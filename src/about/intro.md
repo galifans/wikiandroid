@@ -23,9 +23,3 @@ WikiAndroid 是一份面向 **Android 开发者**与**求职者**的开源知识
 
 - 持续维护中，欢迎贡献
 - 开源协议：MIT License
-
-## 技术栈
-
-- [VuePress 2](https://vuepress.vuejs.org/)
-- [VuePress Theme Hope](https://theme-hope.vuejs.press/)
-- 部署：Cloudflare Pages
