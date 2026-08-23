@@ -32,7 +32,7 @@ export default hopeTheme({
 
   // 页脚
   footer:
-    '<a href="https://github.com/galifans/wikiandroid" target="_blank">GitHub</a> | <span>MIT License</span> | <span>Powered by VuePress Theme Hope</span>',
+    '<a href="https://github.com/galifans/wikiandroid" target="_blank">GitHub</a> | <span>MIT License</span>',
   displayFooter: true,
 
   // 纯净模式：不显示首页 meta
@@ -55,7 +55,7 @@ export default hopeTheme({
     readingTime: true,
     // 版权信息
     copyright: {
-      author: "AndroidStuff",
+      author: "WikiAndroid",
       license: "MIT",
       global: false,
     },
