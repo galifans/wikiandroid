@@ -8,7 +8,7 @@ export default hopeTheme({
 
   // 作者信息
   author: {
-    name: "AndroidStuff",
+    name: "WikiAndroid",
   },
 
   // 图标库（不依赖网络字体，使用内置样式）
