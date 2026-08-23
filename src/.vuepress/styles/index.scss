@@ -1,0 +1,11 @@
+// 首页 Hero 内容水平居中
+// 主题默认在桌面端（≥959px）将 Hero 文本左对齐，这里统一居中
+.vp-project-home {
+  .vp-hero-info {
+    .vp-hero-title,
+    #main-description,
+    .vp-hero-actions {
+      text-align: center;
+    }
+  }
+}
