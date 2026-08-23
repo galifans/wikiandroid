@@ -3,8 +3,8 @@ import navbar from "./navbar.js";
 import sidebar from "./sidebar.js";
 
 export default hopeTheme({
-  // 站点域名（部署后更新为实际域名）
-  hostname: "https://androidstuff.pages.dev",
+  // 站点域名
+  hostname: "https://wikiandroid.pages.dev",
 
   // 作者信息
   author: {
