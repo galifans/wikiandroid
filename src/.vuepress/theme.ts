@@ -8,7 +8,7 @@ export default hopeTheme({
 
   // 作者信息
   author: {
-    name: "WikiAndroid-TC",
+    name: "WikiAndroid",
   },
 
   // 图标库（不依赖网络字体，使用内置样式）
@@ -55,7 +55,7 @@ export default hopeTheme({
     readingTime: true,
     // 版权信息
     copyright: {
-      author: "WikiAndroid-TC",
+      author: "WikiAndroid",
       license: "MIT",
       global: false,
     },
