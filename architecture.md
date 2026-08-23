@@ -29,6 +29,7 @@
 ```
 galifans_vibe_coding/
 ├── architecture.md              # 本文档（站点结构权威索引）
+├── PROGRESS.md                  # 项目进展与记忆（进展时间线 / 文章记录 / 踩坑经验）
 ├── agent.md                     # Agent 行为约束
 ├── package.json                 # 依赖与脚本（dev / build / clean）
 ├── .gitignore                   # 忽略 node_modules / .cache / .temp / dist
