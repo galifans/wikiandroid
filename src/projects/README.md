@@ -13,7 +13,7 @@ index: false
 | 项目 | 技术栈 | 入口 |
 |------|--------|------|
 | 从零搭建完整 App | Kotlin + Compose + MVVM | [完整教程](from-scratch.md) |
-| 开源项目源码解析 | 架构 / 性能 | [源码解析](open-source-analysis.md)（待更新） |
+| 开源项目源码解析 | 架构 / 性能 | [源码解析](open-source-analysis.md) |
 
 ## 推荐开源项目
 

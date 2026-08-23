@@ -9,7 +9,7 @@ title: 布局优化
 
 ## 文章列表
 
-- [布局优化实战指南](layout-optimization.md)（待更新）
+- [布局优化实战指南](layout-optimization.md)
 
 ## 核心手段
 

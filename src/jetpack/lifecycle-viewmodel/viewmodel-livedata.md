@@ -79,4 +79,4 @@ data.observe(this) { value ->
 4. `viewModelScope` 的线程模型（默认 Main）？
 5. 两个 Fragment 如何共享 ViewModel（`activityViewModels`）？
 
-> 📖 进阶阅读：[Lifecycle 原理与使用](lifecycle.md)（待更新）| [协程 Flow](/network/coroutine/)
+> 📖 进阶阅读：[Lifecycle 原理与使用](lifecycle.md) | [协程 Flow](/network/coroutine/)

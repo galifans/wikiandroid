@@ -9,8 +9,8 @@ title: Paging / Navigation
 
 ## 文章列表
 
-- [Paging 3 分页加载](paging3.md)（待更新）
-- [Navigation 组件使用](navigation.md)（待更新）
+- [Paging 3 分页加载](paging3.md)
+- [Navigation 组件使用](navigation.md)
 
 ## 核心要点
 

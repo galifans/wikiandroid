@@ -9,8 +9,8 @@ title: 插件化与热修复
 
 ## 文章列表
 
-- [插件化原理分析](plugin-principle.md)（待更新）
-- [热修复方案对比](hotfix-comparison.md)（待更新）
+- [插件化原理分析](plugin-principle.md)
+- [热修复方案对比](hotfix-comparison.md)
 
 ## 核心要点
 

@@ -9,7 +9,7 @@ title: 音视频开发
 
 ## 文章列表
 
-- [音视频开发入门](multimedia-basics.md)（待更新）
+- [音视频开发入门](multimedia-basics.md)
 
 ## 核心要点
 

@@ -9,9 +9,9 @@ Android 现代声明式 UI 框架。
 
 ## 文章列表
 
-- [Compose 核心概念](compose-basics.md)（待更新）
-- [Compose 状态管理](compose-state.md)（待更新）
-- [Compose 性能优化](compose-performance.md)（待更新）
+- [Compose 核心概念](compose-basics.md)
+- [Compose 状态管理](compose-state.md)
+- [Compose 性能优化](compose-performance.md)
 
 ## 核心概念
 

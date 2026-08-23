@@ -91,4 +91,4 @@ interface IRemoteService {
 3. `IntentService` 与普通 Service 的区别？
 4. 前台服务在 Android 12+ 的限制？
 
-> 📖 进阶阅读：[AIDL 跨进程通信](aidl.md)（待更新）| [Binder 机制详解](/system/binder/binder-mechanism.md)
+> 📖 进阶阅读：[AIDL 跨进程通信](aidl.md) | [Binder 机制详解](/system/binder/binder-mechanism.md)

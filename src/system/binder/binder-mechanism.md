@@ -76,4 +76,4 @@ Client 调用 → BinderProxy.transact() → Binder 驱动
 6. Binder 驱动在哪一层？（Linux 内核）
 7. 系统服务的注册与查询流程？
 
-> 📖 进阶阅读：[AIDL 深入解析](aidl-deep.md)（待更新）| [Service 与 AIDL](/android/service/service-basics.md)
+> 📖 进阶阅读：[AIDL 深入解析](aidl-deep.md) | [Service 与 AIDL](/android/service/service-basics.md)

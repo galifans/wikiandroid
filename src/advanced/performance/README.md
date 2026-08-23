@@ -11,8 +11,8 @@ title: 性能优化
 
 - [启动优化实践](startup-optimization.md)
 - [内存优化与泄漏排查](memory-optimization.md)
-- [卡顿优化与掉帧分析](jank-optimization.md)（待更新）
-- [包体积优化](apk-size-optimization.md)（待更新）
+- [卡顿优化与掉帧分析](jank-optimization.md)
+- [包体积优化](apk-size-optimization.md)
 
 ## 优化维度
 

@@ -9,8 +9,8 @@ title: 测试体系
 
 ## 文章列表
 
-- [单元测试实践](unit-testing.md)（待更新）
-- [UI 测试与 Espresso](ui-testing.md)（待更新）
+- [单元测试实践](unit-testing.md)
+- [UI 测试与 Espresso](ui-testing.md)
 
 ## 核心要点
 

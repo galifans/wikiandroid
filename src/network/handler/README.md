@@ -10,7 +10,7 @@ Handler 是 Android 线程通信的核心机制，面试必考源码题。
 ## 文章列表
 
 - [Handler 消息机制源码解析](handler-source.md)
-- [HandlerThread 使用详解](handlerthread.md)（待更新）
+- [HandlerThread 使用详解](handlerthread.md)
 
 ## 核心要点
 

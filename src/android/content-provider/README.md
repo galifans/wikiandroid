@@ -9,7 +9,7 @@ ContentProvider 是 Android 四大组件之一，用于跨进程共享数据。
 
 ## 文章列表
 
-- [ContentProvider 详解](content-provider-basics.md)（待更新）
+- [ContentProvider 详解](content-provider-basics.md)
 
 ## 核心要点
 

@@ -9,8 +9,8 @@ title: AMS / WMS
 
 ## 文章列表
 
-- [AMS 与 Activity 启动流程](ams-activity-launch.md)（待更新）
-- [WMS 窗口管理原理](wms-principle.md)（待更新）
+- [AMS 与 Activity 启动流程](ams-activity-launch.md)
+- [WMS 窗口管理原理](wms-principle.md)
 
 ## 核心要点
 

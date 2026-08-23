@@ -118,4 +118,4 @@ Handler handler = new Handler() {
 4. 子线程如何创建 Handler？（先 `Looper.prepare()` + `Looper.loop()`）
 5. `MessageQueue.next()` 为什么用 `nativePollOnce` 而非 `wait()`？
 
-> 📖 进阶阅读：[HandlerThread 使用详解](handlerthread.md)（待更新）| [线程池与并发](/network/thread/)
+> 📖 进阶阅读：[HandlerThread 使用详解](handlerthread.md) | [线程池与并发](/network/thread/)

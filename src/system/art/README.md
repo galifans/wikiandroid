@@ -9,9 +9,9 @@ Android 运行时与字节码机制。
 
 ## 文章列表
 
-- [ART 运行时与 JIT/AOT](art-runtime.md)（待更新）
-- [DEX 文件格式与优化](dex-format.md)（待更新）
-- [类加载机制详解](classloader.md)（待更新）
+- [ART 运行时与 JIT/AOT](art-runtime.md)
+- [DEX 文件格式与优化](dex-format.md)
+- [类加载机制详解](classloader.md)
 
 ## 核心要点
 

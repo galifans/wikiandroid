@@ -84,4 +84,4 @@ interface OnItemClickListener {
 3. Fragment 状态丢失（`IllegalStateException: Can not perform this action after onSaveInstanceState`）如何解决？
 4. 如何解决 Fragment 重叠问题（进程被杀死恢复）？
 
-> 📖 进阶阅读：[Fragment 常见坑点总结](fragment-pitfalls.md)（待更新）| [Paging / Navigation](/jetpack/paging-navigation/)
+> 📖 进阶阅读：[Fragment 常见坑点总结](fragment-pitfalls.md) | [Paging / Navigation](/jetpack/paging-navigation/)

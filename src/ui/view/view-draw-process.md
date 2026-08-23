@@ -77,4 +77,4 @@ override fun onDraw(canvas: Canvas) {
 - **避免过度绘制**：减少背景重复绘制、使用 `clipRect`
 - **使用 `invalidate()` 局部刷新**：仅重绘脏区域
 
-> 📖 进阶阅读：[MeasureSpec 完全解析](measurespec.md)（待更新）| [布局优化](/ui/layout/) | [自定义 View](/ui/custom-view/)
+> 📖 进阶阅读：[MeasureSpec 完全解析](measurespec.md) | [布局优化](/ui/layout/) | [自定义 View](/ui/custom-view/)

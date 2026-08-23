@@ -9,8 +9,8 @@ BroadcastReceiver 用于接收系统或应用发出的全局广播消息。
 
 ## 文章列表
 
-- [BroadcastReceiver 详解](broadcast-basics.md)（待更新）
-- [动态注册与静态注册对比](register-comparison.md)（待更新）
+- [BroadcastReceiver 详解](broadcast-basics.md)
+- [动态注册与静态注册对比](register-comparison.md)
 
 ## 核心要点
 

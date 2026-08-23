@@ -9,8 +9,8 @@ title: Git 与版本管理
 
 ## 文章列表
 
-- [Git 工作流实践](git-workflow.md)（待更新）
-- [Git 常用命令速查](git-cheatsheet.md)（待更新）
+- [Git 工作流实践](git-workflow.md)
+- [Git 常用命令速查](git-cheatsheet.md)
 
 ## 核心要点
 

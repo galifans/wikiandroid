@@ -9,8 +9,8 @@ title: WorkManager / Hilt
 
 ## 文章列表
 
-- [WorkManager 后台任务](workmanager.md)（待更新）
-- [Hilt 依赖注入](hilt.md)（待更新）
+- [WorkManager 后台任务](workmanager.md)
+- [Hilt 依赖注入](hilt.md)
 
 ## 核心要点
 

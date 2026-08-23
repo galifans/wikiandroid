@@ -127,74 +127,74 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 - ✅ compose-roadmap.md（Jetpack Compose 学习路线）
 
 ### ☕ 语言基础 `/language/`
-| 子模块 | ✅ 已完成 | ⏳ 待更新 |
-| --- | --- | --- |
-| kotlin/ | kotlin-basics.md、kotlin-coroutines.md | kotlin-generics.md |
-| java/ | java-basics.md | java-collections.md |
-| algorithm/ | algorithm-guide.md | leetcode-top100.md |
+| 子模块 | ✅ 已完成 |
+| --- | --- |
+| kotlin/ | kotlin-basics.md、kotlin-coroutines.md、kotlin-generics.md、kotlin-extensions.md |
+| java/ | java-basics.md、java-collections.md、java-concurrency.md |
+| algorithm/ | algorithm-guide.md、leetcode-top100.md |
 
 ### 🧱 Android 核心 `/android/`
-| 子模块 | ✅ 已完成 | ⏳ 待更新 |
-| --- | --- | --- |
-| activity/ | activity-lifecycle.md | task-stack.md、activity-launch-process.md |
-| service/ | service-basics.md | foreground-service.md、aidl.md |
-| broadcast/ | — | broadcast-basics.md、register-comparison.md |
-| content-provider/ | — | content-provider-basics.md |
-| fragment/ | fragment-basics.md | fragment-pitfalls.md |
-| storage/ | — | storage-comparison.md 等 |
+| 子模块 | ✅ 已完成 |
+| --- | --- |
+| activity/ | activity-lifecycle.md、task-stack.md、activity-launch-process.md |
+| service/ | service-basics.md、foreground-service.md、aidl.md |
+| broadcast/ | broadcast-basics.md、register-comparison.md |
+| content-provider/ | content-provider-basics.md |
+| fragment/ | fragment-basics.md、fragment-pitfalls.md |
+| storage/ | storage-comparison.md、sp-vs-datastore.md |
 
 ### 🎨 UI 与渲染 `/ui/`
-| 子模块 | ✅ 已完成 | ⏳ 待更新 |
-| --- | --- | --- |
-| view/ | view-draw-process.md | view-viewgroup.md、measurespec.md |
-| event/ | — | event-dispatch.md |
-| custom-view/ | — | custom-view-guide.md |
-| animation/ | — | property-animation.md |
-| layout/ | — | layout-optimization.md |
-| compose/ | — | compose-basics.md、compose-state.md |
+| 子模块 | ✅ 已完成 |
+| --- | --- |
+| view/ | view-draw-process.md、view-viewgroup.md、measurespec.md |
+| event/ | event-dispatch.md、conflict-solution.md |
+| custom-view/ | custom-view-guide.md、custom-viewgroup.md |
+| animation/ | property-animation.md |
+| layout/ | layout-optimization.md |
+| compose/ | compose-basics.md、compose-state.md、compose-performance.md |
 
 ### 🧩 Jetpack `/jetpack/`
-| 子模块 | ✅ 已完成 | ⏳ 待更新 |
-| --- | --- | --- |
-| lifecycle-viewmodel/ | viewmodel-livedata.md | lifecycle.md |
-| room-datastore/ | — | room-guide.md |
-| paging-navigation/ | — | paging3.md 等 |
-| workmanager-hilt/ | — | workmanager.md |
+| 子模块 | ✅ 已完成 |
+| --- | --- |
+| lifecycle-viewmodel/ | viewmodel-livedata.md、savedstate.md、lifecycle.md |
+| room-datastore/ | room-guide.md、datastore-guide.md |
+| paging-navigation/ | paging3.md、navigation.md |
+| workmanager-hilt/ | workmanager.md、hilt.md |
 
 ### 🌐 网络与异步 `/network/`
-| 子模块 | ✅ 已完成 | ⏳ 待更新 |
-| --- | --- | --- |
-| http/ | — | retrofit-okhttp.md、http-protocol.md |
-| handler/ | handler-source.md | handlerthread.md |
-| coroutine/ | — | flow-advanced.md |
-| thread/ | — | thread-pool.md、concurrency-tools.md |
+| 子模块 | ✅ 已完成 |
+| --- | --- |
+| http/ | retrofit-okhttp.md、okhttp-interceptor.md、http-protocol.md |
+| handler/ | handler-source.md、handlerthread.md |
+| coroutine/ | flow-advanced.md、rxjava-operators.md |
+| thread/ | thread-pool.md、locks.md、concurrency-tools.md |
 
 ### 🚀 进阶实战 `/advanced/`
-| 子模块 | ✅ 已完成 | ⏳ 待更新 |
-| --- | --- | --- |
-| architecture/ | — | architecture-evolution.md、clean-architecture.md |
-| modular/ | — | modularization-practice.md |
-| plugin/ | — | plugin-principle.md、hotfix-comparison.md |
-| performance/ | startup-optimization.md、memory-optimization.md | jank-optimization.md、apk-size-optimization.md |
-| stability/ | — | crash-monitoring.md、anr-guide.md |
-| multimedia/ | — | multimedia-basics.md |
+| 子模块 | ✅ 已完成 |
+| --- | --- |
+| architecture/ | architecture-evolution.md、clean-architecture.md、repository-pattern.md |
+| modular/ | modularization-practice.md |
+| plugin/ | plugin-principle.md、hotfix-comparison.md |
+| performance/ | startup-optimization.md、memory-optimization.md、jank-optimization.md、apk-size-optimization.md |
+| stability/ | crash-monitoring.md、anr-guide.md |
+| multimedia/ | multimedia-basics.md |
 
 ### ⚙️ 系统原理 `/system/`
-| 子模块 | ✅ 已完成 | ⏳ 待更新 |
-| --- | --- | --- |
-| binder/ | binder-mechanism.md | aidl-deep.md |
-| ams-wms/ | — | ams-activity-launch.md |
-| boot/ | — | system-boot.md |
-| apk/ | apk-build-process.md | multi-channel.md |
-| art/ | — | art-runtime.md、dex-format.md、classloader.md |
+| 子模块 | ✅ 已完成 |
+| --- | --- |
+| binder/ | binder-mechanism.md、aidl-deep.md |
+| ams-wms/ | ams-activity-launch.md、wms-principle.md |
+| boot/ | system-boot.md、app-launch.md |
+| apk/ | apk-build-process.md、multi-channel.md |
+| art/ | art-runtime.md、dex-format.md、classloader.md |
 
 ### 🛠️ 工程实践 `/engineering/`
-| 子模块 | ✅ 已完成 | ⏳ 待更新 |
-| --- | --- | --- |
-| gradle/ | — | gradle-basics.md |
-| git/ | — | git-workflow.md |
-| cicd/ | — | github-actions.md |
-| testing/ | — | unit-testing.md |
+| 子模块 | ✅ 已完成 |
+| --- | --- |
+| gradle/ | gradle-basics.md、version-catalog.md |
+| git/ | git-workflow.md、git-cheatsheet.md |
+| cicd/ | github-actions.md |
+| testing/ | unit-testing.md、ui-testing.md |
 
 ### 💼 面试指南 `/interview/`（平铺）
 - ✅ basics.md（基础篇）✅ advanced.md（进阶篇）✅ source-code.md（源码篇）
@@ -202,12 +202,12 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 
 ### 🤖 实战项目 `/projects/`
 - ✅ from-scratch.md（从零搭建 App）
-- ⏳ open-source-analysis.md
+- ✅ open-source-analysis.md（开源项目源码解析）
 
 ### 📎 关于本站 `/about/`
 - ✅ intro.md　✅ contribution-guideline.md　✅ faq.md
 
-**现状统计**：✅ 已完成文章约 26 篇，⏳ 待更新约 45 篇，合计构建 78 个页面。
+**现状统计**：✅ 全部文章已完成（约 97 篇 + 各模块 README），无「（待更新）」占位文章，构建无 broken-link warning。
 
 ---
 
@@ -258,7 +258,7 @@ git push origin main # 3. 推送 main → Cloudflare Pages 自动构建部署
 # 4. 验证 https://wikiandroid.com（带查询参数硬刷新避免缓存）
 ```
 
-构建输出 78 个页面；`dist/` 已被 `.gitignore` 忽略，不入库。
+构建输出 97 个文章页面 + 各模块 README 页；`dist/` 已被 `.gitignore` 忽略，不入库。
 
 ---
 
@@ -274,6 +274,6 @@ git push origin main # 3. 推送 main → Cloudflare Pages 自动构建部署
 
 ## 10. 已知问题与警告
 
-- 约 45 篇文章处于「待更新」状态，README 中存在指向它们的死链 → 构建 warning（非致命）。
+- ✅ 所有占位文章已补齐，「待更新」死链 warning 已消除。
 - `theme.ts` 中 `iconAssets: "iconify"` 有弃用提示（新写法为 `plugins.icon.assets`），暂不影响功能。
 - 终端偶发 PATH 丢失（PowerShell 5.1），运行 npm 前先刷新 PATH。

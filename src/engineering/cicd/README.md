@@ -9,7 +9,7 @@ title: CI/CD
 
 ## 文章列表
 
-- [GitHub Actions 实战](github-actions.md)（待更新）
+- [GitHub Actions 实战](github-actions.md)
 
 ## 核心要点
 

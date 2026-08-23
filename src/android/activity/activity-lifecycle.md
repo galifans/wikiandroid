@@ -72,4 +72,4 @@ override fun onRestoreInstanceState(savedInstanceState: Bundle) {
 3. 进程被杀后如何恢复状态？
 4. 为什么 `onSaveInstanceState` 不能在 `onPause` 之后调用？
 
-> 📖 进阶阅读：[Activity 启动流程源码分析](activity-launch-process.md)（待更新）| [Fragment](/android/fragment/)
+> 📖 进阶阅读：[Activity 启动流程源码分析](activity-launch-process.md) | [Fragment](/android/fragment/)

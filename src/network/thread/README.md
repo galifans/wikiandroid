@@ -9,9 +9,9 @@ title: 线程池与并发
 
 ## 文章列表
 
-- [线程池详解](thread-pool.md)（待更新）
-- [Java 并发工具类](concurrency-tools.md)（待更新）
-- [锁机制详解](locks.md)（待更新）
+- [线程池详解](thread-pool.md)
+- [Java 并发工具类](concurrency-tools.md)
+- [锁机制详解](locks.md)
 
 ## 核心要点
 

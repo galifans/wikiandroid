@@ -9,8 +9,8 @@ title: 事件分发机制
 
 ## 文章列表
 
-- [事件分发机制完全解析](event-dispatch.md)（待更新）
-- [滑动冲突解决方案](conflict-solution.md)（待更新）
+- [事件分发机制完全解析](event-dispatch.md)
+- [滑动冲突解决方案](conflict-solution.md)
 
 ## 核心要点
 

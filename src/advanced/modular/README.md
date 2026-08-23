@@ -9,7 +9,7 @@ title: 组件化与模块化
 
 ## 文章列表
 
-- [组件化架构实践](modularization-practice.md)（待更新）
+- [组件化架构实践](modularization-practice.md)
 
 ## 核心要点
 

@@ -10,7 +10,7 @@ Fragment 是界面模块化与适配多屏的核心组件。
 ## 文章列表
 
 - [Fragment 生命周期与通信](fragment-basics.md)
-- [Fragment 常见坑点总结](fragment-pitfalls.md)（待更新）
+- [Fragment 常见坑点总结](fragment-pitfalls.md)
 
 ## 核心要点
 

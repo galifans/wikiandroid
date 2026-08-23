@@ -56,4 +56,4 @@ flowchart TD
 4. 拆分模块增量编译
 5. CI 环境使用远端构建缓存
 
-> 📖 进阶阅读：[Gradle 构建](/engineering/gradle/) | [多渠道打包方案](multi-channel.md)（待更新）
+> 📖 进阶阅读：[Gradle 构建](/engineering/gradle/) | [多渠道打包方案](multi-channel.md)

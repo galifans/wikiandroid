@@ -10,8 +10,8 @@ View 是 Android UI 的基本单元，理解绘制流程是进阶的必修课。
 ## 文章列表
 
 - [View 绘制流程详解](view-draw-process.md)
-- [View 与 ViewGroup 的关系](view-viewgroup.md)（待更新）
-- [MeasureSpec 完全解析](measurespec.md)（待更新）
+- [View 与 ViewGroup 的关系](view-viewgroup.md)
+- [MeasureSpec 完全解析](measurespec.md)
 
 ## 核心要点
 

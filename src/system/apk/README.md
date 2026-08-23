@@ -10,7 +10,7 @@ title: APK 打包与签名
 ## 文章列表
 
 - [APK 打包流程与签名机制](apk-build-process.md)
-- [多渠道打包方案](multi-channel.md)（待更新）
+- [多渠道打包方案](multi-channel.md)
 
 ## 核心要点
 

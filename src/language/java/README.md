@@ -10,8 +10,8 @@ title: Java
 ## 文章列表
 
 - [面向 Android 的 Java 核心回顾](java-basics.md)
-- [Java 集合框架详解](java-collections.md)（待更新）
-- [Java 并发编程基础](java-concurrency.md)（待更新）
+- [Java 集合框架详解](java-collections.md)
+- [Java 并发编程基础](java-concurrency.md)
 
 ## 学习资源
 

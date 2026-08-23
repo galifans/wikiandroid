@@ -51,4 +51,4 @@ val cache = LruCache<String, Bitmap>(maxMemory / 8)
 3. 字符串拼接过多（大对象）
 4. 线程过多导致栈内存溢出
 
-> 📖 进阶阅读：[启动优化实践](startup-optimization.md) | [卡顿优化与掉帧分析](jank-optimization.md)（待更新）
+> 📖 进阶阅读：[启动优化实践](startup-optimization.md) | [卡顿优化与掉帧分析](jank-optimization.md)

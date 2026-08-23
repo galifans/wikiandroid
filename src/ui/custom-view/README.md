@@ -9,8 +9,8 @@ title: 自定义 View
 
 ## 文章列表
 
-- [自定义 View 入门指南](custom-view-guide.md)（待更新）
-- [自定义 ViewGroup 实战](custom-viewgroup.md)（待更新）
+- [自定义 View 入门指南](custom-view-guide.md)
+- [自定义 ViewGroup 实战](custom-viewgroup.md)
 
 ## 分类
 

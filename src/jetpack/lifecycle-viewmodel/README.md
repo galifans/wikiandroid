@@ -9,9 +9,9 @@ Jetpack 生命周期组件，解决组件生命周期管理难题。
 
 ## 文章列表
 
-- [Lifecycle 原理与使用](lifecycle.md)（待更新）
+- [Lifecycle 原理与使用](lifecycle.md)
 - [ViewModel 与 LiveData 详解](viewmodel-livedata.md)
-- [SavedStateHandle 状态保存](savedstate.md)（待更新）
+- [SavedStateHandle 状态保存](savedstate.md)
 
 ## 核心要点
 

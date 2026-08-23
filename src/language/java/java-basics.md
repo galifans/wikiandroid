@@ -60,4 +60,4 @@ method.invoke(obj, "Android");
 4. 内部类与静态内部类、内存泄漏场景
 5. `synchronized` 与 `volatile` 的区别
 
-> 📖 进阶阅读：[Java 集合框架详解](java-collections.md)（待更新）| [线程池与并发](/network/thread/)
+> 📖 进阶阅读：[Java 集合框架详解](java-collections.md) | [线程池与并发](/network/thread/)

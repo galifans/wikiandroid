@@ -9,8 +9,8 @@ title: 系统与应用启动流程
 
 ## 文章列表
 
-- [Android 系统启动流程](system-boot.md)（待更新）
-- [应用启动流程详解](app-launch.md)（待更新）
+- [Android 系统启动流程](system-boot.md)
+- [应用启动流程详解](app-launch.md)
 
 ## 核心要点
 

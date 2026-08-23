@@ -9,9 +9,9 @@ Android 应用架构模式的演进与实践。
 
 ## 文章列表
 
-- [MVC → MVP → MVVM → MVI 演进](architecture-evolution.md)（待更新）
-- [Clean Architecture 实践](clean-architecture.md)（待更新）
-- [数据层设计：Repository 模式](repository-pattern.md)（待更新）
+- [MVC → MVP → MVVM → MVI 演进](architecture-evolution.md)
+- [Clean Architecture 实践](clean-architecture.md)
+- [数据层设计：Repository 模式](repository-pattern.md)
 
 ## 架构对比
 

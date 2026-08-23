@@ -9,7 +9,7 @@ Android 动画体系的演进：帧动画 → 补间动画 → 属性动画。
 
 ## 文章列表
 
-- [属性动画完全解析](property-animation.md)（待更新）
+- [属性动画完全解析](property-animation.md)
 
 ## 核心要点
 

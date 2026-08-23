@@ -9,8 +9,8 @@ Jetpack 数据持久化方案：Room（关系型）与 DataStore（键值）。
 
 ## 文章列表
 
-- [Room 数据库完全指南](room-guide.md)（待更新）
-- [DataStore 使用详解](datastore-guide.md)（待更新）
+- [Room 数据库完全指南](room-guide.md)
+- [DataStore 使用详解](datastore-guide.md)
 
 ## 核心要点
 

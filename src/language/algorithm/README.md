@@ -10,7 +10,7 @@ title: 数据结构与算法
 ## 文章列表
 
 - [算法刷题指南](algorithm-guide.md)
-- [LeetCode 高频 100 题解析](leetcode-top100.md)（待更新）
+- [LeetCode 高频 100 题解析](leetcode-top100.md)
 
 ## 必学内容
 
