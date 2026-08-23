@@ -4,7 +4,7 @@ import sidebar from "./sidebar.js";
 
 export default hopeTheme({
   // 站点域名
-  hostname: "https://wikiandroid.pages.dev",
+  hostname: "https://wikiandroid.com",
 
   // 作者信息
   author: {
