@@ -10,9 +10,14 @@
       <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
   </defs>
+  <!-- 背景圆角方块 -->
   <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <!-- 顶部高光 -->
   <rect x="0" y="0" width="128" height="60" rx="28" fill="url(#shine)"/>
+  <!-- 内部描边 -->
   <rect x="3.5" y="3.5" width="121" height="121" rx="25" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="2"/>
+  <!-- W 字母 -->
   <path d="M26 40 L41 90 L64 62 L87 90 L102 40" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 知识库下划线 -->
   <rect x="36" y="101" width="56" height="6" rx="3" fill="#ffffff" opacity="0.9"/>
 </svg>
