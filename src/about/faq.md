@@ -7,7 +7,7 @@ title: 常见问题
 
 ## 1. 网站的内容是免费的吗？
 
-是的，AndroidStuff 完全免费开源，基于 MIT License 发布。
+是的，WikiAndroid 完全免费开源，基于 MIT License 发布。
 
 ## 2. 如何订阅更新？
 

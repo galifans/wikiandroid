@@ -1,7 +1,7 @@
 {
   "name": "android-stuff",
   "version": "0.1.0",
-  "description": "AndroidStuff - 面向 Android 开发者与求职者的系统化知识库",
+  "description": "WikiAndroid - 面向 Android 开发者与求职者的系统化知识库",
   "license": "MIT",
   "type": "module",
   "scripts": {

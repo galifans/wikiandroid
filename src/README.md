@@ -3,7 +3,7 @@ home: true
 icon: home
 title: 主页
 heroImage: /logo.svg
-heroText: AndroidStuff
+heroText: WikiAndroid
 tagline: 面向 Android 开发者与求职者的系统化知识库，覆盖 Kotlin、Jetpack、源码原理、性能优化与高频面试题
 actions:
   - text: 🚀 开始阅读
@@ -86,7 +86,7 @@ features:
 
 ## 🎯 关于本站
 
-AndroidStuff 是一份面向 **Android 开发者**与**求职者**的开源知识库，从面试复习出发，逐步扩展为覆盖 Android 核心技术、工程实践与前沿技术的系统化学习指南。
+WikiAndroid 是一份面向 **Android 开发者**与**求职者**的开源知识库，从面试复习出发，逐步扩展为覆盖 Android 核心技术、工程实践与前沿技术的系统化学习指南。
 
 - [项目介绍](/about/intro.md)
 - [贡献指南](/about/contribution-guideline.md)

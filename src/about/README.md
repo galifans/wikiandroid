@@ -6,7 +6,7 @@ index: false
 
 # 📎 关于本站
 
-AndroidStuff 相关介绍与说明。
+WikiAndroid 相关介绍与说明。
 
 ## 页面
 
