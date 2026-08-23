@@ -1,0 +1,22 @@
+{
+  "name": "android-stuff",
+  "version": "0.1.0",
+  "description": "AndroidStuff - 面向 Android 开发者与求职者的系统化知识库",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vuepress dev src",
+    "build": "vuepress build src",
+    "clean": "vuepress clean src"
+  },
+  "devDependencies": {
+    "@vuepress/bundler-vite": "^2.0.0-rc.30",
+    "@vuepress/plugin-slimsearch": "^2.0.0-rc.130",
+    "sass-embedded": "^1.103.1",
+    "vuepress": "^2.0.0-rc.30",
+    "vuepress-theme-hope": "^2.0.0-rc.107"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
