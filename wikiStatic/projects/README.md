@@ -29,3 +29,8 @@ index: false
 1. **做透一个项目**，而非做很多半成品
 2. 项目要有**技术亮点**（性能优化、架构设计、自研工具）
 3. 配套技术博客记录决策过程，面试加分
+
+## 📑 全部文章导航
+
+- [从零搭建完整 App](/projects/from-scratch.md)：Kotlin + Compose + MVVM 全流程拆解
+- [开源项目源码解析](/projects/open-source-analysis.md)：架构分析 / 亮点提炼 / 面试讲法
