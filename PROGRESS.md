@@ -21,8 +21,13 @@
 
 ## 2. 进展时间线
 
+### 2026-08-24（脚本跨平台化：修复 Cloudflare 构建失败）
+- ✅ 修复 Cloudflare Pages 构建失败（`sh: 1: powershell: not found`，exit 127）：CI 是 Linux 环境，PowerShell 脚本不可用
+- ✅ `scripts/prepare-public.ps1` / `sync-wikistatic.ps1` → 重写为跨平台 Node 脚本 `prepare-public.mjs` / `sync-wikistatic.mjs`，`package.json` 改用 `node scripts/...`
+- ✅ 目录树输出与旧版完全一致（无漂移），本地构建 150 页面成功
+
 ### 2026-08-24（书籍网站直链 + 首页 README 直接阅读改造）
-- ✅ 网站直链下载：新增 `scripts/prepare-public.ps1`（`prebuild` 钩子，构建时自动把 `wikiStatic/books/` 复制到 `src/.vuepress/public/books/`）→ 书籍可在 wikiandroid.com 直接下载（Cloudflare CDN）；`src/.vuepress/public/books/` 已 gitignore
+- ✅ 网站直链下载：新增 `scripts/prepare-public.mjs`（`prebuild` 钩子，构建时自动把 `wikiStatic/books/` 复制到 `src/.vuepress/public/books/`）→ 书籍可在 wikiandroid.com 直接下载（Cloudflare CDN）；`src/.vuepress/public/books/` 已 gitignore
 - ✅ 首页 README 改造：**移除所有 wikiandroid.com 板块跳转链接**，改为「知识库速览」直接内联各板块核心内容（表格 + 学习路径 + 最佳实践），全部链接指向仓库内 `wikiStatic/`（77 个链接已验证有效）
 - ✅ `wikiStatic/books/README.md` 同步去掉网站直链，保持纯 GitHub 内阅读体验
 - ✅ 构建 150 页面成功；Cloudflare Pages 单文件限制 25MiB（当前最大书 15.5MB）已记录到 architecture.md 7.7 节
@@ -30,7 +35,7 @@
 ### 2026-08-24（书籍板块 + wikiStatic 静态资料库）
 - ✅ 新增「📚 书籍资源」板块：`src/books/README.md` 网站板块页（直链下载）+ navbar/sidebar 接入
 - ✅ 建立 `wikiStatic/` 静态资料库：模块 md 镜像（147 个）+ `books/` 书籍 PDF（7 本已收录，约 33MB）
-- ✅ 新增 `scripts/sync-wikistatic.ps1` + `npm run sync:static`：md 同步 + 根 README / wikiStatic README 目录树自动刷新（WIKISTATIC_TREE 标记区间）
+- ✅ 新增 `scripts/sync-wikistatic.mjs` + `npm run sync:static`：md 同步 + 根 README / wikiStatic README 目录树自动刷新（WIKISTATIC_TREE 标记区间）
 - ✅ 根 `README.md` 重写：三种学习方式 + 内容板块表（同源）+ 书籍资源表 + wikiStatic 目录树 + Star 号召
 - ✅ `agent.md` 新增第 11 节「wikiStatic 静态资料库与 README 同步规范」；`architecture.md` 同步更新
 - ✅ 构建 150 页面成功（含书籍板块页），同步脚本验证通过
@@ -81,6 +86,7 @@
 ## 5. 踩坑与经验记录（供后续参考）
 
 - **markdown 中 `<xxx>` 放在代码块外会被当作 HTML 标签** → VuePress build 报 "Element is missing end tag"。修复：正文里的占位符用反引号包成行内代码（如 `` `git branch <name>` ``）。XML 代码块内不受影响。
+- **Cloudflare Pages 构建环境是 Linux**：任何构建钩子（prebuild）都不能调用 `powershell`/`pwsh`，必须用跨平台 Node 脚本（`node scripts/xxx.mjs`）。本地能跑的 PowerShell 脚本不代表 CI 能跑。
 - **PowerShell 5.1 偶发 PATH 丢失**：跑 npm 前先执行
   `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")`
 - **验证部署**：用 pages.dev 域名 + `?ts=N` 查询参数绕 CDN 缓存；wikiandroid.com 有缓存延迟。

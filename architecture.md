@@ -36,8 +36,8 @@ galifans_vibe_coding/
 ├── .gitignore                   # 忽略 node_modules / .cache / .temp / dist
 ├── scripts/
 │   ├── gen-icons.ps1            # 图标生成脚本（favicon.svg 同款设计 → PNG）
-│   ├── prepare-public.ps1       # 构建前复制 wikiStatic/books/ → src/.vuepress/public/books/（网站直链下载）
-│   └── sync-wikistatic.ps1      # wikiStatic 同步脚本（md 同步 + README 目录树自动刷新）
+│   ├── prepare-public.mjs      # 构建前复制 wikiStatic/books/ → src/.vuepress/public/books/（网站直链下载）
+│   └── sync-wikistatic.mjs     # wikiStatic 同步脚本（md 同步 + README 目录树自动刷新，跨平台 Node）
 ├── wikiStatic/                  # 📦 静态资料库（GitHub 直接浏览/下载，内容与 src/ 同源，详见第 8 节）
 │   ├── README.md                # wikiStatic 总索引（含自动生成的目录树）
 │   ├── books/                   # 📚 书籍资源（PDF 点击直接下载；来源 TIM168/technical_books）
@@ -266,7 +266,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 
 ### 7.7 书籍资源管理（双通道下载）
 - PDF **只存一份**在 `wikiStatic/books/<分类>/`（真相源）；
-- 构建时 `prebuild`（`scripts/prepare-public.ps1`）自动复制到 `src/.vuepress/public/books/` → 发布为 `https://wikiandroid.com/books/*.pdf`（Cloudflare CDN 直链）；
+- 构建时 `prebuild`（`scripts/prepare-public.mjs`）自动复制到 `src/.vuepress/public/books/` → 发布为 `https://wikiandroid.com/books/*.pdf`（Cloudflare CDN 直链）；
 - 三处索引同步维护：`wikiStatic/books/README.md`、`src/books/README.md`（网站板块页）、根 `README.md`（书籍表）——每本书给「网站直链 + GitHub 备用」双链接；
 - **Cloudflare Pages 单文件上限 25 MiB**：收录书籍 PDF 必须小于 25 MiB（当前最大 hello-algo.pdf 15.5MB），超限书籍不收录、只保留源仓库链接；
 - 新增书籍：PDF 放入 `wikiStatic/books/<分类>/` → 更新三处索引 → `npm run build` 验证 → 提交推送。

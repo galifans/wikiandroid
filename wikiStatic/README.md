@@ -5,7 +5,7 @@
 
 ## 目录结构
 
-> 由 `scripts/sync-wikistatic.ps1` 从 `src/` 自动同步，目录树自动刷新，请勿手工编辑标记区间。
+> 由 `scripts/sync-wikistatic.mjs` 从 `src/` 自动同步，目录树自动刷新，请勿手工编辑标记区间。
 
 <!-- WIKISTATIC_TREE:BEGIN -->
 ```text
@@ -215,8 +215,8 @@ wikiStatic/
     │   └── compose-state.md
     ├── custom-view/
     │   ├── README.md
-    │   ├── custom-viewgroup.md
-    │   └── custom-view-guide.md
+    │   ├── custom-view-guide.md
+    │   └── custom-viewgroup.md
     ├── event/
     │   ├── README.md
     │   ├── conflict-solution.md
@@ -247,7 +247,7 @@ wikiStatic/
 
 ## 维护规则
 
-- 内容以 `src/` 为创作源，修改后运行 `npm run sync:static`（即 `scripts/sync-wikistatic.ps1`）同步到本目录（自动刷新目录树）
+- 内容以 `src/` 为创作源，修改后运行 `npm run sync:static`（即 `scripts/sync-wikistatic.mjs`）同步到本目录（自动刷新目录树）
 - `books/` 仅存放 PDF 与索引文件，新增书籍流程见 [books/README.md](books/README.md)
 - 禁止手工编辑目录树标记区间（`<!-- WIKISTATIC_TREE:BEGIN/END -->`）
 

@@ -170,7 +170,7 @@
 
 ## 📦 wikiStatic 目录结构
 
-> **内容架构真相源**：由 `scripts/sync-wikistatic.ps1` 从 `src/` 同步生成，目录树自动刷新，请勿手工编辑标记区间。
+> **内容架构真相源**：由 `scripts/sync-wikistatic.mjs` 从 `src/` 同步生成，目录树自动刷新，请勿手工编辑标记区间。
 
 <!-- WIKISTATIC_TREE:BEGIN -->
 ```text
@@ -380,8 +380,8 @@ wikiStatic/
     │   └── compose-state.md
     ├── custom-view/
     │   ├── README.md
-    │   ├── custom-viewgroup.md
-    │   └── custom-view-guide.md
+    │   ├── custom-view-guide.md
+    │   └── custom-viewgroup.md
     ├── event/
     │   ├── README.md
     │   ├── conflict-solution.md

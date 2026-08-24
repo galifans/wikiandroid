@@ -98,12 +98,12 @@ index: false   # 仅模块索引页需要（如 roadmap/README.md）
 
 - `wikiStatic/` = WikiAndroid 的静态资料库：md 学习资料 + 书籍 PDF，供 GitHub 用户直接浏览 / 下载。
   - `wikiStatic/books/`：书籍 PDF（点击直接下载），索引见 `wikiStatic/books/README.md`
-  - 各知识模块目录（roadmap / language / android / ui / jetpack / network / advanced / system / engineering / interview / projects / about）：由 `scripts/sync-wikistatic.ps1` 从 `src/` 同步的 md 镜像
+  - 各知识模块目录（roadmap / language / android / ui / jetpack / network / advanced / system / engineering / interview / projects / about）：由 `scripts/sync-wikistatic.mjs` 从 `src/` 同步的 md 镜像
 
 ### 11.2 内容变更流程（新增 / 修改文章、模块）
 
 1. 在 `src/` 对应模块创作 / 修改 md（站点构建源）。
-2. 运行 `npm run sync:static`（等价 `scripts/sync-wikistatic.ps1`）：
+2. 运行 `npm run sync:static`（等价 `scripts/sync-wikistatic.mjs`）：
    - 将各模块 md 同步到 `wikiStatic/`（跳过 `.vuepress`、`src/README.md`、`src/books/`）
    - 清理 `wikiStatic/` 模块目录中已删除的孤儿 md（不动 `books/`）
    - 自动刷新根 `README.md` 与 `wikiStatic/README.md` 的目录树（`<!-- WIKISTATIC_TREE:BEGIN/END -->` 标记区间）
