@@ -36,6 +36,7 @@ galifans_vibe_coding/
 ├── .gitignore                   # 忽略 node_modules / .cache / .temp / dist
 ├── scripts/
 │   ├── gen-icons.ps1            # 图标生成脚本（favicon.svg 同款设计 → PNG）
+│   ├── prepare-public.ps1       # 构建前复制 wikiStatic/books/ → src/.vuepress/public/books/（网站直链下载）
 │   └── sync-wikistatic.ps1      # wikiStatic 同步脚本（md 同步 + README 目录树自动刷新）
 ├── wikiStatic/                  # 📦 静态资料库（GitHub 直接浏览/下载，内容与 src/ 同源，详见第 8 节）
 │   ├── README.md                # wikiStatic 总索引（含自动生成的目录树）
@@ -63,7 +64,7 @@ galifans_vibe_coding/
     ├── engineering/             # 🛠️ 工程实践（gradle / git / cicd / testing）
     ├── interview/               # 💼 面试指南（5 篇平铺文章）
     ├── projects/                # 🤖 实战项目
-    ├── books/                   # 📚 书籍资源板块页（PDF 实体存 wikiStatic/books/，此处为分类索引与下载链接）
+    ├── books/                   # 📚 书籍资源板块页（PDF 实体存 wikiStatic/books/，双通道：网站直链 + GitHub）
     └── about/                   # 📎 关于本站（intro / contribution-guideline / faq）
 ```
 
@@ -263,12 +264,19 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 7.6 更新「待更新」文章为正式文章
 - 创建文章文件，更新模块 README 移除「（待更新）」标记，即可消除对应 broken-link warning。
 
+### 7.7 书籍资源管理（双通道下载）
+- PDF **只存一份**在 `wikiStatic/books/<分类>/`（真相源）；
+- 构建时 `prebuild`（`scripts/prepare-public.ps1`）自动复制到 `src/.vuepress/public/books/` → 发布为 `https://wikiandroid.com/books/*.pdf`（Cloudflare CDN 直链）；
+- 三处索引同步维护：`wikiStatic/books/README.md`、`src/books/README.md`（网站板块页）、根 `README.md`（书籍表）——每本书给「网站直链 + GitHub 备用」双链接；
+- **Cloudflare Pages 单文件上限 25 MiB**：收录书籍 PDF 必须小于 25 MiB（当前最大 hello-algo.pdf 15.5MB），超限书籍不收录、只保留源仓库链接；
+- 新增书籍：PDF 放入 `wikiStatic/books/<分类>/` → 更新三处索引 → `npm run build` 验证 → 提交推送。
+
 ---
 
 ## 8. 构建与发布流程
 
 ```bash
-npm run build        # 1. 本地构建验证（输出 src/.vuepress/dist）
+npm run build        # 1. 本地构建验证（prebuild 自动复制 wikiStatic/books/ → public/books/，输出 src/.vuepress/dist）
 npm run dev          # 2.（可选）本地预览 http://localhost:8080
 git add -A
 git commit -m "feat(scope): 描述"
@@ -276,7 +284,7 @@ git push origin main # 3. 推送 main → Cloudflare Pages 自动构建部署
 # 4. 验证 https://wikiandroid.com（带查询参数硬刷新避免缓存）
 ```
 
-构建输出 97 个文章页面 + 各模块 README 页；`dist/` 已被 `.gitignore` 忽略，不入库。
+构建输出 97 个文章页面 + 各模块 README 页 + `books/` PDF 直链；`dist/` 与 `src/.vuepress/public/books/`（构建副本）已被 `.gitignore` 忽略，不入库。
 
 ---
 

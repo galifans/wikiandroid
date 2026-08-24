@@ -21,6 +21,12 @@
 
 ## 2. 进展时间线
 
+### 2026-08-24（书籍网站直链 + 首页 README 直接阅读改造）
+- ✅ 网站直链下载：新增 `scripts/prepare-public.ps1`（`prebuild` 钩子，构建时自动把 `wikiStatic/books/` 复制到 `src/.vuepress/public/books/`）→ 书籍可在 wikiandroid.com 直接下载（Cloudflare CDN）；`src/.vuepress/public/books/` 已 gitignore
+- ✅ 首页 README 改造：**移除所有 wikiandroid.com 板块跳转链接**，改为「知识库速览」直接内联各板块核心内容（表格 + 学习路径 + 最佳实践），全部链接指向仓库内 `wikiStatic/`（77 个链接已验证有效）
+- ✅ `wikiStatic/books/README.md` 同步去掉网站直链，保持纯 GitHub 内阅读体验
+- ✅ 构建 150 页面成功；Cloudflare Pages 单文件限制 25MiB（当前最大书 15.5MB）已记录到 architecture.md 7.7 节
+
 ### 2026-08-24（书籍板块 + wikiStatic 静态资料库）
 - ✅ 新增「📚 书籍资源」板块：`src/books/README.md` 网站板块页（直链下载）+ navbar/sidebar 接入
 - ✅ 建立 `wikiStatic/` 静态资料库：模块 md 镜像（147 个）+ `books/` 书籍 PDF（7 本已收录，约 33MB）
@@ -66,6 +72,7 @@
 
 | Commit | 说明 |
 | --- | --- |
+| `4b03a21` | feat(books): 书籍网站直链下载（prebuild 自动发布）+ 首页 README 改为直接阅读的知识库速览 |
 | `5258508` | feat(books): 新增书籍资源板块与 wikiStatic 静态资料库（三端同源 + 目录树自动同步） |
 | `5abf1bb` | feat(content): 补齐全部占位文章并同步架构文档（121 文件，+14,225 行） |
 | `91599d7` | style(home): 移除首页 hero 图片与项目介绍技术栈 |

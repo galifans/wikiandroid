@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vuepress dev src",
+    "prebuild": "powershell -ExecutionPolicy Bypass -File scripts/prepare-public.ps1",
     "build": "vuepress build src",
     "clean": "vuepress clean src",
     "sync:static": "powershell -ExecutionPolicy Bypass -File scripts/sync-wikistatic.ps1"
