@@ -12,6 +12,7 @@ title: 线程池与并发
 - [线程池详解](thread-pool.md)
 - [Java 并发工具类](concurrency-tools.md)
 - [锁机制详解](locks.md)
+- [AsyncTask 与 IntentService 原理](asynctask-intentservice.md)
 
 ## 核心要点
 

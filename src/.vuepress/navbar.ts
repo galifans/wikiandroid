@@ -8,6 +8,7 @@ export default navbar([
     children: [
       { text: "Kotlin", link: "/language/kotlin/" },
       { text: "Java", link: "/language/java/" },
+      { text: "设计模式", link: "/language/design-pattern/" },
       { text: "数据结构与算法", link: "/language/algorithm/" },
     ],
   },
@@ -83,6 +84,7 @@ export default navbar([
   },
   { text: "💼 面试指南", link: "/interview/" },
   { text: "🤖 实战项目", link: "/projects/" },
+  { text: "📚 读书笔记", link: "/reading-notes/" },
   { text: "📚 书籍资源", link: "/books/" },
   {
     text: "GitHub",

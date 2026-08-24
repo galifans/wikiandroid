@@ -10,6 +10,7 @@ title: 布局优化
 ## 文章列表
 
 - [布局优化实战指南](layout-optimization.md)
+- [屏幕适配方案](screen-adaptation.md)
 
 ## 核心手段
 

@@ -21,6 +21,8 @@ Android 应用开发的核心基石：四大组件、Fragment 与数据存储。
 
 - [Fragment](/android/fragment/)：界面模块化
 - [数据存储](/android/storage/)：SharedPreferences / Room / DataStore
+- [进程](/android/process/)：进程生命周期与保活
+- [Context](/android/context/)：系统服务访问封装
 
 ## 核心知识图谱
 
@@ -30,5 +32,6 @@ Android 核心
 ├── Fragment 与 Intent
 ├── View 体系（见「UI 与渲染」）
 ├── 数据存储
+├── Context 与进程
 └── 进程与线程（见「网络与异步」）
 ```

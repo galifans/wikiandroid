@@ -10,6 +10,7 @@ Android 数据持久化的多种方案对比与选择。
 ## 文章列表
 
 - [数据存储方案对比](storage-comparison.md)
+- [SharedPreferences 深度剖析](sharedpreferences-deep.md)
 - [SharedPreferences 与 DataStore](sp-vs-datastore.md)
 - [Room 数据库详解](/jetpack/room-datastore/)
 

@@ -60,7 +60,11 @@ features:
     icon: book
     details: 精选 Android、Java、算法、网络、数据库等方向的 PDF 书籍，点击即可下载
     link: /books/
-  - title: 📎 关于本站
+  - title: � 读书笔记
+    icon: feather
+    details: 《Android 开发艺术探索》《Java 编程思想》《深入理解 Java 虚拟机》等经典书籍读书笔记
+    link: /reading-notes/
+  - title: �📎 关于本站
     icon: info
     details: 项目介绍、贡献指南与常见问题
     link: /about/

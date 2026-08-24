@@ -11,6 +11,8 @@ Binder 是 Android 跨进程通信的核心，也是源码面试的"深水区"�
 
 - [Binder 跨进程通信机制详解](binder-mechanism.md)
 - [AIDL 深入解析](aidl-deep.md)
+- [Android IPC 方式对比](ipc-comparison.md)
+- [Parcelable 序列化](parcelable.md)
 
 ## 核心要点
 

@@ -11,6 +11,7 @@ title: 插件化与热修复
 
 - [插件化原理分析](plugin-principle.md)
 - [热修复方案对比](hotfix-comparison.md)
+- [Hook 技术详解](hook-tech.md)
 
 ## 核心要点
 

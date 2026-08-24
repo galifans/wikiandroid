@@ -72,7 +72,7 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 | `booleanPreferencesKey()` | Boolean |
 | `longPreferencesKey()` | Long |
 | `floatPreferencesKey()` | Float |
-| `stringSetPreferencesKey()` | Set\<String\> |
+| `stringSetPreferencesKey()` | Set\&lt;String\&gt; |
 
 ## 3. Proto DataStore
 

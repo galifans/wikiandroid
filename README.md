@@ -115,6 +115,14 @@
 | 从零搭建完整 App | Kotlin + Compose + MVVM | [完整教程](wikiStatic/projects/from-scratch.md) |
 | 开源项目源码解析 | 架构 / 性能 | [源码解析](wikiStatic/projects/open-source-analysis.md) |
 
+### 📚 读书笔记
+
+| 书籍 | 入口 |
+| --- | --- |
+| 《Android 开发艺术探索》 | [笔记合集](wikiStatic/reading-notes/README.md) |
+| 《深入理解 Java 虚拟机》 | [第 12 章：并发](wikiStatic/reading-notes/《深入理解java虚拟机》第12章.md) |
+| 《Java 编程思想》 | [笔记合集](wikiStatic/reading-notes/README.md) |
+
 ## 📚 书籍资源
 
 > 来源：[TIM168/technical_books](https://github.com/TIM168/technical_books)，仅供学习交流。

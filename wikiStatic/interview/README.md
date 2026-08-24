@@ -20,6 +20,7 @@ Android 面试八股文与准备策略，助你拿下心仪 Offer。
 
 - [面试准备计划](/interview/interview-plan.md)
 - [简历与项目经验建议](/interview/resume-guide.md)
+- [大厂面试经验实录](/interview/company-experience.md) — 阿里、美团、网易等真实面经与考点总结
 
 ## 面试准备路线
 

@@ -10,6 +10,7 @@ Android 运行时与字节码机制。
 ## 文章列表
 
 - [ART 运行时与 JIT/AOT](art-runtime.md)
+- [ART 运行时与 GC](art-gc.md)
 - [DEX 文件格式与优化](dex-format.md)
 - [类加载机制详解](classloader.md)
 

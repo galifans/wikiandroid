@@ -77,4 +77,59 @@ override fun onDraw(canvas: Canvas) {
 - **避免过度绘制**：减少背景重复绘制、使用 `clipRect`
 - **使用 `invalidate()` 局部刷新**：仅重绘脏区域
 
+## 六、在 Activity 中获取 View 的宽高
+
+`onCreate` 中 View 尚未完成测量，直接 `getWidth()` 得到 0。以下三种方式可拿到真实宽高：
+
+### 1. onWindowFocusChanged
+
+```java
+// View 已初始化完毕；窗口得到/失去焦点时各回调一次
+public void onWindowFocusChanged(boolean hasFocus) {
+    super.onWindowFocusChanged(hasFocus);
+    if (hasFocus) {
+        int width = view.getMeasuredWidth();
+        int height = view.getMeasuredHeight();
+    }
+}
+```
+
+注意：频繁 onResume/onPause 时该方法会被频繁调用。
+
+### 2. view.post(runnable)
+
+```java
+// runnable 投递到消息队列尾部，Looper 调用时 View 已初始化完成
+protected void onStart() {
+    super.onStart();
+    view.post(new Runnable() {
+        @Override
+        public void run() {
+            int width = view.getMeasuredWidth();
+            int height = view.getMeasuredHeight();
+        }
+    });
+}
+```
+
+### 3. ViewTreeObserver
+
+```java
+// View 树状态或内部 View 可见性改变时回调
+ViewTreeObserver observer = view.getViewTreeObserver();
+observer.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onGlobalLayout() {
+        view.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+        int width = view.getMeasuredWidth();
+        int height = view.getMeasuredHeight();
+    }
+});
+```
+
+::: tip 对比
+`onWindowFocusChanged` 简单但触发频繁；`post` 最简洁；`ViewTreeObserver` 精确但需注意移除监听（API 16 后用 `removeOnGlobalLayoutListener`）。
+:::
+
 > 📖 进阶阅读：[MeasureSpec 完全解析](measurespec.md) | [布局优化](/ui/layout/) | [自定义 View](/ui/custom-view/)

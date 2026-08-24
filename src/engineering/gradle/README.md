@@ -10,7 +10,9 @@ Android 构建系统的核心：Gradle + AGP。
 ## 文章列表
 
 - [Gradle 基础与构建优化](gradle-basics.md)
+- [Gradle 依赖配置详解](dependency-config.md)
 - [Version Catalog 依赖管理](version-catalog.md)
+- [ProGuard 代码混淆](proguard-guide.md)
 
 ## 核心要点
 

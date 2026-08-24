@@ -16,7 +16,9 @@ View 体系、渲染原理与 Jetpack Compose 现代 UI 开发。
 | 事件分发机制 | dispatchTouchEvent 链条 | [事件分发](/ui/event/) |
 | 自定义 View | 绘制与交互实战 | [自定义 View](/ui/custom-view/) |
 | 动画机制 | 属性动画 / 帧动画 | [动画](/ui/animation/) |
-| 布局优化 | ConstraintLayout / include | [布局优化](/ui/layout/) |
+| 布局优化 | ConstraintLayout / include / 屏幕适配 | [布局优化](/ui/layout/) |
+| Window 机制 | Window / WindowManager | [Window](/ui/window/) |
+| Bitmap | 图片解码与压缩 | [Bitmap](/ui/bitmap/) |
 
 ## 现代 UI
 

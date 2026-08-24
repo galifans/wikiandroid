@@ -17,6 +17,7 @@ index: false
 | 启动流程 | 系统与应用启动 | [启动流程](/system/boot/) |
 | APK | 打包与签名 | [APK](/system/apk/) |
 | ART / DEX | 运行时与类加载 | [ART / DEX](/system/art/) |
+| 操作系统 | 操作系统与 IPC | [操作系统](/system/os/) |
 
 ## 知识框架
 

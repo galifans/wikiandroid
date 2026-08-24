@@ -11,6 +11,7 @@ title: 自定义 View
 
 - [自定义 View 入门指南](custom-view-guide.md)
 - [自定义 ViewGroup 实战](custom-viewgroup.md)
+- [触摸辅助类与 View 滑动](touch-helper.md)
 
 ## 分类
 
