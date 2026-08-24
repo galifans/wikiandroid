@@ -1,7 +1,6 @@
 ﻿# 🟢 WikiAndroid
 
-> 面向 **Android 开发者与求职者**的系统化知识库：Kotlin、Jetpack、源码原理、性能优化、高频面试题全覆盖。
-> **无需跳转，直接向下阅读即可学习**。本文档与 [`wikiStatic/`](wikiStatic/README.md) 静态资料同源，全部链接均指向仓库内文件；需要全文搜索 / 侧边栏 / 明暗主题时可访问 [wikiandroid.com](https://wikiandroid.com)（内容一致）。
+> 面向 **Android 开发者与求职者**的系统化知识库：Kotlin、Jetpack、源码原理、性能优化、高频面试题全覆盖。本文档与 [`wikiStatic/`](wikiStatic/README.md) 静态资料同源；需要全文搜索、侧边栏导航、明暗主题时可访问 [wikiandroid.com](https://wikiandroid.com)。
 
 ---
 
@@ -17,8 +16,6 @@
 
 ## 📖 知识库速览（直接阅读）
 
-> 以下内容与 `wikiStatic/` 目录一一对应，点击标题即可在 GitHub 内阅读全文，无需离开本页。
-
 ### 🗺️ 学习路线 → [`wikiStatic/roadmap/`](wikiStatic/roadmap/README.md)
 
 | 路线 | 适合人群 | 预计周期 |
@@ -26,8 +23,6 @@
 | [Android 学习路线（2026 最新版）](wikiStatic/roadmap/android-roadmap.md) | 零基础入门 / 转行 Android | 6-12 个月 |
 | [Kotlin 学习路线](wikiStatic/roadmap/kotlin-roadmap.md) | 已掌握 Java 的开发者 | 2-4 周 |
 | [Jetpack Compose 学习路线](wikiStatic/roadmap/compose-roadmap.md) | 有 Android 基础，转向声明式 UI | 1-2 个月 |
-
-> 💡 建议：先动手再理论（每个知识点配 Demo）、重视源码（Handler / Binder 是面试深水区）、坚持输出（博客 / 开源项目沉淀）。
 
 ### ☕ 语言基础 → [`wikiStatic/language/`](wikiStatic/language/README.md)
 
@@ -57,8 +52,6 @@
 | 布局优化 | ConstraintLayout / include | [布局优化](wikiStatic/ui/layout/README.md) |
 | Jetpack Compose | 声明式 UI 开发 | [Compose](wikiStatic/ui/compose/README.md) |
 
-> 学习路径：View 体系基础 → 绘制流程 → 事件分发 → 自定义 View → 动画 → 性能优化，再到 Compose。
-
 ### 🧩 Jetpack 全家桶 → [`wikiStatic/jetpack/`](wikiStatic/jetpack/README.md)
 
 | 分类 | 组件 | 入口 |
@@ -77,8 +70,6 @@
 | 协程 | 协程 Flow / RxJava | [协程](wikiStatic/network/coroutine/README.md) |
 | 线程 | 线程池与并发编程 | [线程](wikiStatic/network/thread/README.md) |
 
-> 知识关系：`Retrofit → OkHttp → Okio → Socket`；异步框架：协程（现代）/ RxJava（历史）/ Handler（系统消息）。
-
 ### 🚀 进阶实战 → [`wikiStatic/advanced/`](wikiStatic/advanced/README.md)
 
 | 模块 | 说明 | 入口 |
@@ -90,8 +81,6 @@
 | 稳定性 | 崩溃监控 / ANR / 日志 | [稳定性](wikiStatic/advanced/stability/README.md) |
 | 音视频 | 音视频开发入门 | [音视频](wikiStatic/advanced/multimedia/README.md) |
 
-> 成长路径：架构模式 → 组件化 → 性能优化 → 稳定性 → 专项（音视频 / 跨端）。
-
 ### ⚙️ 系统原理 → [`wikiStatic/system/`](wikiStatic/system/README.md)
 
 | 模块 | 说明 | 入口 |
@@ -102,8 +91,6 @@
 | APK | 打包与签名 | [APK](wikiStatic/system/apk/README.md) |
 | ART / DEX | 运行时与类加载 | [ART / DEX](wikiStatic/system/art/README.md) |
 
-> 知识框架：Linux 内核 → Android 系统服务（AMS/WMS/PMS）→ Binder IPC → 应用框架层。
-
 ### 🛠️ 工程实践 → [`wikiStatic/engineering/`](wikiStatic/engineering/README.md)
 
 | 模块 | 说明 | 入口 |
@@ -113,8 +100,6 @@
 | CI/CD | 自动化构建发布 | [CI/CD](wikiStatic/engineering/cicd/README.md) |
 | 测试 | 单元测试与 UI 测试 | [测试](wikiStatic/engineering/testing/README.md) |
 
-> 最佳实践：Version Catalog 统一依赖、Git 分支规范、GitHub Actions 自动化、关键逻辑单测 + 核心流程 UI 测试。
-
 ### 💼 面试指南 → [`wikiStatic/interview/`](wikiStatic/interview/README.md)
 
 | 模块 | 内容 | 入口 |
@@ -123,8 +108,6 @@
 | 进阶篇 | 性能优化、架构、组件化 | [进阶篇](wikiStatic/interview/advanced.md) |
 | 源码篇 | Handler、Binder、启动流程 | [源码篇](wikiStatic/interview/source-code.md) |
 
-> 准备路线：基础回顾（2 周）→ 源码深挖（2 周）→ 项目复盘（1 周）→ 模拟面试 → 投递面试。
-
 ### 🤖 实战项目 → [`wikiStatic/projects/`](wikiStatic/projects/README.md)
 
 | 项目 | 技术栈 | 入口 |
@@ -132,12 +115,9 @@
 | 从零搭建完整 App | Kotlin + Compose + MVVM | [完整教程](wikiStatic/projects/from-scratch.md) |
 | 开源项目源码解析 | 架构 / 性能 | [源码解析](wikiStatic/projects/open-source-analysis.md) |
 
-> 建议：做透一个项目而非做很多半成品；项目要有技术亮点（性能优化 / 架构设计 / 自研工具）；配套技术博客记录决策过程。
-
 ## 📚 书籍资源
 
-> 存放于 `wikiStatic/books/`，点击书名即可在仓库内直接下载（网页版与 GitHub 同步提供下载）。
-> 来源：[TIM168/technical_books](https://github.com/TIM168/technical_books)，仅供学习交流，请尊重版权。
+> 来源：[TIM168/technical_books](https://github.com/TIM168/technical_books)，仅供学习交流。
 
 ### 🧮 算法
 
@@ -166,11 +146,7 @@
 | --- | --- | --- |
 | 程序员的 SQL 金典 | SQL 语法与优化经典 | [programmer-sql-classic.pdf](wikiStatic/books/database/programmer-sql-classic.pdf) |
 
-> 📌 更多书籍陆续收录中：Android / 架构 / 语言 / 系统分类目录已建好，PDF 待补充（来源同 TIM168/technical_books）。
-
 ## 📦 wikiStatic 目录结构
-
-> **内容架构真相源**：由 `scripts/sync-wikistatic.mjs` 从 `src/` 同步生成，目录树自动刷新，请勿手工编辑标记区间。
 
 <!-- WIKISTATIC_TREE:BEGIN -->
 ```text
