@@ -66,7 +66,7 @@
 
 | Commit | 说明 |
 | --- | --- |
-| `cb048b2` | feat(books): 新增书籍资源板块与 wikiStatic 静态资料库（三端同源 + 目录树自动同步） |
+| `5258508` | feat(books): 新增书籍资源板块与 wikiStatic 静态资料库（三端同源 + 目录树自动同步） |
 | `5abf1bb` | feat(content): 补齐全部占位文章并同步架构文档（121 文件，+14,225 行） |
 | `91599d7` | style(home): 移除首页 hero 图片与项目介绍技术栈 |
 | `21cbb6d` | chore: 统一项目名为 wikiandroid |
