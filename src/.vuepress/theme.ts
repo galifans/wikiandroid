@@ -16,7 +16,7 @@ export default hopeTheme({
 
   // 仓库地址
   repo: "https://github.com/galifans/wikiandroid",
-  docsDir: "src",
+  docsDir: "src", // src 为站点内容源码目录；wikiStatic 存放书籍等静态资源
 
   // 深色模式切换
   darkmode: "toggle",

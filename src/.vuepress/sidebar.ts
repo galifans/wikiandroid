@@ -13,6 +13,7 @@ export default sidebar({
   "/engineering/": "structure",
   "/interview/": "structure",
   "/projects/": "structure",
+  "/books/": "structure",
   "/about/": "structure",
   // 首页无侧边栏
   "/": false,

@@ -15,11 +15,19 @@
 | 域名 | https://wikiandroid.com（备用：https://wikiandroid.pages.dev） |
 | 仓库 | https://github.com/galifans/wikiandroid（分支 main） |
 | 部署方式 | Cloudflare Pages：`git push main` 自动触发构建部署（约 2-4 分钟） |
-| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 149 页面） |
+| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 150 页面） |
 | 本地预览 | `npm run dev` → http://localhost:8080 |
 | 当前状态 | ✅ 内容建设完成（71+ 篇文章），持续维护中 |
 
 ## 2. 进展时间线
+
+### 2026-08-24（书籍板块 + wikiStatic 静态资料库）
+- ✅ 新增「📚 书籍资源」板块：`src/books/README.md` 网站板块页（直链下载）+ navbar/sidebar 接入
+- ✅ 建立 `wikiStatic/` 静态资料库：模块 md 镜像（147 个）+ `books/` 书籍 PDF（7 本已收录，约 33MB）
+- ✅ 新增 `scripts/sync-wikistatic.ps1` + `npm run sync:static`：md 同步 + 根 README / wikiStatic README 目录树自动刷新（WIKISTATIC_TREE 标记区间）
+- ✅ 根 `README.md` 重写：三种学习方式 + 内容板块表（同源）+ 书籍资源表 + wikiStatic 目录树 + Star 号召
+- ✅ `agent.md` 新增第 11 节「wikiStatic 静态资料库与 README 同步规范」；`architecture.md` 同步更新
+- ✅ 构建 150 页面成功（含书籍板块页），同步脚本验证通过
 
 ### 2026-08-23（首日建设）
 - ✅ 完成站点框架搭建（VuePress + Theme Hope + Cloudflare Pages 部署）
@@ -31,7 +39,7 @@
 
 ## 3. 内容建设记录
 
-### 文章规模（总计 149 页面构建成功）
+### 文章规模（总计 150 页面构建成功）
 | 模块 | 文章数 | 说明 |
 | --- | --- | --- |
 | roadmap/ | 3 | 学习路线（Android / Kotlin / Compose） |
@@ -45,8 +53,9 @@
 | engineering/ | 8 | Gradle / Git / CI/CD / 测试 |
 | interview/ | 5 | 面试指南 |
 | projects/ | 2 | 实战项目 |
+| books/ | 1 | 📚 书籍资源板块页（PDF 实体存 wikiStatic/books/，直链下载） |
 | about/ | 3 | 关于本站 |
-| **合计** | **84** | 文章页面（另有各模块 README 索引页） |
+| **合计** | **85** | 文章页面（另有各模块 README 索引页） |
 
 ### 文章模板（每篇均包含）
 - frontmatter：`icon`（iconify）+ `title` + `description`
@@ -57,6 +66,7 @@
 
 | Commit | 说明 |
 | --- | --- |
+| `cb048b2` | feat(books): 新增书籍资源板块与 wikiStatic 静态资料库（三端同源 + 目录树自动同步） |
 | `5abf1bb` | feat(content): 补齐全部占位文章并同步架构文档（121 文件，+14,225 行） |
 | `91599d7` | style(home): 移除首页 hero 图片与项目介绍技术栈 |
 | `21cbb6d` | chore: 统一项目名为 wikiandroid |
@@ -74,6 +84,6 @@
 ## 6. 未来计划（候选，待用户确认）
 
 - [ ] 可选：扩充更多模块（如「音视频开发」「Kotlin Multiplatform」「大前端/跨端」）
-- [ ] 可选：补充 README 精选文章推荐位
+- [x] 可选：补充 README 精选文章推荐位（已实现：根 README 含精选文章表）
 - [ ] 可选：多语言支持（zh-CN / en）
 - [ ] 可选：图标库 `iconAssets: "iconify"` 弃用提示修复（新写法 `plugins.icon.assets`）

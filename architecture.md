@@ -31,10 +31,19 @@ galifans_vibe_coding/
 ├── architecture.md              # 本文档（站点结构权威索引）
 ├── PROGRESS.md                  # 项目进展与记忆（进展时间线 / 文章记录 / 踩坑经验）
 ├── agent.md                     # Agent 行为约束
-├── package.json                 # 依赖与脚本（dev / build / clean）
+├── README.md                    # 🏠 GitHub 首页（与 wikiandroid.com 同源：内容板块 + 书籍索引 + wikiStatic 目录树）
+├── package.json                 # 依赖与脚本（dev / build / clean / sync:static）
 ├── .gitignore                   # 忽略 node_modules / .cache / .temp / dist
 ├── scripts/
-│   └── gen-icons.ps1            # 图标生成脚本（favicon.svg 同款设计 → PNG）
+│   ├── gen-icons.ps1            # 图标生成脚本（favicon.svg 同款设计 → PNG）
+│   └── sync-wikistatic.ps1      # wikiStatic 同步脚本（md 同步 + README 目录树自动刷新）
+├── wikiStatic/                  # 📦 静态资料库（GitHub 直接浏览/下载，内容与 src/ 同源，详见第 8 节）
+│   ├── README.md                # wikiStatic 总索引（含自动生成的目录树）
+│   ├── books/                   # 📚 书籍资源（PDF 点击直接下载；来源 TIM168/technical_books）
+│   │   ├── README.md            # 书籍索引（算法 / Java / 网络 / 数据库 …）
+│   │   ├── algorithm/ java/ network/ database/              # 已收录 PDF
+│   │   └── android/ architecture/ language/ system/         # 目录已建，PDF 待补充
+│   └── <模块目录>/              # 各知识模块 md 镜像（roadmap / language / android / ui / jetpack / network / advanced / system / engineering / interview / projects / about）
 └── src/                         # 站点源码根（VuePress docsDir）
     ├── README.md                # 🏠 首页（hero + 12 张功能卡片 + 精选文章）
     ├── .vuepress/               # 站点配置目录
@@ -54,6 +63,7 @@ galifans_vibe_coding/
     ├── engineering/             # 🛠️ 工程实践（gradle / git / cicd / testing）
     ├── interview/               # 💼 面试指南（5 篇平铺文章）
     ├── projects/                # 🤖 实战项目
+    ├── books/                   # 📚 书籍资源板块页（PDF 实体存 wikiStatic/books/，此处为分类索引与下载链接）
     └── about/                   # 📎 关于本站（intro / contribution-guideline / faq）
 ```
 
@@ -80,7 +90,8 @@ galifans_vibe_coding/
 | 10 | 🛠️ 工程实践 | — | Gradle 构建 / Git 与版本管理 / CI/CD / 测试体系 | 下拉菜单 |
 | 11 | 💼 面试指南 | `/interview/` | — | 平铺 5 篇文章 |
 | 12 | 🤖 实战项目 | `/projects/` | — | 平铺文章 |
-| 13 | GitHub | https://github.com/galifans/wikiandroid | — | 外链 |
+| 13 | 📚 书籍资源 | `/books/` | — | 分类索引 + 直链下载（PDF 实体存 `wikiStatic/books/`） |
+| 14 | GitHub | https://github.com/galifans/wikiandroid | — | 外链 |
 
 > 注：`/about/` 不在导航栏中，通过首页「📎 关于本站」功能卡片与链接访问。
 
@@ -205,10 +216,13 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 - ✅ from-scratch.md（从零搭建 App）
 - ✅ open-source-analysis.md（开源项目源码解析）
 
+### � 书籍资源 `/books/`
+- ✅ src/books/README.md（网站板块页：分类索引 + 直链下载；PDF 实体存 `wikiStatic/books/`，来源 TIM168/technical_books）
+
 ### 📎 关于本站 `/about/`
 - ✅ intro.md　✅ contribution-guideline.md　✅ faq.md
 
-**现状统计**：✅ 全部文章已完成（约 97 篇 + 各模块 README），无「（待更新）」占位文章，构建无 broken-link warning。
+**现状统计**：✅ 全部文章已完成（约 97 篇 + 各模块 README + 书籍板块页），无「（待更新）」占位文章，构建无 broken-link warning。
 
 ---
 
@@ -219,18 +233,21 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 2. 更新该模块 `README.md` 的「文章列表」，去掉「（待更新）」或新增条目。
 3. 若文章值得推荐，同步更新首页 `src/README.md` 的「📌 精选文章」对应小节。
 4. 侧边栏无需改动（structure 自动生成）。
+5. **运行 `npm run sync:static`**，同步 md 到 `wikiStatic/` 并刷新根 README 与 wikiStatic README 的目录树。
 
 ### 7.2 新增一个子模块（如 `android/xxx/`）
 1. 创建 `src/android/xxx/README.md`（frontmatter：`icon` + `title`）。
 2. 如需出现在顶部导航，在 `navbar.ts` 对应下拉组中加一项。
 3. 如需首页展示，更新 `src/README.md` 的 features / 精选文章。
+4. 运行 `npm run sync:static` 同步 wikiStatic。
 
 ### 7.3 新增一个顶层模块（如 `src/xxx/`）
 1. 创建 `src/xxx/README.md`。
 2. 在 `navbar.ts` 添加导航项（或下拉组）。
 3. 在 `sidebar.ts` 添加一行 `"/xxx/": "structure"`。
 4. 首页 features 如需要则加一张卡片。
-5. **同步更新本文档**第 2 / 3 / 6 节。
+5. 运行 `npm run sync:static` 同步 wikiStatic（模块镜像 + 目录树）。
+6. **同步更新本文档**第 2 / 3 / 6 节。
 
 ### 7.4 调整导航栏
 - 只改 `navbar.ts`（文案、顺序、分组、链接）。

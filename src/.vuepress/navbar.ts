@@ -83,6 +83,7 @@ export default navbar([
   },
   { text: "💼 面试指南", link: "/interview/" },
   { text: "🤖 实战项目", link: "/projects/" },
+  { text: "📚 书籍资源", link: "/books/" },
   {
     text: "GitHub",
     link: "https://github.com/galifans/wikiandroid",

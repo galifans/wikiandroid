@@ -56,6 +56,10 @@ features:
     icon: robot
     details: 从零搭建完整 App 的实战拆解与优质开源项目推荐
     link: /projects/
+  - title: 📚 书籍资源
+    icon: book
+    details: 精选 Android、Java、算法、网络、数据库等方向的 PDF 书籍，点击即可下载
+    link: /books/
   - title: 📎 关于本站
     icon: info
     details: 项目介绍、贡献指南与常见问题
