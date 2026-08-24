@@ -9,7 +9,7 @@
 //   1. Copy *.md from src/ content modules into wikiStatic/ (skip .vuepress, src/README.md, src/books/)
 //   2. Remove orphan *.md files in wikiStatic/ module dirs (never touch wikiStatic/books/)
 //   3. Auto-refresh the directory tree between the WIKISTATIC_TREE markers
-//      in both the root README.md and wikiStatic/README.md
+//      in wikiStatic/README.md (the root README.md no longer shows the tree)
 //
 // Usage:
 //   npm run sync:static
@@ -156,7 +156,6 @@ function updateTreeSection(filePath) {
     console.log(`Tree refreshed: ${filePath}`);
 }
 
-updateTreeSection(path.join(root, "README.md"));
 updateTreeSection(path.join(wikiDir, "README.md"));
 
 console.log("wikiStatic sync completed");
