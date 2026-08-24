@@ -16,7 +16,7 @@
 
 ## 📖 知识库速览（直接阅读）
 
-### 🗺️ 学习路线 → [`wikiStatic/roadmap/`](wikiStatic/roadmap/README.md)
+### 🗺️ 学习路线
 
 | 路线 | 适合人群 | 预计周期 |
 | --- | --- | --- |
@@ -24,13 +24,13 @@
 | [Kotlin 学习路线](wikiStatic/roadmap/kotlin-roadmap.md) | 已掌握 Java 的开发者 | 2-4 周 |
 | [Jetpack Compose 学习路线](wikiStatic/roadmap/compose-roadmap.md) | 有 Android 基础，转向声明式 UI | 1-2 个月 |
 
-### ☕ 语言基础 → [`wikiStatic/language/`](wikiStatic/language/README.md)
+### ☕ 语言基础
 
 - **Kotlin**：[基础语法详解](wikiStatic/language/kotlin/kotlin-basics.md) · [协程从入门到进阶](wikiStatic/language/kotlin/kotlin-coroutines.md) · [泛型](wikiStatic/language/kotlin/kotlin-generics.md) · [扩展函数](wikiStatic/language/kotlin/kotlin-extensions.md)
 - **Java**：[面向 Android 的 Java 核心回顾](wikiStatic/language/java/java-basics.md) · [集合](wikiStatic/language/java/java-collections.md) · [并发](wikiStatic/language/java/java-concurrency.md)
 - **算法**：[刷题指南](wikiStatic/language/algorithm/algorithm-guide.md) · [LeetCode Top 100 精讲](wikiStatic/language/algorithm/leetcode-top100.md)
 
-### 🧱 Android 核心 → [`wikiStatic/android/`](wikiStatic/android/README.md)
+### 🧱 Android 核心
 
 | 组件 | 作用 | 入口文档 |
 | --- | --- | --- |
@@ -41,7 +41,7 @@
 | Fragment | 界面模块化 | [Fragment](wikiStatic/android/fragment/README.md) |
 | 数据存储 | SharedPreferences / Room / DataStore | [存储](wikiStatic/android/storage/README.md) |
 
-### 🎨 UI 与渲染 → [`wikiStatic/ui/`](wikiStatic/ui/README.md)
+### 🎨 UI 与渲染
 
 | 模块 | 说明 | 入口 |
 | --- | --- | --- |
@@ -52,7 +52,7 @@
 | 布局优化 | ConstraintLayout / include | [布局优化](wikiStatic/ui/layout/README.md) |
 | Jetpack Compose | 声明式 UI 开发 | [Compose](wikiStatic/ui/compose/README.md) |
 
-### 🧩 Jetpack 全家桶 → [`wikiStatic/jetpack/`](wikiStatic/jetpack/README.md)
+### 🧩 Jetpack 全家桶
 
 | 分类 | 组件 | 入口 |
 | --- | --- | --- |
@@ -61,7 +61,7 @@
 | 导航与分页 | Paging / Navigation | [Paging / Navigation](wikiStatic/jetpack/paging-navigation/README.md) |
 | 后台与注入 | WorkManager / Hilt | [WorkManager / Hilt](wikiStatic/jetpack/workmanager-hilt/README.md) |
 
-### 🌐 网络与异步 → [`wikiStatic/network/`](wikiStatic/network/README.md)
+### 🌐 网络与异步
 
 | 模块 | 说明 | 入口 |
 | --- | --- | --- |
@@ -70,7 +70,7 @@
 | 协程 | 协程 Flow / RxJava | [协程](wikiStatic/network/coroutine/README.md) |
 | 线程 | 线程池与并发编程 | [线程](wikiStatic/network/thread/README.md) |
 
-### 🚀 进阶实战 → [`wikiStatic/advanced/`](wikiStatic/advanced/README.md)
+### 🚀 进阶实战
 
 | 模块 | 说明 | 入口 |
 | --- | --- | --- |
@@ -81,7 +81,7 @@
 | 稳定性 | 崩溃监控 / ANR / 日志 | [稳定性](wikiStatic/advanced/stability/README.md) |
 | 音视频 | 音视频开发入门 | [音视频](wikiStatic/advanced/multimedia/README.md) |
 
-### ⚙️ 系统原理 → [`wikiStatic/system/`](wikiStatic/system/README.md)
+### ⚙️ 系统原理
 
 | 模块 | 说明 | 入口 |
 | --- | --- | --- |
@@ -91,7 +91,7 @@
 | APK | 打包与签名 | [APK](wikiStatic/system/apk/README.md) |
 | ART / DEX | 运行时与类加载 | [ART / DEX](wikiStatic/system/art/README.md) |
 
-### 🛠️ 工程实践 → [`wikiStatic/engineering/`](wikiStatic/engineering/README.md)
+### 🛠️ 工程实践
 
 | 模块 | 说明 | 入口 |
 | --- | --- | --- |
@@ -100,7 +100,7 @@
 | CI/CD | 自动化构建发布 | [CI/CD](wikiStatic/engineering/cicd/README.md) |
 | 测试 | 单元测试与 UI 测试 | [测试](wikiStatic/engineering/testing/README.md) |
 
-### 💼 面试指南 → [`wikiStatic/interview/`](wikiStatic/interview/README.md)
+### 💼 面试指南
 
 | 模块 | 内容 | 入口 |
 | --- | --- | --- |
@@ -108,7 +108,7 @@
 | 进阶篇 | 性能优化、架构、组件化 | [进阶篇](wikiStatic/interview/advanced.md) |
 | 源码篇 | Handler、Binder、启动流程 | [源码篇](wikiStatic/interview/source-code.md) |
 
-### 🤖 实战项目 → [`wikiStatic/projects/`](wikiStatic/projects/README.md)
+### 🤖 实战项目
 
 | 项目 | 技术栈 | 入口 |
 | --- | --- | --- |
