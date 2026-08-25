@@ -21,6 +21,17 @@
 
 ## 2. 进展时间线
 
+### 2026-08-26（Jetpack Compose 移入 Jetpack 板块 + 旧链接重定向 + Google 文档风格字体 + 正文排版优化）
+- ✅ 用户反馈：① Compose 应归入 Jetpack 板块（"需要更新一下位置"）；② 界面排版内容有些拥挤（正文行距太密）；③ 想用 Google 文档同款字体
+- ✅ 结构迁移：`git mv src/ui/compose/* → src/jetpack/compose/`（README + compose-basics/state/performance 共 4 文件，内容不变）；compose README frontmatter `dir.order: 8 → 1`（Jetpack 侧边栏首位）
+- ✅ 引用更新（7 处）：`navbar.ts`（UI 下拉删 Jetpack Compose → Jetpack 下拉首位）；`src/README.md` 首页（UI feature 描述去掉 Compose，Jetpack feature 文案含 Compose + 链接 `/jetpack/compose/`，底部文章列表链接）；`ui/README.md`（现代 UI 分支删除 Compose，改 `> 💡 声明式 UI 开发见 [Jetpack Compose](/jetpack/compose/)`）；`jetpack/README.md`（分类表加"声明式 UI"行 + 文章导航）；`roadmap/compose-roadmap.md`（链接）；`about/intro.md`（UI/Jetpack 描述）
+- ✅ 旧链接重定向：`theme.ts` 新增 `plugins.redirect.config`（**注意：必须是 `Record<string,string>` 对象映射，不是数组**）——`/ui/compose/` → `/jetpack/compose/`、三个 `.html` 页逐一映射；构建生成 `dist/ui/compose/index.html` 等 redirect 文件；浏览器实测旧链接 302 落新地址
+- ✅ 字体：Google Sans / Google Sans Text 是专有字体（官方 zh-CN 站实际回退 Noto Sans 家族），采用开源等价组合 **Roboto + Noto Sans SC**（`config.ts` head 加 preconnect + Google Fonts 样式表，权重 400;500;600;700 + display=swap 离线可回退）；`index.scss :root` 覆盖 `--vp-font` / `--vp-font-heading` 字体栈
+- ✅ 排版：`index.scss` 新增 `.vp-page` 块——`p, li { line-height: 1.75 }`、`p { margin: 0.6em 0 }`、`h2 { margin-top: 1.5em }`（主题默认 line-height 1.6 + `p { margin: 0 }` 是"拥挤"根因）；浏览器实测 p 行高 28px、段距 9.6px、H2 26.4px/600
+- ✅ 回归：/ui/ 侧边栏已无 Compose；Jetpack 下拉首位 = Jetpack Compose（概览/核心概念/性能/状态）；首页 Jetpack feature → /jetpack/compose/；页面信息（日期+阅读时间）不受影响
+- ✅ `npm run build` 构建 248 页面成功；`npm run sync:static` 已同步 wikiStatic
+- ⚠️ 注意：redirect 插件 `config` 类型为 `Record<string, string> | ((app) => Record<string, string>)`——用数组 `[{from,to}]` 构建虽成功但**不会生成任何 redirect 文件**（浪费一次构建）；主题内容容器是 `.vp-page`（本主题无 `.vp-doc` 类）
+
 ### 2026-08-26（页面 meta 精简：去作者 + 去贡献者 + 禁用 hover 悬浮提示）
 - ✅ 用户反馈：① 页面顶部"WikiAndroid / 2026/8/26 / 大约 1 分钟"鼠标悬停弹出提示内容很鸡肋（文字本身已表达含义）；② 去掉作者（站点即 WikiAndroid，每页重复）；③ 去掉"贡献者: galifans"（底部已有 GitHub 链接）
 - ✅ 顶部信息：`theme.pageInfo: ["Date", "ReadingTime"]` 去掉 Author——只剩"写作日期📅 + 阅读时间⌛"，作者不再渲染（浏览器实测 `page-author-info` 不存在）

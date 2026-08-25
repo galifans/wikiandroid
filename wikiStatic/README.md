@@ -132,6 +132,11 @@ wikiStatic/
 │   └── source-code.md
 ├── jetpack/
 │   ├── README.md
+│   ├── compose/
+│   │   ├── README.md
+│   │   ├── compose-basics.md
+│   │   ├── compose-performance.md
+│   │   └── compose-state.md
 │   ├── lifecycle-viewmodel/
 │   │   ├── README.md
 │   │   ├── lifecycle.md
@@ -319,10 +324,6 @@ wikiStatic/
     │   ├── README.md
     │   └── bitmap-guide.md
     ├── compose/
-    │   ├── README.md
-    │   ├── compose-basics.md
-    │   ├── compose-performance.md
-    │   └── compose-state.md
     ├── custom-view/
     │   ├── README.md
     │   ├── custom-view-guide.md

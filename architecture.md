@@ -285,6 +285,18 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 - hover 悬浮提示：主题用 balloon.css（`[aria-label][data-balloon-pos]`）渲染 tooltip，已在 `index.scss` 用 `.page-info [aria-label][data-balloon-pos]` 禁用（`::before/::after` 隐藏 + `cursor: default`），仅影响页面信息项。
 - 底部贡献者：`theme.ts` 的 `plugins.git: { contributors: false }` 关闭（底部已有 GitHub 链接无需重复展示）；恢复时改为 `true`。
 
+### 7.5.2 旧链接重定向（@vuepress/plugin-redirect）
+- 位置：`theme.ts` → `plugins.redirect`（theme-hope 内置暴露 `RedirectPluginOptions | boolean`）。
+- **`config` 必须是 `Record<string, string>` 对象映射（from → to），不是数组**（用 `[{from,to}]` 数组构建虽成功但不会生成任何 redirect 文件，会白跑一次构建）。
+- 当前映射：Compose 移入 Jetpack 后旧路径 `/ui/compose/`、`/ui/compose/compose-*.html` → `/jetpack/compose/` 对应地址；构建后在 `dist/ui/compose/index.html` 等位置生成 meta-refresh 重定向页，旧链接 302 落到新地址。
+- 新增迁移时：往 `plugins.redirect.config` 里追加 from→to 条目即可。
+
+### 7.5.3 字体与正文排版（Google 文档风格）
+- 字体：Google Sans / Google Sans Text 为专有字体（官方 developer.android.google.cn 中文站实际回退到 Noto Sans 家族），本站采用开源等价组合 **Roboto + Noto Sans SC**。
+- 加载：`config.ts` head 添加 `preconnect`（fonts.googleapis.com / fonts.gstatic.com）+ Google Fonts 样式表（权重 400;500;600;700，`display=swap` 离线可优雅回退到系统字体）。
+- 字体栈：`index.scss` `:root` 覆盖 `--vp-font` / `--vp-font-heading`（Roboto、Noto Sans SC、PingFang SC、Microsoft YaHei、system-ui…）。
+- 排版：`index.scss` `.vp-page` 块——`p, li { line-height: 1.75 }`、`p { margin: 0.6em 0 }`、`h2 { margin-top: 1.5em }`（主题默认 line-height 1.6 + `p { margin: 0 }` 导致正文拥挤；本主题内容容器是 `.vp-page`，没有 `.vp-doc` 类）。
+
 ### 7.6 更新「待更新」文章为正式文章
 - 创建文章文件，更新模块 README 移除「（待更新）」标记，即可消除对应 broken-link warning。
 

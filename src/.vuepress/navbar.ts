@@ -36,12 +36,12 @@ export default navbar([
       { text: "Window", link: "/ui/window/" },
       { text: "动画机制", link: "/ui/animation/" },
       { text: "布局优化", link: "/ui/layout/" },
-      { text: "Jetpack Compose", link: "/ui/compose/" },
     ],
   },
   {
     text: "🧩 Jetpack",
     children: [
+      { text: "Jetpack Compose", link: "/jetpack/compose/" },
       { text: "Lifecycle / ViewModel", link: "/jetpack/lifecycle-viewmodel/" },
       { text: "Room / DataStore", link: "/jetpack/room-datastore/" },
       { text: "Paging / Navigation", link: "/jetpack/paging-navigation/" },

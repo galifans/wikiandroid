@@ -26,12 +26,12 @@ features:
     link: /android/activity/
   - title: 🎨 UI 与渲染
     icon: palette
-    details: View 绘制流程、事件分发、自定义 View、动画机制与 Jetpack Compose
+    details: View 绘制流程、事件分发、自定义 View、动画机制与布局优化
     link: /ui/view/
   - title: 🧩 Jetpack 全家桶
     icon: boxes
-    details: Lifecycle、ViewModel、Room、DataStore、Paging、Navigation、WorkManager、Hilt
-    link: /jetpack/lifecycle-viewmodel/
+    details: Jetpack Compose、Lifecycle、ViewModel、Room、DataStore、Paging、Navigation、WorkManager、Hilt
+    link: /jetpack/compose/
   - title: 🌐 网络与异步
     icon: globe
     details: OkHttp、Retrofit、Handler 消息机制、协程 Flow、线程池与并发编程
@@ -116,7 +116,7 @@ features:
 - [布局优化与屏幕适配](/ui/layout/layout-optimization.md)
 - [Window 机制详解](/ui/window/window-mechanism.md)
 - [Bitmap 详解与图片压缩](/ui/bitmap/bitmap-guide.md)
-- [Jetpack Compose 入门到进阶](/ui/compose/compose-basics.md)
+- [Jetpack Compose 入门到进阶](/jetpack/compose/compose-basics.md)
 
 ### 🧩 Jetpack 全家桶
 - [Lifecycle / ViewModel / LiveData](/jetpack/lifecycle-viewmodel/lifecycle.md)

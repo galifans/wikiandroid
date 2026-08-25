@@ -12,6 +12,7 @@ Android 官方组件库，助力构建健壮、可维护的应用。
 
 | 分类 | 组件 | 入口 |
 |------|------|------|
+| 声明式 UI | Jetpack Compose | [Jetpack Compose](/jetpack/compose/) |
 | 生命周期 | Lifecycle / ViewModel / LiveData | [Lifecycle / ViewModel](/jetpack/lifecycle-viewmodel/) |
 | 数据持久化 | Room / DataStore | [Room / DataStore](/jetpack/room-datastore/) |
 | 导航与分页 | Paging / Navigation | [Paging / Navigation](/jetpack/paging-navigation/) |
@@ -32,6 +33,11 @@ ViewModel ──→ LiveData / StateFlow
 ```
 
 ## 📑 全部文章导航
+
+### 🧩 声明式 UI
+- [Compose 核心概念](/jetpack/compose/compose-basics.md)：声明式 UI / 重组 / Modifier
+- [Compose 状态管理](/jetpack/compose/compose-state.md)：remember / mutableStateOf
+- [Compose 性能优化](/jetpack/compose/compose-performance.md)：重组优化 / 列表性能
 
 ### 🔄 生命周期
 - [Lifecycle 组件详解](/jetpack/lifecycle-viewmodel/lifecycle.md)：LifecycleOwner / 观察者

@@ -33,6 +33,30 @@ export default defineUserConfig({
       },
     ],
     ["meta", { name: "theme-color", content: "#16A34A" }],
+    // Google 官方文档同款字体：Roboto（英文/数字）+ Noto Sans SC（思源黑体，中文）
+    // Google Sans 为 Google 私有字体不可公开加载，官方中文文档实际回退到 Noto Sans 家族
+    [
+      "link",
+      {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
+    ],
+    [
+      "link",
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossorigin: "",
+      },
+    ],
+    [
+      "link",
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Roboto:wght@400;500;600;700&display=swap",
+      },
+    ],
   ],
 
   theme,

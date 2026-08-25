@@ -32,4 +32,4 @@ title: Jetpack Compose 学习路线
 - Compose 性能优化：稳定性（Stability）、`@Stable`、键值（Keys）
 - 无障碍与测试
 
-> 📖 相关文章：[Compose 入门到进阶](/ui/compose/)
+> 📖 相关文章：[Compose 入门到进阶](/jetpack/compose/)

@@ -10,6 +10,42 @@
   }
 }
 
+// 字体：Google 官方文档同款（Roboto 英文 + Noto Sans SC 思源黑体中文）
+// 覆盖主题 :root 的 --vp-font / --vp-font-heading（默认仅 Inter + system-ui，
+// 中文回退到各平台系统字体，Windows 微软雅黑观感偏挤）。display=swap 保证
+// 字体加载失败时自动回退，不影响可用性。
+:root {
+  --vp-font:
+    "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Source Han Sans SC", ui-sans-serif, system-ui,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+  --vp-font-heading:
+    "Roboto", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Source Han Sans SC", ui-sans-serif, system-ui,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+}
+
+// 正文排版：改善"拥挤"观感
+// 主题默认 p/li 行高 1.6 且段落 margin 为 0（段落之间零间距，中文阅读显挤）。
+// 这里在 .vp-page（正文容器）内提升行高到 1.75、给段落加垂直间距。
+.vp-page {
+  p,
+  li {
+    line-height: 1.75; // 1.6 → 1.75，中文阅读更舒展
+  }
+
+  p {
+    margin: 0.6em 0; // 段落间距（原为 0）
+  }
+
+  // 标题与正文的间距略增大，层级更清晰
+  h2 {
+    margin-top: 1.5em;
+  }
+}
+
 // 侧边栏长标题换行：避免无空格长文本（如“RecyclerView优化与ListView对比”）换行时溢出到左侧
 .vp-sidebar {
   .vp-sidebar-link,

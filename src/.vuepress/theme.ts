@@ -61,6 +61,16 @@ export default hopeTheme({
     photoSwipe: true,
     // 阅读时间
     readingTime: true,
+    // 旧路径重定向：Compose 从 /ui/compose/ 移入 /jetpack/compose/，
+    // 保留旧链接可用（SEO 与站外收藏）
+    redirect: {
+      config: {
+        "/ui/compose/": "/jetpack/compose/",
+        "/ui/compose/compose-basics.html": "/jetpack/compose/compose-basics.html",
+        "/ui/compose/compose-state.html": "/jetpack/compose/compose-state.html",
+        "/ui/compose/compose-performance.html": "/jetpack/compose/compose-performance.html",
+      },
+    },
     // 版权信息
     copyright: {
       author: "WikiAndroid",
