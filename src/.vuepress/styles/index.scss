@@ -28,10 +28,16 @@
   }
 
   // 嵌套子分组（如 语言基础 > Java 下的 Java 并发/Java 集合）：
-  // 与子级链接同级 —— 14px 常规不加粗，避免与大类同字号同字重造成层级混乱
-  .vp-sidebar-group .vp-sidebar-group > .vp-sidebar-header:not(.active) {
+  // 与子级链接同级 —— 字号**无条件固定** 14px（不能用 :not(.active)，
+  // 否则选中后该规则失效，字号回退到主题继承值 0.94rem≈15.04px 会“变大”）；
+  // 字重未选中 400 常规，选中（active）后 600 加粗，字号始终不变
+  .vp-sidebar-group .vp-sidebar-group > .vp-sidebar-header {
     font-size: 0.875rem; // 14px
     font-weight: 400; // 不加粗
+
+    &.active {
+      font-weight: 600; // 选中后加粗（字号不变）
+    }
   }
 
   .vp-sidebar-link {
