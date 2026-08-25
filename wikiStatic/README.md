@@ -323,7 +323,6 @@ wikiStatic/
     ├── bitmap/
     │   ├── README.md
     │   └── bitmap-guide.md
-    ├── compose/
     ├── custom-view/
     │   ├── README.md
     │   ├── custom-view-guide.md

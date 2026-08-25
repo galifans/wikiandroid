@@ -21,6 +21,14 @@
 
 ## 2. 进展时间线
 
+### 2026-08-26（导航栏网络下拉补齐基础协议，与侧边栏对齐）
+- ✅ 用户反馈：`/network/socket.html` 页面左侧边栏有「Socket 编程基础 / TCP 与 UDP 详解 / 计算机网络体系」，但导航栏「🌐 网络与异步」下拉框不包含——要求必须对应
+- ✅ 根因：侧边栏用 `structure` 自动包含板块根目录顶层文章，而 `navbar.ts` 是手工配置，network 下拉漏了 `osi-tcpip.md` / `socket.md` / `tcp-udp.md` 三篇基础协议文章
+- ✅ 修复：`navbar.ts` 网络下拉新增「基础协议」分组（计算机网络体系 → /network/osi-tcpip.html、TCP 与 UDP 详解 → /network/tcp-udp.html、Socket 编程基础 → /network/socket.html），置于下拉首位
+- ✅ 排查确认：仅有下拉框的板块（语言基础 / Android 核心 / UI 与渲染 / Jetpack / 网络与异步 / 进阶实战 / 系统原理 / 工程实践）中，只有 network 存在顶层文章遗漏；单链接板块（学习路线 / 面试指南 / 实战项目 / 读书笔记）无下拉框不在此列
+- ✅ `npm run build` 248 页面成功；浏览器实测下拉含基础协议分组、点击跳转 osi-tcpip 正常；`npm run sync:static` 已同步
+- ⚠️ 经验教训已入记忆：**navbar.ts 手工配置，下拉框必须逐项覆盖侧边栏顶层入口**，新增板块根目录顶层文章时必查下拉框
+
 ### 2026-08-26（GitHub 首页 README 板块结构同步修复）
 - ✅ 用户反馈：GitHub 仓库首页 README 中 Android 核心表格仍缺 进程/Context 两行，UI 与渲染仍显示 Jetpack Compose——板块结构未更新
 - ✅ 根因：根 `README.md`（GitHub 首页）为**手工维护**，不随 `npm run sync:static` 自动更新；上次 Compose 迁移（2a1574d）与 Android 核心升级（263a5ed）只更新了 `src/README.md`（网站首页）与各子模块 README，遗漏根 `README.md`
