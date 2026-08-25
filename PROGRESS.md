@@ -21,6 +21,14 @@
 
 ## 2. 进展时间线
 
+### 2026-08-26（GitHub 首页 README 板块结构同步修复）
+- ✅ 用户反馈：GitHub 仓库首页 README 中 Android 核心表格仍缺 进程/Context 两行，UI 与渲染仍显示 Jetpack Compose——板块结构未更新
+- ✅ 根因：根 `README.md`（GitHub 首页）为**手工维护**，不随 `npm run sync:static` 自动更新；上次 Compose 迁移（2a1574d）与 Android 核心升级（263a5ed）只更新了 `src/README.md`（网站首页）与各子模块 README，遗漏根 `README.md`
+- ✅ 修复内容：① Android 核心表格补 进程（wikiStatic/android/process/README.md）+ Context（wikiStatic/android/context/README.md）两行；② UI 与渲染表格删除 Jetpack Compose 行；③ Jetpack 全家桶表格新增"声明式 UI | Jetpack Compose"行（wikiStatic/jetpack/compose/README.md）
+- ✅ 顺带清理：删除 sync 脚本遗留的空目录 `wikiStatic/ui/compose/`（sync-wikistatic.mjs 只删 md 不删空目录；git 不跟踪空目录故不影响 GitHub）
+- ✅ 提交推送：`263a5ed..0202a5a main -> main`（1 file changed）
+- ⚠️ 经验教训：**根 README.md 是手工维护的**——今后任何板块结构变更（新增子模块、移动目录）必须同步检查并更新根 README.md 的三张速览表（Android 核心 / UI 与渲染 / Jetpack 全家桶），再走 build → sync:static → commit 流程
+
 ### 2026-08-26（Android 核心板块 16 篇文章内容全面扩充完善）
 - ✅ 用户反馈：网站刚建立，Android 核心板块很多文章内容敷衍，要求不投喂 md、由模型自行输出完整详细的学习资料，做到"非常完善"
 - ✅ 全板块质量审计：16 篇文章按质量分级——6 篇偏薄（<110 行）需重写，10 篇达标需增强
