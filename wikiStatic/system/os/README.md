@@ -1,6 +1,10 @@
 ---
 icon: server
 title: 操作系统
+shortTitle: 概览
+dir:
+  text: 操作系统
+  order: 6
 ---
 
 # 操作系统

@@ -1,6 +1,10 @@
 ---
 icon: kotlin
 title: Kotlin
+shortTitle: 概览
+dir:
+  text: Kotlin
+  order: 1
 ---
 
 # ☕ Kotlin

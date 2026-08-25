@@ -1,6 +1,10 @@
 ---
 icon: gradle
 title: Gradle 构建
+shortTitle: 概览
+dir:
+  text: Gradle 构建
+  order: 1
 ---
 
 # 📦 Gradle 构建

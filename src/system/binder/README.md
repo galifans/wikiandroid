@@ -1,6 +1,10 @@
 ---
 icon: binder
 title: Binder 机制
+shortTitle: 概览
+dir:
+  text: Binder 机制
+  order: 1
 ---
 
 # 🔗 Binder 机制

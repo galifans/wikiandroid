@@ -1,6 +1,10 @@
 ---
 icon: gears
 title: 进程
+shortTitle: 概览
+dir:
+  text: 进程
+  order: 7
 ---
 
 # 进程

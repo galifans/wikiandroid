@@ -1,6 +1,10 @@
 ---
 icon: view
 title: View 体系
+shortTitle: 概览
+dir:
+  text: View 体系
+  order: 1
 ---
 
 # 🖼️ View 体系

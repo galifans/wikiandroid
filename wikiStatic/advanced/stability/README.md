@@ -1,6 +1,10 @@
 ---
 icon: stability
 title: 稳定性保障
+shortTitle: 概览
+dir:
+  text: 稳定性保障
+  order: 5
 ---
 
 # 🛡️ 稳定性保障

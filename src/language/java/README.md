@@ -1,6 +1,10 @@
 ---
 icon: java
 title: Java
+shortTitle: 概览
+dir:
+  text: Java
+  order: 2
 ---
 
 # ☕ Java

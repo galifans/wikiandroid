@@ -1,6 +1,10 @@
 ---
 icon: plugin
 title: 插件化与热修复
+shortTitle: 概览
+dir:
+  text: 插件化与热修复
+  order: 3
 ---
 
 # 🧰 插件化与热修复

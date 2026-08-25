@@ -1,6 +1,10 @@
 ---
 icon: workmanager
 title: WorkManager / Hilt
+shortTitle: 概览
+dir:
+  text: WorkManager / Hilt
+  order: 4
 ---
 
 # ⏰ WorkManager / Hilt

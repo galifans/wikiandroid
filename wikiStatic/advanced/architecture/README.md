@@ -1,6 +1,10 @@
 ---
 icon: architecture
 title: 架构设计
+shortTitle: 概览
+dir:
+  text: 架构设计
+  order: 1
 ---
 
 # 🏗️ 架构设计

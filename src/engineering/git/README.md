@@ -1,6 +1,10 @@
 ---
 icon: git
 title: Git 与版本管理
+shortTitle: 概览
+dir:
+  text: Git 与版本管理
+  order: 2
 ---
 
 # 🔀 Git 与版本管理

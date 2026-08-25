@@ -1,6 +1,10 @@
 ---
 icon: service
 title: Service
+shortTitle: 概览
+dir:
+  text: Service
+  order: 2
 ---
 
 # ⚙️ Service

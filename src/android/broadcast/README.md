@@ -1,6 +1,10 @@
 ---
 icon: broadcast
 title: BroadcastReceiver
+shortTitle: 概览
+dir:
+  text: BroadcastReceiver
+  order: 3
 ---
 
 # 📡 BroadcastReceiver

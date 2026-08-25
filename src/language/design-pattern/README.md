@@ -1,6 +1,10 @@
 ---
 icon: object-group
 title: 设计模式
+shortTitle: 概览
+dir:
+  text: 设计模式
+  order: 4
 ---
 
 # 🧩 设计模式

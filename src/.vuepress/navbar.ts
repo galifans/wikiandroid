@@ -8,7 +8,7 @@ export default navbar([
     children: [
       { text: "Kotlin", link: "/language/kotlin/" },
       { text: "Java", link: "/language/java/" },
-      { text: "C++", link: "/language/cpp/" },
+      { text: "C++ 知识点", link: "/language/cpp/" },
       { text: "设计模式", link: "/language/design-pattern/" },
       { text: "数据结构与算法", link: "/language/algorithm/" },
     ],
@@ -29,7 +29,7 @@ export default navbar([
   {
     text: "🎨 UI 与渲染",
     children: [
-      { text: "View 绘制流程", link: "/ui/view/" },
+      { text: "View 体系", link: "/ui/view/" },
       { text: "事件分发机制", link: "/ui/event/" },
       { text: "自定义 View", link: "/ui/custom-view/" },
       { text: "Bitmap", link: "/ui/bitmap/" },
@@ -51,7 +51,7 @@ export default navbar([
   {
     text: "🌐 网络与异步",
     children: [
-      { text: "OkHttp / Retrofit", link: "/network/http/" },
+      { text: "网络与协议", link: "/network/http/" },
       { text: "Handler 消息机制", link: "/network/handler/" },
       { text: "协程 Flow / RxJava", link: "/network/coroutine/" },
       { text: "线程池与并发", link: "/network/thread/" },

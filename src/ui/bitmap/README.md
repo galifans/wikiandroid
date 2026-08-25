@@ -1,6 +1,10 @@
 ---
 icon: image
 title: Bitmap
+shortTitle: 概览
+dir:
+  text: Bitmap
+  order: 4
 ---
 
 # Bitmap

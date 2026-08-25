@@ -1,6 +1,10 @@
 ---
 icon: activity
 title: Activity
+shortTitle: 概览
+dir:
+  text: Activity
+  order: 1
 ---
 
 # 🧩 Activity

@@ -1,6 +1,10 @@
 ---
 icon: cicd
 title: CI/CD
+shortTitle: 概览
+dir:
+  text: CI/CD
+  order: 3
 ---
 
 # 🤖 CI/CD

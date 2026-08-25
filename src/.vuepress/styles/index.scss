@@ -9,3 +9,12 @@
     }
   }
 }
+
+// 侧边栏长标题换行：避免无空格长文本（如“RecyclerView优化与ListView对比”）换行时溢出到左侧
+.vp-sidebar {
+  .vp-sidebar-link,
+  .vp-sidebar-header .vp-sidebar-title {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}

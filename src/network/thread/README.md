@@ -1,6 +1,10 @@
 ---
 icon: thread
 title: 线程池与并发
+shortTitle: 概览
+dir:
+  text: 线程池与并发
+  order: 4
 ---
 
 # 🧵 线程池与并发

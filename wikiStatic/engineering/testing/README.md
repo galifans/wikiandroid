@@ -1,6 +1,10 @@
 ---
 icon: testing
 title: 测试体系
+shortTitle: 概览
+dir:
+  text: 测试体系
+  order: 4
 ---
 
 # 🧪 测试体系

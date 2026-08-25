@@ -1,6 +1,10 @@
 ---
 icon: handler
 title: Handler 消息机制
+shortTitle: 概览
+dir:
+  text: Handler 消息机制
+  order: 2
 ---
 
 # 🔄 Handler 消息机制

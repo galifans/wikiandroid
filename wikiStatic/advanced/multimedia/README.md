@@ -1,6 +1,10 @@
 ---
 icon: multimedia
 title: 音视频开发
+shortTitle: 概览
+dir:
+  text: 音视频开发
+  order: 6
 ---
 
 # 🎬 音视频开发

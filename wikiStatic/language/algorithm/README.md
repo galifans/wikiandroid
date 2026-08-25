@@ -1,6 +1,10 @@
 ---
 icon: algorithm
 title: 数据结构与算法
+shortTitle: 概览
+dir:
+  text: 数据结构与算法
+  order: 5
 ---
 
 # 🧮 数据结构与算法

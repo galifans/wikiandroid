@@ -1,6 +1,10 @@
 ---
 icon: module
 title: 组件化与模块化
+shortTitle: 概览
+dir:
+  text: 组件化与模块化
+  order: 2
 ---
 
 # 🧩 组件化与模块化

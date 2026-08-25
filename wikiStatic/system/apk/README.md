@@ -1,6 +1,10 @@
 ---
 icon: apk
 title: APK 打包与签名
+shortTitle: 概览
+dir:
+  text: APK 打包与签名
+  order: 4
 ---
 
 # 📦 APK 打包与签名

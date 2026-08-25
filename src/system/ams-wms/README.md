@@ -1,6 +1,10 @@
 ---
 icon: service
 title: AMS / WMS
+shortTitle: 概览
+dir:
+  text: AMS / WMS
+  order: 2
 ---
 
 # 🏢 AMS / WMS

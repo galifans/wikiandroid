@@ -1,6 +1,10 @@
 ---
 icon: animation
 title: 动画机制
+shortTitle: 概览
+dir:
+  text: 动画机制
+  order: 6
 ---
 
 # ✨ 动画机制

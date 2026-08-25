@@ -1,6 +1,10 @@
 ---
 icon: window
 title: Window
+shortTitle: 概览
+dir:
+  text: Window
+  order: 5
 ---
 
 # Window

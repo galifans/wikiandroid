@@ -1,6 +1,10 @@
 ---
 icon: database
 title: ContentProvider
+shortTitle: 概览
+dir:
+  text: ContentProvider
+  order: 4
 ---
 
 # 🗃️ ContentProvider

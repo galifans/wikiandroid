@@ -1,6 +1,10 @@
 ---
 icon: layout
 title: 布局优化
+shortTitle: 概览
+dir:
+  text: 布局优化
+  order: 7
 ---
 
 # 📐 布局优化

@@ -1,6 +1,10 @@
 ---
 icon: flow
 title: 协程 Flow / RxJava
+shortTitle: 概览
+dir:
+  text: 协程 Flow / RxJava
+  order: 3
 ---
 
 # 🌊 协程 Flow / RxJava

@@ -1,6 +1,10 @@
 ---
 icon: fragment
 title: Fragment
+shortTitle: 概览
+dir:
+  text: Fragment
+  order: 5
 ---
 
 # 🧩 Fragment

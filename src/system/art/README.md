@@ -1,6 +1,10 @@
 ---
 icon: art
 title: ART / DEX / 类加载
+shortTitle: 概览
+dir:
+  text: ART / DEX / 类加载
+  order: 5
 ---
 
 # 🧠 ART / DEX / 类加载

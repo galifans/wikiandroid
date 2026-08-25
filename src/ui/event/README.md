@@ -1,6 +1,10 @@
 ---
 icon: touch
 title: 事件分发机制
+shortTitle: 概览
+dir:
+  text: 事件分发机制
+  order: 2
 ---
 
 # 👆 事件分发机制

@@ -1,6 +1,10 @@
 ---
 icon: brush
 title: 自定义 View
+shortTitle: 概览
+dir:
+  text: 自定义 View
+  order: 3
 ---
 
 # 🎨 自定义 View

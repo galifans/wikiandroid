@@ -1,6 +1,10 @@
 ---
 icon: boot
 title: 系统与应用启动流程
+shortTitle: 概览
+dir:
+  text: 系统与应用启动流程
+  order: 3
 ---
 
 # 🚀 系统与应用启动流程

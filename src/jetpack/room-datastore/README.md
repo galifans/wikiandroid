@@ -1,6 +1,10 @@
 ---
 icon: database
 title: Room / DataStore
+shortTitle: 概览
+dir:
+  text: Room / DataStore
+  order: 2
 ---
 
 # 🗄️ Room / DataStore

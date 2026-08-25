@@ -1,6 +1,10 @@
 ---
 icon: compose
 title: Jetpack Compose
+shortTitle: 概览
+dir:
+  text: Jetpack Compose
+  order: 8
 ---
 
 # 🧩 Jetpack Compose

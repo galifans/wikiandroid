@@ -1,6 +1,10 @@
 ---
 icon: lifecycle
 title: Lifecycle / ViewModel
+shortTitle: 概览
+dir:
+  text: Lifecycle / ViewModel
+  order: 1
 ---
 
 # 🔄 Lifecycle / ViewModel / LiveData

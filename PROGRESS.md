@@ -21,6 +21,13 @@
 
 ## 2. 进展时间线
 
+### 2026-08-25（导航体验优化：文案统一 + 顺序对应 + 概览子级 + 换行修复）
+- ✅ 问题 1 文案统一：navbar 与侧边栏不一致的 3 处统一为页面标题（View 绘制流程→**View 体系**、OkHttp/Retrofit→**网络与协议**、C++→**C++ 知识点**），`src/.vuepress/navbar.ts`
+- ✅ 问题 2 顺序对应：45 个子模块 README 添加 `dir.order`（严格按 navbar.ts 下拉顺序 1..N），8 大板块侧边栏顺序与下拉完全一致（浏览器逐板块验证 match=true）
+- ✅ 问题 3 重名子级：45 个子模块 README 添加 `shortTitle: 概览` + `dir.text`，展开后第一个子级统一显示「概览」而非重复模块名（theme-hope 机制：文件链接文本 = `shortTitle ?? title`，分组标题 = `dir.text ?? shortTitle ?? title`）
+- ✅ 问题 4 长标题换行：`src/.vuepress/styles/index.scss` 添加 `overflow-wrap: anywhere; word-break: break-word`，长标题（如「RecyclerView 优化与 ListView 对比」）换行不再溢出
+- ✅ `npm run build` 构建 248 页面成功；`npm run sync:static` 已同步 wikiStatic；architecture.md 侧边栏规则表新增 frontmatter 说明
+
 ### 2026-08-25（导航一致性修复：navbar 与侧边栏对齐）
 - ✅ 审计全部板块：navbar 手工维护的下拉与侧边栏（structure 自动生成）存在 4 处不一致，补齐缺失入口：语言基础 +C++、Android 核心 +Context/进程、UI 与渲染 +Bitmap/Window、系统原理 +操作系统（`src/.vuepress/navbar.ts`）
 - ✅ 修复侧边栏"左侧未对齐"：5 个子模块 README（android/context、android/process、system/os、ui/bitmap、ui/window）缺少 `icon` frontmatter，导致侧边栏分组按钮无图标、与其他分组文字错位；已按模块风格补上（box/gears/server/image/window）
@@ -90,6 +97,7 @@
 
 | Commit | 说明 |
 | --- | --- |
+| `<hash>` | fix(nav): 统一导航文案并优化侧边栏（概览命名 / 板块顺序与 navbar 严格对应 / 长标题换行） |
 | `2c77f78` | fix(nav): 补齐导航栏缺失入口（语言 +C++ / Android +Context、进程 / UI +Bitmap、Window / 系统 +操作系统）并修复 5 个模块侧边栏图标缺失导致的对齐问题 |
 | `ff89888` | feat(interview): 新增 Android 知识点汇总归纳文章并补齐内容缺口（Service START 模式表 / ContentProvider 与 SQL 区别 / WebView 本地资源替代） |
 | `8c8b091` | feat(books): 书籍网站直链下载（prebuild 自动发布）+ 首页 README 改为直接阅读的知识库速览 |

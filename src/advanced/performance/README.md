@@ -1,6 +1,10 @@
 ---
 icon: performance
 title: 性能优化
+shortTitle: 概览
+dir:
+  text: 性能优化
+  order: 4
 ---
 
 # ⚡ 性能优化

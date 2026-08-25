@@ -1,6 +1,10 @@
 ---
 icon: code
 title: C++ 知识点
+shortTitle: 概览
+dir:
+  text: C++ 知识点
+  order: 3
 ---
 
 # C++ 知识点
