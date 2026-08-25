@@ -15,11 +15,18 @@
 | 域名 | https://wikiandroid.com（备用：https://wikiandroid.pages.dev） |
 | 仓库 | https://github.com/galifans/wikiandroid（分支 main） |
 | 部署方式 | Cloudflare Pages：`git push main` 自动触发构建部署（约 2-4 分钟） |
-| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 150 页面） |
+| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 248 页面） |
 | 本地预览 | `npm run dev` → http://localhost:8080 |
-| 当前状态 | ✅ 内容建设完成（71+ 篇文章），持续维护中 |
+| 当前状态 | ✅ 内容建设完成（183 篇文章），持续维护中 |
 
 ## 2. 进展时间线
+
+### 2026-08-25（Android 知识点汇总归纳 + 内容缺口补齐）
+- ✅ 读取桌面 `Android-Review-master/Docs/Android知识点汇总.md`（2494 行）全文，逐主题审计站内覆盖情况（19 大主题约 95% 已有对应文章）
+- ✅ 新增 `src/interview/android-knowledge-summary.md`：「Android 知识点汇总」19 大主题系统回顾清单（考点表格 + 高频追问 + 全部详细文章链接），面试前查漏补缺
+- ✅ 补齐三处内容缺口：Service `onStartCommand` 三种返回值表、ContentProvider 与 SQL 区别 / Binder 线程池 Q&A、WebView 本地资源替代（shouldInterceptRequest）加载优化
+- ✅ `src/interview/README.md` 新增汇总文章入口；构建 248 页面成功；`npm run sync:static` 已同步 wikiStatic
+- ✅ 修正 PROGRESS.md / architecture.md 文档漂移（150 → 248 页面，文章规模表按实际目录重新统计）
 
 ### 2026-08-24（脚本跨平台化：修复 Cloudflare 构建失败）
 - ✅ 修复 Cloudflare Pages 构建失败（`sh: 1: powershell: not found`，exit 127）：CI 是 Linux 环境，PowerShell 脚本不可用
@@ -50,23 +57,24 @@
 
 ## 3. 内容建设记录
 
-### 文章规模（总计 150 页面构建成功）
+### 文章规模（构建渲染 248 页面，2026-08-25 按实际目录重新统计）
 | 模块 | 文章数 | 说明 |
 | --- | --- | --- |
 | roadmap/ | 3 | 学习路线（Android / Kotlin / Compose） |
-| language/ | 5 | Kotlin / Java / 算法 |
-| android/ | 10 | 四大组件 + Fragment + 存储 |
-| ui/ | 11 | View / 事件 / 自定义 / 动画 / Compose |
-| jetpack/ | 8 | Lifecycle / Room / Paging / WorkManager / Hilt |
-| network/ | 9 | OkHttp / Retrofit / Handler / 协程 / 线程 |
-| advanced/ | 11 | 架构 / 组件化 / 性能 / 稳定性 / 多媒体 |
-| system/ | 9 | Binder / AMS / WMS / 启动 / APK / ART |
-| engineering/ | 8 | Gradle / Git / CI/CD / 测试 |
-| interview/ | 5 | 面试指南 |
+| language/ | 59 | Kotlin / Java / 设计模式 / 并发 / 集合 / JVM / 算法 / C++ |
+| android/ | 16 | 四大组件 + Fragment + 存储 + 进程 / Context |
+| ui/ | 18 | View / 事件 / 自定义 / 动画 / 布局 / Compose / Window / Bitmap / WebView |
+| jetpack/ | 9 | Lifecycle / Room / Paging / WorkManager / Hilt |
+| network/ | 14 | OkHttp / Retrofit / Handler / 协程 / 线程 |
+| advanced/ | 16 | 架构 / 组件化 / 性能 / 稳定性 / 多媒体 / 插件化 |
+| system/ | 16 | Binder / AMS / WMS / 启动 / APK / ART / OS |
+| engineering/ | 9 | Gradle / Git / CI/CD / 测试 |
+| interview/ | 7 | 面试指南（含知识点汇总） |
 | projects/ | 2 | 实战项目 |
+| reading-notes/ | 11 | 读书笔记 |
 | books/ | 1 | 📚 书籍资源板块页（PDF 实体存 wikiStatic/books/，直链下载） |
 | about/ | 3 | 关于本站 |
-| **合计** | **85** | 文章页面（另有各模块 README 索引页） |
+| **合计** | **183** | 非 README 文章页面（另有各模块 README 索引页） |
 
 ### 文章模板（每篇均包含）
 - frontmatter：`icon`（iconify）+ `title` + `description`

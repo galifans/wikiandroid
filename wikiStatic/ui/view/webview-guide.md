@@ -115,6 +115,41 @@ if (isNetworkConnected(context)) {
 3. **缓存策略：** 设置合理的 CacheMode，配合 Service Worker 缓存。
 4. **懒加载：** 页面不可见时暂停加载（`onStop` 时 `webView.pauseTimers()`）。
 5. **预加载：** 提前初始化 WebView 并加载首屏。
+6. **本地资源替代：** 将常用静态资源放入 `assets`，重写 `shouldInterceptRequest` 拦截 URL，命中本地配置时直接返回本地资源，减少网络请求：
+
+```java
+mWebView.setWebViewClient(new WebViewClient() {
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+        // 命中本地资源配置则用本地资源替代，否则走网络
+        if (mDataHelper.hasLocalResource(url)) {
+            WebResourceResponse response =
+                mDataHelper.getReplacedWebResourceResponse(getApplicationContext(), url);
+            if (response != null) {
+                return response;
+            }
+        }
+        return super.shouldInterceptRequest(view, url);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+        String url = request.getUrl().toString();
+        if (mDataHelper.hasLocalResource(url)) {
+            WebResourceResponse response =
+                mDataHelper.getReplacedWebResourceResponse(getApplicationContext(), url);
+            if (response != null) {
+                return response;
+            }
+        }
+        return super.shouldInterceptRequest(view, request);
+    }
+});
+```
+
+> 其他思路：WebView 初始化慢可**预创建实例**等待复用；后端响应慢可让服务器**分块输出**；
+> DNS/连接慢可**复用客户端域名连接**；JS 执行慢可将框架代码**提前拆分执行**、脚本后置不阻塞解析。
 
 ## 六、内存泄漏处理
 

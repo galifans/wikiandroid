@@ -62,7 +62,7 @@ galifans_vibe_coding/
     ├── advanced/                # 🚀 进阶实战（architecture / modular / plugin / performance / stability / multimedia）
     ├── system/                  # ⚙️ 系统原理（binder / ams-wms / boot / apk / art）
     ├── engineering/             # 🛠️ 工程实践（gradle / git / cicd / testing）
-    ├── interview/               # 💼 面试指南（5 篇平铺文章）
+    ├── interview/               # 💼 面试指南（7 篇平铺文章）
     ├── projects/                # 🤖 实战项目
     ├── books/                   # 📚 书籍资源板块页（PDF 实体存 wikiStatic/books/，双通道：网站直链 + GitHub）
     └── about/                   # 📎 关于本站（intro / contribution-guideline / faq）
@@ -89,7 +89,7 @@ galifans_vibe_coding/
 | 8 | 🚀 进阶实战 | — | 架构设计 / 组件化与模块化 / 插件化与热修复 / 性能优化 / 稳定性保障 / 音视频开发 | 下拉菜单 |
 | 9 | ⚙️ 系统原理 | — | Binder 机制 / AMS/WMS / 系统与应用启动流程 / APK 打包与签名 / ART/DEX/类加载 | 下拉菜单 |
 | 10 | 🛠️ 工程实践 | — | Gradle 构建 / Git 与版本管理 / CI/CD / 测试体系 | 下拉菜单 |
-| 11 | 💼 面试指南 | `/interview/` | — | 平铺 5 篇文章 |
+| 11 | 💼 面试指南 | `/interview/` | — | 平铺 7 篇文章 |
 | 12 | 🤖 实战项目 | `/projects/` | — | 平铺文章 |
 | 13 | 📚 书籍资源 | `/books/` | — | 分类索引 + 直链下载（PDF 实体存 `wikiStatic/books/`） |
 | 14 | GitHub | https://github.com/galifans/wikiandroid | — | 外链 |
@@ -210,8 +210,9 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 | testing/ | unit-testing.md、ui-testing.md |
 
 ### 💼 面试指南 `/interview/`（平铺）
+- ✅ android-knowledge-summary.md（Android 知识点汇总：19 大主题回顾清单，链接全部详细文章）
 - ✅ basics.md（基础篇）✅ advanced.md（进阶篇）✅ source-code.md（源码篇）
-- ✅ interview-plan.md（面试准备计划）✅ resume-guide.md（简历建议）
+- ✅ interview-plan.md（面试准备计划）✅ resume-guide.md（简历建议）✅ company-experience.md（大厂面经实录）
 
 ### 🤖 实战项目 `/projects/`
 - ✅ from-scratch.md（从零搭建 App）
@@ -223,7 +224,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 📎 关于本站 `/about/`
 - ✅ intro.md　✅ contribution-guideline.md　✅ faq.md
 
-**现状统计**：✅ 全部文章已完成（约 97 篇 + 各模块 README + 书籍板块页），无「（待更新）」占位文章，构建无 broken-link warning。
+**现状统计**：✅ 全部文章已完成（约 183 篇 + 各模块 README + 书籍板块页，构建 248 页面），无「（待更新）」占位文章，构建无 broken-link warning。
 
 ---
 

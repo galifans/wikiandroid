@@ -12,6 +12,7 @@ Android 面试八股文与准备策略，助你拿下心仪 Offer。
 
 | 模块 | 内容 | 入口 |
 |------|------|------|
+| 知识点汇总 | 19 大主题系统回顾清单 | [知识点汇总](/interview/android-knowledge-summary.md) |
 | 基础篇 | Java/Kotlin、四大组件、View | [基础篇](/interview/basics.md) |
 | 进阶篇 | 性能优化、架构、组件化 | [进阶篇](/interview/advanced.md) |
 | 源码篇 | Handler、Binder、启动流程 | [源码篇](/interview/source-code.md) |
@@ -31,6 +32,7 @@ Android 面试八股文与准备策略，助你拿下心仪 Offer。
 
 ## 📑 全部文章导航
 
+- [Android 知识点汇总](/interview/android-knowledge-summary.md)：19 大主题系统回顾清单，面试前查漏补缺
 - [面试基础篇](/interview/basics.md)：Java/Kotlin、四大组件、View
 - [面试进阶篇](/interview/advanced.md)：性能优化、架构、组件化
 - [面试源码篇](/interview/source-code.md)：Handler、Binder、启动流程

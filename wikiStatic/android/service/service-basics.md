@@ -28,6 +28,14 @@ class DownloadService : Service() {
 **生命周期**：`onCreate → onStartCommand → ... → onDestroy`
 **特点**：不返回结果给调用方，任务完成后需自行 `stopSelf()`
 
+#### onStartCommand 的三种返回值
+
+| 返回值 | 行为 | 适用场景 |
+|--------|------|----------|
+| `START_NOT_STICKY` | 系统杀死服务后**不重建**（除非有挂起的 Intent 要传递） | 可随时重启的作业，最安全的选择 |
+| `START_STICKY` | 系统杀死服务后**重建**并回调 `onStartCommand`，但 Intent 为 `null`（除非有挂起 Intent） | 不执行命令但需无限期运行的媒体播放类服务 |
+| `START_REDELIVER_INTENT` | 系统杀死服务后**重建**并**重新传递最后一个 Intent**（挂起 Intent 依次传递） | 需要立即恢复的下载类作业 |
+
 ### 2. 绑定式（bindService）
 
 ```kotlin

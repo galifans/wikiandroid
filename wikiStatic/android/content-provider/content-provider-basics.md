@@ -253,6 +253,15 @@ A：由注册时传入的 Handler 决定。传主线程 Handler 则在主线程�
 A：它的 `onCreate` 在所有应用组件初始化之前被系统调用，且即使 App 未被用户启动，
 只要其他应用访问该 Provider 也会触发初始化。但要注意这也会**拖慢冷启动**，应轻量化。
 
+**Q6：ContentProvider 与直接使用 SQL 有什么区别？**
+A：① ContentProvider **屏蔽了数据存储细节**，内部实现透明化，调用方只需关心 URI 是否匹配；
+② ContentProvider 能实现**跨应用数据共享**，SQL 只能被本程序访问；
+③ ContentProvider 还能对**本地文件、XML 等非数据库数据**进行增删改查，不局限于 SQLite。
+
+**Q7：Provider 的 CRUD 方法运行在什么线程？需要处理线程同步吗？**
+A：`insert/delete/update/query` 运行在 **Binder 线程池**中（由系统从调用方所在进程的 Binder 线程池调度），
+多个调用方可能并发访问，因此服务端实现**必须自行处理线程同步**（如使用 SQLite 的事务锁）。
+
 ## 8. 小结
 
 - ContentProvider = URI 寻址 + Binder 传输 + CRUD 抽象。
