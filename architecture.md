@@ -121,6 +121,8 @@ galifans_vibe_coding/
 | `shortTitle: 概览` | 分组展开后第一个子级（README 自身链接）显示为「概览」 |
 
 > 注意：分组的顺序由 `dir.order` 控制（而非顶层 `order`）；`shortTitle` 同时会作用于面包屑（显示为「概览」）。
+>
+> 侧边栏样式（`src/.vuepress/styles/index.scss`）：子级链接前自动显示序号（CSS counter，如 1. 2. 3.），一眼可数出每个板块的子级数量；分组标题 17px / 子级 14px 层级区分；悬挂缩进 `padding-left: calc(8px + 3em); text-indent: calc(-3em)` 保证长标题换行与图标/序号对齐。
 
 ---
 

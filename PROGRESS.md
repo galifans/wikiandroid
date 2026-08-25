@@ -21,6 +21,14 @@
 
 ## 2. 进展时间线
 
+### 2026-08-25（侧边栏子级序号标识：一眼可数子级数量）
+- ✅ 需求：子级换行或过多时不易分辨"每个板块有多少个子级"，希望每个子级前有标识
+- ✅ 方案：CSS 计数器（counter）为每个板块的直接子级生成序号（1. 2. 3. …），`src/.vuepress/styles/index.scss`：`.vp-sidebar-group > ul { counter-reset: sidebar-child }` → `> li { counter-increment }` → `> li > .vp-sidebar-link::before { content: counter(sidebar-child) "." }`
+- ✅ 序号样式：inline-block 宽 1.5em、右对齐、`var(--vp-c-text-mute, #8f8f96)` 灰色、font-weight 500，位于图标之前；每个分组独立重置计数（section > ul 作用域），板块间互不影响
+- ✅ 悬挂缩进同步升级：由"图标占位 1em + 4px"改为"序号 1.5em + 间距 0.25em + 图标 1em + 图标间距 0.25em = 3em"：`padding-left: calc(8px + 3em); text-indent: calc(-3em)`（14px 下 50px/-42px），换行对齐仍精确（浏览器实测「数据存储」4 子级：文本两行均 69px；「设计模式」13 子级两位数序号不溢出，icon 52px/文本 69px）
+- ✅ 兼容性验证：13 个子级（两位数 13.）序号 21px 占位内正常；折叠/展开、`:focus` 点击高亮（600 字重 + accent-soft 背景）均不受影响
+- ✅ `npm run build` 构建 248 页面成功；`npm run sync:static` 已同步 wikiStatic
+
 ### 2026-08-25（侧边栏焦点规则修正：当前页面唯一高亮）
 - ✅ 修正 :has(> ul) 方案的副作用：该方案在"当前页所在分组"必然展开时，会导致大类 + 概览/子级**双重绿色高亮**（下拉导航到概览页时大类+概览都绿；选子级后大类+子级都绿）
 - ✅ 改用 `.vp-sidebar-header:focus`（绿色 + accent-soft 背景 + 600 字重）：点击大类按钮（获得焦点）→ 大类绿色反馈；选择子级/概览（页面导航，按钮失焦）→ 大类自动取消，仅当前页面对应链接（active）绿色

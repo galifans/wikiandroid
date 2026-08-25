@@ -38,13 +38,35 @@
     background-color: var(--vp-c-accent-soft);
   }
 
-  // 文件链接的图标为 inline-block（1em 宽 + 4px 间距），
+  // 子级编号：每个子级链接前显示序号（1. 2. 3. …），
+  // 一眼可数出当前板块的子级数量，长标题换行时也便于区分条目。
+  // 每个分组的列表独立重置编号（section > ul），与其他板块互不影响。
+  .vp-sidebar-group > ul {
+    counter-reset: sidebar-child;
+
+    > li {
+      counter-increment: sidebar-child;
+
+      > .vp-sidebar-link::before {
+        content: counter(sidebar-child) ".";
+        display: inline-block;
+        width: 1.5em;
+        margin-right: 0.25em;
+        color: var(--vp-c-text-mute, #8f8f96);
+        font-weight: 500;
+        text-align: right;
+      }
+    }
+  }
+
+  // 文件链接的图标为 inline-block（1em 宽 + 0.25em 间距），
   // 换行后的第二行会回到内容左边缘（图标之前），导致与第一行文本未对齐。
-  // 用“悬挂缩进”抵消图标占位（1em 随字号自适应，字体缩小时依然对齐）：
-  // padding-left 增加“8px + 图标(1em) + 4px”，text-indent 回拉“1em + 4px”。
+  // 用“悬挂缩进”抵消“序号(1.5em) + 间距(0.25em) + 图标(1em) + 图标间距(0.25em) = 3em”占位：
+  // padding-left 增加“8px + 3em”，text-indent 回拉“3em”，
+  // 使第一行（序号 + 图标 + 文本）与后续行文本起点一致（序号宽度随字号自适应）。
   .vp-sidebar-link:has(> .vp-icon) {
-    padding-left: calc(8px + 1em + 4px);
-    text-indent: calc(-1em - 4px);
+    padding-left: calc(8px + 3em);
+    text-indent: calc(-3em);
   }
 }
 
