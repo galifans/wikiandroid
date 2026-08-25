@@ -21,6 +21,14 @@
 
 ## 2. 进展时间线
 
+### 2026-08-25（侧边栏层级优化：嵌套子分组取消加粗、选中态才加粗）
+- ✅ 用户反馈：语言基础 > Java 下的嵌套子分组（Java 并发/Java 集合等）与大类 Java 同为黑色加粗、同字号，层级混乱；建议吸收 Google 官方文档风格——大类与子级偏灰黑、大类加粗、子级不加粗、子级选中后才加粗
+- ✅ 实测官方文档（developer.android.google.cn）侧边栏：子级链接 `#202124` 灰黑 / 400 常规 / 14px；选中项 700 加粗 + 淡蓝背景（nav-active）
+- ✅ 修改（`src/.vuepress/styles/index.scss`）：嵌套子分组 `.vp-sidebar-group .vp-sidebar-group > .vp-sidebar-header:not(.active)` 降为 14px + 400 常规（与大类 17px/600 区分）；新增 `.vp-sidebar-link.active, .vp-sidebar-header.active { font-weight: 600 }` 子级选中后加粗；焦点规则移除 `font-weight: 600`（子级点击仅变色反馈，不加粗）；文字色沿用主题 `var(--vp-c-text)`（亮色 #3c3c43 灰黑，暗色自动切换，不写死避免破坏暗色模式）
+- ✅ 浏览器验证（/language/java/）：大类 Java 17px/600；嵌套子分组 Java 并发/基础/集合/JVM 全部 14px/400；JVM 页（嵌套分组内文章）JVM 按钮 active → 600 加粗 + 子级链接 600 加粗 + 绿高亮；焦点点击嵌套分组 → 绿背景但保持 400
+- ✅ 回归验证：/android/activity/ 完整场景（点数据存储→点 Activity）仍仅「概览」一个绿元素；叶子链接仍无 `›` 箭头
+- ✅ `npm run build` 构建 248 页面成功；`npm run sync:static` 已同步 wikiStatic
+
 ### 2026-08-25（侧边栏箭头修正 + 大类加粗 + 焦点双重高亮根因修复）
 - ✅ 用户反馈 3 问题：① 所有子级右侧都有 `›` 箭头（哪怕无法展开）；② 大类可仿官方文档稍微加粗；③ 点击「数据存储」后再点「Activity」，Activity 与子级「概览」同时绿色背景（焦点双重高亮），要求找到根因
 - ✅ 修复 1（箭头仅限有内容）：`::after` 从 `.vp-sidebar-link:has(> .vp-icon)` 移到 `&:has(> ul)`——叶子链接无箭头（浏览器实测数据存储 4 子级 `content: none`）；站内更深内容（如 /language/java/ 的 Java 并发/基础/集合/JVM）为 `li > section` 嵌套分组，自带主题 `.vp-arrow` chevron（display: block），"有内容"的子级仍有展开指示

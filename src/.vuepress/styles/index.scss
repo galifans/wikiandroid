@@ -18,14 +18,31 @@
     word-break: break-word;
   }
 
-  // 层级区分：分组标题（栏目）醒目，子级链接字号稍小
+  // 层级区分：大类（分组标题）17px 加粗，子级（嵌套分组 + 链接）14px 常规不加粗，
+  // 选中（active）后加粗 —— 仿 Google 官方文档导航（大类 600 / 子级 400 / 选中 700）。
+  // 文字默认色为 var(--vp-c-text)（亮色 #3c3c43 偏灰黑，暗色自动切换浅色），
+  // 不写死色值，避免破坏暗色模式与 active/hover 高亮。
   .vp-sidebar-header {
     font-size: 1.0625rem; // 17px
-    font-weight: 600; // 大类加粗，仿官方文档导航层级
+    font-weight: 600; // 大类加粗
+  }
+
+  // 嵌套子分组（如 语言基础 > Java 下的 Java 并发/Java 集合）：
+  // 与子级链接同级 —— 14px 常规不加粗，避免与大类同字号同字重造成层级混乱
+  .vp-sidebar-group .vp-sidebar-group > .vp-sidebar-header:not(.active) {
+    font-size: 0.875rem; // 14px
+    font-weight: 400; // 不加粗
   }
 
   .vp-sidebar-link {
     font-size: 0.875rem; // 14px
+    font-weight: 400; // 不加粗
+  }
+
+  // 子级选中后加粗（当前页面条目高亮强化）
+  .vp-sidebar-link.active,
+  .vp-sidebar-header.active {
+    font-weight: 600;
   }
 
   // 展开分组焦点：点击分组按钮（获得焦点）时绿色高亮，反馈“用户刚点击的板块”。
@@ -36,9 +53,9 @@
   // 若不加排除，点击当前板块按钮时“按钮(:focus 背景) + 概览(active 背景)”双绿。
   // :focus 与点击绑定：一旦用户选择了子级/概览（页面导航，按钮失焦），
   // 高亮自动消失，仅保留当前页面对应链接（active）的高亮。
+  // 不设 font-weight：子级分组点击仅变色反馈，不加粗（加粗留给选中态）。
   .vp-sidebar-header:focus:not(.active) {
     color: var(--vp-c-accent);
-    font-weight: 600;
     background-color: var(--vp-c-accent-soft);
   }
 
