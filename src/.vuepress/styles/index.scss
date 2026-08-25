@@ -27,10 +27,12 @@
     font-size: 0.875rem; // 14px
   }
 
-  // 展开分组焦点：主题在收起分组时移除其子级 <ul>，展开时必然存在，
-  // 故用 :has() 精确命中“用户刚点击展开的板块”，绿色高亮当前所处栏目。
-  // （active 类基于路由，点击切换展开时不会更新，不能作为点击反馈依据。）
-  .vp-sidebar-group:has(> ul) > .vp-sidebar-header {
+  // 展开分组焦点：点击分组按钮（获得焦点）时绿色高亮，反馈“用户刚点击的板块”。
+  // 注意不能用 :has(> ul)（主题收起分组才移除 ul，当前页所在分组必然展开，
+  // 会导致“大类 + 概览/子级”双重高亮）。
+  // :focus 与点击绑定：一旦用户选择了子级/概览（页面导航，按钮失焦），
+  // 高亮自动消失，仅保留当前页面对应链接（active）的高亮。
+  .vp-sidebar-header:focus {
     color: var(--vp-c-accent);
     font-weight: 600;
     background-color: var(--vp-c-accent-soft);
