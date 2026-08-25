@@ -21,6 +21,13 @@
 
 ## 2. 进展时间线
 
+### 2026-08-25（侧边栏/标题换行对齐修复）
+- ✅ 问题定位：侧边栏文件链接的图标为 inline-block（16px 图标 + 4px 间距），换行后第二行回到内容左边缘（图标之前），与第一行文本错位 20px；页面标题前的 icon 装饰渲染为空占位 + 8.8px margin，换行同样错位
+- ✅ 侧边栏修复：`.vp-sidebar-link:has(> .vp-icon)` 悬挂缩进（`padding-left: 28px; text-indent: -20px`），图标 27px / 两行文本 46/47px 对齐（浏览器实测「RecyclerView 优化与 ListView 对比」「SharedPreferences 深度剖析」）
+- ✅ 页面标题修复：`.vp-page-title h1 > .vp-icon { display: none }` 隐藏空 icon 装饰，标题文本从内容左边缘开始（1000px 窄视口实测两行 360/360 对齐，修复前 370/379 错位）
+- ✅ `npm run build` 成功；`npm run sync:static` 已同步 wikiStatic
+- ⚠️ 教训：`getClientRects()` 换行 rect 数量 = 行数，可精确测量每行左偏移；悬挂缩进只对 icon 宽度固定的场景可靠，icon 宽度不定时（如页面标题 icon 渲染失败）直接隐藏更稳
+
 ### 2026-08-25（导航体验优化：文案统一 + 顺序对应 + 概览子级 + 换行修复）
 - ✅ 问题 1 文案统一：navbar 与侧边栏不一致的 3 处统一为页面标题（View 绘制流程→**View 体系**、OkHttp/Retrofit→**网络与协议**、C++→**C++ 知识点**），`src/.vuepress/navbar.ts`
 - ✅ 问题 2 顺序对应：45 个子模块 README 添加 `dir.order`（严格按 navbar.ts 下拉顺序 1..N），8 大板块侧边栏顺序与下拉完全一致（浏览器逐板块验证 match=true）

@@ -17,4 +17,20 @@
     overflow-wrap: anywhere;
     word-break: break-word;
   }
+
+  // 文件链接的图标为 inline-block（16px 图标 + 4px 间距 = 20px），
+  // 换行后的第二行会回到内容左边缘（图标之前），导致与第一行文本未对齐。
+  // 用“悬挂缩进”抵消图标占位：padding-left 增加 20px，text-indent 回拉 20px，
+  // 使第一行（图标 + 文本）与后续行文本起点一致。
+  .vp-sidebar-link:has(> .vp-icon) {
+    padding-left: 28px; // 原 8px + 20px 图标占位
+    text-indent: -20px; // 仅回拉第一行，图标占据该空间
+  }
+}
+
+// 页面标题前的 icon 装饰（frontmatter icon）宽度不定（此处渲染为空占位 + margin），
+// 标题换行时第二行会回到内容左边缘，与第一行文本错位 8.8px。
+// 隐藏该装饰，让标题文本从内容左边缘开始，换行自然对齐。
+.vp-page-title h1 > .vp-icon {
+  display: none;
 }
