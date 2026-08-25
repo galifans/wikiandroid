@@ -154,7 +154,44 @@ val cacheFile = File(context.cacheDir, "temp.txt")
 | `externalFilesDir` | 外部私有目录 | 无（10+） |
 | `getExternalStoragePublicDirectory` | 公共目录 | 需要（已废弃） |
 
-## 6. 选型决策树
+## 6. 分区存储（Scoped Storage）对选型的影响
+
+> Android 10+ 强制分区存储，直接影响文件与媒体存储方式，是面试常考点。
+
+### 6.1 三个时代的文件访问
+
+| 版本 | 策略 | 说明 |
+|------|------|------|
+| ≤ Android 9 | 宽松 | 任意路径可读写（需权限） |
+| Android 10 (API 29) | 分区存储（可退出） | `requestLegacyExternalStorage` 可临时关闭 |
+| Android 11+ (API 30) | 分区存储（强制） | 不再提供退出开关 |
+
+### 6.2 分区存储下的正确姿势
+
+```kotlin
+// ① 应用私有目录：完全不受影响（无需权限）
+File(context.filesDir, "data.json").writeText(json)
+
+// ② 媒体文件（图片/视频/音频）：用 MediaStore，无需权限写入
+val values = ContentValues().apply {
+    put(MediaStore.Images.Media.DISPLAY_NAME, "photo.jpg")
+    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+    put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/MyApp")
+}
+val uri = contentResolver.insert(
+    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values
+)
+
+// ③ 任意公共目录文件：用 SAF（Storage Access Framework）
+// ActivityResultContracts.OpenDocument / CreateDocument
+```
+
+**对选型的影响**：
+- 过去"直接写 `/sdcard/xxx` 路径"的方案全部失效，必须走 MediaStore 或 SAF。
+- `getExternalStoragePublicDirectory` 已废弃，公共目录必须通过 MediaStore/SAF 访问。
+- 应用私有目录（`filesDir`/`externalFilesDir`）策略不变，仍是推荐存储位置。
+
+## 7. 选型决策树
 
 ```text
 数据是否需要跨设备/跨用户？
@@ -166,7 +203,7 @@ val cacheFile = File(context.cacheDir, "temp.txt")
       └─ 需要被其他应用访问 → ContentProvider 封装
 ```
 
-## 7. 高频面试题
+## 8. 高频面试题
 
 **Q1：SharedPreferences 与 DataStore 的区别？**
 A：① DataStore 基于 Flow，天然异步+响应式；SP 的 get 会阻塞主线程。② DataStore
@@ -189,8 +226,21 @@ A：不能。它会删除旧表重建，导致用户数据丢失。生产环境�
 A：数据本身是"文件"性质（图片、视频、日志、缓存 JSON），不需要结构化查询；
 数据库适合需要条件查询、关联、事务的数据。
 
-## 8. 小结
+**Q6：Android 11 上还能直接写公共目录吗？**
+A：不能。分区存储强制生效，公共目录必须通过 MediaStore（媒体文件）或
+SAF（任意文件）写入；应用私有目录不受影响。
+
+**Q7：为什么 MediaStore 插入媒体不需要权限？**
+A：MediaStore 插入走系统 ContentProvider，系统代为管理文件；但**读取**其他应用
+创建的媒体仍需 READ_MEDIA_IMAGES/VIDEO/AUDIO 权限（Android 13+ 细分）。
+
+**Q8：DataStore 与 SharedPreferences 能共存吗？**
+A：可以，但不建议长期共存。官方提供 `SharedPreferencesMigration` 一次性迁移，
+迁移完成后删除 SP 文件，避免双份数据不一致。
+
+## 9. 小结
 
 - 简单配置 → DataStore；结构化数据 → Room；大文件 → 文件系统。
 - SP 是历史遗留，新项目直接 DataStore。
 - 核心考察点：异步性、类型安全、跨进程能力、生命周期集成。
+- 分区存储（Android 10+）改变了文件访问方式：私有目录不受影响，公共目录走 MediaStore/SAF。

@@ -125,6 +125,30 @@ registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
 需要跨应用通信？            → 显式广播（setPackage）或 ContentProvider/Service
 ```
 
+### 5.1 静态注册受限后的替代方案
+
+| 原静态注册场景 | 替代方案 |
+|----------------|----------|
+| 开机自启 | `BOOT_COMPLETED` 仍在豁免列表，但 Android 15 起需 `RECEIVER_BOOT_COMPLETED` 且应用至少被启动一次 |
+| 网络变化监听 | `ConnectivityManager.registerDefaultNetworkCallback()`（不依赖广播） |
+| 电量变化 | 仍可动态注册（`ACTION_BATTERY_CHANGED` 粘性广播） |
+| 应用被卸载/替换 | `ACTION_MY_PACKAGE_REPLACED` 豁免；卸载监听需 `setPackage` 显式化 |
+| 闹钟/定时任务 | `AlarmManager` / WorkManager（无需广播） |
+| 推送消息 | FCM 高优先级消息（系统直接拉起） |
+
+**核心原则**：现代 Android 鼓励"按需动态注册 + 系统调度（WorkManager/JobScheduler）"，静态注册只用于豁免列表内的系统级事件。
+
+### 5.2 动态注册对进程优先级的影响
+
+```text
+Receiver 正在执行 onReceive → 进程处于"前台进程"级别（几乎不会被杀）
+onReceive 返回后 → 进程优先级回落（可能瞬间被杀）
+```
+
+- 系统在分发广播时会把目标进程临时提到**前台优先级**，保证广播能投递。
+- 广播结束后进程降级：**静态注册 Receiver 被拉起后进程很快被杀**是正常现象（App 未在前台）。
+- 因此：静态注册的 `onReceive` 里必须快速完成任务或把工作**转交给 WorkManager/前台服务**，否则任务可能随进程死亡而中断。
+
 ### 5.1 一个实用模板：网络变化监听
 
 ```kotlin

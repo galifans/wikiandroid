@@ -223,6 +223,44 @@ class InitProvider : ContentProvider() {
 }
 ```
 
+### 5.4 批量操作（ContentProviderOperation）
+
+```kotlin
+// 一次性批量增删改（事务性，性能远高于逐条调用）
+val operations = ArrayList<ContentProviderOperation>()
+operations += ContentProviderOperation.newInsert(USER_URI)
+    .withValue("name", "Alice")
+    .build()
+operations += ContentProviderOperation.newUpdate(USER_URI)
+    .withSelection("_id=?", arrayOf("1"))
+    .withValue("name", "Bob")
+    .build()
+operations += ContentProviderOperation.newDelete(USER_URI)
+    .withSelection("_id=?", arrayOf("2"))
+    .build()
+
+contentResolver.applyBatch(AUTHORITY, operations)
+```
+
+> 注意：`applyBatch` 是否真正"事务"取决于 Provider 实现（需在 `ContentProvider` 子类中重写 `applyBatch` 开启 `SQLiteDatabase.beginTransaction`）。
+
+## 5.5 Provider 启动时机与 Application 的关系（源码角度）
+
+```mermaid
+sequenceDiagram
+    participant S as system_server
+    participant App as App 进程
+    S->>App: 启动进程
+    App->>App: ActivityThread.handleBindApplication
+    App->>App: installContentProviders()（先于 Application.onCreate）
+    App->>App: ContentProvider.onCreate() ← 各 Provider 初始化
+    App->>App: Application.onCreate() ← 后才执行
+```
+
+- `ActivityThread.handleBindApplication` 中：先 `installContentProviders`（创建 Provider 实例并回调 `onCreate`），再回调 `Application.onCreate`。
+- 因此 **Provider 的 `onCreate` 一定先于 `Application.onCreate`**——这是 SDK 自动初始化（WorkManager、LeakCanary、Firebase）的底层保证。
+- 副作用：Provider 过多且 `onCreate` 重会**拖慢冷启动**（每个 Provider 实例化都要耗时）。这是 `androidx.startup`（App Startup）库优化的问题——它把所有初始化器合并到一个 Provider。
+
 ## 6. ContentProvider vs 其他方案
 
 | 方案 | 跨进程 | 类型安全 | 数据变化通知 | 适用场景 |

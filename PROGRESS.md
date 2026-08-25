@@ -21,6 +21,19 @@
 
 ## 2. 进展时间线
 
+### 2026-08-26（Android 核心板块 16 篇文章内容全面扩充完善）
+- ✅ 用户反馈：网站刚建立，Android 核心板块很多文章内容敷衍，要求不投喂 md、由模型自行输出完整详细的学习资料，做到"非常完善"
+- ✅ 全板块质量审计：16 篇文章按质量分级——6 篇偏薄（<110 行）需重写，10 篇达标需增强
+- ✅ 批次 1（Activity 3 篇）：`activity-lifecycle.md` 重写（75→450 行：生命周期全景 mermaid、11 种典型场景回调顺序表、配置变更与状态保存 4 方案、四种启动模式、Intent Flags、Lifecycle 组件、Q1-Q8）；`task-stack.md` 增强（Task vs 进程/线程表、跨应用 Task、allowTaskReparenting、多窗口模式适配）；`activity-launch-process.md` 增强（冷启动耗时拆解、Android 12+ 启动变化、Activity Result API）
+- ✅ 批次 2（Service 3 篇）：`service-basics.md` 重写（102→450 行：最大误区、两种使用方式、onStartCommand 返回值、绑定通信、8.0+ 后台限制、Service 与协程配合、Q1-Q6）；`foreground-service.md` 增强（FGS 类型总表、Android 15 超时机制、BOOT_COMPLETED 正确姿势）；`aidl.md` 增强（@Parcelize 现代写法、Binder 线程池安全）
+- ✅ 批次 3（Broadcast + ContentProvider 3 篇）：`broadcast-basics.md` 增强（AMS 底层分发 sequenceDiagram、广播安全实践、onReceive 超时精确数值与 goAsync）；`register-comparison.md` 增强（静态注册替代方案表、动态注册进程优先级影响）；`content-provider-basics.md` 增强（applyBatch 批量操作、Provider onCreate 先于 Application 的源码时序图、App Startup 优化）
+- ✅ 批次 4（Fragment 2 篇）：`fragment-basics.md` 重写（87→370 行：实例/View 生命周期分离核心概念、三个 FragmentManager 对比、commit 三种方式、四种通信方式、状态保存、ViewPager2、单 Activity 架构、Q1-Q7）；`fragment-pitfalls.md` 增强（新增 setMaxLifecycle/ViewPager2 离屏页、viewLifecycleOwner 时序两个坑点 + Q5/Q6）
+- ✅ 批次 5（Storage/Process/Context 5 篇）：`sharedpreferences-deep.md` 重写（63→330 行：单例缓存、apply 的 QueuedWork ANR 根因、MODE_MULTI_PROCESS 真相、DataStore 替代）；`storage-comparison.md` 增强（新增分区存储 Scoped Storage 章节 + Q6-Q8）；`sp-vs-datastore.md` 已达标准；`process-lifecycle.md` 重写（102→400 行：五级优先级 mermaid、ADJ 全表、多进程问题表、保活方案演进与 8.0+ 现实、Q1-Q8）；`context-overview.md` 重写（75→350 行：继承体系 mermaid、ContextWrapper 代理、类型对比、泄漏案例、getSystemService 原理、Q1-Q8）
+- ✅ 批次 6：`android/README.md` 篇数修正（17→16）+ 全部文章描述更新；8 个子模块 README 核心要点同步更新
+- ✅ 文章风格统一：mermaid 图（stateDiagram/sequenceDiagram/flowchart）、对比表格、Kotlin 代码、高频面试题带详解、小结、跨板块交叉链接（/android/fragment/、/jetpack/、/system/ 等）
+- ✅ `npm run build` 构建 248 页面成功；浏览器实测 context/fragment/process 新页面渲染正常（目录、mermaid、阅读时间均正确）；`npm run sync:static` 已同步 wikiStatic
+- ⚠️ 注意：构建日志中的 `Missing aidl/gradle/proguard highlighter` 为 shiki 高亮语言缺失警告，不影响构建与渲染
+
 ### 2026-08-26（Jetpack Compose 移入 Jetpack 板块 + 旧链接重定向 + Google 文档风格字体 + 正文排版优化）
 - ✅ 用户反馈：① Compose 应归入 Jetpack 板块（"需要更新一下位置"）；② 界面排版内容有些拥挤（正文行距太密）；③ 想用 Google 文档同款字体
 - ✅ 结构迁移：`git mv src/ui/compose/* → src/jetpack/compose/`（README + compose-basics/state/performance 共 4 文件，内容不变）；compose README frontmatter `dir.order: 8 → 1`（Jetpack 侧边栏首位）

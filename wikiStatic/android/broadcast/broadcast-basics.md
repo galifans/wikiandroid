@@ -132,6 +132,50 @@ sendStickyBroadcast(intent)
 
 - `ACTION_BATTERY_CHANGED` 等系统粘性广播仍在使用（可通过 `registerReceiver(null, filter)` 获取当前值）。
 
+## 3.4 广播发送的安全实践
+
+```kotlin
+// ① 跨应用发送指定包名（显式）：绕开 8.0 静态注册限制 + 更安全
+val intent = Intent("com.example.ACTION_SYNC").apply {
+    setPackage("com.example.target")
+}
+sendBroadcast(intent)
+
+// ② 发送时声明权限：只有声明了该权限的应用才能收到
+sendBroadcast(intent, "com.example.permission.READ_SYNC")
+
+// ③ 接收方校验发送者 UID（防伪造）
+override fun onReceive(context: Context, intent: Intent) {
+    val uid = getSendingUid()
+    if (uid != expectedUid) return   // 校验发送方身份
+}
+```
+
+## 3.5 广播的底层分发流程（AMS 侧）
+
+```mermaid
+sequenceDiagram
+    participant App as 发送方
+    participant AMS as system_server(AMS)
+    participant R1 as Receiver 1
+    participant R2 as Receiver 2
+    App->>AMS: sendBroadcast(intent) (Binder)
+    AMS->>AMS: 解析 Intent：<br/>显式(组件名) / 隐式(action 匹配)
+    AMS->>AMS: 收集匹配 Receiver：<br/>静态注册表(PMS) + 动态注册表
+    alt 普通广播
+        AMS->>R1: scheduleReceiver (Binder 线程池并发分发)
+        AMS->>R2: scheduleReceiver
+    else 有序广播
+        AMS->>R1: 按 priority 逐个分发
+        R1-->>AMS: 处理结果 / abortBroadcast
+        AMS->>R2: 继续（除非被中止）
+    end
+```
+
+- **动态注册**的 Receiver 由 AMS 在应用进程的注册表中维护；**静态注册**的在 PMS 安装时登记。
+- 广播最终通过 `ApplicationThread.scheduleReceiver` 回调到 App 进程，`onReceive` 执行在**主线程**。
+- 系统进程崩溃（system_server 重启）后，动态注册的 Receiver **全部失效**，需重新注册。
+
 ## 4. Android 版本限制汇总
 
 | 版本 | 限制 |
@@ -186,12 +230,21 @@ override fun onReceive(context: Context, intent: Intent) {
 }
 ```
 
+**超时机制详解**：AMS 对每个广播设置超时（BroadcastQueue 中的 `BROADCAST_TIMEOUT`）：
+
+| 场景 | 超时时间 | 超时后果 |
+|------|----------|----------|
+| 前台广播（`setPackage`/高优先级） | ~10 秒 | 超时后 AMS 强制结束该 Receiver 进程（ANR 弹窗） |
+| 后台广播（`FLAG_RECEIVER_FOREGROUND` 未设置） | 60 秒（分派慢时可能更低） | 同上 |
+
+> 广播的超时是**从发送到 Receiver 处理完毕**的整体时限。静态注册的 Receiver 若进程未启动，系统会先启动进程再投递，这段时间也计入超时——所以静态注册的 `onReceive` 里**绝不能做耗时操作**。
+
 `goAsync()` 模式：
 
 ```kotlin
 class MyReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val pendingResult = goAsync()   // 声明异步处理
+        val pendingResult = goAsync()   // 声明异步处理（最多 10 秒宽限）
         GlobalScope.launch(Dispatchers.IO) {
             try {
                 // 耗时操作（如写数据库）
@@ -202,6 +255,12 @@ class MyReceiver : BroadcastReceiver() {
     }
 }
 ```
+
+::: danger 注意
+- `goAsync()` 只是把超时"记到你的账上"，不是无限期；不调用 `finish()` 依然会超时被杀。
+- 更推荐的做法：`onReceive` 里只做"转发"——启动 WorkManager / 前台服务，立即返回。
+- 静态注册的 Receiver 被拉起时进程处于**前台优先级**（`PROCESS_STATE_...`），`onReceive` 返回后进程降级，随时可能被回收。
+:::
 
 ## 7. 高频面试题
 

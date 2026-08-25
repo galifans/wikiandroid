@@ -172,7 +172,9 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 | broadcast/ | broadcast-basics.md、register-comparison.md |
 | content-provider/ | content-provider-basics.md |
 | fragment/ | fragment-basics.md、fragment-pitfalls.md |
-| storage/ | storage-comparison.md、sp-vs-datastore.md |
+| storage/ | storage-comparison.md、sharedpreferences-deep.md、sp-vs-datastore.md |
+| process/ | process-lifecycle.md |
+| context/ | context-overview.md |
 
 ### 🎨 UI 与渲染 `/ui/`
 | 子模块 | ✅ 已完成 |

@@ -17,8 +17,27 @@ description: 前台服务的使用场景、通知渠道、Android 8.0+ 限制与
 - **Android 9（API 28）**：前台服务必须申请 `FOREGROUND_SERVICE` 权限。
 - **Android 12（API 31）**：前台服务启动增加限制（不能从后台启动大多数类型）。
 - **Android 14（API 34）**：新增前台服务类型必须声明（如 `dataSync`、`mediaPlayback`）。
+- **Android 15（API 35）**：新增 **FGS 超时机制**——`dataSync` 等类型最长运行 6 小时，超时抛 `ForegroundServiceTimeoutException`（ANR）；且启动前台服务时**不能**同时启动定位/摄像头等新类型，必须先 `startForeground` 完成后再启动新的前台服务类型。
 
 **前台服务 = 带常驻通知的服务**，通知让用户"看得到"，系统因此放宽了对它的限制。
+
+## 1.1 前台服务类型总表（Android 14+）
+
+| 类型 | 用途 | 对应权限 |
+|------|------|----------|
+| `dataSync` | 数据同步/上传下载 | `FOREGROUND_SERVICE_DATA_SYNC` |
+| `mediaPlayback` | 媒体播放（音视频） | `FOREGROUND_SERVICE_MEDIA_PLAYBACK` |
+| `mediaProjection` | 屏幕录制/截图 | `FOREGROUND_SERVICE_MEDIA_PROJECTION`（+ 系统弹窗授权） |
+| `location` | 后台定位 | `FOREGROUND_SERVICE_LOCATION` + `ACCESS_COARSE/FINE_LOCATION` |
+| `connectedDevice` | 蓝牙/NFC/USB 等外设 | `FOREGROUND_SERVICE_CONNECTED_DEVICE` |
+| `camera` | 后台相机 | `FOREGROUND_SERVICE_CAMERA` |
+| `microphone` | 后台录音 | `FOREGROUND_SERVICE_MICROPHONE` |
+| `phoneCall` | 通话相关 | `FOREGROUND_SERVICE_PHONE_CALL` |
+| `shortService` | 短时任务（3 分钟上限） | `FOREGROUND_SERVICE_SHORT_SERVICE` |
+
+::: warning Android 15 的 FGS 超时
+`dataSync` / `mediaProcessing` 等类型从启动起 **6 小时**后强制终止并抛 `ForegroundServiceTimeoutException`；`shortService` 只有 **3 分钟**。需要超长时间运行的任务应设计为分段执行（配合 WorkManager 重新调度）或引导用户使用媒体会话等正规类型。
+:::
 
 ## 2. 通知渠道（Notification Channel）
 
@@ -142,6 +161,38 @@ Android 12 起，**从后台启动前台服务**被严格限制（`BackgroundAct
 - 高优先级 FCM 消息（`high_priority`）
 - 系统广播（`BOOT_COMPLETED`、`LOCKED_BOOT_COMPLETED`、`MY_PACKAGE_REPLACED` 等豁免列表）
 - 闹钟、Geofence 等场景
+
+### 5.2 开机自启的正确姿势（BOOT_COMPLETED）
+
+```kotlin
+// 开机广播接收后，不能直接 startForegroundService？
+// 可以，但必须立即 startForeground 且依赖系统广播豁免；
+// 更稳妥：用 WorkManager 处理"开机后的初始化任务"
+class BootReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
+            val workRequest = OneTimeWorkRequestBuilder<InitWorker>().build()
+            WorkManager.getInstance(context).enqueue(workRequest)
+        }
+    }
+}
+```
+
+::: tip 注意
+- `BOOT_COMPLETED` 广播在 Android 15 起默认**不再自动送达**（`RECEIVER_BOOT_COMPLETED` 权限改为"限制"级别），声明权限的同时需在应用被用户启动过至少一次后才有效。
+- 开机后直接启动前台服务受限；使用 WorkManager + 前台服务组合是标准做法。
+:::
+
+### 5.3 前台服务通知必须可关闭的场景
+
+用户可以从通知设置中关闭通知渠道，前台服务通知被关闭会导致服务异常。开发时注意：
+
+```kotlin
+// 前台服务通知渠道建议使用低重要性 + 不可关闭的提示逻辑
+val channel = NotificationChannel(CHANNEL_ID, "前台服务", NotificationManager.IMPORTANCE_LOW)
+channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+// 无法强制用户开启，只能引导
+```
 
 ### 5.2 最佳实践
 

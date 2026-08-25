@@ -206,6 +206,46 @@ val intent = Intent("com.example.ipc.BOOK_SERVICE").apply {
 bindService(intent, connection, Context.BIND_AUTO_CREATE)
 ```
 
+### 3.6 Kotlin 现代写法：@Parcelize 替代手写 Parcelable
+
+```kotlin
+// build.gradle.kts
+// android { buildFeatures { aidl = true } }
+// plugins { id("kotlin-parcelize") }
+
+@Parcelize
+data class Book(
+    val id: Int,
+    val name: String
+) : Parcelable   // 自动生成 writeToParcel / CREATOR，无需手写
+
+// AIDL 文件不变：parcelable Book;
+```
+
+> 注意：`@Parcelize` 生成的 `CREATOR` 与 AIDL 生成代码兼容（AIDL 通过 `Book.CREATOR` 反序列化）。
+> Kotlin 的 AIDL 文件默认放在 `src/main/aidl`，Parcelable 类在 `src/main/java`（或 `kotlin`），
+> 二者包名必须一致。
+
+### 3.7 线程安全：服务端方法并发访问
+
+服务端 Stub 方法执行在 **Binder 线程池**，多个客户端可并发调用，必须保证线程安全：
+
+```kotlin
+private val binder = object : IBookManager.Stub() {
+    // MutableList 非线程安全 → 加锁或使用并发容器
+    private val bookList = CopyOnWriteArrayList<Book>()
+
+    override fun addBook(book: Book) {
+        bookList.add(book)
+        val n = listenerList.beginBroadcast()
+        for (i in 0 until n) {
+            listenerList.getBroadcastItem(i).onBookArrived(book)
+        }
+        listenerList.finishBroadcast()
+    }
+}
+```
+
 ## 4. 深入：Binder 如何支撑 AIDL
 
 ### 4.1 一次调用发生了什么

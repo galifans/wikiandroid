@@ -232,7 +232,48 @@ sequenceDiagram
     NewApp-->>ATMS: ActivityResumed (通知完成)
 ```
 
-## 6. 高频面试题
+## 6. 冷启动耗时拆解与优化
+
+冷启动（Cold Start）指进程不存在时从桌面图标启动，总耗时 = 进程创建 + 应用初始化 + 首帧渲染：
+
+| 阶段 | 耗时来源 | 优化手段 |
+|------|----------|----------|
+| Zygote fork 新进程 | 内核 fork + 内存页分配 | 无法直接优化；减少 Application 初始化负担 |
+| Application.onCreate | 业务初始化（SDK、数据库、上报） | **懒加载**：非必要初始化推迟到用时再执行（如启动器框架）；SDK 按需初始化 |
+| Activity.onCreate/onStart | 布局 inflate、数据加载 | 布局扁平化（ConstraintLayout）、`AsynchronousLayoutInflater`、ViewStub 懒加载、列表分页 |
+| 首帧渲染 | measure/layout/draw 全流程 | 减少过度绘制、避免主线程 IO、启动主题（SplashScreen）掩盖白屏 |
+
+```kotlin
+// 启动优化示例：Application 中拆分初始化
+class MyApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        initImmediately()      // 必须的：崩溃上报、日志
+        // 延迟到需要时才初始化
+        InitHolder.ensureInitialized(this)
+    }
+}
+
+object InitHolder {
+    private var initialized = false
+    fun ensureInitialized(context: Context) {
+        if (initialized) return
+        synchronized(this) {
+            if (initialized) return
+            // 数据库、图片库、网络库等
+            initialized = true
+        }
+    }
+}
+```
+
+## 7. Android 12+ 的启动流程变化
+
+- **延迟 onPause**：Android 12 起，启动新 Activity 时旧 Activity 的 `onPause` 被**延迟到新 Activity 可见之后**调用，改善启动响应速度（启动跳转更跟手）。这导致依赖 `onPause` 顺序的代码需注意时序变化。
+- **SplashScreen API**：Android 12 引入系统级启动画面（App 图标 + 品牌色），`Theme.SplashScreen` 替代自定义启动页，应用无法再自定义冷启动窗口背景。
+- **后台启动限制**：`startActivity` 从后台被调用会受到 `BackgroundActivityStartManager` 限制（需用户可见操作或豁免场景）。
+
+## 8. 高频面试题
 
 **Q1：startActivity 的完整链路？**
 A：`startActivity → Instrumentation.execStartActivity → ATMS.startActivity（Binder）→
@@ -258,7 +299,29 @@ AMS 负责进程/服务/内存等，ATMS 负责 Activity/Task/Stack 管理。`Ac
 A：① 进程创建（Zygote fork + Application init）；② `Application.onCreate`（业务初始化）；
 ③ `Activity.onCreate/onStart/onResume`（布局 inflate + 首帧绘制）。性能优化通常从这四段入手。
 
-## 7. 小结
+**Q6：startActivityForResult 与 Activity Result API 有什么区别？**
+A：`startActivityForResult`（旧）有两大痛点：Activity 重建后回调丢失、无类型安全；
+**Activity Result API**（AndroidX）通过 `registerForActivityResult` 注册回调，结果由
+`ActivityResultRegistry` 管理，配置变更后自动恢复回调，且 `ActivityResultContract` 提供类型安全契约。
+
+```kotlin
+// 现代写法：Activity Result API
+private val pickImage = registerForActivityResult(
+    ActivityResultContracts.GetContent()
+) { uri: Uri? -> uri?.let { binding.image.setImageURI(it) } }
+
+private fun onClick() {
+    pickImage.launch("image/*")   // 类型安全，无回调丢失
+}
+```
+
+**Q7：onResume 回调时界面可见吗？为什么 onCreate 中测量宽高为 0？**
+A：`onResume` 回调发生在 `WindowManager.addView(DecorView)` **之前**——此时视图已创建但尚未
+完成首次 measure/layout/draw，所以 `onResume` 中 `view.width` 为 0。首帧真正绘制是在
+`onResume` 之后由 `ViewRootImpl.performTraversals` 触发，配合 `Choreographer` 同步到垂直同步信号。
+获取宽高的正确时机：`view.post {}`、`ViewTreeObserver.OnGlobalLayoutListener`、`onWindowFocusChanged`。
+
+## 9. 小结
 
 - 启动链路 = **App 进程 → ATMS（跨进程）→ 进程启动 → 回调 App 进程** 的两次跨进程闭环。
 - 决策在 system_server（ATMS/Supervisor），执行在 App 进程（ActivityThread/Instrumentation）。

@@ -244,7 +244,63 @@ class ProfileFragment : Fragment() {
 
 > 复杂状态推荐：`ViewModel`（自动跨配置变更保留）或 `SavedStateHandle`。
 
-## 11. 高频面试题
+## 11. 坑点十一：setMaxLifecycle 与 ViewPager2 页面的状态泄漏
+
+### 问题
+
+ViewPager2 默认预加载相邻页，页面不可见时 Fragment 仍处于 `STARTED` 甚至 `RESUMED` 状态——`onResume` 中启动的协程/轮询在离屏页上仍在运行，造成资源浪费甚至崩溃。
+
+### 解决
+
+```kotlin
+// 方案一：自定义 Behavior 精确控制页面最大生命周期
+class MaxLifecycleBehavior(private val maxLifecycle: Lifecycle.State) :
+    FragmentPagerBehavior() {
+    override fun shouldTriggerViewPagerOffscreenPageLimit() = true
+}
+
+// 方案二（常用）：用 viewLifecycleOwner 绑定的协程 + repeatOnLifecycle
+// 离屏页虽然 onResume 已执行，但数据加载用 Flow 收集 + 页面销毁自动取消
+viewLifecycleOwner.lifecycleScope.launch {
+    repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        viewModel.pagerData.collect { render(it) }
+    }
+}
+```
+
+> 关键认知：ViewPager2 的离屏页 `onResume` 仍会回调（`isResumed` 为 true），
+> 但用户不可见。**"用户可见"判断必须结合 `primaryItem` 或 `onPageSelected`**。
+
+## 12. 坑点十二：viewLifecycleOwner 在 onViewCreated 时的时序陷阱
+
+### 问题
+
+```kotlin
+// ❌ 错误：在 onCreateView 之前使用 viewLifecycleOwner
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    // viewLifecycleOwner 此时还不可用！可能拿到旧的
+    viewLifecycleOwner.lifecycleScope.launch { ... }
+}
+```
+
+### 原因
+
+`viewLifecycleOwner` 在 `onCreateView` 到 `onDestroyView` 之间才有效。在 `onCreate` 中访问可能取到**上一个 View 的 lifecycle**（Fragment 重建 View 时），导致协程没有及时取消。
+
+### 解决
+
+```kotlin
+// ✅ 正确：在 onViewCreated 之后访问
+override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
+    viewLifecycleOwner.lifecycleScope.launch { ... }
+}
+
+// 需要 Activity 级数据：用 Fragment 自己的 lifecycleScope（不依赖 View）
+```
+
+## 13. 高频面试题
 
 **Q1：Fragment 状态丢失的根因？**
 A：`onSaveInstanceState` 之后 UI 状态不再被系统保存，此时 commit 事务系统无法保证
@@ -262,7 +318,16 @@ A：结合 `onResume`（当前页可见）+ ViewPager2 的 `primaryItem`；旧�
 A：Fragment 的 View 可能先于 Fragment 销毁（如 remove 后重建），`viewLifecycleOwner`
 在 View 销毁时触发 `onDestroyView`，挂在其上的协程/观察者自动取消，避免对已销毁 View 操作。
 
-## 12. 小结
+**Q5：ViewPager2 离屏页 onResume 会回调吗？会不会导致数据重复加载？**
+A：会。ViewPager2 预加载相邻页，离屏页 `onResume` 也会执行（`isResumed` 为 true），
+只是用户看不到。重复加载用"首次加载标志 + primaryItem 判断"或
+`repeatOnLifecycle(RESUMED)` + Flow 收集（离屏时收集器暂停）解决。
+
+**Q6：为什么 onCreate 里不能安全使用 viewLifecycleOwner？**
+A：`viewLifecycleOwner` 只在 View 创建后有效；`onCreate` 时若 Fragment 重建 View，
+取到的是旧 View 的 lifecycle，可能导致协程不取消或操作已销毁视图。
+
+## 14. 小结
 
 - 高频坑点集中在：commit 时机、状态保存、生命周期错配、FragmentManager 选择。
 - 核心心法：**数据放 ViewModel/arguments，视图操作绑 viewLifecycleOwner，
