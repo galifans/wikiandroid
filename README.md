@@ -39,6 +39,11 @@
 | BroadcastReceiver | 全局消息接收 | [BroadcastReceiver](wikiStatic/android/broadcast/README.md) |
 | ContentProvider | 跨进程数据共享 | [ContentProvider](wikiStatic/android/content-provider/README.md) |
 | Fragment | 界面模块化 | [Fragment](wikiStatic/android/fragment/README.md) |
+| Intent | 组件通信桥梁 | [Intent](wikiStatic/android/intent/README.md) |
+| Application | 启动流程与全局初始化 | [Application](wikiStatic/android/app/README.md) |
+| 资源系统 | 多语言 / 多屏幕适配 | [资源](wikiStatic/android/resource/README.md) |
+| 权限系统 | 运行时权限机制 | [权限](wikiStatic/android/permission/README.md) |
+| 通知机制 | 通知渠道 / PendingIntent | [通知](wikiStatic/android/notification/README.md) |
 | 数据存储 | SharedPreferences / Room / DataStore | [存储](wikiStatic/android/storage/README.md) |
 | 进程 | 进程生命周期与保活 | [进程](wikiStatic/android/process/README.md) |
 | Context | 系统服务访问封装 | [Context](wikiStatic/android/context/README.md) |

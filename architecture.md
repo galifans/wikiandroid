@@ -55,7 +55,7 @@ galifans_vibe_coding/
     │   └── public/              # 静态资源（logo.svg / favicon.svg / 图标 PNG）
     ├── roadmap/                 # 🗺️ 学习路线
     ├── language/                # ☕ 语言基础（kotlin / java / algorithm）
-    ├── android/                 # 🧱 Android 核心（四大组件 + Fragment + 存储）
+    ├── android/                 # 🧱 Android 核心（四大组件 + Fragment + Intent + 应用启动 + 资源/权限/通知 + 存储）
     ├── ui/                      # 🎨 UI 与渲染（view / event / custom-view / animation / layout / compose）
     ├── jetpack/                 # 🧩 Jetpack（lifecycle-viewmodel / room-datastore / paging-navigation / workmanager-hilt）
     ├── network/                 # 🌐 网络与异步（http / handler / coroutine / thread）
@@ -82,7 +82,7 @@ galifans_vibe_coding/
 | 1 | 🏠 首页 | `/` | — | 首页 |
 | 2 | 🗺️ 学习路线 | `/roadmap/` | — | 3 条学习路线 |
 | 3 | ☕ 语言基础 | — | Kotlin / Java / C++ 知识点 / 设计模式 / 数据结构与算法 | 下拉菜单 |
-| 4 | 🧱 Android 核心 | — | Activity / Service / BroadcastReceiver / ContentProvider / Fragment / Context / 进程 / 数据存储 | 下拉菜单 |
+| 4 | 🧱 Android 核心 | — | Activity / Service / BroadcastReceiver / ContentProvider / Fragment / Intent / Application / 资源系统 / 权限系统 / 通知机制 / Context / 进程 / 数据存储 | 下拉菜单 |
 | 5 | 🎨 UI 与渲染 | — | View 体系 / 事件分发机制 / 自定义 View / Bitmap / Window / 动画机制 / 布局优化 / Jetpack Compose | 下拉菜单 |
 | 6 | 🧩 Jetpack | — | Lifecycle/ViewModel / Room/DataStore / Paging/Navigation / WorkManager/Hilt | 下拉菜单 |
 | 7 | 🌐 网络与异步 | — | 网络与协议 / Handler 消息机制 / 协程 Flow/RxJava / 线程池与并发 | 下拉菜单 |
@@ -172,6 +172,11 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 | broadcast/ | broadcast-basics.md、register-comparison.md |
 | content-provider/ | content-provider-basics.md |
 | fragment/ | fragment-basics.md、fragment-pitfalls.md |
+| intent/ | intent-basics.md、intent-filter.md |
+| app/ | application-basics.md、app-launch-process.md、manifest-guide.md |
+| resource/ | resource-basics.md、resource-qualifiers.md |
+| permission/ | permission-basics.md、permission-practice.md |
+| notification/ | notification-basics.md、pendingintent.md |
 | storage/ | storage-comparison.md、sharedpreferences-deep.md、sp-vs-datastore.md |
 | process/ | process-lifecycle.md |
 | context/ | context-overview.md |

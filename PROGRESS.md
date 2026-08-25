@@ -15,11 +15,25 @@
 | 域名 | https://wikiandroid.com（备用：https://wikiandroid.pages.dev） |
 | 仓库 | https://github.com/galifans/wikiandroid（分支 main） |
 | 部署方式 | Cloudflare Pages：`git push main` 自动触发构建部署（约 2-4 分钟） |
-| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 248 页面） |
+| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 264 页面） |
 | 本地预览 | `npm run dev` → http://localhost:8080 |
 | 当前状态 | ✅ 内容建设完成（183 篇文章），持续维护中 |
 
 ## 2. 进展时间线
+
+### 2026-08-26（Android 核心知识体系系统扩充：+5 大板块 +11 篇文章）
+- ✅ 用户需求：Android 核心只有 8 个板块远不够，要求系统整理并补充缺失知识面，新增大类与子级
+- ✅ 缺口分析：对照完整 Android 核心知识体系，识别出 5 个必学但缺失的板块——Intent 组件通信（组件桥梁）、Application 与启动流程（冷启动/清单文件）、资源系统（多语言/多屏幕适配）、权限系统（运行时权限）、通知机制（渠道/PendingIntent）
+- ✅ 新增子模块（11 篇文章 + 5 个 README）：
+  - `intent/`（order 6）：intent-basics.md（显式/隐式、Flags、Extras、安全）、intent-filter.md（action/category/data 匹配规则、Deep Link）
+  - `app/`（order 7）：application-basics.md（Application 生命周期与初始化）、app-launch-process.md（冷启动全链路与优化）、manifest-guide.md（Manifest 详解）
+  - `resource/`（order 8）：resource-basics.md（R 文件/AAPT/加载机制）、resource-qualifiers.md（限定符/多语言适配）
+  - `permission/`（order 9）：permission-basics.md（权限分级/运行时权限/版本演进）、permission-practice.md（申请最佳实践/特殊权限）
+  - `notification/`（order 10）：notification-basics.md（渠道/构建/样式/通知权限）、pendingintent.md（PendingIntent 详解）
+- ✅ 顺序重排：原有 order 6-8（context/process/storage）顺延为 11-13，新模块插入 Fragment 之后，形成 13 个子模块的完整知识顺序（四大组件 → Fragment → Intent → Application → 资源 → 权限 → 通知 → Context → 进程 → 存储）
+- ✅ 同步更新：`src/android/README.md`（16 → 27 篇，新增全部文章导航与知识图谱）、`navbar.ts` Android 核心下拉 8 → 13 项扁平链接、根 `README.md` 表格 +5 行（wikiStatic 链接）、`src/README.md` 精选 +11 篇、`architecture.md` 子模块表 + navbar 表
+- ✅ `npm run build` 264 页面成功（248 → 264，无 broken link）；`npm run sync:static` 261 文件同步；浏览器实测：侧边栏 13 板块顺序正确、下拉 13 项扁平可点击、新页面渲染正常
+- ⚠️ 修正：新建子模块时若 `dir.order` 与现有模块冲突会导致侧边栏排序混乱，须先全局盘点所有子模块 order 再分配
 
 ### 2026-08-26（侧边栏根级链接与子模块分组视觉对齐：17px 加粗统一）
 - ✅ 用户反馈：`network` 板块侧边栏中「Socket 编程基础 / TCP 与 UDP 详解 / 计算机网络体系」是子级条目，但没加粗、字号小一号，未对齐「网络与协议 / Handler / 协程 / 线程」等子模块分组

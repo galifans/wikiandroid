@@ -53,6 +53,11 @@ wikiStatic/
 │   │   ├── activity-launch-process.md
 │   │   ├── activity-lifecycle.md
 │   │   └── task-stack.md
+│   ├── app/
+│   │   ├── README.md
+│   │   ├── app-launch-process.md
+│   │   ├── application-basics.md
+│   │   └── manifest-guide.md
 │   ├── broadcast/
 │   │   ├── README.md
 │   │   ├── broadcast-basics.md
@@ -67,9 +72,25 @@ wikiStatic/
 │   │   ├── README.md
 │   │   ├── fragment-basics.md
 │   │   └── fragment-pitfalls.md
+│   ├── intent/
+│   │   ├── README.md
+│   │   ├── intent-basics.md
+│   │   └── intent-filter.md
+│   ├── notification/
+│   │   ├── README.md
+│   │   ├── notification-basics.md
+│   │   └── pendingintent.md
+│   ├── permission/
+│   │   ├── README.md
+│   │   ├── permission-basics.md
+│   │   └── permission-practice.md
 │   ├── process/
 │   │   ├── README.md
 │   │   └── process-lifecycle.md
+│   ├── resource/
+│   │   ├── README.md
+│   │   ├── resource-basics.md
+│   │   └── resource-qualifiers.md
 │   ├── service/
 │   │   ├── README.md
 │   │   ├── aidl.md

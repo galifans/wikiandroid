@@ -6,7 +6,7 @@ index: false
 
 # 🧱 Android 核心
 
-Android 应用开发的核心基石：四大组件、Fragment、数据存储、进程与 Context。本板块共 **16 篇原创文章**，从应用层基础到源码级原理全覆盖，每篇均包含源码分析、对比表格与高频面试题精讲。
+Android 应用开发的核心基石：四大组件、Fragment、数据存储、进程与 Context，以及 Intent 组件通信、应用启动流程、资源系统、权限系统与通知机制。本板块共 **27 篇原创文章**，从应用层基础到源码级原理全覆盖，每篇均包含源码分析、对比表格与高频面试题精讲。
 
 ## 四大组件
 
@@ -20,7 +20,12 @@ Android 应用开发的核心基石：四大组件、Fragment、数据存储、�
 ## 其他核心
 
 - [Fragment](/android/fragment/)：界面模块化
+- [Intent 与组件通信](/android/intent/)：显式/隐式 Intent、IntentFilter 匹配规则
+- [Application 与启动流程](/android/app/)：Application 初始化、冷启动链路、Manifest 清单
 - [数据存储](/android/storage/)：SharedPreferences / Room / DataStore
+- [资源系统](/android/resource/)：R 文件、限定符、多语言与多屏幕适配
+- [权限系统](/android/permission/)：运行时权限、权限组、申请最佳实践
+- [通知机制](/android/notification/)：通知渠道、PendingIntent、前台服务通知
 - [进程](/android/process/)：进程生命周期与保活
 - [Context](/android/context/)：系统服务访问封装
 
@@ -52,6 +57,32 @@ Android 应用开发的核心基石：四大组件、Fragment、数据存储、�
 - [SharedPreferences 深度剖析](/android/storage/sharedpreferences-deep.md)：源码级原理、`apply`/`commit` 区别、ANR 根因与 DataStore 替代
 - [SharedPreferences 与 DataStore 对比](/android/storage/sp-vs-datastore.md)：六大维度差异分析、深挖原理与迁移方案
 
+### � Intent 与组件通信
+- [Intent 详解：显式与隐式](/android/intent/intent-basics.md)：Intent 结构、显式/隐式跳转、Flags 与任务栈、Extras 传递、安全最佳实践
+- [IntentFilter 匹配规则](/android/intent/intent-filter.md)：action/category/data 三大匹配规则、源码解析流程、Deep Link 实战
+
+### 🚀 Application 与启动流程
+- [Application 详解与全局初始化](/android/app/application-basics.md)：创建链路、onCreate 初始化最佳实践、多进程陷阱、Context 关系
+- [App 启动流程：从点击图标到首帧](/android/app/app-launch-process.md)：冷/温/热启动、Zygote fork 全链路、启动耗时测量与优化清单
+- [Manifest 清单文件详解](/android/app/manifest-guide.md)：组件声明、权限体系、exported 规则、多进程配置与常见错误排查
+
+### 💾 数据存储
+- [数据存储方案对比](/android/storage/storage-comparison.md)：SharedPreferences / Room / DataStore / 文件全对比选型、分区存储适配
+- [SharedPreferences 深度剖析](/android/storage/sharedpreferences-deep.md)：源码级原理、`apply`/`commit` 区别、ANR 根因与 DataStore 替代
+- [SharedPreferences 与 DataStore 对比](/android/storage/sp-vs-datastore.md)：六大维度差异分析、深挖原理与迁移方案
+
+### 🎨 资源系统
+- [资源系统详解：R 文件、类型与加载](/android/resource/resource-basics.md)：AAPT 编译流程、资源 ID 结构、Resources/AssetManager 加载、主题与样式
+- [资源限定符与多语言适配](/android/resource/resource-qualifiers.md)：限定符体系、最佳匹配算法、多语言 i18n 全流程、多屏幕适配
+
+### 🛡️ 权限系统
+- [权限机制与运行时权限详解](/android/permission/permission-basics.md)：沙箱模型、保护级别、权限组、申请机制、版本演进与底层校验
+- [权限申请最佳实践与常见问题](/android/permission/permission-practice.md)：申请时机、批量申请、解释弹窗、特殊权限、合规建议
+
+### 🔔 通知机制
+- [通知机制详解：渠道、构建与样式](/android/notification/notification-basics.md)：Channel 机制、Builder 构建、样式类型、通知权限、前台服务通知
+- [PendingIntent 详解](/android/notification/pendingintent.md)：与 Intent 区别、三种创建方式、FLAG 更新规则、安全最佳实践
+
 ### 🔄 进程与 Context
 - [Android 进程与保活](/android/process/process-lifecycle.md)：五级进程优先级、OOM_ADJ 机制、多进程问题与保活方案演进
 - [Context 详解](/android/context/context-overview.md)：继承体系、ContextWrapper 代理机制、类型对比、内存泄漏案例与 getSystemService 原理
@@ -61,9 +92,12 @@ Android 应用开发的核心基石：四大组件、Fragment、数据存储、�
 ```
 Android 核心
 ├── 四大组件（Activity / Service / BroadcastReceiver / ContentProvider）
-├── Fragment 与 Intent
-├── View 体系（见「UI 与渲染」）
+├── Fragment 与 Intent（组件通信）
+├── Application 与启动流程（冷启动 / Manifest）
+├── 资源系统（多语言 / 多屏幕适配）
+├── 权限系统（运行时权限）
+├── 通知机制（渠道 / PendingIntent）
 ├── 数据存储
 ├── Context 与进程
-└── 进程与线程（见「网络与异步」）
+└── View 体系（见「UI 与渲染」）/ 进程与线程（见「网络与异步」）
 ```
