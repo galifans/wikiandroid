@@ -40,11 +40,19 @@ export default hopeTheme({
     editLink: "在 GitHub 上编辑此页",
   },
 
+  // 页面信息（文章页顶部 作者/写作日期/阅读时间）
+  // 仅保留 写作日期 + 阅读时间；去掉作者（站点即 WikiAndroid，每页重复）
+  pageInfo: ["Date", "ReadingTime"],
+
   // 博客功能关闭（纯文档站）
   blog: false,
 
   // 插件配置
   plugins: {
+    // git 插件：关闭贡献者（页面底部已有 GitHub 链接，无需重复展示）
+    git: {
+      contributors: false,
+    },
     // 本地搜索（slimsearch）
     slimsearch: true,
     // 代码块复制按钮

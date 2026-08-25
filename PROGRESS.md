@@ -21,6 +21,15 @@
 
 ## 2. 进展时间线
 
+### 2026-08-26（页面 meta 精简：去作者 + 去贡献者 + 禁用 hover 悬浮提示）
+- ✅ 用户反馈：① 页面顶部"WikiAndroid / 2026/8/26 / 大约 1 分钟"鼠标悬停弹出提示内容很鸡肋（文字本身已表达含义）；② 去掉作者（站点即 WikiAndroid，每页重复）；③ 去掉"贡献者: galifans"（底部已有 GitHub 链接）
+- ✅ 顶部信息：`theme.pageInfo: ["Date", "ReadingTime"]` 去掉 Author——只剩"写作日期📅 + 阅读时间⌛"，作者不再渲染（浏览器实测 `page-author-info` 不存在）
+- ✅ hover 悬浮提示：主题用 balloon.css（`[aria-label][data-balloon-pos]`）渲染 tooltip，在 `index.scss` 新增 `.page-info [aria-label][data-balloon-pos]` 禁用——`::before/::after` 隐藏（`display: none !important`）、`cursor: default`，仅作用于页面信息项不影响其他组件；实测 hover 无气泡弹出、图标与日期文本正常显示
+- ✅ 贡献者：`plugins.git: { contributors: false }` 关闭——底部只剩"在 GitHub 上编辑此页 + 最近更新"，实测无"贡献者"
+- ✅ 回归：/android/activity/ 概览页 + 首页均无作者/贡献者；首页无 page-info 不受影响
+- ✅ `npm run build` 构建 248 页面成功；`npm run sync:static` 已同步 wikiStatic
+- ⚠️ 注意：theme-hope 的 git 插件 contributors 配置项在 `plugins.git`（GitPluginOptions.contributors），而非 frontmatter
+
 ### 2026-08-26（侧边栏嵌套分组选中后字号回退修复）
 - ✅ 用户反馈：java 板块选中"子级的子级"（如 JVM 分组内文章）后，子级分组（JVM）本身字体变大——要求字体全程不变化、不放大
 - ✅ 根因：嵌套子分组字号规则用了 `:not(.active)`（`.vp-sidebar-group .vp-sidebar-group > .vp-sidebar-header:not(.active)`），选中后按钮带 active 类 → 规则失效 → 字号回退到主题继承值（侧边栏 0.94rem ≈ **15.04px**，实测选中前 14px → 选中后 15.04px）

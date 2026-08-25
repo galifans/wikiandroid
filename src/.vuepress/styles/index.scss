@@ -106,3 +106,16 @@
 .vp-page-title h1 > .vp-icon {
   display: none;
 }
+
+// 页面顶部信息（写作日期/阅读时间）禁用 hover 悬浮提示（balloon）：
+// 文字本身已表达含义（如“写作日期📅 2026/8/26”），无需悬停再弹提示。
+// 主题用 balloon.css 的 [aria-label][data-balloon-pos] 渲染 tooltip，
+// 这里仅作用于 .page-info 内的信息项，不影响其他组件。
+.page-info [aria-label][data-balloon-pos] {
+  cursor: default; // 去掉手型（不再暗示可悬停）
+
+  &::before,
+  &::after {
+    display: none !important; // 隐藏 tooltip 气泡与箭头
+  }
+}

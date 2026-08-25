@@ -280,6 +280,11 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 - 站点标题：`config.ts` 的 `title`。
 - 图标：替换 `public/logo.svg` / `public/favicon.svg`（用 `scripts/gen-icons.ps1` 重新生成 PNG）。
 
+### 7.5.1 页面 meta（作者 / 写作日期 / 阅读时间 / 贡献者）
+- 顶部信息：`theme.ts` 的 `pageInfo` 数组（当前 `["Date", "ReadingTime"]`，已去掉 Author——站点即 WikiAndroid 无需每页重复作者；可选值见 `PageInfoType`）。
+- hover 悬浮提示：主题用 balloon.css（`[aria-label][data-balloon-pos]`）渲染 tooltip，已在 `index.scss` 用 `.page-info [aria-label][data-balloon-pos]` 禁用（`::before/::after` 隐藏 + `cursor: default`），仅影响页面信息项。
+- 底部贡献者：`theme.ts` 的 `plugins.git: { contributors: false }` 关闭（底部已有 GitHub 链接无需重复展示）；恢复时改为 `true`。
+
 ### 7.6 更新「待更新」文章为正式文章
 - 创建文章文件，更新模块 README 移除「（待更新）」标记，即可消除对应 broken-link warning。
 
