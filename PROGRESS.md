@@ -21,6 +21,14 @@
 
 ## 2. 进展时间线
 
+### 2026-08-26（导航栏网络下拉风格统一：去分组 + 顺序对齐 + 侧边栏根级链接字号修复）
+- ✅ 用户反馈：① 下拉顺序不对；② 左侧（侧边栏）当前页未加粗、字体不对；③ 下拉出现「基础协议」不可点击分组标题——要求与其他板块下拉统一风格
+- ✅ 根因 1：navbar 嵌套 children 会渲染成「不可点击的分组标题」，其他板块下拉都是扁平可点击项，风格不统一
+- ✅ 根因 2：主题自带规则 `.vp-sidebar > .vp-sidebar-links > li > .vp-sidebar-link { font-size: 1.1em }` 特异性更高，把模块根目录松散文件（network 的 osi-tcpip/socket/tcp-udp）字号放大到 ≈16.5px，与子级链接 14px 不一致；且该规则必须写在 `.vp-sidebar` 块**外**（独立顶层选择器），否则 SCSS 嵌套会多一层祖先选择器导致匹配不上（第一次修复失败的原因）
+- ✅ 修复：① navbar.ts 网络下拉去掉「基础协议」分组，改为 7 个扁平链接，顺序与侧边栏一致（网络与协议 → Handler → 协程 → 线程 → 计算机网络体系 → Socket → TCP 与 UDP）；② index.scss 新增独立顶层规则 `.vp-sidebar > .vp-sidebar-links > li > .vp-sidebar-link { font-size: 0.875rem; font-weight: 400; &.active { font-weight: 600 } }`
+- ✅ 浏览器实测：下拉 7 项全部 14px 可点击、顺序与侧边栏一致；侧边栏根级链接 14px（原 16.5px）、当前页加粗 600；该修复对所有板块根目录松散文件（如 reading-notes 笔记）同样生效
+- ✅ `npm run build` 248 页面成功；`npm run sync:static` 已同步
+
 ### 2026-08-26（导航栏网络下拉补齐基础协议，与侧边栏对齐）
 - ✅ 用户反馈：`/network/socket.html` 页面左侧边栏有「Socket 编程基础 / TCP 与 UDP 详解 / 计算机网络体系」，但导航栏「🌐 网络与异步」下拉框不包含——要求必须对应
 - ✅ 根因：侧边栏用 `structure` 自动包含板块根目录顶层文章，而 `navbar.ts` 是手工配置，network 下拉漏了 `osi-tcpip.md` / `socket.md` / `tcp-udp.md` 三篇基础协议文章

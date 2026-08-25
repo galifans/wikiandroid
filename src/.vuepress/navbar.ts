@@ -51,18 +51,13 @@ export default navbar([
   {
     text: "🌐 网络与异步",
     children: [
-      {
-        text: "基础协议",
-        children: [
-          { text: "计算机网络体系", link: "/network/osi-tcpip.html" },
-          { text: "TCP 与 UDP 详解", link: "/network/tcp-udp.html" },
-          { text: "Socket 编程基础", link: "/network/socket.html" },
-        ],
-      },
       { text: "网络与协议", link: "/network/http/" },
       { text: "Handler 消息机制", link: "/network/handler/" },
       { text: "协程 Flow / RxJava", link: "/network/coroutine/" },
       { text: "线程池与并发", link: "/network/thread/" },
+      { text: "计算机网络体系", link: "/network/osi-tcpip.html" },
+      { text: "Socket 编程基础", link: "/network/socket.html" },
+      { text: "TCP 与 UDP 详解", link: "/network/tcp-udp.html" },
     ],
   },
   {

@@ -136,6 +136,20 @@
   }
 }
 
+// 根级链接（模块根目录下的松散 .md 文件，如 /network/ 下的 osi-tcpip/socket/tcp-udp）：
+// 主题自带规则 `.vp-sidebar > .vp-sidebar-links > li > .vp-sidebar-link { font-size: 1.1em }`
+// 特异性更高会把字号放大到 ≈16.5px，与子级链接 14px 不一致。
+// 用同特异性独立规则覆盖（必须写在 .vp-sidebar 块外，否则嵌套会多一层祖先选择器），
+// 字号与子级链接统一 14px；字重未选中 400、选中 600。
+.vp-sidebar > .vp-sidebar-links > li > .vp-sidebar-link {
+  font-size: 0.875rem; // 14px
+  font-weight: 400;
+
+  &.active {
+    font-weight: 600;
+  }
+}
+
 // 页面标题前的 icon 装饰（frontmatter icon）宽度不定（此处渲染为空占位 + margin），
 // 标题换行时第二行会回到内容左边缘，与第一行文本错位 8.8px。
 // 隐藏该装饰，让标题文本从内容左边缘开始，换行自然对齐。
