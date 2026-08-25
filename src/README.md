@@ -60,11 +60,7 @@ features:
     icon: book
     details: 精选 Android、Java、算法、网络、数据库等方向的 PDF 书籍，点击即可下载
     link: /books/
-  - title: 📖 读书笔记
-    icon: feather
-    details: 《Android 开发艺术探索》《Java 编程思想》《深入理解 Java 虚拟机》等经典书籍读书笔记
-    link: /reading-notes/
-  - title: 📎 关于本站
+  - title:  关于本站
     icon: info
     details: 项目介绍、贡献指南与常见问题
     link: /about/
@@ -73,7 +69,7 @@ features:
 ## 📊 内容规模
 
 > **9 大知识模块 · 220+ 篇原创文章**，覆盖 Android 面试全考点（应用层 → 源码 → 性能 → 工程化）；
-> 另有 **11 篇经典书籍读书笔记**、**7 本可下载 PDF 书籍**与 **6 篇大厂面经**。
+> 另有 **7 本可下载 PDF 书籍**与 **6 篇大厂面经**。
 
 ## 📌 精选文章
 
@@ -233,11 +229,6 @@ features:
 - [大厂面试经验实录（阿里 / 美团 / 网易）](/interview/company-experience.md)
 - [从零搭建完整 App（Kotlin + Compose + MVVM）](/projects/from-scratch.md)
 - [开源项目源码解析](/projects/open-source-analysis.md)
-
-### 📚 经典读书笔记
-- [《Android 开发艺术探索》笔记合集（Activity / IPC / View / Window / 性能）](/reading-notes/)
-- [《深入理解 Java 虚拟机》第 12 章：内存模型与线程](/reading-notes/《深入理解java虚拟机》第12章.md)
-- [《Java 编程思想》第一章：对象导论](/reading-notes/《Java编程思想》第一章读书笔记.md)
 
 ### 🧮 算法与数据结构
 - [算法刷题指南](/language/algorithm/algorithm-guide.md)

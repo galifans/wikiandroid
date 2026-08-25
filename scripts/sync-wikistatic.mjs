@@ -45,7 +45,6 @@ const modules = [
     "interview",
     "projects",
     "about",
-    "reading-notes",
 ];
 
 // ---------- helpers ----------

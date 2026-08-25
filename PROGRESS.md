@@ -15,9 +15,9 @@
 | 域名 | https://wikiandroid.com（备用：https://wikiandroid.pages.dev） |
 | 仓库 | https://github.com/galifans/wikiandroid（分支 main） |
 | 部署方式 | Cloudflare Pages：`git push main` 自动触发构建部署（约 2-4 分钟） |
-| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 311 页面） |
+| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 305 页面） |
 | 本地预览 | `npm run dev` → http://localhost:8080 |
-| 当前状态 | ✅ 内容建设完成（236 篇文章），持续维护中 |
+| 当前状态 | ✅ 内容建设完成（231 篇文章），持续维护中 |
 
 ## 2. 进展时间线
 
@@ -34,6 +34,16 @@
 - ✅ 同步更新：各板块 README 文章导航（network/advanced/system/engineering 全文重排）、`navbar.ts`（+渲染原理、+跨端方案）、根 `README.md`（进阶实战 +跨端方案行、系统原理 +操作系统行、精选文章重写）、`src/README.md`（内容规模 200+→220+、四大板块精选 +27 篇）、`architecture.md`（navbar 表 4 行、模块文章表 8 个板块）
 - ✅ `npm run build` 构建 311 页面成功（264 → 311，无 broken link warning）；`npm run sync:static` 已同步 wikiStatic；浏览器实测：侧边栏新子模块顺序正确、navbar 下拉新增项可点击、新页面渲染正常
 - ⚠️ 教训：生成文章时 `::: details 查看答案` 闭合标签偶发写成全角 `：`（`::：`），每批文章后必须全局 grep 排查；新增子模块前必须盘点全部 `dir.order` 避免冲突（advanced 1-7、system 1-6 已核验唯一）
+
+### 2026-08-26（移除读书笔记板块，知识点迁移至对应板块）
+- ✅ 用户需求：读书笔记板块永久移除——个人读书笔记不权威，与站点「权威知识汇聚网站」定位不符；**但知识点不能消失，需迁移到对应板块**
+- ✅ 删除 `src/reading-notes/` 全部 11 篇笔记与 README，知识点以专题文章形式迁移：
+  - 新增 6 篇权威专题文章：`android/activity/intent-filter.md`（Intent 匹配规则）、`ui/event/view-sliding.md`（View 滑动与弹性滑动）、`advanced/architecture/project-structure.md`（项目结构与工程规范）、`network/http/network-cache.md`（网络请求设计与缓存策略）、`language/java/jvm/Java内存模型与线程.md`（JMM/volatile/happens-before）、`advanced/performance/anr-optimization.md`（ANR 机制与优化）
+  - 扩充 2 篇：`language/java/java-basics.md`（+类与类之间的关系、对象存储位置与基本类型）、`system/binder/ipc-comparison.md`（+Binder 连接池）
+  - 已覆盖无需迁移：Activity 启动模式/异常回收（activity-lifecycle）、多进程/序列化/IPC 对比（process-lifecycle、binder 系列）、View 绘制/MeasureSpec（view 系列）、Window 机制（window-mechanism/windowmanager-deep）、自定义 View 分类（custom-view-guide）、布局优化（layout-optimization）、内存优化/MAT（memory-optimization）
+- ✅ 同步更新：6 个子模块 README 文章列表（activity/event/architecture/network-http/performance/jvm）；`architecture.md` 模块表 6 处 + 现状统计（231 篇 / 305 页）；`PROGRESS.md` 规模表（language 63 / android 28 / ui 24 / advanced 26 / network 21，合计 231）
+- ✅ 引用清理：`navbar.ts` 移除「📚 读书笔记」入口；`sync-wikistatic.mjs` 移除 `reading-notes`；根 `README.md` 移除读书笔记章节；`src/README.md` 移除卡片/计数/精选区
+- ✅ 重建后页面数 311 → 305（-11 笔记 +6 新文章），文章数 236 → 231；`npm run sync:static` 自动清理 wikiStatic/reading-notes/ 并刷新目录树
 
 ### 2026-08-26（Android 核心知识体系系统扩充：+5 大板块 +11 篇文章）
 - ✅ 用户需求：Android 核心只有 8 个板块远不够，要求系统整理并补充缺失知识面，新增大类与子级
@@ -221,20 +231,19 @@
 | 模块 | 文章数 | 说明 |
 | --- | --- | --- |
 | roadmap/ | 3 | 学习路线（Android / Kotlin / Compose） |
-| language/ | 62 | Kotlin / Java / 设计模式 / 并发 / 集合 / JVM / 算法 / C++ |
-| android/ | 27 | 四大组件 + Fragment + Intent + App + 资源 + 权限 + 通知 + 存储 + 进程 / Context |
-| ui/ | 23 | View / 事件 / 自定义 / 动画 / 布局 / Window / Bitmap / 渲染原理 / WebView |
+| language/ | 63 | Kotlin / Java / 设计模式 / 并发 / 集合 / JVM / 算法 / C++ |
+| android/ | 28 | 四大组件 + Fragment + Intent + App + 资源 + 权限 + 通知 + 存储 + 进程 / Context |
+| ui/ | 24 | View / 事件 / 自定义 / 动画 / 布局 / Window / Bitmap / 渲染原理 / WebView |
 | jetpack/ | 19 | Compose / Lifecycle / Room / Paging / WorkManager / Hilt |
-| network/ | 20 | OkHttp / Retrofit / Handler / 协程 / 线程 / 基础协议 |
-| advanced/ | 24 | 架构 / 组件化 / 路由 / 性能 / 稳定性 / 多媒体 / 跨端 / 插件化 |
+| network/ | 21 | OkHttp / Retrofit / Handler / 协程 / 线程 / 基础协议 |
+| advanced/ | 26 | 架构 / 组件化 / 路由 / 性能 / 稳定性 / 多媒体 / 跨端 / 插件化 |
 | system/ | 23 | Binder / AMS / WMS / PMS / 启动 / APK / ART / OS |
 | engineering/ | 15 | Gradle / Git / CI/CD / 测试 |
 | interview/ | 7 | 面试指南（含知识点汇总） |
 | projects/ | 2 | 实战项目 |
-| reading-notes/ | 11 | 读书笔记 |
 | books/ | 1 | 📚 书籍资源板块页（PDF 实体存 wikiStatic/books/，直链下载） |
 | about/ | 3 | 关于本站 |
-| **合计** | **183** | 非 README 文章页面（另有各模块 README 索引页） |
+| **合计** | **231** | 非 README 文章页面（另有各模块 README 索引页） |
 
 ### 文章模板（每篇均包含）
 - frontmatter：`icon`（iconify）+ `title` + `description`

@@ -16,6 +16,7 @@ dir:
 - [启动优化实践](startup-optimization.md)
 - [内存优化与泄漏排查](memory-optimization.md)
 - [卡顿优化与掉帧分析](jank-optimization.md)
+- [ANR 机制与优化](anr-optimization.md)
 - [包体积优化](apk-size-optimization.md)
 - [LeakCanary 源码分析](leakcanary-analysis.md)
 - [网络优化实战](network-optimization.md)

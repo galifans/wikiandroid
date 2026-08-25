@@ -100,7 +100,6 @@ export default navbar([
   },
   { text: "💼 面试指南", link: "/interview/" },
   { text: "🤖 实战项目", link: "/projects/" },
-  { text: "📚 读书笔记", link: "/reading-notes/" },
   { text: "📚 书籍资源", link: "/books/" },
   {
     text: "GitHub",

@@ -30,7 +30,53 @@ title: Android IPC 方式对比
 - **数据共享**：ContentProvider；
 - **网络通信**：Socket。
 
-## 四、相关文章
+## 四、Binder 连接池
+
+项目规模大时，若每个业务模块都创建一个绑定 Service，会消耗大量系统资源。**Binder 连接池（BinderPool）**将多个业务模块的 AIDL 统一交由**一个 Service** 管理：
+
+```mermaid
+flowchart TD
+    A[客户端 bindService] --> B[BinderPoolService]
+    B --> C[BinderPool：Binder 池管理]
+    C --> D[模块 A 的 Binder] --> A1[业务接口 1]
+    C --> E[模块 B 的 Binder] --> A2[业务接口 2]
+    C --> F[模块 C 的 Binder] --> A3[业务接口 3]
+    subgraph 同一进程中的服务端
+        B
+        C
+        D
+        E
+        F
+    end
+```
+
+```java
+public class BinderPool extends Binder implements IBinderPool {
+
+    public static final int BINDER_A = 1;
+    public static final int BINDER_B = 2;
+
+    @Override
+    public IBinder queryBinder(int binderCode) {
+        switch (binderCode) {
+            case BINDER_A:
+                return new ModuleAService();
+            case BINDER_B:
+                return new ModuleBService();
+            default:
+                return null;
+        }
+    }
+}
+```
+
+**收益**：
+
+- 客户端只需与**一个 Service** 建立连接，通过 `queryBinder` 按标识获取对应 Binder
+- 避免为每个业务模块重复创建 Service，降低资源消耗与连接建立开销
+- 连接池单例化 + 服务端断开自动重连，保证连接可靠性
+
+## 五、相关文章
 
 - [Binder 跨进程通信机制详解](binder-mechanism.md) — Android IPC 核心
 - [AIDL 深入解析](aidl-deep.md)

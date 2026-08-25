@@ -23,6 +23,7 @@ wikiStatic/
 │   │   ├── architecture-evolution.md
 │   │   ├── clean-architecture.md
 │   │   ├── eventbus-analysis.md
+│   │   ├── project-structure.md
 │   │   └── repository-pattern.md
 │   ├── cross-platform/
 │   │   ├── README.md
@@ -38,6 +39,7 @@ wikiStatic/
 │   │   └── multimedia-basics.md
 │   ├── performance/
 │   │   ├── README.md
+│   │   ├── anr-optimization.md
 │   │   ├── apk-size-optimization.md
 │   │   ├── battery-optimization.md
 │   │   ├── jank-optimization.md
@@ -62,6 +64,7 @@ wikiStatic/
 │   │   ├── README.md
 │   │   ├── activity-launch-process.md
 │   │   ├── activity-lifecycle.md
+│   │   ├── intent-filter.md
 │   │   └── task-stack.md
 │   ├── app/
 │   │   ├── README.md
@@ -273,6 +276,7 @@ wikiStatic/
 │   │   │   ├── README.md
 │   │   │   ├── 泛型与类型擦除.md
 │   │   │   ├── 垃圾回收算法.md
+│   │   │   ├── Java内存模型与线程.md
 │   │   │   ├── JVM类加载机制.md
 │   │   │   └── JVM内存区域与内存溢出.md
 │   │   ├── java-basics.md
@@ -302,6 +306,7 @@ wikiStatic/
 │   ├── http/
 │   │   ├── README.md
 │   │   ├── http-protocol.md
+│   │   ├── network-cache.md
 │   │   ├── okhttp-interceptor.md
 │   │   ├── okhttp-source.md
 │   │   ├── retrofit-okhttp.md
@@ -320,19 +325,6 @@ wikiStatic/
 │   ├── README.md
 │   ├── from-scratch.md
 │   └── open-source-analysis.md
-├── reading-notes/
-│   ├── README.md
-│   ├── 《深入理解java虚拟机》第12章.md
-│   ├── 《Android开发艺术探索》第八章笔记.md
-│   ├── 《Android开发艺术探索》第二章笔记.md
-│   ├── 《Android开发艺术探索》第三章笔记.md
-│   ├── 《Android开发艺术探索》第十五章笔记.md
-│   ├── 《Android开发艺术探索》第四章笔记.md
-│   ├── 《Android开发艺术探索》第一章笔记.md
-│   ├── 《APP研发录》第1章读书笔记.md
-│   ├── 《APP研发录》第2章读书笔记.md
-│   ├── 《Java编程思想》第二章读书笔记.md
-│   └── 《Java编程思想》第一章读书笔记.md
 ├── roadmap/
 │   ├── README.md
 │   ├── android-roadmap.md
@@ -396,7 +388,8 @@ wikiStatic/
     │   ├── README.md
     │   ├── conflict-solution.md
     │   ├── event-dispatch.md
-    │   └── input-system.md
+    │   ├── input-system.md
+    │   └── view-sliding.md
     ├── layout/
     │   ├── README.md
     │   ├── layout-optimization.md

@@ -161,7 +161,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 | 子模块 | ✅ 已完成 |
 | --- | --- |
 | kotlin/ | kotlin-basics.md、kotlin-coroutines.md、kotlin-generics.md、kotlin-extensions.md、kotlin-functional.md、kotlin-delegation.md |
-| java/ | java-basics.md、java-collections.md、java-concurrency.md（含 basics/ collections/ concurrent/ jvm/ 分组） |
+| java/ | java-basics.md、java-collections.md、java-concurrency.md（含 basics/ collections/ concurrent/ jvm/ 分组；jvm/ 含内存区域、类加载、垃圾回收、泛型、Java 内存模型与线程） |
 | cpp/ | cpp-basics.md、cpp-memory.md、jni-ndk.md |
 | design-pattern/ | 设计模式汇总 + 11 篇精讲（单例/代理/观察者/策略/责任链/适配器等） |
 | algorithm/ | algorithm-guide.md、leetcode-top100.md、sort-algorithm.md、search-algorithm.md、binary-tree-traversal.md、high-frequency-algorithms.md、data-structure.md、coder-interview-guide.md、offer-classic.md 等 |
@@ -169,7 +169,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 🧱 Android 核心 `/android/`
 | 子模块 | ✅ 已完成 |
 | --- | --- |
-| activity/ | activity-lifecycle.md、task-stack.md、activity-launch-process.md |
+| activity/ | activity-lifecycle.md、intent-filter.md、task-stack.md、activity-launch-process.md |
 | service/ | service-basics.md、foreground-service.md、aidl.md |
 | broadcast/ | broadcast-basics.md、register-comparison.md |
 | content-provider/ | content-provider-basics.md |
@@ -187,7 +187,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 | 子模块 | ✅ 已完成 |
 | --- | --- |
 | view/ | view-draw-process.md、view-viewgroup.md、measurespec.md、recyclerview-guide.md、recyclerview-source.md、webview-guide.md |
-| event/ | event-dispatch.md、conflict-solution.md、input-system.md |
+| event/ | event-dispatch.md、view-sliding.md、conflict-solution.md、input-system.md |
 | custom-view/ | custom-view-guide.md、custom-viewgroup.md、canvas-path.md、touch-helper.md |
 | animation/ | property-animation.md、tween-animation.md、scene-transition.md |
 | layout/ | layout-optimization.md、screen-adaptation.md |
@@ -207,7 +207,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 🌐 网络与异步 `/network/`
 | 子模块 | ✅ 已完成 |
 | --- | --- |
-| http/ | retrofit-okhttp.md、okhttp-interceptor.md、http-protocol.md、okhttp-source.md、retrofit-source.md |
+| http/ | retrofit-okhttp.md、okhttp-interceptor.md、http-protocol.md、okhttp-source.md、retrofit-source.md、network-cache.md |
 | handler/ | handler-source.md、handlerthread.md、sync-barrier.md |
 | coroutine/ | flow-advanced.md、rxjava-operators.md、coroutine-principle.md、structured-concurrency.md |
 | thread/ | thread-pool.md、locks.md、concurrency-tools.md、asynctask-intentservice.md、concurrency-practice.md |
@@ -216,10 +216,10 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 🚀 进阶实战 `/advanced/`
 | 子模块 | ✅ 已完成 |
 | --- | --- |
-| architecture/ | architecture-evolution.md、clean-architecture.md、repository-pattern.md、eventbus-analysis.md |
+| architecture/ | architecture-evolution.md、clean-architecture.md、repository-pattern.md、eventbus-analysis.md、project-structure.md |
 | modular/ | modularization-practice.md、router-design.md |
 | plugin/ | plugin-principle.md、hotfix-comparison.md、hook-tech.md |
-| performance/ | startup-optimization.md、memory-optimization.md、jank-optimization.md、apk-size-optimization.md、leakcanary-analysis.md、network-optimization.md、battery-optimization.md |
+| performance/ | startup-optimization.md、memory-optimization.md、jank-optimization.md、anr-optimization.md、apk-size-optimization.md、leakcanary-analysis.md、network-optimization.md、battery-optimization.md |
 | stability/ | crash-monitoring.md、anr-guide.md、apm-monitoring.md、log-system.md |
 | multimedia/ | multimedia-basics.md、exoplayer-deep.md、mediacodec-ffmpeg.md |
 | cross-platform/ | cross-platform-overview.md |
@@ -257,7 +257,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 📎 关于本站 `/about/`
 - ✅ intro.md　✅ contribution-guideline.md　✅ faq.md
 
-**现状统计**：✅ 全部文章已完成（236 篇文章 + 81 个模块 README，构建 311 页面），无「（待更新）」占位文章，构建无 broken-link warning。
+**现状统计**：✅ 全部文章已完成（231 篇文章 + 80 个模块 README，构建 305 页面），无「（待更新）」占位文章，构建无 broken-link warning。
 
 ---
 

@@ -17,6 +17,7 @@ Android 应用架构模式的演进与实践。
 - [Clean Architecture 实践](clean-architecture.md)
 - [数据层设计：Repository 模式](repository-pattern.md)
 - [EventBus 源码分析](eventbus-analysis.md)
+- [项目结构与工程规范](project-structure.md)
 
 ## 架构对比
 
