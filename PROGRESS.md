@@ -21,6 +21,15 @@
 
 ## 2. 进展时间线
 
+### 2026-08-25（侧边栏箭头修正 + 大类加粗 + 焦点双重高亮根因修复）
+- ✅ 用户反馈 3 问题：① 所有子级右侧都有 `›` 箭头（哪怕无法展开）；② 大类可仿官方文档稍微加粗；③ 点击「数据存储」后再点「Activity」，Activity 与子级「概览」同时绿色背景（焦点双重高亮），要求找到根因
+- ✅ 修复 1（箭头仅限有内容）：`::after` 从 `.vp-sidebar-link:has(> .vp-icon)` 移到 `&:has(> ul)`——叶子链接无箭头（浏览器实测数据存储 4 子级 `content: none`）；站内更深内容（如 /language/java/ 的 Java 并发/基础/集合/JVM）为 `li > section` 嵌套分组，自带主题 `.vp-arrow` chevron（display: block），"有内容"的子级仍有展开指示
+- ✅ 修复 2（大类加粗）：`.vp-sidebar-header { font-weight: 600 }`（17px 加粗，仿官方文档层级，浏览器实测 600）
+- ✅ 修复 3（焦点根因）：根因 = 按钮 `:focus` 自绘绿背景 **叠加** 主题路由类 `.active`（当前页所在分组按钮必 active）+ 其子级 active 链接的主题 accent-soft 背景 → 双重绿色。改用 `.vp-sidebar-header:focus:not(.active)`：非当前板块点击仍有绿色反馈（实测数据存储点击后 bg rgba(20,184,110,0.14)）；当前板块按钮（含 .active）点击仅 hover 浅灰（--vp-c-control），不再叠绿；最终任意场景仅剩**一个**绿色元素（当前页 active 条目/链接）
+- ✅ 完整用户场景验证：点击数据存储 → 点击 Activity → 全侧边栏仅「概览」链接绿色，无按钮残留绿背景
+- ✅ `npm run build` 构建 248 页面成功（13.56s）；`npm run sync:static` 已同步 wikiStatic
+- ⚠️ 教训：侧边栏分组按钮的 `.active` 是**路由驱动**（当前页所在分组），与展开/折叠无关；自定义 :focus 样式必须 `:not(.active)` 避免与路由高亮叠加
+
 ### 2026-08-25（侧边栏子级标识：数字改右侧箭头）
 - ✅ 用户反馈数字标号太丑，改为右侧 `›` 箭头（仿 Android 官方文档导航的 chevron 指示），表明"这是一个子级条目（点开还有内容）"
 - ✅ 移除 counter 数字方案（.vp-sidebar-group > ul 的 counter-reset/increment 与 ::before 序号）

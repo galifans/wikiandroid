@@ -122,7 +122,11 @@ galifans_vibe_coding/
 
 > 注意：分组的顺序由 `dir.order` 控制（而非顶层 `order`）；`shortTitle` 同时会作用于面包屑（显示为「概览」）。
 >
-> 侧边栏样式（`src/.vuepress/styles/index.scss`）：子级链接右侧显示 `›` 小箭头（仿 Android 官方文档导航的 chevron 指示），表明这是一个子级条目（点开还有内容），激活/悬停时变绿；分组标题 17px / 子级 14px 层级区分；悬挂缩进 `padding-left: calc(8px + 1em + 4px); text-indent: calc(-1em - 4px)` 保证长标题换行与图标对齐。
+> 侧边栏样式（`src/.vuepress/styles/index.scss`）规则：
+> - **箭头仅限有内容**：子级链接右侧的 `›` 小箭头（仿 Android 官方文档 chevron）只在 `:has(> ul)`（链接内嵌更深内容）时显示；叶子链接无箭头。站内更深内容实际是 `li > section` 嵌套分组（非 `a > ul`），自带主题 `.vp-arrow` chevron 作为展开指示
+> - **层级区分**：分组标题 17px + `font-weight: 600` 加粗（仿官方文档大类），子级链接 14px 常规
+> - **焦点规则**：`.vp-sidebar-header:focus:not(.active)` → 非当前板块点击有绿色反馈（accent 色 + accent-soft 背景）；当前板块按钮（路由类 `.active`）点击不叠绿，避免与子级 active 链接双重高亮——**任意场景仅当前页条目一个绿色**
+> - **悬挂缩进**：`padding-left: calc(8px + 1em + 4px); text-indent: calc(-1em - 4px)` 保证长标题换行与图标对齐
 
 ---
 
