@@ -40,6 +40,8 @@
 | ContentProvider | 跨进程数据共享 | [ContentProvider](wikiStatic/android/content-provider/README.md) |
 | Fragment | 界面模块化 | [Fragment](wikiStatic/android/fragment/README.md) |
 | 数据存储 | SharedPreferences / Room / DataStore | [存储](wikiStatic/android/storage/README.md) |
+| 进程 | 进程生命周期与保活 | [进程](wikiStatic/android/process/README.md) |
+| Context | 系统服务访问封装 | [Context](wikiStatic/android/context/README.md) |
 
 ### 🎨 UI 与渲染
 
@@ -50,12 +52,12 @@
 | 自定义 View | 绘制与交互实战 | [自定义 View](wikiStatic/ui/custom-view/README.md) |
 | 动画机制 | 属性动画 / 帧动画 | [动画](wikiStatic/ui/animation/README.md) |
 | 布局优化 | ConstraintLayout / include | [布局优化](wikiStatic/ui/layout/README.md) |
-| Jetpack Compose | 声明式 UI 开发 | [Compose](wikiStatic/ui/compose/README.md) |
 
 ### 🧩 Jetpack 全家桶
 
 | 分类 | 组件 | 入口 |
 | --- | --- | --- |
+| 声明式 UI | Jetpack Compose | [Compose](wikiStatic/jetpack/compose/README.md) |
 | 生命周期 | Lifecycle / ViewModel / LiveData | [Lifecycle / ViewModel](wikiStatic/jetpack/lifecycle-viewmodel/README.md) |
 | 数据持久化 | Room / DataStore | [Room / DataStore](wikiStatic/jetpack/room-datastore/README.md) |
 | 导航与分页 | Paging / Navigation | [Paging / Navigation](wikiStatic/jetpack/paging-navigation/README.md) |
