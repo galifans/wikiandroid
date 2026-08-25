@@ -81,13 +81,13 @@ galifans_vibe_coding/
 | --- | --- | --- | --- | --- |
 | 1 | 🏠 首页 | `/` | — | 首页 |
 | 2 | 🗺️ 学习路线 | `/roadmap/` | — | 3 条学习路线 |
-| 3 | ☕ 语言基础 | — | Kotlin / Java / 数据结构与算法 | 下拉菜单 |
-| 4 | 🧱 Android 核心 | — | Activity / Service / BroadcastReceiver / ContentProvider / Fragment / 数据存储 | 下拉菜单 |
-| 5 | 🎨 UI 与渲染 | — | View 绘制流程 / 事件分发机制 / 自定义 View / 动画机制 / 布局优化 / Jetpack Compose | 下拉菜单 |
+| 3 | ☕ 语言基础 | — | Kotlin / Java / C++ / 设计模式 / 数据结构与算法 | 下拉菜单 |
+| 4 | 🧱 Android 核心 | — | Activity / Service / BroadcastReceiver / ContentProvider / Fragment / Context / 进程 / 数据存储 | 下拉菜单 |
+| 5 | 🎨 UI 与渲染 | — | View 绘制流程 / 事件分发机制 / 自定义 View / Bitmap / Window / 动画机制 / 布局优化 / Jetpack Compose | 下拉菜单 |
 | 6 | 🧩 Jetpack | — | Lifecycle/ViewModel / Room/DataStore / Paging/Navigation / WorkManager/Hilt | 下拉菜单 |
 | 7 | 🌐 网络与异步 | — | OkHttp/Retrofit / Handler 消息机制 / 协程 Flow/RxJava / 线程池与并发 | 下拉菜单 |
 | 8 | 🚀 进阶实战 | — | 架构设计 / 组件化与模块化 / 插件化与热修复 / 性能优化 / 稳定性保障 / 音视频开发 | 下拉菜单 |
-| 9 | ⚙️ 系统原理 | — | Binder 机制 / AMS/WMS / 系统与应用启动流程 / APK 打包与签名 / ART/DEX/类加载 | 下拉菜单 |
+| 9 | ⚙️ 系统原理 | — | Binder 机制 / AMS/WMS / 系统与应用启动流程 / APK 打包与签名 / ART/DEX/类加载 / 操作系统 | 下拉菜单 |
 | 10 | 🛠️ 工程实践 | — | Gradle 构建 / Git 与版本管理 / CI/CD / 测试体系 | 下拉菜单 |
 | 11 | 💼 面试指南 | `/interview/` | — | 平铺 7 篇文章 |
 | 12 | 🤖 实战项目 | `/projects/` | — | 平铺文章 |

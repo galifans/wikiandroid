@@ -1,3 +1,8 @@
+---
+icon: image
+title: Bitmap
+---
+
 # Bitmap
 
 > Bitmap 的使用与图片加载优化。

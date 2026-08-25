@@ -21,6 +21,11 @@
 
 ## 2. 进展时间线
 
+### 2026-08-25（导航一致性修复：navbar 与侧边栏对齐）
+- ✅ 审计全部板块：navbar 手工维护的下拉与侧边栏（structure 自动生成）存在 4 处不一致，补齐缺失入口：语言基础 +C++、Android 核心 +Context/进程、UI 与渲染 +Bitmap/Window、系统原理 +操作系统（`src/.vuepress/navbar.ts`）
+- ✅ 修复侧边栏"左侧未对齐"：5 个子模块 README（android/context、android/process、system/os、ui/bitmap、ui/window）缺少 `icon` frontmatter，导致侧边栏分组按钮无图标、与其他分组文字错位；已按模块风格补上（box/gears/server/image/window）
+- ✅ `npm run build` 构建 248 页面成功；`npm run sync:static` 已同步 wikiStatic；`architecture.md` navbar 表格同步更新
+
 ### 2026-08-25（Android 知识点汇总归纳 + 内容缺口补齐）
 - ✅ 读取桌面 `Android-Review-master/Docs/Android知识点汇总.md`（2494 行）全文，逐主题审计站内覆盖情况（19 大主题约 95% 已有对应文章）
 - ✅ 新增 `src/interview/android-knowledge-summary.md`：「Android 知识点汇总」19 大主题系统回顾清单（考点表格 + 高频追问 + 全部详细文章链接），面试前查漏补缺

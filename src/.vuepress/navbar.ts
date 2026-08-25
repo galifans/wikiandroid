@@ -8,6 +8,7 @@ export default navbar([
     children: [
       { text: "Kotlin", link: "/language/kotlin/" },
       { text: "Java", link: "/language/java/" },
+      { text: "C++", link: "/language/cpp/" },
       { text: "设计模式", link: "/language/design-pattern/" },
       { text: "数据结构与算法", link: "/language/algorithm/" },
     ],
@@ -20,6 +21,8 @@ export default navbar([
       { text: "BroadcastReceiver", link: "/android/broadcast/" },
       { text: "ContentProvider", link: "/android/content-provider/" },
       { text: "Fragment", link: "/android/fragment/" },
+      { text: "Context", link: "/android/context/" },
+      { text: "进程", link: "/android/process/" },
       { text: "数据存储", link: "/android/storage/" },
     ],
   },
@@ -29,6 +32,8 @@ export default navbar([
       { text: "View 绘制流程", link: "/ui/view/" },
       { text: "事件分发机制", link: "/ui/event/" },
       { text: "自定义 View", link: "/ui/custom-view/" },
+      { text: "Bitmap", link: "/ui/bitmap/" },
+      { text: "Window", link: "/ui/window/" },
       { text: "动画机制", link: "/ui/animation/" },
       { text: "布局优化", link: "/ui/layout/" },
       { text: "Jetpack Compose", link: "/ui/compose/" },
@@ -71,6 +76,7 @@ export default navbar([
       { text: "系统与应用启动流程", link: "/system/boot/" },
       { text: "APK 打包与签名", link: "/system/apk/" },
       { text: "ART / DEX / 类加载", link: "/system/art/" },
+      { text: "操作系统", link: "/system/os/" },
     ],
   },
   {

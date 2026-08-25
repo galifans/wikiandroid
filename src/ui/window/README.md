@@ -1,3 +1,8 @@
+---
+icon: window
+title: Window
+---
+
 # Window
 
 > Window 是 Android 视图的直接管理者。
