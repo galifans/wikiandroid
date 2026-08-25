@@ -21,6 +21,13 @@
 
 ## 2. 进展时间线
 
+### 2026-08-25（侧边栏层级与展开焦点优化）
+- ✅ 字体层级区分：分组标题（栏目）17px vs 子级链接 14px（原 16.5/15px 过于接近），`src/.vuepress/styles/index.scss`
+- ✅ 展开分组焦点：`.vp-sidebar-group:has(> ul) > .vp-sidebar-header` 绿色高亮（accent 色 + accent-soft 背景 + 600 字重）——theme-hope 收起分组时移除子级 `ul`，展开组必含 `ul`，故 `:has()` 精准命中"用户刚点击展开的板块"；点击切换展开时焦点跟随（浏览器实测 Service/ContentProvider 切换高亮正确）
+- ✅ 悬挂缩进自适应：`padding-left: calc(8px + 1em + 4px); text-indent: calc(-1em - 4px)` 随字号缩放（14px 下 -18px/26px），换行对齐仍精确（图标 27 / 文本两行 45）
+- ✅ `npm run build` 成功；`npm run sync:static` 已同步 wikiStatic
+- ⚠️ 注意：active 类基于路由（点击切换展开不会更新），不能作为点击反馈；展开态（ul 存在与否）才是点击驱动的可靠信号
+
 ### 2026-08-25（侧边栏/标题换行对齐修复）
 - ✅ 问题定位：侧边栏文件链接的图标为 inline-block（16px 图标 + 4px 间距），换行后第二行回到内容左边缘（图标之前），与第一行文本错位 20px；页面标题前的 icon 装饰渲染为空占位 + 8.8px margin，换行同样错位
 - ✅ 侧边栏修复：`.vp-sidebar-link:has(> .vp-icon)` 悬挂缩进（`padding-left: 28px; text-indent: -20px`），图标 27px / 两行文本 46/47px 对齐（浏览器实测「RecyclerView 优化与 ListView 对比」「SharedPreferences 深度剖析」）
