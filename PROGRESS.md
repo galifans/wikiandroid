@@ -97,7 +97,7 @@
 
 | Commit | 说明 |
 | --- | --- |
-| `<hash>` | fix(nav): 统一导航文案并优化侧边栏（概览命名 / 板块顺序与 navbar 严格对应 / 长标题换行） |
+| `272848f` | fix(nav): 统一导航文案并优化侧边栏（概览命名 / 板块顺序与 navbar 严格对应 / 长标题换行） |
 | `2c77f78` | fix(nav): 补齐导航栏缺失入口（语言 +C++ / Android +Context、进程 / UI +Bitmap、Window / 系统 +操作系统）并修复 5 个模块侧边栏图标缺失导致的对齐问题 |
 | `ff89888` | feat(interview): 新增 Android 知识点汇总归纳文章并补齐内容缺口（Service START 模式表 / ContentProvider 与 SQL 区别 / WebView 本地资源替代） |
 | `8c8b091` | feat(books): 书籍网站直链下载（prebuild 自动发布）+ 首页 README 改为直接阅读的知识库速览 |
