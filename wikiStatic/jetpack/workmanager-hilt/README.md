@@ -15,6 +15,7 @@ dir:
 
 - [WorkManager 后台任务](workmanager.md)
 - [Hilt 依赖注入](hilt.md)
+- [Hilt 依赖注入进阶](hilt-advanced.md) — 多模块/自定义 Qualifier/测试替身
 
 ## 核心要点
 

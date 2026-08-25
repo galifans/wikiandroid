@@ -15,6 +15,7 @@ dir:
 
 - [Paging 3 分页加载](paging3.md)
 - [Navigation 组件使用](navigation.md)
+- [Navigation 高级进阶](navigation-advanced.md) — 类型安全导航/Deep Link/返回栈管理
 
 ## 核心要点
 

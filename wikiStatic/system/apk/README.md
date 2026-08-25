@@ -14,11 +14,13 @@ dir:
 ## 文章列表
 
 - [APK 打包流程与签名机制](apk-build-process.md)
+- [APK 签名与校验机制](signature-verify.md)
 - [多渠道打包方案](multi-channel.md)
 
 ## 核心要点
 
 1. **打包流程**：AAPT2 资源编译 → Kotlin/Java 编译 → D8 转 Dex → 资源链接 → 打包 → 签名 → 对齐（zipalign）
 2. **构建工具链**：AGP（Android Gradle Plugin）+ Gradle
-3. **签名**：v1（JAR）/ v2（APK Signature Scheme）/ v3（密钥轮换）
+3. **签名**：v1（JAR）/ v2（APK Signature Scheme，整包校验）/ v3（密钥轮换）/ v4（增量更新）
 4. **混淆**：R8（代码压缩、混淆、优化）
+5. **签名原理**：私钥签名 + 公钥验证，修改 APK 必须重签

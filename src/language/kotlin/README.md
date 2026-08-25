@@ -17,6 +17,8 @@ Kotlin 是 Android 官方推荐的一级开发语言，语法简洁、空安全�
 - [Kotlin 协程从入门到进阶](kotlin-coroutines.md)
 - [Kotlin 泛型详解](kotlin-generics.md)
 - [Kotlin 扩展函数与作用域函数](kotlin-extensions.md)
+- [Kotlin 函数式编程与高阶函数](kotlin-functional.md)
+- [Kotlin 委托机制与内联函数](kotlin-delegation.md)
 
 ## 学习资源
 

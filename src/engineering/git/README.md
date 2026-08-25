@@ -14,6 +14,7 @@ dir:
 ## 文章列表
 
 - [Git 工作流实践](git-workflow.md)
+- [Git 高级操作与工作流](git-rebase-workflow.md)
 - [Git 常用命令速查](git-cheatsheet.md)
 
 ## 核心要点
@@ -21,8 +22,9 @@ dir:
 1. **分支模型**：Git Flow / GitHub Flow / Trunk Based
 2. **提交规范**：Conventional Commits（`feat`、`fix`、`docs` 等）
 3. **合并策略**：Merge / Squash / Rebase 的取舍
-4. **常用命令**：`commit`、`rebase`、`cherry-pick`、`stash`
-5. **GitHub 协作**：PR 流程、Code Review
+4. **高级操作**：交互式 rebase、cherry-pick、stash、冲突解决
+5. **常用命令**：`commit`、`rebase`、`cherry-pick`、`stash`
+6. **GitHub 协作**：PR 流程、Code Review
 
 ## 提交信息模板
 

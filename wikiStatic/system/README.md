@@ -35,6 +35,7 @@ Binder IPC（进程通信骨架）
 
 ### 🔗 Binder 机制
 - [Binder 跨进程通信机制详解](/system/binder/binder-mechanism.md)：驱动 / 代理 / 流程
+- [Binder 驱动层深入](/system/binder/binder-driver.md)：binder_proc / mmap / BC_TRANSACTION
 - [AIDL 深入解析](/system/binder/aidl-deep.md)：Stub / Proxy / 双向通信
 - [Parcelable 序列化](/system/binder/parcelable.md)：与 Serializable 对比
 - [IPC 方式对比](/system/binder/ipc-comparison.md)：Binder / Socket / Messenger
@@ -42,21 +43,27 @@ Binder IPC（进程通信骨架）
 ### ⚙️ AMS / WMS
 - [AMS 与 Activity 启动](/system/ams-wms/ams-activity-launch.md)：AMS 调度流程
 - [WMS 窗口管理](/system/ams-wms/wms-principle.md)：窗口层级 / 添加删除
+- [PMS 包管理机制](/system/ams-wms/pms-package-manager.md)：扫描解析 / 安装 / 权限
+- [WMS 触摸事件分发深入](/system/ams-wms/wms-touch-dispatch.md)：InputDispatcher / 命中测试
 
 ### 🚀 启动流程
 - [系统启动流程](/system/boot/system-boot.md)：Bootloader → init → Zygote
 - [应用启动流程](/system/boot/app-launch.md)：Launcher → AMS → ActivityThread
+- [Zygote 进程深入](/system/boot/zygote-deep.md)：预加载 / fork / Socket 孵化
 
 ### 📦 APK 打包与签名
 - [APK 打包流程与签名机制](/system/apk/apk-build-process.md)：AAPT / D8 / 签名 v1-v3
+- [APK 签名与校验机制](/system/apk/signature-verify.md)：v1-v4 / 密钥轮换 / 多渠道
 - [多渠道打包](/system/apk/multi-channel.md)
 
 ### 🧠 ART / DEX / 类加载
 - [ART 运行时与 GC](/system/art/art-runtime.md)：AOT / JIT / 回收器
+- [ART 编译优化深入](/system/art/art-compilation.md)：Profile 引导 / dex2oat
 - [ART 垃圾回收机制](/system/art/art-gc.md)
 - [类加载器与双亲委托](/system/art/classloader.md)：DexClassLoader / PathClassLoader
 - [DEX 文件格式](/system/art/dex-format.md)
 
 ### 🖥️ 操作系统
 - [操作系统核心概念](/system/os/os-core.md)：进程 / 线程 / 内存
+- [Linux 内存管理深入](/system/os/linux-memory.md)：虚拟内存 / oom_adj / LMK
 - [线程同步与 IPC](/system/os/thread-sync-ipc.md)：锁 / 信号量 / Linux IPC

@@ -87,6 +87,7 @@
 | 性能优化 | 启动 / 卡顿 / 内存 / 包体积 | [性能优化](wikiStatic/advanced/performance/README.md) |
 | 稳定性 | 崩溃监控 / ANR / 日志 | [稳定性](wikiStatic/advanced/stability/README.md) |
 | 音视频 | 音视频开发入门 | [音视频](wikiStatic/advanced/multimedia/README.md) |
+| 跨端方案 | Flutter / RN / KMP 选型 | [跨端方案](wikiStatic/advanced/cross-platform/README.md) |
 
 ### ⚙️ 系统原理
 
@@ -97,6 +98,7 @@
 | 启动流程 | 系统与应用启动 | [启动流程](wikiStatic/system/boot/README.md) |
 | APK | 打包与签名 | [APK](wikiStatic/system/apk/README.md) |
 | ART / DEX | 运行时与类加载 | [ART / DEX](wikiStatic/system/art/README.md) |
+| 操作系统 | 操作系统与 IPC | [操作系统](wikiStatic/system/os/README.md) |
 
 ### 🛠️ 工程实践
 
@@ -167,8 +169,9 @@
 | --- | --- |
 | 学习路线 | [Android 学习路线 2026](wikiStatic/roadmap/android-roadmap.md) · [Kotlin 学习路线](wikiStatic/roadmap/kotlin-roadmap.md) · [Compose 学习路线](wikiStatic/roadmap/compose-roadmap.md) |
 | 语言与核心 | [Kotlin 基础语法](wikiStatic/language/kotlin/kotlin-basics.md) · [Kotlin 协程进阶](wikiStatic/language/kotlin/kotlin-coroutines.md) · [Activity 生命周期](wikiStatic/android/activity/activity-lifecycle.md) |
-| 源码与原理 | [Handler 消息机制源码](wikiStatic/network/handler/handler-source.md) · [Binder 机制详解](wikiStatic/system/binder/binder-mechanism.md) · [APK 打包与签名](wikiStatic/system/apk/apk-build-process.md) |
-| 性能与进阶 | [启动优化实践](wikiStatic/advanced/performance/startup-optimization.md) · [内存优化与泄漏排查](wikiStatic/advanced/performance/memory-optimization.md) |
+| 源码与原理 | [Handler 消息机制源码](wikiStatic/network/handler/handler-source.md) · [Binder 驱动层深入](wikiStatic/system/binder/binder-driver.md) · [APK 签名与校验](wikiStatic/system/apk/signature-verify.md) |
+| 系统与性能 | [Zygote 进程深入](wikiStatic/system/boot/zygote-deep.md) · [ART 编译优化](wikiStatic/system/art/art-compilation.md) · [启动优化实践](wikiStatic/advanced/performance/startup-optimization.md) · [内存优化与泄漏排查](wikiStatic/advanced/performance/memory-optimization.md) |
+| 工程与进阶 | [跨端方案选型](wikiStatic/advanced/cross-platform/cross-platform-overview.md) · [自定义 Gradle 插件](wikiStatic/engineering/gradle/custom-gradle-plugin.md) · [灰度发布](wikiStatic/engineering/cicd/gray-release.md) · [MockK 单元测试](wikiStatic/engineering/testing/mockk-testing.md) |
 
 ## ⭐ 支持项目
 

@@ -17,6 +17,7 @@ View 是 Android UI 的基本单元，理解绘制流程是进阶的必修课。
 - [View 与 ViewGroup 的关系](view-viewgroup.md)
 - [MeasureSpec 完全解析](measurespec.md)
 - [RecyclerView 优化与 ListView 对比](recyclerview-guide.md)
+- [RecyclerView 源码解析](recyclerview-source.md) — 五级缓存、回收复用流程、预取机制、DiffUtil
 - [WebView 使用与优化](webview-guide.md)
 
 ## 核心要点

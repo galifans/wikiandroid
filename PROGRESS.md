@@ -15,11 +15,25 @@
 | 域名 | https://wikiandroid.com（备用：https://wikiandroid.pages.dev） |
 | 仓库 | https://github.com/galifans/wikiandroid（分支 main） |
 | 部署方式 | Cloudflare Pages：`git push main` 自动触发构建部署（约 2-4 分钟） |
-| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 264 页面） |
+| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 311 页面） |
 | 本地预览 | `npm run dev` → http://localhost:8080 |
-| 当前状态 | ✅ 内容建设完成（183 篇文章），持续维护中 |
+| 当前状态 | ✅ 内容建设完成（236 篇文章），持续维护中 |
 
 ## 2. 进展时间线
+
+### 2026-08-26（七大板块内容扩充：语言/UI/Jetpack/网络/进阶/系统/工程 +45 篇文章 +2 子模块）
+- ✅ 用户需求：完善「语言基础、UI与渲染、Jetpack、网络与异步、进阶实战、系统原理、工程实践」七大板块，内容多多益善，新增板块与子级随意加，保持 UI 风格统一
+- ✅ 语言基础（+3 篇）：`kotlin-functional.md`（函数式编程：lambda/高阶函数/集合操作）、`kotlin-delegation.md`（by lazy / by viewModels / 属性委托）、`cpp-memory.md`（智能指针/RAII/内存模型）；同步更新 kotlin/ cpp/ README
+- ✅ UI 与渲染（+8 篇 + 新子模块 `render/` order 7）：`recyclerview-guide.md`（RecyclerView 使用）、`recyclerview-source.md`（缓存复用源码）、`webview-guide.md`（WebView 优化）、`input-system.md`（输入系统全链路）、`canvas-path.md`（Canvas/Path 绘图）、`touch-helper.md`（TouchHelper）、`tween-animation.md`、`scene-transition.md`、`screen-adaptation.md`、`windowmanager-deep.md`、`glide-source.md`、`render-principle.md`（渲染原理：CPU→GPU 管线）；navbar 下拉新增「渲染原理」
+- ✅ Jetpack（+7 篇）：`compose-state.md`、`compose-performance.md`（Compose 状态/性能）、`viewmodel-source.md`（ViewModel 源码）、`savedstate.md`（SavedStateHandle）、`room-advanced.md`（迁移/关系/协程）、`navigation-advanced.md`、`hilt-advanced.md`（自定义绑定/限定符）
+- ✅ 网络与异步（+6 篇）：`okhttp-source.md`（Dispatcher/拦截器责任链/连接池/缓存源码）、`retrofit-source.md`（动态代理/ServiceMethod/CallAdapter/Converter）、`coroutine-principle.md`（CPS/状态机/COROUTINE_SUSPENDED/Dispatchers）、`structured-concurrency.md`（Scope/SupervisorJob/async-await）、`sync-barrier.md`（同步屏障/异步消息/IdleHandler/epoll）、`concurrency-practice.md`（中断/ThreadLocal/并发容器/死锁）
+- ✅ 进阶实战（+8 篇 + 新子模块 `cross-platform/` order 7）：`router-design.md`（路由表/APT/Postcard/SPI）、`network-optimization.md`（HTTPDNS/连接复用/HTTP2-3/弱网）、`battery-optimization.md`（Doze/WakeLock/定位优化）、`apm-monitoring.md`（APM 架构/崩溃/卡顿/ANR/上报）、`log-system.md`（日志分级/环形文件/回捞/请求ID）、`exoplayer-deep.md`（ExoPlayer 架构/ABR/Renderer/DRM）、`mediacodec-ffmpeg.md`（硬编硬解/PTS 同步/FFmpeg）、`cross-platform-overview.md`（Flutter 自绘/RN 桥接/CMP/KMP 选型）；navbar 下拉新增「跨端方案」
+- ✅ 系统原理（+7 篇）：`binder-driver.md`（内核驱动/binder_proc-node-ref/mmap 一次拷贝/BC_TRANSACTION）、`pms-package-manager.md`（PMS 扫描/安装流程/权限/resolveActivity）、`wms-touch-dispatch.md`（IMS/InputReader/InputDispatcher/命中测试/输入 ANR）、`zygote-deep.md`（预加载/COW/fork 孵化/ActivityThread.main）、`art-compilation.md`（AOT/JIT/Profile 引导/dex2oat）、`linux-memory.md`（虚拟内存/回收/oom_adj/LMKD/PSI）、`signature-verify.md`（v1-v4 签名/密钥轮换/多渠道重签）
+- ✅ 工程实践（+6 篇）：`custom-gradle-plugin.md`（三种插件形式/Extension/Task/Transform+ASM）、`git-rebase-workflow.md`（Rebase vs Merge/交互式变基/cherry-pick/stash）、`jenkins-pipeline.md`（Master-Agent/声明式 Pipeline/Android 流水线/凭据）、`gray-release.md`（UID 哈希分组/功能开关/监控回滚）、`mockk-testing.md`（coEvery/coVerify/spyk/runTest）、`test-pyramid.md`（金字塔/覆盖率 JaCoCo/TDD/质量门禁）
+- ✅ 每篇文章风格统一：intro 引言、mermaid 图（flowchart/sequenceDiagram/stateDiagram）、对比表格、Kotlin 代码、高频面试题 Q1-Q5（`::: details 查看答案`）、小结、跨板块交叉链接
+- ✅ 同步更新：各板块 README 文章导航（network/advanced/system/engineering 全文重排）、`navbar.ts`（+渲染原理、+跨端方案）、根 `README.md`（进阶实战 +跨端方案行、系统原理 +操作系统行、精选文章重写）、`src/README.md`（内容规模 200+→220+、四大板块精选 +27 篇）、`architecture.md`（navbar 表 4 行、模块文章表 8 个板块）
+- ✅ `npm run build` 构建 311 页面成功（264 → 311，无 broken link warning）；`npm run sync:static` 已同步 wikiStatic；浏览器实测：侧边栏新子模块顺序正确、navbar 下拉新增项可点击、新页面渲染正常
+- ⚠️ 教训：生成文章时 `::: details 查看答案` 闭合标签偶发写成全角 `：`（`::：`），每批文章后必须全局 grep 排查；新增子模块前必须盘点全部 `dir.order` 避免冲突（advanced 1-7、system 1-6 已核验唯一）
 
 ### 2026-08-26（Android 核心知识体系系统扩充：+5 大板块 +11 篇文章）
 - ✅ 用户需求：Android 核心只有 8 个板块远不够，要求系统整理并补充缺失知识面，新增大类与子级
@@ -203,18 +217,18 @@
 
 ## 3. 内容建设记录
 
-### 文章规模（构建渲染 248 页面，2026-08-25 按实际目录重新统计）
+### 文章规模（构建渲染 311 页面，2026-08-26 按实际目录重新统计）
 | 模块 | 文章数 | 说明 |
 | --- | --- | --- |
 | roadmap/ | 3 | 学习路线（Android / Kotlin / Compose） |
-| language/ | 59 | Kotlin / Java / 设计模式 / 并发 / 集合 / JVM / 算法 / C++ |
-| android/ | 16 | 四大组件 + Fragment + 存储 + 进程 / Context |
-| ui/ | 18 | View / 事件 / 自定义 / 动画 / 布局 / Compose / Window / Bitmap / WebView |
-| jetpack/ | 9 | Lifecycle / Room / Paging / WorkManager / Hilt |
-| network/ | 14 | OkHttp / Retrofit / Handler / 协程 / 线程 |
-| advanced/ | 16 | 架构 / 组件化 / 性能 / 稳定性 / 多媒体 / 插件化 |
-| system/ | 16 | Binder / AMS / WMS / 启动 / APK / ART / OS |
-| engineering/ | 9 | Gradle / Git / CI/CD / 测试 |
+| language/ | 62 | Kotlin / Java / 设计模式 / 并发 / 集合 / JVM / 算法 / C++ |
+| android/ | 27 | 四大组件 + Fragment + Intent + App + 资源 + 权限 + 通知 + 存储 + 进程 / Context |
+| ui/ | 23 | View / 事件 / 自定义 / 动画 / 布局 / Window / Bitmap / 渲染原理 / WebView |
+| jetpack/ | 19 | Compose / Lifecycle / Room / Paging / WorkManager / Hilt |
+| network/ | 20 | OkHttp / Retrofit / Handler / 协程 / 线程 / 基础协议 |
+| advanced/ | 24 | 架构 / 组件化 / 路由 / 性能 / 稳定性 / 多媒体 / 跨端 / 插件化 |
+| system/ | 23 | Binder / AMS / WMS / PMS / 启动 / APK / ART / OS |
+| engineering/ | 15 | Gradle / Git / CI/CD / 测试 |
 | interview/ | 7 | 面试指南（含知识点汇总） |
 | projects/ | 2 | 实战项目 |
 | reading-notes/ | 11 | 读书笔记 |

@@ -15,6 +15,8 @@ dir:
 
 - [协程 Flow 进阶](flow-advanced.md)
 - [RxJava 操作符详解](rxjava-operators.md)
+- [协程原理深入](coroutine-principle.md)
+- [结构化并发与作用域](structured-concurrency.md)
 
 ## 核心要点
 
@@ -23,6 +25,12 @@ dir:
 2. **热流**：`StateFlow` / `SharedFlow`（状态共享）
 3. **背压处理**：`conflate` / `buffer` / `collectLatest`
 4. **操作符**：`map` / `filter` / `flatMapConcat` / `combine` / `catch`
+
+### 协程原理
+1. **挂起本质**：CPS 变换 + 状态机（`COROUTINE_SUSPENDED`）
+2. **调度器**：`Dispatchers.Main` / `IO` / `Default` / `Unconfined`
+3. **结构化并发**：Scope 管理生命周期，取消自动传播
+4. **SupervisorJob**：子异常隔离；`async/await` 组合并发
 
 ### RxJava
 1. **核心概念**：Observable / Observer / Scheduler

@@ -18,6 +18,8 @@ dir:
 - [卡顿优化与掉帧分析](jank-optimization.md)
 - [包体积优化](apk-size-optimization.md)
 - [LeakCanary 源码分析](leakcanary-analysis.md)
+- [网络优化实战](network-optimization.md)
+- [电量优化实战](battery-optimization.md)
 
 ## 优化维度
 
@@ -28,3 +30,4 @@ dir:
 | 内存 | 泄漏排查（LeakCanary）、Bitmap 优化、内存缓存 |
 | 电量 | 定位/网络/唤醒锁优化、Doze 适配 |
 | 包体积 | R8 混淆、资源压缩、动态特性模块 |
+| 网络 | HTTPDNS、连接复用、弱网适配、流量压缩 |

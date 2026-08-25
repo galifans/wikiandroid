@@ -16,6 +16,7 @@ Jetpack 生命周期组件，解决组件生命周期管理难题。
 - [Lifecycle 原理与使用](lifecycle.md)
 - [ViewModel 与 LiveData 详解](viewmodel-livedata.md)
 - [SavedStateHandle 状态保存](savedstate.md)
+- [ViewModel 源码解析](viewmodel-source.md) — ViewModelStore/onCleared/viewModelScope 原理
 
 ## 核心要点
 

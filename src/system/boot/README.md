@@ -15,6 +15,7 @@ dir:
 
 - [Android 系统启动流程](system-boot.md)
 - [应用启动流程详解](app-launch.md)
+- [Zygote 进程深入](zygote-deep.md)
 
 ## 核心要点
 
@@ -31,3 +32,8 @@ Boot ROM → BootLoader → Linux 内核
 → ActivityThread.main() → 创建 Application → 创建 Activity
 → ViewRootImpl → 首帧
 ```
+
+### Zygote 孵化器
+1. 预加载框架类与资源（COW 共享内存）
+2. Socket 监听 AMS 请求，fork 创建应用进程
+3. SystemServer 是 Zygote 的第一个子进程

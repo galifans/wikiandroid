@@ -83,10 +83,10 @@ galifans_vibe_coding/
 | 2 | 🗺️ 学习路线 | `/roadmap/` | — | 3 条学习路线 |
 | 3 | ☕ 语言基础 | — | Kotlin / Java / C++ 知识点 / 设计模式 / 数据结构与算法 | 下拉菜单 |
 | 4 | 🧱 Android 核心 | — | Activity / Service / BroadcastReceiver / ContentProvider / Fragment / Intent / Application / 资源系统 / 权限系统 / 通知机制 / Context / 进程 / 数据存储 | 下拉菜单 |
-| 5 | 🎨 UI 与渲染 | — | View 体系 / 事件分发机制 / 自定义 View / Bitmap / Window / 动画机制 / 布局优化 / Jetpack Compose | 下拉菜单 |
-| 6 | 🧩 Jetpack | — | Lifecycle/ViewModel / Room/DataStore / Paging/Navigation / WorkManager/Hilt | 下拉菜单 |
-| 7 | 🌐 网络与异步 | — | 网络与协议 / Handler 消息机制 / 协程 Flow/RxJava / 线程池与并发 | 下拉菜单 |
-| 8 | 🚀 进阶实战 | — | 架构设计 / 组件化与模块化 / 插件化与热修复 / 性能优化 / 稳定性保障 / 音视频开发 | 下拉菜单 |
+| 5 | 🎨 UI 与渲染 | — | View 体系 / 事件分发机制 / 自定义 View / Bitmap / Window / 动画机制 / 布局优化 / 渲染原理 | 下拉菜单 |
+| 6 | 🧩 Jetpack | — | Jetpack Compose / Lifecycle/ViewModel / Room/DataStore / Paging/Navigation / WorkManager/Hilt | 下拉菜单 |
+| 7 | 🌐 网络与异步 | — | 网络与协议 / Handler 消息机制 / 协程 Flow/RxJava / 线程池与并发 / 计算机网络体系 / Socket 编程基础 / TCP 与 UDP 详解 | 下拉菜单 |
+| 8 | 🚀 进阶实战 | — | 架构设计 / 组件化与模块化 / 插件化与热修复 / 性能优化 / 稳定性保障 / 音视频开发 / 跨端方案 | 下拉菜单 |
 | 9 | ⚙️ 系统原理 | — | Binder 机制 / AMS/WMS / 系统与应用启动流程 / APK 打包与签名 / ART/DEX/类加载 / 操作系统 | 下拉菜单 |
 | 10 | 🛠️ 工程实践 | — | Gradle 构建 / Git 与版本管理 / CI/CD / 测试体系 | 下拉菜单 |
 | 11 | 💼 面试指南 | `/interview/` | — | 平铺 7 篇文章 |
@@ -160,9 +160,11 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### ☕ 语言基础 `/language/`
 | 子模块 | ✅ 已完成 |
 | --- | --- |
-| kotlin/ | kotlin-basics.md、kotlin-coroutines.md、kotlin-generics.md、kotlin-extensions.md |
-| java/ | java-basics.md、java-collections.md、java-concurrency.md |
-| algorithm/ | algorithm-guide.md、leetcode-top100.md |
+| kotlin/ | kotlin-basics.md、kotlin-coroutines.md、kotlin-generics.md、kotlin-extensions.md、kotlin-functional.md、kotlin-delegation.md |
+| java/ | java-basics.md、java-collections.md、java-concurrency.md（含 basics/ collections/ concurrent/ jvm/ 分组） |
+| cpp/ | cpp-basics.md、cpp-memory.md、jni-ndk.md |
+| design-pattern/ | 设计模式汇总 + 11 篇精讲（单例/代理/观察者/策略/责任链/适配器等） |
+| algorithm/ | algorithm-guide.md、leetcode-top100.md、sort-algorithm.md、search-algorithm.md、binary-tree-traversal.md、high-frequency-algorithms.md、data-structure.md、coder-interview-guide.md、offer-classic.md 等 |
 
 ### 🧱 Android 核心 `/android/`
 | 子模块 | ✅ 已完成 |
@@ -184,55 +186,61 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 🎨 UI 与渲染 `/ui/`
 | 子模块 | ✅ 已完成 |
 | --- | --- |
-| view/ | view-draw-process.md、view-viewgroup.md、measurespec.md |
-| event/ | event-dispatch.md、conflict-solution.md |
-| custom-view/ | custom-view-guide.md、custom-viewgroup.md |
-| animation/ | property-animation.md |
-| layout/ | layout-optimization.md |
-| compose/ | compose-basics.md、compose-state.md、compose-performance.md |
+| view/ | view-draw-process.md、view-viewgroup.md、measurespec.md、recyclerview-guide.md、recyclerview-source.md、webview-guide.md |
+| event/ | event-dispatch.md、conflict-solution.md、input-system.md |
+| custom-view/ | custom-view-guide.md、custom-viewgroup.md、canvas-path.md、touch-helper.md |
+| animation/ | property-animation.md、tween-animation.md、scene-transition.md |
+| layout/ | layout-optimization.md、screen-adaptation.md |
+| window/ | window-mechanism.md、windowmanager-deep.md |
+| bitmap/ | bitmap-guide.md、glide-source.md |
+| render/ | render-principle.md |
 
 ### 🧩 Jetpack `/jetpack/`
 | 子模块 | ✅ 已完成 |
 | --- | --- |
-| lifecycle-viewmodel/ | viewmodel-livedata.md、savedstate.md、lifecycle.md |
-| room-datastore/ | room-guide.md、datastore-guide.md |
-| paging-navigation/ | paging3.md、navigation.md |
-| workmanager-hilt/ | workmanager.md、hilt.md |
+| compose/ | compose-basics.md、compose-state.md、compose-performance.md、compose-layout.md、compose-animation.md、compose-interop.md |
+| lifecycle-viewmodel/ | viewmodel-livedata.md、savedstate.md、lifecycle.md、viewmodel-source.md |
+| room-datastore/ | room-guide.md、room-advanced.md、datastore-guide.md |
+| paging-navigation/ | paging3.md、navigation.md、navigation-advanced.md |
+| workmanager-hilt/ | workmanager.md、hilt.md、hilt-advanced.md |
 
 ### 🌐 网络与异步 `/network/`
 | 子模块 | ✅ 已完成 |
 | --- | --- |
-| http/ | retrofit-okhttp.md、okhttp-interceptor.md、http-protocol.md |
-| handler/ | handler-source.md、handlerthread.md |
-| coroutine/ | flow-advanced.md、rxjava-operators.md |
-| thread/ | thread-pool.md、locks.md、concurrency-tools.md |
+| http/ | retrofit-okhttp.md、okhttp-interceptor.md、http-protocol.md、okhttp-source.md、retrofit-source.md |
+| handler/ | handler-source.md、handlerthread.md、sync-barrier.md |
+| coroutine/ | flow-advanced.md、rxjava-operators.md、coroutine-principle.md、structured-concurrency.md |
+| thread/ | thread-pool.md、locks.md、concurrency-tools.md、asynctask-intentservice.md、concurrency-practice.md |
+| 根级 | osi-tcpip.md、socket.md、tcp-udp.md（基础协议） |
 
 ### 🚀 进阶实战 `/advanced/`
 | 子模块 | ✅ 已完成 |
 | --- | --- |
-| architecture/ | architecture-evolution.md、clean-architecture.md、repository-pattern.md |
-| modular/ | modularization-practice.md |
-| plugin/ | plugin-principle.md、hotfix-comparison.md |
-| performance/ | startup-optimization.md、memory-optimization.md、jank-optimization.md、apk-size-optimization.md |
-| stability/ | crash-monitoring.md、anr-guide.md |
-| multimedia/ | multimedia-basics.md |
+| architecture/ | architecture-evolution.md、clean-architecture.md、repository-pattern.md、eventbus-analysis.md |
+| modular/ | modularization-practice.md、router-design.md |
+| plugin/ | plugin-principle.md、hotfix-comparison.md、hook-tech.md |
+| performance/ | startup-optimization.md、memory-optimization.md、jank-optimization.md、apk-size-optimization.md、leakcanary-analysis.md、network-optimization.md、battery-optimization.md |
+| stability/ | crash-monitoring.md、anr-guide.md、apm-monitoring.md、log-system.md |
+| multimedia/ | multimedia-basics.md、exoplayer-deep.md、mediacodec-ffmpeg.md |
+| cross-platform/ | cross-platform-overview.md |
 
 ### ⚙️ 系统原理 `/system/`
 | 子模块 | ✅ 已完成 |
 | --- | --- |
-| binder/ | binder-mechanism.md、aidl-deep.md |
-| ams-wms/ | ams-activity-launch.md、wms-principle.md |
-| boot/ | system-boot.md、app-launch.md |
-| apk/ | apk-build-process.md、multi-channel.md |
-| art/ | art-runtime.md、dex-format.md、classloader.md |
+| binder/ | binder-mechanism.md、binder-driver.md、aidl-deep.md、ipc-comparison.md、parcelable.md |
+| ams-wms/ | ams-activity-launch.md、wms-principle.md、pms-package-manager.md、wms-touch-dispatch.md |
+| boot/ | system-boot.md、app-launch.md、zygote-deep.md |
+| apk/ | apk-build-process.md、multi-channel.md、signature-verify.md |
+| art/ | art-runtime.md、art-compilation.md、art-gc.md、dex-format.md、classloader.md |
+| os/ | os-core.md、linux-memory.md、thread-sync-ipc.md |
 
 ### 🛠️ 工程实践 `/engineering/`
 | 子模块 | ✅ 已完成 |
 | --- | --- |
-| gradle/ | gradle-basics.md、version-catalog.md |
-| git/ | git-workflow.md、git-cheatsheet.md |
-| cicd/ | github-actions.md |
-| testing/ | unit-testing.md、ui-testing.md |
+| gradle/ | gradle-basics.md、dependency-config.md、version-catalog.md、proguard-guide.md、custom-gradle-plugin.md |
+| git/ | git-workflow.md、git-rebase-workflow.md、git-cheatsheet.md |
+| cicd/ | github-actions.md、jenkins-pipeline.md、gray-release.md |
+| testing/ | unit-testing.md、mockk-testing.md、ui-testing.md、test-pyramid.md |
 
 ### 💼 面试指南 `/interview/`（平铺）
 - ✅ android-knowledge-summary.md（Android 知识点汇总：19 大主题回顾清单，链接全部详细文章）
@@ -249,7 +257,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 📎 关于本站 `/about/`
 - ✅ intro.md　✅ contribution-guideline.md　✅ faq.md
 
-**现状统计**：✅ 全部文章已完成（约 183 篇 + 各模块 README + 书籍板块页，构建 248 页面），无「（待更新）」占位文章，构建无 broken-link warning。
+**现状统计**：✅ 全部文章已完成（236 篇文章 + 81 个模块 README，构建 311 页面），无「（待更新）」占位文章，构建无 broken-link warning。
 
 ---
 

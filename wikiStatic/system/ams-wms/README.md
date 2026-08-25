@@ -15,6 +15,8 @@ dir:
 
 - [AMS 与 Activity 启动流程](ams-activity-launch.md)
 - [WMS 窗口管理原理](wms-principle.md)
+- [PMS 包管理机制](pms-package-manager.md)
+- [WMS 触摸事件分发深入](wms-touch-dispatch.md)
 
 ## 核心要点
 
@@ -27,7 +29,12 @@ dir:
 1. 窗口管理：添加、更新、删除窗口
 2. 窗口层级与 Z-order
 3. SurfaceFlinger 调度与合成
-4. 输入事件分发（InputDispatcher）
+4. 输入事件分发（InputDispatcher / 命中测试）
+
+### PMS（PackageManagerService）
+1. 扫描解析 APK、管理安装卸载
+2. 权限管理与运行时授权
+3. Intent 解析匹配（resolveActivity）
 
 ## 启动流程简版
 

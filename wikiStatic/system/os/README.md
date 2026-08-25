@@ -14,6 +14,7 @@ dir:
 ## 文章列表
 
 - [操作系统核心知识](os-core.md) — 进程线程、死锁、内存管理、虚拟内存、进程调度、Linux IPC 概览
+- [Linux 内存管理深入](linux-memory.md) — 虚拟内存、分页、回收、oom_adj 与 LMK
 - [线程同步与进程间通信](thread-sync-ipc.md) — 临界区、互斥量、信号量、管道、共享内存、Socket
 
 ## 相关知识

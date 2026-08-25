@@ -17,6 +17,7 @@ Android 构建系统的核心：Gradle + AGP。
 - [Gradle 依赖配置详解](dependency-config.md)
 - [Version Catalog 依赖管理](version-catalog.md)
 - [ProGuard 代码混淆](proguard-guide.md)
+- [自定义 Gradle 插件](custom-gradle-plugin.md)
 
 ## 核心要点
 
@@ -25,6 +26,7 @@ Android 构建系统的核心：Gradle + AGP。
 3. **构建优化**：缓存、并行、Configuration Cache
 4. **依赖管理**：Version Catalog（`libs.versions.toml`）
 5. **变体（Build Variants）**：debug / release + 维度
+6. **自定义插件**：buildSrc / 独立工程 / Extension + Task / Transform 插桩
 
 ## 常用命令
 

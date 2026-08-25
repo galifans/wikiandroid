@@ -14,14 +14,17 @@ dir:
 ## 文章列表
 
 - [音视频开发入门](multimedia-basics.md)
+- [Media3 ExoPlayer 播放器深入](exoplayer-deep.md)
+- [MediaCodec 与 FFmpeg 音视频处理](mediacodec-ffmpeg.md)
 
 ## 核心要点
 
 1. **采集**：Camera / AudioRecord / MediaCodec
-2. **编码**：H.264 / H.265 / AAC，硬编（MediaCodec）与软编
+2. **编码**：H.264 / H.265 / AAC，硬编（MediaCodec）与软编（FFmpeg）
 3. **播放**：ExoPlayer（推荐）/ Media3
 4. **渲染**：SurfaceView / TextureView / OpenGL ES
 5. **推流拉流**：RTMP / RTSP / WebRTC
+6. **编辑管线**：解封装 → 解码 → 处理 → 编码 → 封装
 
 ## 技术选型
 

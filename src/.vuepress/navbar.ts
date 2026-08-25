@@ -41,6 +41,7 @@ export default navbar([
       { text: "Window", link: "/ui/window/" },
       { text: "动画机制", link: "/ui/animation/" },
       { text: "布局优化", link: "/ui/layout/" },
+      { text: "渲染原理", link: "/ui/render/" },
     ],
   },
   {
@@ -74,6 +75,7 @@ export default navbar([
       { text: "性能优化", link: "/advanced/performance/" },
       { text: "稳定性保障", link: "/advanced/stability/" },
       { text: "音视频开发", link: "/advanced/multimedia/" },
+      { text: "跨端方案", link: "/advanced/cross-platform/" },
     ],
   },
   {

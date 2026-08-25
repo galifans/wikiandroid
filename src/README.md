@@ -72,7 +72,7 @@ features:
 
 ## 📊 内容规模
 
-> **9 大知识模块 · 200+ 篇原创文章**，覆盖 Android 面试全考点（应用层 → 源码 → 性能 → 工程化）；
+> **9 大知识模块 · 220+ 篇原创文章**，覆盖 Android 面试全考点（应用层 → 源码 → 性能 → 工程化）；
 > 另有 **11 篇经典书籍读书笔记**、**7 本可下载 PDF 书籍**与 **6 篇大厂面经**。
 
 ## 📌 精选文章
@@ -87,12 +87,16 @@ features:
 - [Kotlin 协程从入门到进阶](/language/kotlin/kotlin-coroutines.md)
 - [Kotlin 泛型详解](/language/kotlin/kotlin-generics.md)
 - [Kotlin 扩展函数](/language/kotlin/kotlin-extensions.md)
+- [Kotlin 函数式编程：lambda / 高阶函数 / 集合操作](/language/kotlin/kotlin-functional.md)
+- [Kotlin 委托：by lazy / by viewModels / 属性委托](/language/kotlin/kotlin-delegation.md)
 - [面向 Android 的 Java 核心回顾](/language/java/java-basics.md)
 - [Java 集合框架（HashMap / ArrayList / ConcurrentHashMap 源码剖析）](/language/java/collections/)
 - [Java 并发基础：线程 / volatile / synchronized / 死锁](/language/java/concurrent/)
 - [JVM 内存区域与内存溢出](/language/java/jvm/JVM内存区域与内存溢出.md)
 - [JVM 类加载机制](/language/java/jvm/JVM类加载机制.md)
 - [垃圾回收算法](/language/java/jvm/垃圾回收算法.md)
+- [C++ 基础与 JNI / NDK 开发](/language/cpp/cpp-basics.md)
+- [C++ 内存管理：智能指针 / RAII](/language/cpp/cpp-memory.md)
 - [设计模式汇总（12 篇精讲，结合 Android 源码实例）](/language/design-pattern/)
 
 ### 🧱 Android 核心
@@ -121,64 +125,104 @@ features:
 ### 🎨 UI 与渲染
 - [View 绘制流程详解](/ui/view/view-draw-process.md)
 - [MeasureSpec 完全解析](/ui/view/measurespec.md)
+- [RecyclerView 使用指南与源码解析](/ui/view/recyclerview-guide.md)
+- [WebView 使用与优化](/ui/view/webview-guide.md)
 - [事件分发机制详解](/ui/event/event-dispatch.md)
+- [输入系统：从触摸事件到应用分发](/ui/event/input-system.md)
 - [自定义 View 实战](/ui/custom-view/custom-view-guide.md)
+- [Canvas / Path 绘图详解](/ui/custom-view/canvas-path.md)
 - [属性动画机制](/ui/animation/property-animation.md)
+- [补间动画与场景过渡动画](/ui/animation/tween-animation.md)
 - [布局优化与屏幕适配](/ui/layout/layout-optimization.md)
 - [Window 机制详解](/ui/window/window-mechanism.md)
 - [Bitmap 详解与图片压缩](/ui/bitmap/bitmap-guide.md)
-- [Jetpack Compose 入门到进阶](/jetpack/compose/compose-basics.md)
+- [Glide 图片加载源码解析](/ui/bitmap/glide-source.md)
+- [渲染原理：CPU 到 GPU 的绘制管线](/ui/render/render-principle.md)
 
 ### 🧩 Jetpack 全家桶
+- [Jetpack Compose 入门到进阶](/jetpack/compose/compose-basics.md)
+- [Compose 状态管理与重组机制](/jetpack/compose/compose-state.md)
+- [Compose 布局系统：测量与约束](/jetpack/compose/compose-layout.md)
 - [Lifecycle / ViewModel / LiveData](/jetpack/lifecycle-viewmodel/lifecycle.md)
+- [ViewModel 源码解析](/jetpack/lifecycle-viewmodel/viewmodel-source.md)
+- [SavedStateHandle 状态保存](/jetpack/lifecycle-viewmodel/savedstate.md)
 - [Room 数据库详解](/jetpack/room-datastore/room-guide.md)
+- [Room 进阶：迁移 / 关系 / 协程](/jetpack/room-datastore/room-advanced.md)
 - [DataStore 使用指南](/jetpack/room-datastore/datastore-guide.md)
 - [Paging 3 分页加载](/jetpack/paging-navigation/paging3.md)
 - [Navigation 导航组件](/jetpack/paging-navigation/navigation.md)
 - [WorkManager 后台任务](/jetpack/workmanager-hilt/workmanager.md)
 - [Hilt 依赖注入](/jetpack/workmanager-hilt/hilt.md)
+- [Hilt 进阶：自定义绑定 / 限定符](/jetpack/workmanager-hilt/hilt-advanced.md)
 
 ### 🌐 网络与异步
 - [计算机网络体系（OSI / TCP-IP）](/network/osi-tcpip.md)
 - [TCP 与 UDP 详解](/network/tcp-udp.md)
 - [OkHttp / Retrofit 详解](/network/http/retrofit-okhttp.md)
+- [OkHttp 源码解析：Dispatcher / 拦截器 / 连接池](/network/http/okhttp-source.md)
+- [Retrofit 源码解析：动态代理 / CallAdapter / Converter](/network/http/retrofit-source.md)
 - [Handler 消息机制源码解析](/network/handler/handler-source.md)
+- [Handler 同步屏障与异步消息](/network/handler/sync-barrier.md)
 - [协程 Flow 进阶](/network/coroutine/flow-advanced.md)
+- [协程原理：挂起恢复与状态机](/network/coroutine/coroutine-principle.md)
+- [结构化并发：Scope / SupervisorJob / async-await](/network/coroutine/structured-concurrency.md)
 - [线程池详解](/network/thread/thread-pool.md)
 - [锁机制详解](/network/thread/locks.md)
+- [并发编程实践：中断 / ThreadLocal / 死锁](/network/thread/concurrency-practice.md)
 
 ### 🚀 进阶实战
 - [架构设计演进（MVC / MVP / MVVM / MVI）](/advanced/architecture/architecture-evolution.md)
 - [组件化与模块化实践](/advanced/modular/modularization-practice.md)
+- [路由框架设计与实现](/advanced/modular/router-design.md)
 - [插件化原理](/advanced/plugin/plugin-principle.md)
 - [Android 启动优化实践](/advanced/performance/startup-optimization.md)
 - [内存优化与内存泄漏排查](/advanced/performance/memory-optimization.md)
 - [卡顿优化实战](/advanced/performance/jank-optimization.md)
 - [APK 体积优化](/advanced/performance/apk-size-optimization.md)
+- [网络优化实践：HTTPDNS / 连接复用 / 弱网](/advanced/performance/network-optimization.md)
+- [耗电优化：Doze / WakeLock / WorkManager](/advanced/performance/battery-optimization.md)
 - [LeakCanary 源码分析](/advanced/performance/leakcanary-analysis.md)
 - [EventBus 源码分析](/advanced/architecture/eventbus-analysis.md)
 - [崩溃监控与 ANR 治理](/advanced/stability/crash-monitoring.md)
+- [APM 监控体系：崩溃 / 卡顿 / ANR 采集与上报](/advanced/stability/apm-monitoring.md)
+- [日志系统设计：分级 / 回捞 / 链路追踪](/advanced/stability/log-system.md)
+- [ExoPlayer 架构深度解析](/advanced/multimedia/exoplayer-deep.md)
+- [MediaCodec 硬编硬解与 FFmpeg](/advanced/multimedia/mediacodec-ffmpeg.md)
+- [跨端方案选型：Flutter / RN / Compose Multiplatform](/advanced/cross-platform/cross-platform-overview.md)
 
 ### ⚙️ 系统原理
 - [Binder 跨进程通信机制详解](/system/binder/binder-mechanism.md)
+- [Binder 驱动源码剖析：一次拷贝 / binder_ioctl](/system/binder/binder-driver.md)
 - [AIDL 深入解析](/system/binder/aidl-deep.md)
 - [Parcelable 序列化](/system/binder/parcelable.md)
 - [AMS 与 Activity 启动](/system/ams-wms/ams-activity-launch.md)
+- [PMS 包管理服务解析](/system/ams-wms/pms-package-manager.md)
 - [WMS 窗口管理](/system/ams-wms/wms-principle.md)
+- [触摸事件分发：InputManagerService 全流程](/system/ams-wms/wms-touch-dispatch.md)
 - [系统启动流程](/system/boot/system-boot.md)
+- [Zygote 进程深度解析](/system/boot/zygote-deep.md)
 - [APK 打包流程与签名机制](/system/apk/apk-build-process.md)
+- [APK 签名机制：v1-v4 / 密钥轮换 / 多渠道](/system/apk/signature-verify.md)
 - [ART 运行时与 GC](/system/art/art-runtime.md)
+- [ART 编译模式：AOT / JIT / Profile 引导](/system/art/art-compilation.md)
 - [类加载器与双亲委托](/system/art/classloader.md)
+- [Linux 内存管理与 LMKD 杀进程](/system/os/linux-memory.md)
 
 ### 🛠️ 工程实践
 - [Gradle 构建系统与 AGP](/engineering/gradle/gradle-basics.md)
 - [Gradle 依赖项配置](/engineering/gradle/dependency-config.md)
 - [ProGuard 混淆配置](/engineering/gradle/proguard-guide.md)
+- [自定义 Gradle 插件：Transform + ASM](/engineering/gradle/custom-gradle-plugin.md)
 - [Git 工作流与最佳实践](/engineering/git/git-workflow.md)
+- [Git Rebase 工作流：交互式变基 / cherry-pick](/engineering/git/git-rebase-workflow.md)
 - [Git 常用命令速查](/engineering/git/git-cheatsheet.md)
 - [GitHub Actions CI/CD](/engineering/cicd/github-actions.md)
+- [Jenkins Pipeline 构建 Android 流水线](/engineering/cicd/jenkins-pipeline.md)
+- [灰度发布实践：分组 / 开关 / 回滚](/engineering/cicd/gray-release.md)
 - [单元测试实战](/engineering/testing/unit-testing.md)
+- [MockK 单元测试框架](/engineering/testing/mockk-testing.md)
 - [UI 测试实战](/engineering/testing/ui-testing.md)
+- [测试金字塔与覆盖率门禁](/engineering/testing/test-pyramid.md)
 
 ### 💼 面试与项目
 - [面试基础篇（Java/Kotlin、四大组件、View）](/interview/basics.md)

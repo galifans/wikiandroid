@@ -31,11 +31,13 @@ Android 开发的语言地基：Kotlin、Java 与数据结构算法。
 
 ## 📑 全部文章导航
 
-### 🟣 Kotlin（4 篇）
+### 🟣 Kotlin（6 篇）
 - [Kotlin 基础语法详解](/language/kotlin/kotlin-basics.md)
 - [Kotlin 协程从入门到进阶](/language/kotlin/kotlin-coroutines.md)
 - [Kotlin 泛型详解](/language/kotlin/kotlin-generics.md)
 - [Kotlin 扩展函数](/language/kotlin/kotlin-extensions.md)
+- [Kotlin 函数式编程与高阶函数](/language/kotlin/kotlin-functional.md)
+- [Kotlin 委托机制与内联函数](/language/kotlin/kotlin-delegation.md)
 
 ### ☕ Java 核心回顾（3 篇）
 - [面向 Android 的 Java 核心回顾](/language/java/java-basics.md)
@@ -97,6 +99,7 @@ Android 开发的语言地基：Kotlin、Java 与数据结构算法。
 - [LeetCode Top 100 精讲](/language/algorithm/leetcode-top100.md)
 - [高频算法题汇总](/language/algorithm/high-frequency-algorithms.md)
 
-### ➕ C++ / NDK（2 篇）
+### ➕ C++ / NDK（3 篇）
 - [C++ 核心知识点](/language/cpp/cpp-basics.md)：指针 / 面向对象 / 智能指针
+- [C++ 内存管理与智能指针](/language/cpp/cpp-memory.md)：RAII / 智能指针 / NDK 实践
 - [JNI 与 NDK 开发](/language/cpp/jni-ndk.md)：JNI 基础 / CMake / 原生 API

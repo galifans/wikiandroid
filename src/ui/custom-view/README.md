@@ -16,6 +16,7 @@ dir:
 - [自定义 View 入门指南](custom-view-guide.md)
 - [自定义 ViewGroup 实战](custom-viewgroup.md)
 - [触摸辅助类与 View 滑动](touch-helper.md)
+- [Canvas 与 Path 绘制艺术](canvas-path.md) — Paint 样式、贝塞尔曲线、渐变/阴影/文字高级绘制
 
 ## 分类
 
