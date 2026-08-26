@@ -14,10 +14,23 @@ description: 内容 URI 的诞生背景、FileProvider 配置全流程、file_pa
 
 Android 7.0（API 24）之前，应用间分享文件直接传递 `file://` 路径：
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 Intent intent = new Intent(Intent.ACTION_VIEW);
 intent.setDataAndType(Uri.fromFile(new File("/storage/emulated/0/DCIM/1.jpg")), "image/*");
 ```
+
+@tab Kotlin
+
+```kotlin
+val intent = Intent(Intent.ACTION_VIEW)
+intent.setDataAndType(Uri.fromFile(File("/storage/emulated/0/DCIM/1.jpg")), "image/*")
+```
+
+:::
 
 这种方式的严重安全问题是：**file:// URI 暴露了文件的绝对路径**，接收方拿到路径后可以越权访问其他应用未授权的文件。
 
@@ -112,6 +125,21 @@ flowchart LR
 
 ### 3.1 获取 URI
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 核心 API
+Uri uri = FileProvider.getUriForFile(
+    context,
+    context.getPackageName() + ".fileprovider",
+    file
+);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 核心 API
 val uri: Uri = FileProvider.getUriForFile(
@@ -121,9 +149,25 @@ val uri: Uri = FileProvider.getUriForFile(
 )
 ```
 
+:::
+
 生成的 URI 形如：`content://com.example.app.fileprovider/images/IMG_20260101.jpg`
 
 ### 3.2 授予临时权限
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 拍照场景：相机需要写入输出文件
+Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+// 授予相机写权限
+intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 拍照场景：相机需要写入输出文件
@@ -134,7 +178,29 @@ val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
 }
 ```
 
+:::
+
 ### 3.3 分享场景
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public void shareImage(Context context, File file) {
+    Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", file);
+    Intent intent = new Intent(Intent.ACTION_SEND);
+    intent.setType("image/*");
+    intent.putExtra(Intent.EXTRA_STREAM, uri);
+    // 授予读取权限
+    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    // 配合 ClipData，让系统把权限授予给所有目标应用
+    intent.setClipData(ClipData.newUri(context.getContentResolver(), "分享图片", uri));
+    startActivity(Intent.createChooser(intent, "分享到"));
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 fun shareImage(context: Context, file: File) {
@@ -150,6 +216,8 @@ fun shareImage(context: Context, file: File) {
     startActivity(Intent.createChooser(intent, "分享到"))
 }
 ```
+
+:::
 
 > 关键点：Android 4.4+ 的 `ClipData` 机制会把临时权限授予**所有可处理该 Intent 的应用**。只有 clipData 中的 URI 会被授权，单纯放 extras 在某些场景授权不生效。
 

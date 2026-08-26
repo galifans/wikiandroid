@@ -72,6 +72,35 @@ flowchart LR
 
 ### 2.2 适配策略
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 用 WorkManager 替代自建任务:系统自动适配 Doze
+OneTimeWorkRequest work = new OneTimeWorkRequest.Builder(SyncWorker.class)
+        .setConstraints(new Constraints.Builder()
+                .setRequiresBatteryNotLow(true)
+                .setRequiresCharging(true)     // 充电时才同步
+                .build())
+        .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+        .build();
+WorkManager.getInstance(context).enqueue(work);
+
+// ② 真需要立即唤醒(如闹钟):setAlarmClock(唯一不受 Doze 限制)
+AlarmManager alarmManager =
+        (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+alarmManager.setAlarmClock(
+        new AlarmManager.AlarmClockInfo(triggerAt, null),
+        PendingIntent.getActivity(...)
+);
+
+// ③ 请求忽略电池优化(需谨慎,滥用会被下架)
+// adb shell dumpsys deviceidle whitelist +包名
+```
+
+@tab Kotlin
+
 ```kotlin
 // ① 用 WorkManager 替代自建任务:系统自动适配 Doze
 val work = OneTimeWorkRequestBuilder<SyncWorker>()
@@ -94,7 +123,31 @@ alarmManager.setAlarmClock(
 // adb shell dumpsys deviceidle whitelist +包名
 ```
 
+:::
+
 ## 三、WakeLock 正确用法
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 获取 WakeLock(必须带超时 + finally 释放)
+PowerManager powerManager =
+        (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+        PowerManager.PARTIAL_WAKE_LOCK, "app:download"
+);
+
+try {
+    wakeLock.acquire(60_000);   // 超时自动释放,防泄漏
+    doLongTask();
+} finally {
+    if (wakeLock.isHeld()) wakeLock.release();   // 必须释放!
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 获取 WakeLock(必须带超时 + finally 释放)
@@ -111,6 +164,8 @@ try {
 }
 ```
 
+:::
+
 | 错误用法 | 后果 |
 |---------|------|
 | 不释放 WakeLock | 手机无法休眠,电量狂掉 |
@@ -121,6 +176,34 @@ try {
 >  **最佳实践**:能用 WorkManager/JobScheduler 就不要自己拿 WakeLock;拿锁必须 try-finally 释放并带超时。
 
 ## 四、定位与传感器优化
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 定位:按需 + 降精度
+LocationManager locationManager =
+        (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+
+// 策略:业务场景决定精度
+// ① 前台导航 → 高精度(GPS),页面销毁必须 removeUpdates
+// ② 位置上报 → 省电模式(网络定位),低频(如 5 分钟)
+locationManager.requestLocationUpdates(
+        LocationManager.NETWORK_PROVIDER,   // 省电定位源
+        5 * 60_000L,                        // 5 分钟
+        100f,                               // 100 米
+        listener
+);
+// 用完必须注销!
+onDestroy() { locationManager.removeUpdates(listener); }
+
+// 传感器:事件驱动 + 及时注销
+sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+onDestroy() { sensorManager.unregisterListener(listener); }
+```
+
+@tab Kotlin
 
 ```kotlin
 // 定位:按需 + 降精度
@@ -143,6 +226,8 @@ sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DEL
 onDestroy() { sensorManager.unregisterListener(listener) }
 ```
 
+:::
+
 ## 五、网络与数据同步省电
 
 | 做法 | 说明 |
@@ -152,6 +237,25 @@ onDestroy() { sensorManager.unregisterListener(listener) }
 | 长连接保活 | 用系统级推送(FCM),避免自建长连接 |
 | 心跳合并 | 多条消息合并心跳 |
 | 避免频繁唤醒 | 轮询改事件驱动 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 充电 + WiFi 才同步的 WorkRequest
+Constraints constraints = new Constraints.Builder()
+        .setRequiresCharging(true)
+        .setRequiredNetworkType(NetworkType.UNMETERED)   // 仅 WiFi
+        .build();
+
+PeriodicWorkRequest syncWork =
+        new PeriodicWorkRequest.Builder(SyncWorker.class, 6, TimeUnit.HOURS)
+                .setConstraints(constraints)
+                .build();
+```
+
+@tab Kotlin
 
 ```kotlin
 // 充电 + WiFi 才同步的 WorkRequest
@@ -164,6 +268,8 @@ val syncWork = PeriodicWorkRequestBuilder<SyncWorker>(6, TimeUnit.HOURS)
     .setConstraints(constraints)
     .build()
 ```
+
+:::
 
 ## 六、电量优化检查清单
 

@@ -28,6 +28,22 @@ flowchart TD
 | `EXACTLY` | 精确尺寸 | `match_parent` / 固定 dp |
 | `AT_MOST` | 最大尺寸 | `wrap_content` |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    // 自定义测量逻辑
+    int width = MeasureSpec.getSize(widthMeasureSpec);
+    int height = MeasureSpec.getSize(heightMeasureSpec);
+    setMeasuredDimension(width, height);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
     // 自定义测量逻辑
@@ -37,11 +53,30 @@ override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
 }
 ```
 
+:::
+
 ::: tip 面试考点
 `wrap_content` 需要重写 `onMeasure`，否则效果等同 `match_parent`（因为父 View 默认给 AT_MOST 时直接用 spec 尺寸）。
 :::
 
 ## 三、Layout：布局阶段
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    // 遍历子 View，确定每个子 View 的位置
+    for (int i = 0; i < getChildCount(); i++) {
+        View child = getChildAt(i);
+        child.layout(left, top, right, bottom);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
@@ -53,6 +88,8 @@ override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
 }
 ```
 
+:::
+
 ## 四、Draw：绘制阶段
 
 绘制顺序（dispatchDraw 之前）：
@@ -62,6 +99,21 @@ override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
 3. 绘制子 View（`dispatchDraw`）
 4. 绘制装饰（`onDrawForeground`）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    paint.setColor(Color.RED);
+    canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, 50f, paint);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onDraw(canvas: Canvas) {
     super.onDraw(canvas)
@@ -69,6 +121,8 @@ override fun onDraw(canvas: Canvas) {
     canvas.drawCircle(width / 2f, height / 2f, 50f, paint)
 }
 ```
+
+:::
 
 ## 五、性能优化启示
 
@@ -83,6 +137,10 @@ override fun onDraw(canvas: Canvas) {
 
 ### 1. onWindowFocusChanged
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // View 已初始化完毕；窗口得到/失去焦点时各回调一次
 public void onWindowFocusChanged(boolean hasFocus) {
@@ -94,9 +152,28 @@ public void onWindowFocusChanged(boolean hasFocus) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// View 已初始化完毕；窗口得到/失去焦点时各回调一次
+override fun onWindowFocusChanged(hasFocus: Boolean) {
+    super.onWindowFocusChanged(hasFocus)
+    if (hasFocus) {
+        val width = view.measuredWidth
+        val height = view.measuredHeight
+    }
+}
+```
+
+:::
+
 注意：频繁 onResume/onPause 时该方法会被频繁调用。
 
 ### 2. view.post(runnable)
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // runnable 投递到消息队列尾部，Looper 调用时 View 已初始化完成
@@ -112,7 +189,26 @@ protected void onStart() {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// runnable 投递到消息队列尾部，Looper 调用时 View 已初始化完成
+override fun onStart() {
+    super.onStart()
+    view.post {
+        val width = view.measuredWidth
+        val height = view.measuredHeight
+    }
+}
+```
+
+:::
+
 ### 3. ViewTreeObserver
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // View 树状态或内部 View 可见性改变时回调
@@ -127,6 +223,23 @@ observer.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
     }
 });
 ```
+
+@tab Kotlin
+
+```kotlin
+// View 树状态或内部 View 可见性改变时回调
+val observer = view.viewTreeObserver
+observer.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+    @Suppress("DEPRECATION")
+    override fun onGlobalLayout() {
+        view.viewTreeObserver.removeGlobalOnLayoutListener(this)
+        val width = view.measuredWidth
+        val height = view.measuredHeight
+    }
+})
+```
+
+:::
 
 ::: tip 对比
 `onWindowFocusChanged` 简单但触发频繁；`post` 最简洁；`ViewTreeObserver` 精确但需注意移除监听（API 16 后用 `removeOnGlobalLayoutListener`）。

@@ -31,6 +31,38 @@ description: ViewPager2 与 ViewPager 对比、RecyclerView 内核、PageTransfo
     android:layout_height="match_parent" />
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Fragment 适配器
+public class HomePagerAdapter extends FragmentStateAdapter {
+
+    public HomePagerAdapter(Fragment fragment) {
+        super(fragment);
+    }
+
+    @Override
+    public int getItemCount() {
+        return 3;
+    }
+
+    @Override
+    public Fragment createFragment(int position) {
+        return PageFragment.newInstance(position);
+    }
+}
+
+// 使用
+HomePagerAdapter adapter = new HomePagerAdapter(this);
+viewPager.setAdapter(adapter);
+viewPager.setOrientation(ViewPager2.ORIENTATION_VERTICAL);  // 支持纵向
+viewPager.setOffscreenPageLimit(2);  // 预加载页数
+```
+
+@tab Kotlin
+
 ```kotlin
 // Fragment 适配器
 class HomePagerAdapter(fragment: Fragment) :
@@ -48,6 +80,8 @@ viewPager.adapter = adapter
 viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL  // 支持纵向
 viewPager.offscreenPageLimit = 2  // 预加载页数
 ```
+
+:::
 
 ## 二、ViewPager2 与 ViewPager 对比
 
@@ -78,6 +112,32 @@ flowchart LR
 
 ### 3.1 自定义变换
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 缩放 + 透明度联动动画
+public class ScaleTransformer implements ViewPager2.PageTransformer {
+    @Override
+    public void transformPage(View page, float position) {
+        // position: 0 为当前页，±1 为相邻页
+        float absPos = Math.abs(position);
+
+        // 缩放：中心页 1.0，边缘页 0.8
+        page.setScaleX(1f - 0.2f * absPos);
+        page.setScaleY(1f - 0.2f * absPos);
+        // 透明度
+        page.setAlpha(1f - 0.3f * absPos);
+        page.setTranslationX(position * -0.3f * page.getWidth());  // 视差效果
+    }
+}
+
+viewPager.setPageTransformer(new ScaleTransformer());
+```
+
+@tab Kotlin
+
 ```kotlin
 // 缩放 + 透明度联动动画
 class ScaleTransformer : ViewPager2.PageTransformer {
@@ -98,6 +158,8 @@ class ScaleTransformer : ViewPager2.PageTransformer {
 
 viewPager.setPageTransformer(ScaleTransformer())
 ```
+
+:::
 
 ### 3.2 position 含义
 
@@ -127,6 +189,38 @@ flowchart LR
 
 ### 4.2 官方懒加载姿势
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 方式一：Fragment 内判断用户可见（配合 onResume）
+public class PageFragment extends Fragment {
+    private boolean isFirstLoad = true;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isFirstLoad && isVisible()) {
+            loadData();   // 首次真正可见才加载
+            isFirstLoad = false;
+        }
+    }
+}
+
+// 方式二：registerOnPageChangeCallback 判断当前页
+viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+    @Override
+    public void onPageSelected(int position) {
+        if (position == 2) {
+            loadPageData(position);  // 滑动到该页才加载
+        }
+    }
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 // 方式一：Fragment 内判断用户可见（配合 onResume）
 class PageFragment : Fragment() {
@@ -151,7 +245,24 @@ viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback(
 })
 ```
 
+:::
+
 ### 4.3 setMaxLifecycle 控制
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 只让当前页走到 RESUMED，其他页停在 STARTED（更省资源）
+viewPager.setCurrentItem(position);
+((FragmentStateAdapter) adapter).setMaxLifecycle(
+        fragment,
+        Lifecycle.State.RESUMED
+);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 只让当前页走到 RESUMED，其他页停在 STARTED（更省资源）
@@ -161,6 +272,8 @@ viewPager.setCurrentItem(position)
     Lifecycle.State.RESUMED
 )
 ```
+
+:::
 
 ## 五、ViewPager2 源码原理
 

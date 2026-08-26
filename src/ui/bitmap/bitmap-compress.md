@@ -54,6 +54,28 @@ flowchart LR
 
 **采样压缩是 OOM 治理的第一道防线**：解码时按比例缩减像素，而不是解码后再缩放。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 第一步：只读边界（inJustDecodeBounds），不加载像素
+BitmapFactory.Options options = new BitmapFactory.Options();
+options.inJustDecodeBounds = true;
+BitmapFactory.decodeFile(path, options);
+
+// 第二步：计算采样率
+int reqWidth = 1080;
+int reqHeight = 1920;
+options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+// 第三步：真正解码（已压缩）
+options.inJustDecodeBounds = false;
+Bitmap bitmap = BitmapFactory.decodeFile(path, options);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 第一步：只读边界（inJustDecodeBounds），不加载像素
 val options = BitmapFactory.Options().apply {
@@ -70,6 +92,35 @@ options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
 options.inJustDecodeBounds = false
 val bitmap = BitmapFactory.decodeFile(path, options)
 ```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 采样率计算
+private int calculateInSampleSize(
+        BitmapFactory.Options options,
+        int reqWidth, int reqHeight) {
+    int height = options.outHeight;
+    int width = options.outWidth;
+    int inSampleSize = 1;
+    if (height > reqHeight || width > reqWidth) {
+        int halfHeight = height / 2;
+        int halfWidth = width / 2;
+        // 循环倍增，直到尺寸满足需求
+        while (halfHeight / inSampleSize >= reqHeight &&
+                halfWidth / inSampleSize >= reqWidth) {
+            inSampleSize *= 2;
+        }
+    }
+    return inSampleSize;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 采样率计算
@@ -92,6 +143,8 @@ private fun calculateInSampleSize(
 }
 ```
 
+:::
+
 ### 2.2 采样率规则
 
 | inSampleSize | 效果 | 内存 |
@@ -107,6 +160,21 @@ private fun calculateInSampleSize(
 
 ### 3.1 compress 压缩
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 质量压缩：调整编码质量，不改变像素尺寸
+public byte[] compressQuality(Bitmap bitmap, int quality) {
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    bitmap.compress(Bitmap.CompressFormat.JPEG, quality, output);
+    return output.toByteArray();
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 质量压缩：调整编码质量，不改变像素尺寸
 fun compressQuality(bitmap: Bitmap, quality: Int = 80): ByteArray {
@@ -115,6 +183,8 @@ fun compressQuality(bitmap: Bitmap, quality: Int = 80): ByteArray {
     return output.toByteArray()
 }
 ```
+
+:::
 
 | 格式 | 特点 | 适用 |
 |------|------|------|
@@ -125,6 +195,30 @@ fun compressQuality(bitmap: Bitmap, quality: Int = 80): ByteArray {
 > 注意：质量压缩用于**减少文件体积**（上传、存储），不减少内存占用（解码后仍是原像素）；**内存优化靠采样压缩**。
 
 ### 3.2 尺寸压缩（缩放）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 尺寸压缩：改变像素尺寸，直接减少内存
+public Bitmap compressScale(Bitmap bitmap, int maxWidth, int maxHeight) {
+    float scale = Math.min(
+            Math.min(maxWidth / (float) bitmap.getWidth(),
+                    maxHeight / (float) bitmap.getHeight()),
+            1f
+    );
+    if (scale >= 1f) return bitmap;
+    return Bitmap.createScaledBitmap(
+            bitmap,
+            (int) (bitmap.getWidth() * scale),
+            (int) (bitmap.getHeight() * scale),
+            true
+    );
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 尺寸压缩：改变像素尺寸，直接减少内存
@@ -144,9 +238,30 @@ fun compressScale(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
 }
 ```
 
+:::
+
 ## 四、缓存与复用
 
 ### 4.1 LruCache 内存缓存
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 图片内存缓存：最近最少使用
+int cacheSize = (int) (Runtime.getRuntime().maxMemory() / 8);  // 1/8 堆内存
+
+LruCache<String, Bitmap> lruCache = new LruCache<String, Bitmap>(cacheSize) {
+    // 计算单个 Bitmap 的大小
+    @Override
+    protected int sizeOf(String key, Bitmap value) {
+        return value.getAllocationByteCount();  // 8.0+ 用这个
+    }
+};
+```
+
+@tab Kotlin
 
 ```kotlin
 // 图片内存缓存：最近最少使用
@@ -160,7 +275,25 @@ val lruCache = object : LruCache<String, Bitmap>(cacheSize) {
 }
 ```
 
+:::
+
 ### 4.2 inBitmap 复用
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Bitmap 复用：重复利用像素内存
+Bitmap reusableBitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+
+BitmapFactory.Options options = new BitmapFactory.Options();
+options.inMutable = true;                 // 可复用前提
+options.inBitmap = reusableBitmap;        // 复用其像素内存
+BitmapFactory.decodeResource(res, R.drawable.img, options);
+```
+
+@tab Kotlin
 
 ```kotlin
 // Bitmap 复用：重复利用像素内存
@@ -172,6 +305,8 @@ val options = BitmapFactory.Options().apply {
 }
 BitmapFactory.decodeResource(res, R.drawable.img, options)
 ```
+
+:::
 
 复用条件：
 
@@ -205,6 +340,21 @@ flowchart TD
 
 ### 5.2 大图查看场景
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 超大图（长图）用 BitmapRegionDecoder 分块加载
+BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(inputStream, false);
+
+// 只解码可见区域
+Rect rect = new Rect(0, 0, visibleWidth, visibleHeight);
+Bitmap region = decoder.decodeRegion(rect, new BitmapFactory.Options());
+```
+
+@tab Kotlin
+
 ```kotlin
 // 超大图（长图）用 BitmapRegionDecoder 分块加载
 val decoder = BitmapRegionDecoder.newInstance(inputStream, false)
@@ -213,6 +363,8 @@ val decoder = BitmapRegionDecoder.newInstance(inputStream, false)
 val rect = Rect(0, 0, visibleWidth, visibleHeight)
 val region = decoder.decodeRegion(rect, BitmapFactory.Options())
 ```
+
+:::
 
 ## 六、高频面试题
 

@@ -43,6 +43,10 @@ flowchart TD
     G --> H[AMS 启动完成<br>系统就绪]
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // PMS 初始化(简化)
 class PackageManagerService {
@@ -58,6 +62,26 @@ class PackageManagerService {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// PMS 初始化(简化)
+class PackageManagerService(context: Context, installer: Installer) {
+    init {
+        // 1. 创建 Settings(持久化包信息)
+        mSettings = Settings(...)
+        // 2. 扫描各目录的 APK
+        scanDirTracedLI(File("/system/framework"), ...)
+        scanDirTracedLI(File("/system/app"), ...)
+        scanDirTracedLI(File("/data/app"), ...)
+        // 3. 写回 packages.xml(增量更新)
+        mSettings.writeLPr()
+    }
+}
+```
+
+:::
 
 | 扫描目录 | 内容 |
 |---------|------|
@@ -95,6 +119,20 @@ sequenceDiagram
 | 权限分配 | 授予 manifest 声明的权限 |
 | 广播通知 | ACTION_PACKAGE_ADDED 等 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 开发者视角:安装过程的关键校验
+// 1. 签名不一致 → 拒绝安装(INSTALL_FAILED_UPDATE_INCOMPATIBLE)
+// 2. targetSdk 过低 + 新系统 → 兼容性警告
+// 3. 请求过多敏感权限 → 用户可拒绝
+// 4. 存储不足 → INSTALL_FAILED_INSUFFICIENT_STORAGE
+```
+
+@tab Kotlin
+
 ```kotlin
 // 开发者视角:安装过程的关键校验
 // 1. 签名不一致 → 拒绝安装(INSTALL_FAILED_UPDATE_INCOMPATIBLE)
@@ -103,7 +141,13 @@ sequenceDiagram
 // 4. 存储不足 → INSTALL_FAILED_INSUFFICIENT_STORAGE
 ```
 
+:::
+
 ## 四、Manifest 解析与组件注册
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // PackageParser 解析 APK 的 AndroidManifest.xml(二进制 XML)
@@ -120,6 +164,27 @@ class Package {
     int versionCode; String versionName;
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// PackageParser 解析 APK 的 AndroidManifest.xml(二进制 XML)
+// 产物:Package 对象,包含:
+class Package {
+    var packageName: String? = null             // 包名
+    var applicationInfo: ApplicationInfo? = null // 应用信息
+    val activities = ArrayList<Activity>()       // Activity 组件
+    val services = ArrayList<Service>()          // Service 组件
+    val providers = ArrayList<Provider>()        // ContentProvider
+    val receivers = ArrayList<ActivityIntentInfo>()  // 广播接收者
+    val permissions = ArrayList<Permission>()     // 声明的权限
+    var signatures: Array<Signature>? = null      // 签名
+    var versionCode = 0
+    var versionName: String? = null
+}
+```
+
+:::
 
 > **组件注册的意义**:四大组件必须注册才能被系统识别。AMS 启动组件时通过 PMS 查询组件信息;Intent 隐式匹配也依赖 PMS 解析的 IntentFilter。
 
@@ -144,6 +209,20 @@ flowchart LR
 
 ### 5.2 运行时权限
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 运行时权限:dangerous 权限动态申请
+if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+    requestPermissions(new String[]{Manifest.permission.CAMERA}, REQ_CAMERA);
+}
+// 用户授权后:PMS 记录授权状态,后续直接通过
+```
+
+@tab Kotlin
+
 ```kotlin
 // 运行时权限:dangerous 权限动态申请
 if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -152,7 +231,13 @@ if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION
 // 用户授权后:PMS 记录授权状态,后续直接通过
 ```
 
+:::
+
 ## 六、解析器缓存与查询
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // resolveActivity:Intent → 目标组件(隐式跳转的基础)
@@ -163,6 +248,20 @@ public ResolveInfo resolveActivity(Intent intent, int flags) {
 }
 // 查询流程依赖 PMS 持有的 IntentResolver(包 → IntentFilter 索引)
 ```
+
+@tab Kotlin
+
+```kotlin
+// resolveActivity:Intent → 目标组件(隐式跳转的基础)
+fun resolveActivity(intent: Intent, flags: Int): ResolveInfo? {
+    // 1. 从缓存查询(PMS 启动时已解析所有 IntentFilter)
+    // 2. 匹配 action / category / data
+    // 3. 多个匹配时按优先级选择
+}
+// 查询流程依赖 PMS 持有的 IntentResolver(包 → IntentFilter 索引)
+```
+
+:::
 
 ## 七、高频面试题
 

@@ -33,6 +33,26 @@ flowchart LR
 
 ## 二、Paint 样式体系
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+paint.setStyle(Paint.Style.FILL);          // FILL / STROKE / FILL_AND_STROKE
+paint.setColor(Color.parseColor("#3F51B5"));
+paint.setStrokeWidth(6f);                  // 描边宽度
+paint.setStrokeCap(Paint.Cap.ROUND);       // 端点样式
+paint.setStrokeJoin(Paint.Join.ROUND);     // 拐角样式
+paint.setAntiAlias(true);                  // 抗锯齿
+paint.setDither(true);                     // 抖动（色彩过渡平滑）
+paint.setTextSize(40f);                    // 文字大小
+paint.setTypeface(Typeface.DEFAULT_BOLD);  // 字体
+paint.setTextAlign(Paint.Align.CENTER);    // 文字对齐
+```
+
+@tab Kotlin
+
 ```kotlin
 val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
     style = Paint.Style.FILL          // FILL / STROKE / FILL_AND_STROKE
@@ -47,6 +67,8 @@ val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
     textAlign = Paint.Align.CENTER    // 文字对齐
 }
 ```
+
+:::
 
 ### 样式速查表
 
@@ -64,6 +86,21 @@ val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
 
 ### 3.1 基础路径
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Path path = new Path();
+path.moveTo(100f, 100f);        // 移动到起点
+path.lineTo(300f, 100f);        // 直线
+path.lineTo(300f, 300f);
+path.close();                   // 闭合（回到起点）
+canvas.drawPath(path, paint);
+```
+
+@tab Kotlin
+
 ```kotlin
 val path = Path().apply {
     moveTo(100f, 100f)        // 移动到起点
@@ -74,7 +111,27 @@ val path = Path().apply {
 canvas.drawPath(path, paint)
 ```
 
+:::
+
 ### 3.2 贝塞尔曲线
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 二阶贝塞尔：quadTo(控制点, 终点)
+Path path = new Path();
+path.moveTo(100f, 300f);
+path.quadTo(200f, 100f, 300f, 300f);   // 抛物线
+
+// 三阶贝塞尔：cubicTo(控制点1, 控制点2, 终点)
+Path path2 = new Path();
+path2.moveTo(100f, 400f);
+path2.cubicTo(150f, 200f, 250f, 600f, 300f, 400f);  // S 形曲线
+```
+
+@tab Kotlin
 
 ```kotlin
 // 二阶贝塞尔：quadTo(控制点, 终点)
@@ -89,6 +146,8 @@ val path2 = Path().apply {
     cubicTo(150f, 200f, 250f, 600f, 300f, 400f)  // S 形曲线
 }
 ```
+
+:::
 
 ```mermaid
 flowchart LR
@@ -118,6 +177,29 @@ flowchart LR
 
 ### 3.4 PathMeasure 实现动画
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 用 PathMeasure 实现"描边路径动画"（如加载进度环）
+PathMeasure pathMeasure = new PathMeasure(circlePath, false);
+ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+animator.setDuration(2000);
+animator.addUpdateListener(animation -> {
+    float fraction = (float) animation.getAnimatedValue();
+    float stop = pathMeasure.getLength() * fraction;
+    // 动态截取路径片段绘制
+    Path drawPath = new Path();
+    pathMeasure.getSegment(0f, stop, drawPath, true);
+    invalidate();
+});
+animator.setRepeatCount(ValueAnimator.INFINITE);
+animator.start();
+```
+
+@tab Kotlin
+
 ```kotlin
 // 用 PathMeasure 实现"描边路径动画"（如加载进度环）
 val pathMeasure = PathMeasure(circlePath, false)
@@ -136,7 +218,25 @@ val animator = ValueAnimator.ofFloat(0f, 1f).apply {
 }
 ```
 
+:::
+
 ## 四、Canvas 变换与保存/恢复
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+canvas.save();                  // 保存当前画布状态（入栈）
+canvas.translate(100f, 100f);   // 平移坐标系
+canvas.rotate(45f);             // 旋转
+canvas.scale(0.5f, 0.5f);       // 缩放
+canvas.skew(0.1f, 0f);          // 斜切
+// ... 绘制（基于变换后的坐标系）
+canvas.restore();               // 恢复画布状态（出栈）
+```
+
+@tab Kotlin
 
 ```kotlin
 canvas.save()                  // 保存当前画布状态（入栈）
@@ -147,6 +247,8 @@ canvas.skew(0.1f, 0f)          // 斜切
 // ... 绘制（基于变换后的坐标系）
 canvas.restore()               // 恢复画布状态（出栈）
 ```
+
+:::
 
 ```mermaid
 flowchart LR
@@ -161,6 +263,28 @@ flowchart LR
 ## 五、高级效果
 
 ### 5.1 渐变 Shader
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 线性渐变
+paint.setShader(new LinearGradient(
+        0f, 0f, width, height,
+        new int[]{Color.RED, Color.BLUE},
+        null, Shader.TileMode.CLAMP
+));
+
+// 径向渐变（雷达图/仪表盘常用）
+paint.setShader(new RadialGradient(
+        cx, cy, radius,
+        Color.YELLOW, Color.TRANSPARENT,
+        Shader.TileMode.CLAMP
+));
+```
+
+@tab Kotlin
 
 ```kotlin
 // 线性渐变
@@ -178,7 +302,23 @@ paint.shader = RadialGradient(
 )
 ```
 
+:::
+
 ### 5.2 阴影与模糊
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 文字/图形阴影
+paint.setShadowLayer(8f, 2f, 4f, Color.GRAY);
+
+// 模糊（需关闭硬件加速或降低复杂度）
+paint.setMaskFilter(new BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL));
+```
+
+@tab Kotlin
 
 ```kotlin
 // 文字/图形阴影
@@ -188,7 +328,23 @@ paint.setShadowLayer(radius = 8f, dx = 2f, dy = 4f, shadowColor = Color.GRAY)
 paint.maskFilter = BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL)
 ```
 
+:::
+
 ### 5.3 剪裁 Clip
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 把绘制限制在圆形区域（头像裁圆）
+canvas.save();
+canvas.clipPath(circlePath);      // 裁剪
+canvas.drawBitmap(avatar, 0f, 0f, paint);   // 只显示圆内部分
+canvas.restore();
+```
+
+@tab Kotlin
 
 ```kotlin
 // 把绘制限制在圆形区域（头像裁圆）
@@ -198,7 +354,31 @@ canvas.drawBitmap(avatar, 0f, 0f, paint)   // 只显示圆内部分
 canvas.restore()
 ```
 
+:::
+
 ## 六、文字绘制
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+String text = "WikiAndroid";
+Paint paint = new Paint();
+paint.setTextSize(48f);
+paint.setTextAlign(Paint.Align.CENTER);
+paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+
+// 基线计算：文字垂直居中
+Paint.FontMetrics fm = paint.getFontMetrics();
+float baseline = (height - (fm.descent - fm.ascent)) / 2 - fm.ascent;
+canvas.drawText(text, width / 2f, baseline, paint);
+
+// 测量文字宽度
+float textWidth = paint.measureText(text);
+```
+
+@tab Kotlin
 
 ```kotlin
 val text = "WikiAndroid"
@@ -216,6 +396,8 @@ canvas.drawText(text, width / 2f, baseline, paint)
 // 测量文字宽度
 val textWidth = paint.measureText(text)
 ```
+
+:::
 
 | 文字概念 | 说明 |
 |---------|------|
@@ -235,6 +417,37 @@ val textWidth = paint.measureText(text)
 | 复杂效果降级 | 模糊/阴影在低端机关闭 |
 | 使用 hardwareAccelerated | 显示列表缓存 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 正确姿势：对象在 init/构造中创建，onDraw 只绘制
+public class ProgressView extends View {
+
+    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);   // 复用！
+    private final Path path = new Path();                           // 复用！
+
+    public ProgressView(Context context) {
+        super(context);
+    }
+
+    public ProgressView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        path.reset();          // 清空复用，不 new
+        // ... 绘制逻辑
+        canvas.drawPath(path, paint);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 正确姿势：对象在 init/构造中创建，onDraw 只绘制
 class ProgressView @JvmOverloads constructor(
@@ -252,6 +465,8 @@ class ProgressView @JvmOverloads constructor(
     }
 }
 ```
+
+:::
 
 ## 八、高频面试题
 

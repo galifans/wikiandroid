@@ -21,6 +21,16 @@
 
 ## 2. 进展时间线
 
+### 2026-08-26（全站示例代码块支持 Java/Kotlin 切换）
+- ✓ 用户需求：网站所有示例代码块补充 Java/Kotlin 切换功能——默认 Java，代码块右上角有切换按钮；除编程基础或必须使用 C/C++ 的示例外，不要其他语言风格的代码
+- ✓ 基础设施：`src/.vuepress/theme.ts` 开启 `markdown: { codeTabs: true, tabs: true }`（theme-hope rc.107 内置 `@vuepress/plugin-markdown-tab`）；`src/.vuepress/styles/index.scss` 追加 `.vp-code-tabs-nav` 样式实现右上角右对齐 + 高亮；浏览器实测切换正常（默认 Java、点击 Kotlin 切换面板）
+- ✓ 转换语法：`::: code-tabs` + `@tab:active Java`（`@tab` 与 `:active` 无空格）+ ```java 围栏 + `@tab Kotlin` + ```kotlin 围栏 + `:::`，全部顶格、行间留空行
+- ✓ 全站转换：**8 大板块 754 个代码块**全部转为 code-tabs（android 222 / language 184 / ui 178 / jetpack 123 / network 107 / advanced 80 / system 37 / engineering+projects+roadmap 30），每个 Java 块补 Kotlin 版本、每个 Kotlin 块补 Java 版本，语义等价忠实互译
+- ✓ 例外保留：C/C++ 块（language/cpp 23 个、system 6 个，编程基础/JNI/NDK 场景）原样不动；Kotlin DSL 构建脚本 4 处（build.gradle.kts 配置，非程序示例）豁免；其余语言（mermaid/xml/groovy/shell 等）一律不动
+- ✓ 新增工具脚本：`scripts/code-tabs-spec.md`（转换规范）、`scripts/validate-tabs.cjs`（校验 java/kotlin 围栏全部在 code-tabs 内、容器配对完整，支持 Kotlin DSL 豁免清单）、`scripts/count-langs.cjs`（分板块语言统计）、`scripts/fence-check.cjs`（围栏定位排查）
+- ✓ `node scripts/validate-tabs.cjs` 全站 **ALL OK**（0 残留游离 java/kotlin 围栏）；`npm run build` 构建 336 页面成功；`npm run sync:static` 已同步 wikiStatic；浏览器实测 ui/view/measurespec.html 与 jetpack/room-datastore/datastore-guide.html 切换正常
+-  教训：`@tab Java :active` 写法会渲染字面 `:active` 文本，必须用 `@tab:active Java`；Compose/协程等纯 Kotlin 场景的 Java 版本用等价 View 体系/回调/线程池写法并注释说明
+
 ### 2026-08-26（全站去 emoji + 内容全方面扩充 31 篇：Android 核心 + UI 与渲染 重点）
 - ✓ 用户需求：① 站内大量 emoji 表情图标「AI 味太重」，全部优化去除；② 继续完善文章内容，全方面扩展至少 30 篇，重点放在 Android 核心板块和 UI 与渲染 两个板块
 - ✓ 全站 emoji 清理：grep 正则 `[\p{Extended_Pictographic}\u{FE0F}]` + `\u2b50` 扫描全站 md，用 `scripts/strip-emoji.mjs` 批量去除装饰性 emoji（保留表格、代码等必要场景，改写文案使其通顺）；清理后 0 残留，**全站禁用 emoji 成为新约定**

@@ -59,6 +59,56 @@ flowchart LR
 
 ### 2.3 SurfaceHolder 使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+
+    public CameraSurfaceView(Context context) {
+        super(context);
+        getHolder().addCallback(this);
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        // Surface 创建完成，可开始绘制
+        startDrawingThread(holder);
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        // Surface 尺寸变化（旋转等）
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        // Surface 销毁，停止绘制
+        stopDrawingThread();
+    }
+
+    private void startDrawingThread(final SurfaceHolder holder) {
+        new Thread(() -> {
+            while (isRunning) {
+                // lockCanvas 获取画布（阻塞等待）
+                Canvas canvas = holder.lockCanvas();
+                if (canvas == null) continue;
+                try {
+                    // 在子线程绘制
+                    drawFrame(canvas);
+                } finally {
+                    // unlockCanvasAndPost 提交帧
+                    holder.unlockCanvasAndPost(canvas);
+                }
+            }
+        }).start();
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class CameraSurfaceView(context: Context) : SurfaceView(context),
     SurfaceHolder.Callback {
@@ -100,6 +150,8 @@ class CameraSurfaceView(context: Context) : SurfaceView(context),
 }
 ```
 
+:::
+
 > 关键点：**lockCanvas 会阻塞**等待上一帧完成（双缓冲时等待可用的后台缓冲）；绘制必须成对使用 lockCanvas/unlockCanvasAndPost。
 
 ## 三、TextureView 详解
@@ -120,6 +172,34 @@ flowchart LR
 
 ### 3.2 基本使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+TextureView textureView = new TextureView(context);
+
+// 监听纹理可用
+textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+        // 纹理可用，开始渲染（如 Camera2 的 CaptureSession）
+        openCamera(surface);
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {}
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) { return true; }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {}
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 val textureView = TextureView(context)
 
@@ -138,7 +218,23 @@ textureView.surfaceTextureListener = object : TextureView.SurfaceTextureListener
 }
 ```
 
+:::
+
 ### 3.3 抓帧与转换
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 抓取当前帧为 Bitmap
+Bitmap bitmap = textureView.getBitmap();
+
+// 转换为 Bitmap 并保存
+Bitmap savedBitmap = textureView.getBitmap(bitmapWidth, bitmapHeight);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 抓取当前帧为 Bitmap
@@ -147,6 +243,8 @@ val bitmap = textureView.getBitmap()
 // 转换为 Bitmap 并保存
 val savedBitmap = textureView.getBitmap(bitmapWidth, bitmapHeight)
 ```
+
+:::
 
 ## 四、SurfaceView 与 TextureView 对比
 
@@ -182,6 +280,20 @@ flowchart TD
 
 ### 5.1 视频播放
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ExoPlayer + SurfaceView（官方推荐组合）
+SurfaceView surfaceView = new SurfaceView(context);
+player.setVideoSurfaceView(surfaceView);
+player.prepare();
+player.play();
+```
+
+@tab Kotlin
+
 ```kotlin
 // ExoPlayer + SurfaceView（官方推荐组合）
 val surfaceView = SurfaceView(context)
@@ -190,7 +302,38 @@ player.prepare()
 player.play()
 ```
 
+:::
+
 ### 5.2 相机预览（Camera2 + TextureView）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+private void openCamera(SurfaceTexture surfaceTexture) {
+    surfaceTexture.setDefaultBufferSize(previewSize.width, previewSize.height);
+    Surface surface = new Surface(surfaceTexture);
+    CaptureRequest.Builder request = cameraDevice.createCaptureRequest(
+            CameraDevice.TEMPLATE_PREVIEW);
+    request.addTarget(surface);
+    cameraDevice.createCaptureSession(
+            Arrays.asList(surface),
+            new CameraCaptureSession.StateCallback() {
+                @Override
+                public void onConfigured(CameraCaptureSession session) {
+                    session.setRepeatingRequest(request.build(), null, null);
+                }
+
+                @Override
+                public void onConfigureFailed(CameraCaptureSession session) {}
+            },
+            null
+    );
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 private fun openCamera(surfaceTexture: SurfaceTexture) {
@@ -212,6 +355,8 @@ private fun openCamera(surfaceTexture: SurfaceTexture) {
     )
 }
 ```
+
+:::
 
 ### 5.3 直播特效（TextureView + OpenGL）
 

@@ -13,6 +13,25 @@ description: synchronized 与 ReentrantLock、volatile、CAS、死锁、Java 内
 
 ### 1.1 三种用法
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 修饰实例方法：锁是当前实例
+public synchronized void syncMethod() { ... }
+
+// ② 修饰静态方法：锁是 Class 对象
+public static synchronized void staticMethod() { ... }
+
+// ③ 同步代码块：锁是指定对象
+public void blockMethod() {
+    synchronized (lock) { ... }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ① 修饰实例方法：锁是当前实例
 @Synchronized
@@ -29,6 +48,8 @@ fun blockMethod() {
     synchronized(lock) { ... }
 }
 ```
+
+:::
 
 ### 1.2 锁升级（重量级 → 轻量级）
 
@@ -47,6 +68,25 @@ JDK6 之后 synchronized 经过锁优化：
 
 ## 2. ReentrantLock 详解
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+ReentrantLock lock = new ReentrantLock();
+
+public void work() {
+    lock.lock();
+    try {
+        // 临界区
+    } finally {
+        lock.unlock();      // 必须释放！
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 val lock = ReentrantLock()
 
@@ -60,6 +100,8 @@ fun work() {
 }
 ```
 
+:::
+
 ### 2.1 synchronized vs ReentrantLock
 
 | 维度 | synchronized | ReentrantLock |
@@ -72,6 +114,28 @@ fun work() {
 | 性能 | 已优化（差不大） | 略灵活 |
 
 ### 2.2 读写锁（ReadWriteLock）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
+Lock readLock = rwLock.readLock();
+Lock writeLock = rwLock.writeLock();
+
+public void read() {
+    readLock.lock();          // 多读并行
+    try { /* 读操作 */ } finally { readLock.unlock(); }
+}
+
+public void write() {
+    writeLock.lock();         // 写独占
+    try { /* 写操作 */ } finally { writeLock.unlock(); }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 val rwLock = ReentrantReadWriteLock()
@@ -89,6 +153,8 @@ fun write() {
 }
 ```
 
+:::
+
 > **读多写少**场景大幅提升并发：读读并行、读写互斥、写写互斥。
 
 ## 3. volatile 与 JMM
@@ -105,6 +171,36 @@ fun write() {
 ```
 
 ### 3.2 volatile 的两大保证
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 可见性：修改立即刷新主内存，其他线程立即可见
+// ② 有序性：禁止指令重排（内存屏障）
+volatile boolean flag = false;
+
+// 经典应用：单例双重检查
+class Singleton {
+    private static volatile Singleton instance;
+
+    private Singleton() {}
+
+    public static Singleton getInstance() {
+        if (instance == null) {                    // 第一次检查
+            synchronized (Singleton.class) {
+                if (instance == null) {            // 第二次检查
+                    instance = new Singleton();    // 防止指令重排
+                }
+            }
+        }
+        return instance;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ① 可见性：修改立即刷新主内存，其他线程立即可见
@@ -132,10 +228,39 @@ class Singleton private constructor() {
 }
 ```
 
+:::
+
 > 为什么需要 volatile：`instance = Singleton()` 分三步（分配内存、初始化、赋值），
 > 不加 volatile 可能"先赋值后初始化"（指令重排），另一个线程读到未初始化的实例。
 
 ## 4. CAS 与原子类
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// CAS（Compare And Swap）：比较并交换
+// 底层：Unsafe.compareAndSwapInt → CPU CMPXCHG 指令
+
+// 手写 CAS 自旋（理解原理）
+class AtomicCounter {
+    private final AtomicInteger value = new AtomicInteger(0);
+
+    public int increment() {
+        while (true) {                        // 自旋
+            int current = value.get();
+            int next = current + 1;
+            if (value.compareAndSet(current, next)) {  // CAS
+                return next;
+            }
+            // 失败重试（别人先改了）
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // CAS（Compare And Swap）：比较并交换
@@ -158,6 +283,8 @@ class AtomicCounter {
 }
 ```
 
+:::
+
 **CAS 三问题**：ABA（版本号）、自旋消耗 CPU、单变量局限。
 
 ## 5. 死锁
@@ -170,6 +297,32 @@ class AtomicCounter {
 | 占有且等待 | 持有一个锁又等另一个 |
 | 不可剥夺 | 已持有的锁不能强抢 |
 | 循环等待 | A 等 B，B 等 A |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 死锁示例
+Object lockA = new Object();
+Object lockB = new Object();
+
+new Thread(() -> {
+    synchronized (lockA) {
+        try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        synchronized (lockB) { }   // 等 B
+    }
+}).start();
+
+new Thread(() -> {
+    synchronized (lockB) {
+        try { Thread.sleep(100); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        synchronized (lockA) { }   // 等 A → 死锁！
+    }
+}).start();
+```
+
+@tab Kotlin
 
 ```kotlin
 // 死锁示例
@@ -190,6 +343,8 @@ Thread {
     }
 }.start()
 ```
+
+:::
 
 ### 5.2 避免死锁
 

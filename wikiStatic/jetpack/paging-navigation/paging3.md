@@ -31,6 +31,59 @@ UI（自动处理加载更多/刷新/错误重试）
 
 ### 2.1 PagingSource（数据源）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// PagingSource.load 是 suspend 函数，Java 中 override 需带 Continuation 参数；
+// 以下展示核心业务逻辑（分页参数与 LoadResult 构造）
+public class UserPagingSource extends PagingSource<Integer, User> {
+    private final ApiService api;
+
+    public UserPagingSource(ApiService api) {
+        this.api = api;
+    }
+
+    @Override
+    public LoadResult<Integer, User> load(
+            LoadParams<Integer> params, Continuation<? super LoadResult<Integer, User>> cont) {
+        try {
+            // params.getKey()：加载的页码（首次为 null）
+            int page = params.getKey() != null ? params.getKey() : 1;
+            int pageSize = params.getLoadSize();
+
+            Response response = api.getUsers(page, pageSize);
+
+            return new LoadResult.Page<>(
+                    response.users,
+                    page > 1 ? page - 1 : null,       // 向前翻页
+                    response.hasMore ? page + 1 : null  // 向后翻页
+            );
+        } catch (IOException e) {
+            return new LoadResult.Error<>(e);   // 网络错误：可重试
+        } catch (HttpException e) {
+            return new LoadResult.Error<>(e);
+        }
+    }
+
+    // 列表更新/失效时重新加载
+    @Override
+    public Integer getRefreshKey(PagingState<Integer, User> state) {
+        Integer anchorPosition = state.getAnchorPosition();
+        if (anchorPosition == null) return null;
+        PageInfo closest = state.closestPageToPosition(anchorPosition);
+        if (closest == null) return null;
+        Integer prevKey = closest.getPrevKey();
+        if (prevKey != null) return prevKey + 1;
+        Integer nextKey = closest.getNextKey();
+        return nextKey != null ? nextKey - 1 : null;
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class UserPagingSource(
     private val api: ApiService
@@ -66,7 +119,35 @@ class UserPagingSource(
 }
 ```
 
+:::
+
 ### 2.2 ViewModel 中组装 PagingData
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Pager.flow 与 cachedIn 均为 Kotlin API，Java 中通过 PagingDataKt / ViewModelKt 调用
+public class UserListViewModel extends ViewModel {
+
+    // 组装 PagingData（cachedIn 缓存，旋转屏幕不重新加载）
+    public Flow<PagingData<User>> buildPagingDataFlow(UserRepository repository) {
+        Pager<Integer, User> pager = new Pager<>(
+                new PagingConfig(
+                        20,              // 每页数量
+                        5,               // 距底部多近时预加载
+                        false            // 不使用占位符
+                ),
+                null,
+                repository::getUsersPagingSource
+        );
+        return PagingDataKt.cachedIn(pager.getFlow(), ViewModelKt.getViewModelScope(this));
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class UserListViewModel(
@@ -85,7 +166,47 @@ class UserListViewModel(
 }
 ```
 
+:::
+
 ### 2.3 UI 层展示
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class UserListFragment extends Fragment {
+
+    private UserListViewModel viewModel;
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        viewModel = new ViewModelProvider(this).get(UserListViewModel.class);
+        UserAdapter adapter = new UserAdapter();
+
+        // 对应 collectLatest：Java 中需协程桥接层收集 Flow 后调用 adapter.submitData(pagingData)
+        // （lifecycleScope 是 Kotlin 扩展，Java 侧可用 LifecycleEventObserver 配合回调）
+
+        // 加载状态处理
+        adapter.addLoadStateListener(combinedLoadStates -> {
+            LoadState refresh = combinedLoadStates.getRefresh();
+            if (refresh instanceof LoadState.Loading) {
+                showLoading();   // 首次加载
+            } else if (refresh instanceof LoadState.Error) {
+                showError((LoadState.Error) refresh);
+            }
+            LoadState append = combinedLoadStates.getAppend();
+            if (append instanceof LoadState.Loading) {
+                showLoadMore();  // 加载更多
+            } else if (append instanceof LoadState.Error) {
+                showRetry();
+            }
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class UserListFragment : Fragment() {
@@ -120,7 +241,52 @@ class UserListFragment : Fragment() {
 }
 ```
 
+:::
+
 ### 2.4 Adapter
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class UserAdapter extends PagingDataAdapter<User, UserAdapter.UserViewHolder> {
+
+    public UserAdapter() {
+        super(UserDiffCallback.INSTANCE);
+    }
+
+    @NonNull
+    @Override
+    public UserViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        ItemUserBinding binding = ItemUserBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false);
+        return new UserViewHolder(binding);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull UserViewHolder holder, int position) {
+        holder.bind(getItem(position));   // getItem 自动处理占位符
+    }
+
+    // object 单例 → Java 静态单例
+    public static class UserDiffCallback extends DiffUtil.ItemCallback<User> {
+        public static final UserDiffCallback INSTANCE = new UserDiffCallback();
+
+        @Override
+        public boolean areItemsTheSame(User oldItem, User newItem) {
+            return oldItem.id == newItem.id;
+        }
+
+        @Override
+        public boolean areContentsTheSame(User oldItem, User newItem) {
+            return oldItem.equals(newItem);
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class UserAdapter :
@@ -142,9 +308,66 @@ class UserAdapter :
 }
 ```
 
+:::
+
 ## 3. RemoteMediator：网络 + 数据库缓存
 
 推荐架构：**数据库作为单一数据源**，网络结果先存库再刷新 UI。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// RemoteMediator.load 是 suspend 函数，Java 中 override 需带 Continuation 参数；
+// 以下展示核心业务逻辑
+public class UserRemoteMediator extends RemoteMediator<Integer, User> {
+    private final AppDatabase db;
+    private final ApiService api;
+
+    public UserRemoteMediator(AppDatabase db, ApiService api) {
+        this.db = db;
+        this.api = api;
+    }
+
+    @Override
+    public MediatorResult load(LoadType loadType, PagingState<Integer, User> state,
+                               Continuation<? super MediatorResult> cont) {
+        try {
+            final int page;
+            if (loadType == LoadType.REFRESH) {
+                page = 1;
+            } else if (loadType == LoadType.PREPEND) {
+                return new MediatorResult.Success(true);  // 没有更早数据
+            } else { // APPEND
+                User lastUser = PagingStateKt.lastItemOrNull(state);
+                Integer key = getPageKey(lastUser);       // 从数据库读取的页码元信息
+                if (key == null) return new MediatorResult.Success(true);
+                page = key;
+            }
+
+            Response response = api.getUsers(page, state.getConfig().getPageSize());
+
+            // 对应 withTransaction：Room 事务在 Java 中通过回调 / 协程桥接执行
+            if (loadType == LoadType.REFRESH) db.userDao().clearAll();
+            db.userDao().insertAll(response.users);
+
+            return new MediatorResult.Success(response.users.isEmpty());
+        } catch (Exception e) {
+            return new MediatorResult.Error(e);
+        }
+    }
+}
+
+// 使用
+Pager<Integer, User> pager = new Pager<>(
+        new PagingConfig(20),
+        new UserRemoteMediator(db, api),
+        () -> db.userDao().pagingSource());
+Flow<PagingData<User>> flow = pager.getFlow();
+```
+
+@tab Kotlin
 
 ```kotlin
 class UserRemoteMediator(
@@ -193,6 +416,8 @@ val pagingDataFlow = Pager(
 ).flow
 ```
 
+:::
+
 **架构图**：
 
 ```mermaid
@@ -214,6 +439,24 @@ flowchart LR
 
 每个都有 `Loading` / `NotLoading` / `Error` 三种状态。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 组合头部加载状态（下拉刷新指示器）
+adapter.addLoadStateListener(combinedLoadStates -> {
+    LoadState refreshState = combinedLoadStates.getRefresh();
+    if (refreshState instanceof LoadState.Loading) {
+        swipeRefresh.setRefreshing(true);
+    } else {
+        swipeRefresh.setRefreshing(false);
+    }
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 // 组合头部加载状态（下拉刷新指示器）
 adapter.addLoadStateListener { combinedLoadStates ->
@@ -225,6 +468,8 @@ adapter.addLoadStateListener { combinedLoadStates ->
     }
 }
 ```
+
+:::
 
 ## 5. 高频面试题
 

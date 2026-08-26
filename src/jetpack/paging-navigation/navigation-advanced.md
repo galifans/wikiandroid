@@ -30,6 +30,39 @@ flowchart LR
 
 > Navigation 2.8+ 的**类型安全路由**:用 Kotlin 类表示目的地,替代字符串路由。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. 定义路由（@Serializable 注解 Java 中同样可用；data object 对应单例类）
+@Serializable
+public final class HomeRoute {
+    public static final HomeRoute INSTANCE = new HomeRoute();
+    private HomeRoute() {}
+}
+
+@Serializable
+public final class UserDetailRoute {
+    public final long userId;
+    public final String userName;   // 默认参数 → 构造器重载
+
+    public UserDetailRoute(long userId) {
+        this(userId, "未知");
+    }
+
+    public UserDetailRoute(long userId, String userName) {
+        this.userId = userId;
+        this.userName = userName;
+    }
+}
+
+// 2. NavHost 注册部分为 Compose DSL，仅支持 Kotlin；
+//    对应 View 体系：XML 导航图 + safe-args（自动生成 Args/Directions 类）
+```
+
+@tab Kotlin
+
 ```kotlin
 // 1. 定义路由(Serializable 对象)
 @Serializable
@@ -57,6 +90,8 @@ NavHost(navController = navController, startDestination = HomeRoute) {
 }
 ```
 
+:::
+
 ### 类型安全 vs 字符串路由
 
 | 维度 | 字符串路由 | 类型安全路由 |
@@ -69,6 +104,28 @@ NavHost(navController = navController, startDestination = HomeRoute) {
 ## 三、Deep Link 深链
 
 ### 3.1 声明深链
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 类型安全方式:声明 @DeepLink（Java 中注解同样可用）
+@Serializable
+@DeepLink("app://example.com/user/{userId}")
+public final class UserDeepLink {
+    public final long userId;
+
+    public UserDeepLink(long userId) {
+        this.userId = userId;
+    }
+}
+
+// composable + navDeepLink 为 Compose DSL，仅支持 Kotlin；
+// 对应 View 体系：导航图 XML 中 <deepLink app:uri="app://example.com/user/{userId}" />
+```
+
+@tab Kotlin
 
 ```kotlin
 // 类型安全方式:声明 @DeepLink
@@ -85,6 +142,8 @@ composable<UserDeepLink>(
 }
 ```
 
+:::
+
 ### 3.2 manifest 配置(应用外启动)
 
 ```xml
@@ -99,6 +158,30 @@ composable<UserDeepLink>(
     </intent-filter>
 </activity>
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 3.3 Activity 中处理深链
+public class MainActivity extends ComponentActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        // 深链参数自动进入 NavController
+        // 也可手动读取
+        Uri uri = intent.getData();
+        if (uri != null) {
+            // 例如:统计/埋点
+            trackDeepLink(uri.toString());
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 3.3 Activity 中处理深链
@@ -116,6 +199,8 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
+:::
+
 ### 深链类型
 
 | 类型 | 说明 |
@@ -127,6 +212,36 @@ class MainActivity : ComponentActivity() {
 ## 四、返回栈管理
 
 ### 4.1 NavOptions 控制
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. 弹出至指定目的地(去重)
+NavOptions options1 = new NavOptions.Builder()
+        .setPopUpTo(HomeRoute.INSTANCE, true)   // 把 Home 也弹出
+        .setLaunchSingleTop(true)               // 栈顶去重
+        .build();
+navController.navigate(HomeRoute.INSTANCE, options1);
+
+// 2. 登录后清空登录页
+NavOptions options2 = new NavOptions.Builder()
+        .setPopUpTo(LoginRoute.INSTANCE, true)
+        .build();
+navController.navigate(MainRoute.INSTANCE, options2);
+
+// 3. 保存状态(底部导航切换)
+NavOptions options3 = new NavOptions.Builder()
+        .setPopUpTo(navController.getGraph().findStartDestination().getId(), true)
+        .setSaveState(true)
+        .setLaunchSingleTop(true)
+        .setRestoreState(true)
+        .build();
+navController.navigate(ProfileRoute.INSTANCE, options3);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 1. 弹出至指定目的地(去重)
@@ -150,6 +265,8 @@ navController.navigate(ProfileRoute) {
 }
 ```
 
+:::
+
 ### 4.2 返回栈常用 API
 
 | API | 作用 |
@@ -172,6 +289,17 @@ sequenceDiagram
 
 ## 五、嵌套导航图
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 嵌套导航图（navigation<T> 为 Compose DSL）仅支持 Kotlin，无 Java 等价写法；
+// 对应 View 体系：XML 中用 <navigation> 嵌套子图，底部导航时各 Tab 子图独立返回栈
+```
+
+@tab Kotlin
+
 ```kotlin
 // 底部导航 + 嵌套图:每个 Tab 独立返回栈
 navigation<MainTab1Route>(startDestination = Tab1HomeRoute) {
@@ -193,9 +321,23 @@ navController.navigate(MainTab2Route) {
 }
 ```
 
+:::
+
 > 嵌套图的优势:每个 Tab 有自己的返回栈,切换 Tab 不丢状态;导航图可复用、可模块化(配合 Hilt 多模块)。
 
 ## 六、与 ViewModel 集成
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// composable + hiltViewModel 为 Compose DSL，仅支持 Kotlin；
+// 对应 View 体系：ViewModelProvider(backStackEntry).get(...) 以返回栈条目为作用域；
+// 共享 ViewModel 时以父级 NavBackStackEntry 为作用域
+```
+
+@tab Kotlin
 
 ```kotlin
 // 1. 每个目的地独立 ViewModel
@@ -213,6 +355,8 @@ composable<HomeRoute> { entry ->
     val sharedVm: SharedViewModel = hiltViewModel(parentEntry)
 }
 ```
+
+:::
 
 ## 七、高频面试题
 

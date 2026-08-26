@@ -26,6 +26,35 @@ Room ← 抽象层 → SQLite ← 存储
 
 ### 2.1 @Entity（表）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Entity(
+    tableName = "user",
+    indices = {@Index(value = {"email"}, unique = true)}  // 唯一索引
+)
+public class User {
+    @PrimaryKey(autoGenerate = true)
+    public long id;               // 默认 0
+
+    @ColumnInfo(name = "email")
+    public String email;          // 自定义列名
+
+    public String name;
+    public Integer age;           // 可空列
+
+    public User(String name, String email, Integer age) {
+        this.name = name;
+        this.email = email;
+        this.age = age;
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 @Entity(
     tableName = "user",
@@ -39,7 +68,37 @@ data class User(
 )
 ```
 
+:::
+
 关系表：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Entity(
+    tableName = "user_book",
+    primaryKeys = {"userId", "bookId"},   // 联合主键
+    foreignKeys = @ForeignKey(
+        entity = User.class,
+        parentColumns = {"id"},
+        childColumns = {"userId"},
+        onDelete = ForeignKey.CASCADE
+    )
+)
+public class UserBook {
+    public long userId;
+    public long bookId;
+
+    public UserBook(long userId, long bookId) {
+        this.userId = userId;
+        this.bookId = bookId;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @Entity(
@@ -57,7 +116,47 @@ data class User(
 data class UserBook(val userId: Long, val bookId: Long)
 ```
 
+:::
+
 ### 2.2 @Dao（数据访问）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Dao
+public interface UserDao {
+
+    // 同步查询
+    @Query("SELECT * FROM user")
+    List<User> getAll();
+
+    // 响应式查询（数据变化自动推送）
+    @Query("SELECT * FROM user")
+    Flow<List<User>> observeAll();
+
+    // 条件查询
+    @Query("SELECT * FROM user WHERE age >= :minAge ORDER BY age DESC")
+    List<User> getByAge(int minAge);
+
+    // 插入：冲突策略（suspend → Java 中同步执行或包一层 Executor）
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insert(User user);
+
+    @Update
+    void update(User user);
+
+    @Delete
+    void delete(User user);
+
+    // 自定义 SQL 更新
+    @Query("UPDATE user SET name = :name WHERE id = :id")
+    void rename(long id, String name);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @Dao
@@ -91,7 +190,56 @@ interface UserDao {
 }
 ```
 
+:::
+
 ### 2.3 @Database（数据库）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Database(
+    entities = {User.class, Book.class},
+    version = 2,                       // 当前版本
+    exportSchema = true                // 导出 schema 用于迁移测试
+)
+public abstract class AppDatabase extends RoomDatabase {
+
+    public abstract UserDao userDao();
+
+    private static volatile AppDatabase INSTANCE;
+
+    public static AppDatabase getInstance(Context context) {
+        if (INSTANCE == null) {
+            synchronized (AppDatabase.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = Room.databaseBuilder(
+                            context.getApplicationContext(),
+                            AppDatabase.class,
+                            "app.db"
+                    )
+                    .addMigrations(MIGRATION_1_2)   // 注册迁移
+                    .build();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+
+    // 数据库升级迁移（object 匿名对象 → 静态单例）
+    public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(SupportSQLiteDatabase db) {
+            db.execSQL(
+                "ALTER TABLE user ADD COLUMN avatar TEXT NOT NULL DEFAULT ''"
+            );
+        }
+    };
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @Database(
@@ -131,9 +279,48 @@ abstract class AppDatabase : RoomDatabase() {
 }
 ```
 
+:::
+
 ## 3. 响应式查询：Flow
 
 Room 对 `Flow` 的支持是最大亮点：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// DAO 返回 LiveData（Java 中更常用；Kotlin 侧对应 Flow）
+@Query("SELECT * FROM user WHERE id = :id")
+LiveData<User> observeUser(long id);
+
+// ViewModel 中使用（对应 stateIn：LiveData 自带缓存最新值 + 生命周期感知）
+public class UserViewModel extends ViewModel {
+    private final LiveData<User> user;
+
+    public UserViewModel(UserDao dao) {
+        user = dao.observeUser(1L);
+    }
+
+    public LiveData<User> getUser() {
+        return user;
+    }
+}
+
+// UI 观察
+public class UserFragment extends Fragment {
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        UserViewModel vm = new ViewModelProvider(this).get(UserViewModel.class);
+        vm.getUser().observe(getViewLifecycleOwner(), user -> {
+            // 任何表数据变化都会自动刷新
+            binding.nameText.setText(user != null ? user.getName() : null);
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // DAO 返回 Flow
@@ -162,12 +349,35 @@ class UserFragment : Fragment() {
 }
 ```
 
+:::
+
 > **原理**：Room 在查询时注册 `InvalidationTracker` 观察者，表数据变化时自动
 > 重新查询并推送新结果（增量查询，性能优化）。
 
 ## 4. 复杂查询技巧
 
 ### 4.1 返回部分列（DTO）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class UserName {
+    public long id;
+    public String name;
+
+    public UserName(long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+}
+
+@Query("SELECT id, name FROM user")
+Flow<List<UserName>> observeNames();
+```
+
+@tab Kotlin
 
 ```kotlin
 data class UserName(val id: Long, val name: String)
@@ -176,7 +386,29 @@ data class UserName(val id: Long, val name: String)
 fun observeNames(): Flow<List<UserName>>
 ```
 
+:::
+
 ### 4.2 关联查询（JOIN）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class UserWithBooks {
+    @Embedded
+    public User user;
+
+    @Relation(parentColumn = "id", entityColumn = "userId")
+    public List<Book> books;
+}
+
+@Transaction
+@Query("SELECT * FROM user")
+Flow<List<UserWithBooks>> observeUsersWithBooks();
+```
+
+@tab Kotlin
 
 ```kotlin
 data class UserWithBooks(
@@ -190,7 +422,27 @@ data class UserWithBooks(
 fun observeUsersWithBooks(): Flow<List<UserWithBooks>>
 ```
 
+:::
+
 ### 4.3 原生查询
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@RawQuery
+List<User> search(SupportSQLiteQuery statement);
+
+// 调用
+String kw = "Tom";
+dao.search(new SimpleSQLiteQuery(
+    "SELECT * FROM user WHERE name LIKE ?",
+    new Object[]{"%" + kw + "%"}
+));
+```
+
+@tab Kotlin
 
 ```kotlin
 @RawQuery
@@ -200,6 +452,8 @@ fun search(statement: SupportSQLiteQuery): List<User>
 dao.search(SimpleSQLiteQuery("SELECT * FROM user WHERE name LIKE ?", arrayOf("%$kw%")))
 ```
 
+:::
+
 ## 5. Migration 与升级
 
 ### 5.1 为什么不能 fallbackToDestructiveMigration
@@ -208,6 +462,42 @@ dao.search(SimpleSQLiteQuery("SELECT * FROM user WHERE name LIKE ?", arrayOf("%$
 - 生产环境必须手写 Migration。
 
 ### 5.2 迁移测试
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@RunWith(AndroidJUnit4.class)
+public class MigrationTest {
+
+    @Test
+    public void migrate1To2() {
+        MigrationTestHelper helper = new MigrationTestHelper(
+            InstrumentationRegistry.getInstrumentation(),
+            AppDatabase.class
+        );
+
+        // 创建版本 1 的数据库并插入数据
+        SupportSQLiteDatabase db = helper.createDatabase(TEST_DB, 1);
+        db.execSQL("INSERT INTO user (name) VALUES ('Tom')");
+
+        // 执行迁移
+        db = helper.runMigrationsAndValidate(
+            TEST_DB, 2, true, AppDatabase.MIGRATION_1_2
+        );
+
+        // 验证数据仍在（buildList → ArrayList）
+        List<String> users = new ArrayList<>();
+        try (Cursor cursor = db.query("SELECT * FROM user")) {
+            while (cursor.moveToNext()) users.add(cursor.getString(1));
+        }
+        assertTrue(users.contains("Tom"));
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @RunWith(AndroidJUnit4::class)
@@ -240,6 +530,8 @@ class MigrationTest {
     }
 }
 ```
+
+:::
 
 ## 6. Room vs 原生 SQLite vs 其他 ORM
 

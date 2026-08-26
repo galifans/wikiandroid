@@ -33,6 +33,50 @@ flowchart LR
 
 ### 2.1 基本使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+class ArticleDbHelper extends SQLiteOpenHelper {
+
+    public static final int DATABASE_VERSION = 2;
+    public static final String TABLE_ARTICLE = "article";
+
+    public ArticleDbHelper(Context context) {
+        super(context, "wiki.db", null, DATABASE_VERSION);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        // 首次创建数据库时执行建表
+        db.execSQL(
+            "CREATE TABLE " + TABLE_ARTICLE + " (" +
+            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "title TEXT NOT NULL," +
+            "category TEXT," +
+            "view_count INTEGER DEFAULT 0," +
+            "created_at INTEGER)"
+        );
+        db.execSQL("CREATE INDEX idx_article_category ON article(category)");
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // 版本升级时执行迁移
+        if (oldVersion < 2) {
+            db.execSQL("ALTER TABLE article ADD COLUMN author TEXT");
+        }
+    }
+}
+
+// 使用
+ArticleDbHelper helper = new ArticleDbHelper(context);
+SQLiteDatabase db = helper.getReadableDatabase();
+```
+
+@tab Kotlin
+
 ```kotlin
 class ArticleDbHelper(context: Context) :
     SQLiteOpenHelper(context, "wiki.db", null, DATABASE_VERSION) {
@@ -71,6 +115,8 @@ val helper = ArticleDbHelper(context)
 val db = helper.readableDatabase
 ```
 
+:::
+
 ### 2.2 生命周期钩子
 
 | 回调 | 触发时机 | 典型操作 |
@@ -84,6 +130,44 @@ val db = helper.readableDatabase
 ## 三、CRUD 与查询
 
 ### 3.1 增删改查
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 插入
+ContentValues values = new ContentValues();
+values.put("title", "SQLite 优化指南");
+values.put("category", "storage");
+values.put("view_count", 100);
+long rowId = db.insert(TABLE_ARTICLE, null, values);
+
+// 查询
+Cursor cursor = db.query(
+        TABLE_ARTICLE,
+        new String[]{"id", "title", "view_count"},
+        "category = ? AND view_count > ?",   // 占位符防注入
+        new String[]{"storage", "10"},
+        null, null,
+        "view_count DESC",
+        "20"                                  // LIMIT
+);
+try (Cursor c = cursor) {
+    while (c.moveToNext()) {
+        long id = c.getLong(c.getColumnIndexOrThrow("id"));
+        String title = c.getString(c.getColumnIndexOrThrow("title"));
+    }
+}
+
+// 更新
+int updated = db.update(TABLE_ARTICLE, values, "id = ?", new String[]{"1"});
+
+// 删除
+db.delete(TABLE_ARTICLE, "view_count < ?", new String[]{"5"});
+```
+
+@tab Kotlin
 
 ```kotlin
 // 插入
@@ -118,7 +202,24 @@ val updated = db.update(TABLE_ARTICLE, values, "id = ?", arrayOf("1"))
 db.delete(TABLE_ARTICLE, "view_count < ?", arrayOf("5"))
 ```
 
+:::
+
 ### 3.2 参数化查询防注入
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 错误：字符串拼接
+Cursor cursor = db.rawQuery(
+        "SELECT * FROM article WHERE title = '" + input + "'", null);  // 注入风险
+
+// 正确：占位符绑定
+db.rawQuery("SELECT * FROM article WHERE title = ?", new String[]{input});
+```
+
+@tab Kotlin
 
 ```kotlin
 // 错误：字符串拼接
@@ -128,11 +229,34 @@ db.rawQuery("SELECT * FROM article WHERE title = '$input'", null)  // 注入风�
 db.rawQuery("SELECT * FROM article WHERE title = ?", arrayOf(input))
 ```
 
+:::
+
 ## 四、事务
 
 ### 4.1 为什么要用事务
 
 批量写入默认每条 SQL 一个事务（写盘一次），N 条数据 = N 次磁盘 IO。用事务包裹可合并为一次提交，**性能提升数量级**，且保证原子性（要么全成功要么全失败）。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 批量插入：单事务包裹
+db.beginTransaction();
+try {
+    for (int i = 1; i <= 1000; i++) {
+        ContentValues values = new ContentValues();
+        values.put("title", "文章 " + i);
+        db.insert(TABLE_ARTICLE, null, values);
+    }
+    db.setTransactionSuccessful();   // 标记成功
+} finally {
+    db.endTransaction();             // 提交或回滚
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 批量插入：单事务包裹
@@ -147,6 +271,8 @@ try {
     db.endTransaction()             // 提交或回滚
 }
 ```
+
+:::
 
 ### 4.2 事务特性
 
@@ -171,6 +297,22 @@ try {
 | 性能 | 写放大 | 写更快、读更快 |
 | 缺点 | 并发差 | WAL 文件增长需 checkpoint |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 开启 WAL（onConfigure 中设置）
+@Override
+public void onConfigure(SQLiteDatabase db) {
+    super.onConfigure(db);
+    db.enableWriteAheadLogging();   // WAL 模式
+    db.setForeignKeyConstraintsEnabled(true);  // 外键约束
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 开启 WAL（onConfigure 中设置）
 override fun onConfigure(db: SQLiteDatabase) {
@@ -180,7 +322,24 @@ override fun onConfigure(db: SQLiteDatabase) {
 }
 ```
 
+:::
+
 ### 5.2 索引优化
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 建立索引
+db.execSQL("CREATE INDEX idx_article_category ON article(category)");
+db.execSQL("CREATE INDEX idx_article_created ON article(created_at DESC)");
+
+// 复合索引（注意列顺序：等值列在前）
+db.execSQL("CREATE INDEX idx_cat_created ON article(category, created_at)");
+```
+
+@tab Kotlin
 
 ```kotlin
 // 建立索引
@@ -190,6 +349,8 @@ db.execSQL("CREATE INDEX idx_article_created ON article(created_at DESC)")
 // 复合索引（注意列顺序：等值列在前）
 db.execSQL("CREATE INDEX idx_cat_created ON article(category, created_at)")
 ```
+
+:::
 
 索引使用建议：
 
@@ -217,6 +378,25 @@ sqlite3 wiki.db "EXPLAIN QUERY PLAN SELECT * FROM article WHERE category='storag
 
 ### 6.1 增量迁移模式
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    // 逐版本增量迁移，保证任意旧版本都能升级
+    if (oldVersion < 2) {
+        db.execSQL("ALTER TABLE article ADD COLUMN author TEXT");
+    }
+    if (oldVersion < 3) {
+        db.execSQL("CREATE TABLE comment (id INTEGER PRIMARY KEY, article_id INTEGER)");
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
     // 逐版本增量迁移，保证任意旧版本都能升级
@@ -229,7 +409,33 @@ override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
 }
 ```
 
+:::
+
 ### 6.2 破坏性变更：重建表
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+if (oldVersion < 4) {
+    // 表结构大改：建新表 → 拷贝数据 → 删旧表 → 改名
+    db.execSQL("ALTER TABLE article RENAME TO article_old");
+    db.execSQL(
+        "CREATE TABLE article (" +
+        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "title TEXT NOT NULL," +
+        "category TEXT," +
+        "view_count INTEGER DEFAULT 0," +
+        "created_at INTEGER," +
+        "author TEXT)"
+    );
+    db.execSQL("INSERT INTO article (id, title, category, view_count, created_at, author) SELECT id, title, category, view_count, created_at, NULL FROM article_old");
+    db.execSQL("DROP TABLE article_old");
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 if (oldVersion < 4) {
@@ -249,6 +455,8 @@ if (oldVersion < 4) {
     db.execSQL("DROP TABLE article_old")
 }
 ```
+
+:::
 
 ### 6.3 迁移注意
 

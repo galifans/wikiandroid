@@ -73,6 +73,23 @@ description: include/merge/ViewStub/ConstraintLayout 优化手段、过度绘制
     android:layout="@layout/view_error" />
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 触发加载（只会加载一次，inflate 后 ViewStub 被替换为实际布局）
+View loadingView = ((ViewStub) findViewById(R.id.stub_loading)).inflate();
+
+// 或
+View stubLoading = findViewById(R.id.stub_loading);
+if (stubLoading != null) {
+    stubLoading.setVisibility(View.VISIBLE);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 触发加载（只会加载一次，inflate 后 ViewStub 被替换为实际布局）
 val loadingView = findViewById<ViewStub>(R.id.stub_loading).inflate()
@@ -80,6 +97,8 @@ val loadingView = findViewById<ViewStub>(R.id.stub_loading).inflate()
 // 或
 findViewById<View>(R.id.stub_loading)?.visibility = View.VISIBLE
 ```
+
+:::
 
 **适用场景**：错误页、空状态、引导层等不常用布局。
 
@@ -133,6 +152,20 @@ ConstraintLayout 优势：
 | 复杂动画（模糊、阴影） | 控制动画范围 |
 | 多层级窗口 | 透明窗口设置为 false |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 减少绘制区域
+canvas.clipRect(0, 0, getWidth() / 2, getHeight());
+
+// 移除不必要的背景
+view.setBackground(null);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 减少绘制区域
 canvas.clipRect(0, 0, width / 2, height)
@@ -140,6 +173,8 @@ canvas.clipRect(0, 0, width / 2, height)
 // 移除不必要的背景
 view.background = null
 ```
+
+:::
 
 ## 4. 分析工具链
 

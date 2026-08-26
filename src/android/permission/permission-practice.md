@@ -19,6 +19,25 @@ description: 运行时权限申请的工程实践——批量申请、时机选�
 
 **黄金法则：在用户真正需要该能力的那一刻申请**——"我要用，才向你借"。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 正确：用户点击拍照按钮时才申请
+void onTakePhotoClick() {
+    checkPermissionAndRun(Manifest.permission.CAMERA, () -> {
+        openCamera();
+    });
+}
+
+// 错误：onCreate 里无脑申请
+// @Override
+// protected void onCreate(...) { requestPermissions(new String[]{CAMERA, LOCATION, ...}, 0); }
+```
+
+@tab Kotlin
+
 ```kotlin
 // 正确：用户点击拍照按钮时才申请
 fun onTakePhotoClick() {
@@ -31,7 +50,32 @@ fun onTakePhotoClick() {
 // override fun onCreate(...) { requestPermissions(arrayOf(CAMERA, LOCATION, ...)) }
 ```
 
+:::
+
 ## 二、批量申请与逐个申请
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 方式一：批量申请（一次弹多个）
+private final ActivityResultLauncher<String[]> multiLauncher =
+        registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), results -> {
+            for (Map.Entry<String, Boolean> entry : results.entrySet()) {
+                Log.d("Permission", entry.getKey() + " = " + entry.getValue());
+            }
+        });
+
+void requestAll() {
+    multiLauncher.launch(new String[]{
+            Manifest.permission.CAMERA,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+    });
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 方式一：批量申请（一次弹多个）
@@ -52,6 +96,8 @@ fun requestAll() {
 }
 ```
 
+:::
+
 | 方式 | 优点 | 缺点 |
 |------|------|------|
 | 批量申请 | 一次弹窗流程，代码少 | 弹多个窗口用户易烦；拒绝难以逐个解释 |
@@ -60,6 +106,24 @@ fun requestAll() {
 **建议**：按业务场景分组合并申请（如"拍照功能"需要相机 + 存储），避免无关权限捆绑。
 
 ## 三、解释弹窗（Rationale）设计
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 首次拒绝后：解释用途再申请
+private void showRationale(String permission, Runnable onConfirm) {
+    new AlertDialog.Builder(this)
+            .setTitle("需要权限")
+            .setMessage("拍摄照片需要相机权限，用于上传头像。")
+            .setPositiveButton("去开启", (dialog, which) -> onConfirm.run())
+            .setNegativeButton("取消", null)
+            .show();
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 首次拒绝后：解释用途再申请
@@ -72,6 +136,8 @@ private fun showRationale(permission: String, onConfirm: () -> Unit) {
         .show()
 }
 ```
+
+:::
 
 **解释文案要点**：
 - 说明**用途**（不是复述权限名）："用于上传头像"而非"需要相机权限"
@@ -89,6 +155,32 @@ private fun showRationale(permission: String, onConfirm: () -> Unit) {
 | 无障碍 | `BIND_ACCESSIBILITY_SERVICE` | `Settings.ACTION_ACCESSIBILITY_SETTINGS` |
 | 电池优化 | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | `Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS` |
 | 闹钟与提醒（14+） | `SCHEDULE_EXACT_ALARM` | `Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM` |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 悬浮窗示例
+void checkOverlayPermission() {
+    if (!Settings.canDrawOverlays(this)) {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        startActivity(intent);
+    }
+}
+
+// 检查结果：onResume 中复查
+@Override
+protected void onResume() {
+    super.onResume();
+    if (Settings.canDrawOverlays(this)) {
+        showFloatingWindow();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 悬浮窗示例
@@ -110,6 +202,8 @@ override fun onResume() {
 }
 ```
 
+:::
+
 ## 五、常见问题与崩溃排查
 
 | 问题 | 原因 | 解决方案 |
@@ -120,6 +214,30 @@ override fun onResume() {
 | 权限已授但仍崩溃 | 厂商 ROM 修改了权限行为 | 调用前 try-catch + 功能降级 |
 | targetSdk 升级后通知不显示 | Android 13 通知权限未申请 | 动态申请 `POST_NOTIFICATIONS` |
 | 存储权限失效 | Android 10+ 分区存储 | 改用 `MediaStore` / SAF 文件选择器 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 健壮性兜底：调用敏感 API 时 try-catch + 降级
+void openCameraSafely() {
+    if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED
+    ) {
+        Toast.makeText(this, "未获得相机权限", Toast.LENGTH_SHORT).show();
+        return;
+    }
+    try {
+        openCamera();
+    } catch (Exception e) {
+        // 部分 ROM 行为差异，降级处理
+        Toast.makeText(this, "相机不可用", Toast.LENGTH_SHORT).show();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 健壮性兜底：调用敏感 API 时 try-catch + 降级
@@ -138,6 +256,8 @@ fun openCameraSafely() {
     }
 }
 ```
+
+:::
 
 ## 六、合规建议（上架必备）
 

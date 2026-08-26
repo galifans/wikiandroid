@@ -15,6 +15,10 @@ title: ArrayList 源码剖析
 
 ## 关键成员
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class ArrayList<E> extends AbstractList<E>
         implements List<E>, RandomAccess, Cloneable, java.io.Serializable {
@@ -24,7 +28,25 @@ public class ArrayList<E> extends AbstractList<E>
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class ArrayList<E> : AbstractList<E>(),
+        List<E>, RandomAccess, Cloneable, java.io.Serializable {
+
+    @Transient
+    private var elementData: Array<Any?>? = null // 保存数据的数组
+    private var size: Int = 0                     // 实际数据数量
+}
+```
+
+:::
+
 ## 构造方法
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public ArrayList(int initialCapacity) {
@@ -41,9 +63,32 @@ public ArrayList(Collection<? extends E> c) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+constructor(initialCapacity: Int) {
+    this.elementData = arrayOfNulls(initialCapacity)
+}
+
+constructor() {
+    this(10) // 默认容量 10
+}
+
+constructor(c: Collection<out E>) {
+    elementData = c.toArray()
+    size = elementData.size
+}
+```
+
+:::
+
 ## 扩容机制
 
 当添加的数据量超过数组长度时扩容：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public void ensureCapacity(int minCapacity) {
@@ -58,6 +103,24 @@ public void ensureCapacity(int minCapacity) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+fun ensureCapacity(minCapacity: Int) {
+    modCount++ // fail-fast 机制
+    val oldCapacity = elementData.size
+    if (minCapacity > oldCapacity) {
+        // 新容量 = 旧容量 * 1.5 + 1（旧实现）
+        var newCapacity = (oldCapacity * 3) / 2 + 1
+        if (newCapacity < minCapacity)
+            newCapacity = minCapacity
+        elementData = Arrays.copyOf(elementData, newCapacity)
+    }
+}
+```
+
+:::
 
 - JDK 6 使用 `Arrays.copyOf()`，JDK 5 使用 `System.arraycopy()`
 - `trimToSize()` 可将容量调整为实际元素个数

@@ -68,6 +68,29 @@ flowchart LR
 
 ### 3.1 事件坐标 API
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+public boolean onTouchEvent(MotionEvent event) {
+    switch (event.getActionMasked()) {
+        case MotionEvent.ACTION_DOWN:
+            // 相对 View 自身左上角
+            float x = event.getX();
+            float y = event.getY();
+            // 相对屏幕左上角
+            float rawX = event.getRawX();
+            float rawY = event.getRawY();
+            break;
+    }
+    return super.onTouchEvent(event);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onTouchEvent(event: MotionEvent): Boolean {
     when (event.actionMasked) {
@@ -83,6 +106,8 @@ override fun onTouchEvent(event: MotionEvent): Boolean {
     return super.onTouchEvent(event)
 }
 ```
+
+:::
 
 | API | 坐标 | 注意 |
 |-----|------|------|
@@ -112,6 +137,25 @@ getRawX() = getX() + view.getLeft() + 父容器的偏移
 
 ### 4.1 三个核心方法
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+int[] location = new int[2];
+
+// 相对窗口（内容区）左上角
+view.getLocationInWindow(location);
+// location[0] = x, location[1] = y
+
+// 相对屏幕左上角
+view.getLocationOnScreen(location);
+
+// 相对某个祖先 View（Android 12+ 可配合 WindowInsets 计算，一般用上面两种方式）
+```
+
+@tab Kotlin
+
 ```kotlin
 val location = IntArray(2)
 
@@ -126,6 +170,8 @@ view.getLocationOnScreen(location)
 view.getLocationInWindowToParent ?: 0  // API 30+，一般用下面方式
 ```
 
+:::
+
 ### 4.2 区别与换算
 
 | 方法 | 基准 | 典型用途 |
@@ -138,6 +184,22 @@ view.getLocationInWindowToParent ?: 0  // API 30+，一般用下面方式
 
 ### 4.3 判断 View 可见性
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 判断 View 是否完全在屏幕内
+public boolean isCompletelyVisible(View view) {
+    Rect rect = new Rect();
+    view.getGlobalVisibleRect(rect);
+    int screenHeight = view.getResources().getDisplayMetrics().heightPixels;
+    return rect.top >= 0 && rect.bottom <= screenHeight;
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 判断 View 是否完全在屏幕内
 fun View.isCompletelyVisible(): Boolean {
@@ -148,9 +210,52 @@ fun View.isCompletelyVisible(): Boolean {
 }
 ```
 
+:::
+
 ## 五、坐标转换实战
 
 ### 5.1 手指位置 → 屏幕坐标
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class DragView extends View {
+
+    private float offsetX = 0f;
+    private float offsetY = 0f;
+
+    public DragView(Context context) {
+        super(context);
+    }
+
+    public DragView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                // 记录按下时 View 位置与手指位置差值
+                int[] location = new int[2];
+                getLocationOnScreen(location);
+                offsetX = event.getRawX() - location[0];
+                offsetY = event.getRawY() - location[1];
+                break;
+            case MotionEvent.ACTION_MOVE:
+                // 用 rawX 移动，避免 getX 漂移
+                setTranslationX(event.getRawX() - offsetX);
+                setTranslationY(event.getRawY() - offsetY);
+                break;
+        }
+        return true;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class DragView @JvmOverloads constructor(
@@ -180,7 +285,27 @@ class DragView @JvmOverloads constructor(
 }
 ```
 
+:::
+
 ### 5.2 PopupWindow 定位
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 让 PopupWindow 出现在目标 View 正下方
+int[] location = new int[2];
+anchorView.getLocationInWindow(location);
+popupWindow.showAtLocation(
+        anchorView,
+        Gravity.TOP | Gravity.START,
+        location[0],
+        location[1] + anchorView.getHeight()
+);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 让 PopupWindow 出现在目标 View 正下方
@@ -194,9 +319,25 @@ popupWindow.showAtLocation(
 )
 ```
 
+:::
+
 ## 六、坐标系转换矩阵
 
 ### 6.1 View 变换矩阵
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 将触摸坐标转换为子 View 局部坐标
+Matrix matrix = new Matrix();
+child.getMatrix().invert(matrix);
+float[] point = new float[]{event.getX(), event.getY()};
+matrix.mapPoints(point);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 将触摸坐标转换为子 View 局部坐标
@@ -205,6 +346,8 @@ child.getMatrix().invert(matrix)
 val point = floatArrayOf(event.x, event.y)
 matrix.mapPoints(point)
 ```
+
+:::
 
 ### 6.2 View 与 Canvas 坐标
 

@@ -24,6 +24,17 @@ description: 重组优化、稳定性推断、不可变性、LazyColumn 性能�
 
 ### 2.1 状态作用域最小化
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 状态作用域最小化对应 View 体系：把依赖状态变化的子控件拆成独立 View / 自定义 View，缩小刷新范围
+```
+
+@tab Kotlin
+
 ```kotlin
 // ✗ 状态读取范围过大：任何变化都重组整个 Column
 @Composable
@@ -55,7 +66,20 @@ fun ExpandIcon(expanded: Boolean, onClick: () -> Unit) {
 }
 ```
 
+:::
+
 ### 2.2 remember 缓存计算结果
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：计算结果存入字段 / ViewModel 缓存，仅在输入变化时重算
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -68,7 +92,20 @@ fun ExpenseList(expenses: List<Expense>) {
 }
 ```
 
+:::
+
 ### 2.3 derivedStateOf：派生状态按需计算
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：滚动监听回调中判断 firstVisibleItemIndex，按需更新控件
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -82,6 +119,8 @@ fun ShowHideButton(listState: LazyListState) {
     }
 }
 ```
+
+:::
 
 ## 3. 稳定性（Stability）
 
@@ -101,6 +140,54 @@ fun ShowHideButton(listState: LazyListState) {
 
 ### 3.2 提升稳定性的实践
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① data class 用 val → Java 中 final 字段 + 构造器（等价于 data class）
+public final class User {
+    private final String name;
+    private final int age;
+
+    public User(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() { return name; }
+    public int getAge() { return age; }
+}
+
+// ② 集合：不要直接暴露可变集合（用 List 而非 MutableList）
+public final class UiState {
+    private final List<User> users;
+
+    public UiState(List<User> users) {
+        this.users = users;
+    }
+
+    public List<User> getUsers() { return users; }
+}
+
+// ③ 官方注解兜底（Java 同样可用 @Immutable）
+@Immutable
+public final class Point {
+    public final int x;
+    public final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+// ④ 用不可变集合（Java 侧可用 Guava ImmutableList 等）
+ImmutableList<User> users;
+```
+
+@tab Kotlin
+
 ```kotlin
 // ① data class 用 val（不可变）
 data class User(val name: String, val age: Int)   // 稳定
@@ -118,6 +205,8 @@ data class Point(val x: Int, val y: Int)
 val users: ImmutableList<User>
 ```
 
+:::
+
 ### 3.3 检查稳定性
 
 ```text
@@ -134,6 +223,17 @@ kotlinOptions {
 ```
 
 ## 4. 列表性能：LazyColumn
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：RecyclerView + ListAdapter（DiffUtil 计算 key 差异）
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -155,6 +255,8 @@ fun UserRow(user: User) {
 }
 ```
 
+:::
+
 **列表优化要点**：
 
 | 优化 | 说明 |
@@ -166,6 +268,17 @@ fun UserRow(user: User) {
 | 避免在 item 内做大计算 | remember 缓存 |
 
 ## 5. 图形层优化（GraphicsLayer）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：View.setTranslationX / setAlpha / setRotationZ（属性动画走硬件合成，跳过布局）
+```
+
+@tab Kotlin
 
 ```kotlin
 // 动画高频变化：用 graphicsLayer 代替 Modifier 布局属性
@@ -179,6 +292,8 @@ Box(Modifier.graphicsLayer {
     rotationZ = 45f
 })
 ```
+
+:::
 
 ```text
 graphicsLayer 优势：

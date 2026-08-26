@@ -18,12 +18,27 @@ title: 集合接口概览
 
 **遍历 Collection 中的元素：**
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 Iterator it = collection.iterator(); // 获得迭代子
 while (it.hasNext()) {
     Object obj = it.next(); // 得到下一个元素
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+val it = collection.iterator() // 获得迭代子
+while (it.hasNext()) {
+    val obj = it.next() // 得到下一个元素
+}
+```
+
+:::
 
 **常用方法：**
 

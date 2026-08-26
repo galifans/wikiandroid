@@ -20,6 +20,10 @@ Socket 是应用层与传输层之间的抽象层，把 TCP/IP 协议族的复�
 
 ### 客户端流程
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 Socket socket = new Socket("ip", 端口);
 
@@ -32,7 +36,27 @@ OutputStream os = socket.getOutputStream();
 DataOutputStream dos = new DataOutputStream(os);
 ```
 
+@tab Kotlin
+
+```kotlin
+val socket = Socket("ip", 端口)
+
+// 获取输入流（读取服务器数据）
+val is = socket.getInputStream()
+val dis = DataInputStream(is)
+
+// 获取输出流（发送数据到服务器）
+val os = socket.getOutputStream()
+val dos = DataOutputStream(os)
+```
+
+:::
+
 ### 服务器端流程
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 ServerSocket serverSocket = new ServerSocket(端口);
@@ -40,7 +64,21 @@ Socket socket = serverSocket.accept(); // 阻塞等待客户端连接
 // 获取流的方式与客户端一样
 ```
 
+@tab Kotlin
+
+```kotlin
+val serverSocket = ServerSocket(端口)
+val socket = serverSocket.accept() // 阻塞等待客户端连接
+// 获取流的方式与客户端一样
+```
+
+:::
+
 ### 读取输入流
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 byte[] buffer = new byte[1024];
@@ -53,9 +91,28 @@ while (true) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+val buffer = ByteArray(1024)
+while (true) {
+    val count = is.read(buffer)
+    if (count <= 0) {
+        break
+    }
+    // 对 buffer 保存或者做些其他操作
+}
+```
+
+:::
+
 ## 三、基于 UDP 的 Socket 编程
 
 UDP 客户端和服务器端的代码结构相同：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 DatagramSocket socket = new DatagramSocket(端口);
@@ -70,6 +127,24 @@ byte[] buf = new byte[1024];
 DatagramPacket packet = new DatagramPacket(buf, 1024);
 socket.receive(packet);
 ```
+
+@tab Kotlin
+
+```kotlin
+val socket = DatagramSocket(端口)
+val serverAddress = InetAddress.getByName("ip")
+
+// 发送
+val packet = DatagramPacket(buffer, length, host, port)
+socket.send(packet)
+
+// 接收
+val buf = ByteArray(1024)
+val packet = DatagramPacket(buf, 1024)
+socket.receive(packet)
+```
+
+:::
 
 ## 四、TCP 与 UDP 编程对比
 

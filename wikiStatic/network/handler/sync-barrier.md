@@ -31,6 +31,10 @@ flowchart LR
 
 > 同步屏障是 target 为 null 的特殊 Message。插入屏障后,**队列中的同步消息全部被"冻结"**,只执行异步消息;移除屏障后恢复。
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // MessageQueue.postSyncBarrier(源码简化)
 private int postSyncBarrier(long when) {
@@ -57,6 +61,40 @@ private int postSyncBarrier(long when) {
 void removeSyncBarrier(int token) { ... }
 ```
 
+@tab Kotlin
+
+```kotlin
+// MessageQueue.postSyncBarrier(源码简化)
+private fun postSyncBarrier(when: Long): Int {
+    synchronized(this) {
+        val token = mNextBarrierToken++
+        // 创建 target == null 的消息
+        val msg = Message.obtain()
+        msg.markInUse()
+        msg.when = when
+        msg.arg1 = token
+        // 按时间插入队列头部
+        var prev: Message? = null
+        var p = mMessages
+        if (when != 0L) {
+            while (p != null && p.when <= when) { prev = p; p = p.next }
+        }
+        if (prev != null) { msg.next = p; prev.next = msg }
+        else { msg.next = p; mMessages = msg }
+        return token
+    }
+}
+
+// 移除屏障
+fun removeSyncBarrier(token: Int) { ... }
+```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 取消息时:遇到屏障跳过同步消息(核心逻辑)
 Message next() {
@@ -73,6 +111,27 @@ Message next() {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// 取消息时:遇到屏障跳过同步消息(核心逻辑)
+fun next(): Message? {
+    while (true) {
+        // 1. 检查是否有同步屏障
+        if (msg != null && msg.target == null) {
+            // 屏障存在:跳过所有同步消息,找异步消息
+            do {
+                prevMsg = msg
+                msg = msg.next
+            } while (msg != null && !msg.isAsynchronous())
+        }
+        // 2. 找到可执行消息(异步 或 无屏障时的同步)
+    }
+}
+```
+
+:::
 
 ### 2.2 为什么需要屏障?
 
@@ -99,6 +158,10 @@ sequenceDiagram
 | 触摸事件 | Input 事件处理高优先级 |
 | 动画 | Animation 回调保证帧率 |
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // Choreographer 投递帧回调(使用异步消息)
 private void postCallbackDelayedInternal(...) {
@@ -110,9 +173,52 @@ private void postCallbackDelayedInternal(...) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// Choreographer 投递帧回调(使用异步消息)
+private fun postCallbackDelayedInternal(...) {
+    // 同步屏障 + 异步消息
+    if (mFramesScheduled) { ... }
+    val msg = mHandler.obtainMessage(MSG_DO_FRAME, callback)
+    msg.isAsynchronous = true        // 异步消息!
+    mHandler.sendMessageAtTime(msg, dueTime)
+}
+```
+
+:::
+
 ## 四、IdleHandler 空闲回调
 
 ### 4.1 用法
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 队列空闲时执行(非紧急任务)
+Looper.myQueue().addIdleHandler(() -> {
+    // 返回 true:继续观察空闲;false:只执行一次后移除
+    preloadData();      // 预加载/预创建等
+    return false;
+});
+
+// 示例:列表预加载
+class MainActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // 等首帧绘制完成、队列空闲后执行
+        Looper.myLooper().getQueue().addIdleHandler(() -> {
+            preloadNextPageData();
+            return false;
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 队列空闲时执行(非紧急任务)
@@ -135,6 +241,8 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+:::
+
 ### 4.2 IdleHandler 特性
 
 | 特性 | 说明 |
@@ -148,6 +256,10 @@ class MainActivity : AppCompatActivity() {
 >  **注意**:IdleHandler 执行时主线程仍被占用,不能做耗时操作,否则反而拖慢界面;不执行不代表"卡死",队列非空时不触发。
 
 ## 五、MessageQueue 阻塞与唤醒
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // 无消息时阻塞:epoll 等待,不占 CPU
@@ -167,6 +279,29 @@ boolean enqueueMessage(Message msg, long when) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// 无消息时阻塞:epoll 等待,不占 CPU
+fun next(): Message? {
+    while (true) {
+        if (msg != null) { ... }
+        // 没有消息:进入阻塞
+        nativePollOnce(ptr, nextPollTimeoutMillis)   // 阻塞等待(epoll)
+    }
+}
+
+// 入队时唤醒
+fun enqueueMessage(msg: Message, when: Long): Boolean {
+    // ...
+    if (needWake) {
+        nativeWake(mPtr)   // 唤醒阻塞的 next()
+    }
+}
+```
+
+:::
 
 ```mermaid
 flowchart LR

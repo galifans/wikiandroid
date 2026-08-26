@@ -106,6 +106,37 @@ description: Style 与 Theme 的区别、styleable 自定义属性、主题继�
 
 ### 3.3 在 View 中使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class RatingBar extends View {
+
+    private int maxRating = 5;
+    private int starColor = Color.parseColor("#FFB300");
+
+    public RatingBar(Context context) {
+        this(context, null);
+    }
+
+    public RatingBar(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public RatingBar(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        // 解析自定义属性
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RatingBar);
+        maxRating = a.getInt(R.styleable.RatingBar_maxRating, 5);
+        starColor = a.getColor(R.styleable.RatingBar_starColor, starColor);
+        a.recycle();  // 必须回收
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class RatingBar @JvmOverloads constructor(
     context: Context,
@@ -126,6 +157,8 @@ class RatingBar @JvmOverloads constructor(
     }
 }
 ```
+
+:::
 
 ### 3.4 布局中使用
 
@@ -179,6 +212,24 @@ Theme.Material3.DayNight
 
 ### 5.1 主题属性驱动的换肤
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 用主题属性定义颜色，深浅色自动切换
+<style name="AppTheme" parent="Theme.Material3.DayNight">
+    <item name="colorPrimary">@color/primary</item>
+    <item name="colorSurface">@color/surface</item>
+    <!-- values-night 中同名 color 自动使用深色值 -->
+</style>
+
+// 运行时切换深浅色
+AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 用主题属性定义颜色，深浅色自动切换
 <style name="AppTheme" parent="Theme.Material3.DayNight">
@@ -190,6 +241,8 @@ Theme.Material3.DayNight
 // 运行时切换深浅色
 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 ```
+
+:::
 
 ### 5.2 动态换肤思路
 

@@ -50,6 +50,33 @@ flowchart TD
 
 ## 3. ActivityThread.main 详解
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 应用的入口方法（由系统调用）
+public static void main(String[] args) {
+    // ① 创建主线程 Looper
+    Looper.prepareMainLooper();
+
+    // ② 创建 ActivityThread
+    ActivityThread thread = new ActivityThread();
+    thread.attach(false);
+
+    // ③ 消息循环开始
+    Looper.loop();
+}
+
+// attach(false) 中：
+// - 通过 Binder 向 AMS 注册（attachApplication）
+// - AMS 回调 bindApplication → handleBindApplication
+//   → 创建 Application（反射）
+//   → attachBaseContext → onCreate
+```
+
+@tab Kotlin
+
 ```kotlin
 // 应用的入口方法（由系统调用）
 fun main(args: Array<String>) {
@@ -70,6 +97,8 @@ fun main(args: Array<String>) {
 //   → 创建 Application（反射）
 //   → attachBaseContext → onCreate
 ```
+
+:::
 
 ## 4. 首帧渲染链路
 
@@ -94,6 +123,34 @@ reportFullyDrawn()（AndroidX 提供）
 
 ## 5. 启动耗时统计
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① adb 命令行统计
+// adb shell am start -W com.example.app/.MainActivity
+// 输出：
+//   TotalTime: 350ms        （startActivity 到首帧）
+//   WaitTime: 360ms         （含启动器等待）
+
+// ② 代码埋点
+class MyApp extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        long startTime = SystemClock.elapsedRealtime();
+        // 业务初始化...
+        Log.d("Launch", "App onCreate 耗时: " + (SystemClock.elapsedRealtime() - startTime) + "ms");
+    }
+}
+
+// ③ Macrobenchmark（官方推荐）
+// 用 Jetpack Macrobenchmark 自动化测量冷/热/温启动
+```
+
+@tab Kotlin
+
 ```kotlin
 // ① adb 命令行统计
 // adb shell am start -W com.example.app/.MainActivity
@@ -115,9 +172,44 @@ class MyApp : Application() {
 // 用 Jetpack Macrobenchmark 自动化测量冷/热/温启动
 ```
 
+:::
+
 ## 6. 启动优化清单
 
 ### 6.1 Application 轻量化
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class MyApp extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        // ✗ 所有 SDK 同步初始化（阻塞启动）
+        // ✓ 延迟/异步初始化
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sdkA.init();      // 非关键路径异步
+                sdkB.init();
+            }
+        }).start();
+
+        // ✓ 关键路径精简：只初始化真正需要的
+        CrashHandler.init(this);
+        // 其他放到首帧后（IdleHandler）
+        Looper.myLooper().setMessageLogging(msg -> {
+            // 首帧完成后执行
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MyApp : Application() {
@@ -141,6 +233,8 @@ class MyApp : Application() {
     }
 }
 ```
+
+:::
 
 ### 6.2 启动页占位（Window Background）
 

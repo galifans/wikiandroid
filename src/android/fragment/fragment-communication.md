@@ -30,6 +30,35 @@ flowchart LR
 
 **Arguments 是 Fragment 之间传递初始化数据的首选**，通过 `setArguments` + `getArguments` 完成：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class DetailFragment extends Fragment {
+
+    public static final String ARG_ID = "arg_id";
+
+    public static DetailFragment newInstance(long id) {
+        DetailFragment fragment = new DetailFragment();
+        Bundle args = new Bundle();
+        args.putLong(ARG_ID, id);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    private long detailId;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        detailId = requireArguments().getLong(ARG_ID);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class DetailFragment : Fragment() {
     companion object {
@@ -51,6 +80,8 @@ class DetailFragment : Fragment() {
 }
 ```
 
+:::
+
 ### 为什么用 Arguments 而不是构造参数
 
 | 对比 | 构造参数 | Arguments |
@@ -64,6 +95,60 @@ class DetailFragment : Fragment() {
 ## 三、接口回调：Fragment 通知 Activity
 
 ### 3.1 标准写法
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. Fragment 定义接口
+public class ArticleListFragment extends Fragment {
+
+    public interface OnArticleClickListener {
+        void onArticleClick(long articleId);
+    }
+
+    private OnArticleClickListener listener;
+
+    // 2. 在 onAttach 中强转获取宿主
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnArticleClickListener) {
+            listener = (OnArticleClickListener) context;
+        } else {
+            throw new IllegalStateException("宿主必须实现 OnArticleClickListener");
+        }
+    }
+
+    // 3. 触发回调
+    private void notifyClick(long articleId) {
+        if (listener != null) {
+            listener.onArticleClick(articleId);
+        }
+    }
+
+    // 4. 安全解绑
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
+    }
+}
+
+// Activity 实现接口
+public class HomeActivity extends AppCompatActivity implements ArticleListFragment.OnArticleClickListener {
+    @Override
+    public void onArticleClick(long articleId) {
+        // 跳转详情页
+        Bundle args = new Bundle();
+        args.putLong("id", articleId);
+        findNavController().navigate(R.id.action_list_to_detail, args);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 1. Fragment 定义接口
@@ -104,6 +189,8 @@ class HomeActivity : AppCompatActivity(), ArticleListFragment.OnArticleClickList
 }
 ```
 
+:::
+
 ### 3.2 注意事项
 
 - 接口回调是**同步、强引用**的，`onDetach` 中必须置空，防止内存泄漏
@@ -115,6 +202,53 @@ class HomeActivity : AppCompatActivity(), ArticleListFragment.OnArticleClickList
 ### 4.1 Activity 作用域共享
 
 **同一个 Activity 内的 Fragment 共享同一个 ViewModel**，通过 `activityViewModels()` 获取：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 共享 ViewModel
+public class SharedViewModel extends ViewModel {
+    public final MutableStateFlow<Article> selectedItem = new MutableStateFlow<>(null);
+    public final MutableStateFlow<List<Article>> listState = new MutableStateFlow<>(Collections.emptyList());
+}
+
+public class ListFragment extends Fragment {
+    // 等价于 activityViewModels()：作用域为宿主 Activity
+    private SharedViewModel getViewModel() {
+        return new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        getViewModel().listState.collectLatest(list -> {
+            // 更新列表 UI
+        });
+    }
+}
+
+public class DetailFragment extends Fragment {
+    // 等价于 activityViewModels()：作用域为宿主 Activity
+    private SharedViewModel getViewModel() {
+        return new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // 观察共享状态
+        getViewModel().selectedItem.collectLatest(item -> {
+            if (item != null) {
+                renderDetail(item);
+            }
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 共享 ViewModel
@@ -147,6 +281,8 @@ class DetailFragment : Fragment() {
 }
 ```
 
+:::
+
 ### 4.2 共享 ViewModel 的优点
 
 | 优点 | 说明 |
@@ -161,6 +297,22 @@ class DetailFragment : Fragment() {
 
 在 Navigation 组件中，还可使用 **Navigation 作用域**的共享 ViewModel（`by navGraphViewModels(R.id.graph_id)`），把共享范围限定在某个导航图内，避免跨图耦合。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class DetailFragment extends Fragment {
+    // 限定在当前 NavGraph 内共享（等价于 navGraphViewModels）
+    private SharedViewModel getViewModel() {
+        NavBackStackEntry backStackEntry = findNavController().getBackStackEntry(R.id.checkout_graph);
+        return new ViewModelProvider(backStackEntry).get(SharedViewModel.class);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class DetailFragment : Fragment() {
     // 限定在当前 NavGraph 内共享
@@ -168,9 +320,30 @@ class DetailFragment : Fragment() {
 }
 ```
 
+:::
+
 ## 五、Fragment Result API：结果回传
 
 Fragment 1.3.0+ 提供官方 Result API，适合**一次性的结果回传**（选中、确认等）：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 结果接收方（列表页）
+setFragmentResultListener("request_article", this, (key, bundle) -> {
+    long articleId = bundle.getLong("article_id");
+    // 处理结果
+});
+
+// 结果发送方（选择页）
+Bundle result = new Bundle();
+result.putLong("article_id", 42L);
+setFragmentResult("request_article", result);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 结果接收方（列表页）
@@ -183,9 +356,29 @@ setFragmentResultListener("request_article") { key, bundle ->
 setFragmentResult("request_article", bundleOf("article_id" to 42L))
 ```
 
+:::
+
 ### 5.1 指定接收者
 
 默认结果广播给**同一 FragmentManager** 下的所有监听者，可通过 `requestKey` 精确定位；跨 FragmentManager 需要层层传递：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 子 Fragment 向父 Fragment 回传
+Bundle result = new Bundle();
+result.putBoolean("ok", true);
+getParentFragmentManager().setFragmentResult("child_result", result);
+
+// 父 Fragment 监听
+setFragmentResultListener("child_result", this, (key, bundle) -> {
+    boolean ok = bundle.getBoolean("ok");
+});
+```
+
+@tab Kotlin
 
 ```kotlin
 // 子 Fragment 向父 Fragment 回传
@@ -196,6 +389,8 @@ setFragmentResultListener("child_result") { _, bundle ->
     val ok = bundle.getBoolean("ok")
 }
 ```
+
+:::
 
 ### 5.2 Result API vs 接口回调
 
@@ -212,6 +407,22 @@ setFragmentResultListener("child_result") { _, bundle ->
 
 ### 6.1 事件总线（EventBus / LiveDataBus）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// EventBus 简单用法
+EventBus.getDefault().post(new ArticleRefreshEvent());
+
+@Subscribe(threadMode = ThreadMode.MAIN)
+public void onRefresh(ArticleRefreshEvent event) {
+    // 处理事件
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // EventBus 简单用法
 EventBus.getDefault().post(ArticleRefreshEvent())
@@ -222,16 +433,34 @@ fun onRefresh(event: ArticleRefreshEvent) {
 }
 ```
 
+:::
+
 - 优点：跨任意对象解耦通信，无需实现接口
 - 缺点：**全局广播**，事件来源不可追踪、容易误接收、需要手动注册注销（防泄漏）
 - 使用建议：仅限**跨模块低频事件**（登录态变化、主题切换），页面内通信优先 ViewModel
 
 ### 6.2 findFragmentById / parentFragment 直接调用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 不建议：直接拿到 Fragment 实例调用其方法
+DetailFragment parent = (DetailFragment) getParentFragment();
+if (parent != null) {
+    parent.refreshData();
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 不建议：直接拿到 Fragment 实例调用其方法
 (parentFragment as? DetailFragment)?.refreshData()
 ```
+
+:::
 
 - 破坏封装、强耦合、无法处理 Fragment 尚未创建等时序问题
 - 仅适合非常简单的同层级临时操作

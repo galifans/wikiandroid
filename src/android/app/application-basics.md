@@ -35,6 +35,25 @@ flowchart LR
 </application>
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class WikiApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // 全局初始化
+        initCrashHandler();
+        initNetwork();
+        initImageLoader();
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class WikiApplication : Application() {
     override fun onCreate() {
@@ -46,6 +65,8 @@ class WikiApplication : Application() {
     }
 }
 ```
+
+:::
 
 ::: warning 注意
 `Application` 的构造器与 `attachBaseContext()` 在 `onCreate` **之前**调用。尽量不要在构造器里做耗时操作——此时 ContentProvider 已初始化但组件尚未就绪。
@@ -71,6 +92,26 @@ class WikiApplication : Application() {
 
 ### ✗ 反面教材：全部同步初始化
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+public void onCreate() {
+    super.onCreate();
+    initCrashHandler();      // 读文件，几 ms
+    initNetworkOkHttp();     // 建连接池，耗时
+    initImageLoader();       // 扫描磁盘缓存，几十 ms
+    initPush();              // 连长连接
+    initDatabase();          // 建库建表，上百 ms
+    initAnalytics();         // 埋点
+    // → 全部阻塞在启动关键路径上
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onCreate() {
     super.onCreate()
@@ -84,7 +125,32 @@ override fun onCreate() {
 }
 ```
 
+:::
+
 ### ✓ 最佳实践：按需 + 异步 + 启动器
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class WikiApplication extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // 1. 必须同步的：崩溃监控、日志（越早越好）
+        initCrashHandler();
+        // 2. 首帧前必须的：图片加载器预热、网络框架
+        initImageLoader();
+        // 3. 可异步的：数据库、埋点、推送（丢到后台线程）
+        new Thread(() -> { initDatabase(); initAnalytics(); }).start();
+        // 4. 真正懒加载的：等第一次使用时才初始化
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class WikiApplication : Application() {
@@ -101,6 +167,8 @@ class WikiApplication : Application() {
     }
 }
 ```
+
+:::
 
 **关键原则**：
 
@@ -120,6 +188,23 @@ class WikiApplication : Application() {
     android:process=":push" />
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+public void onCreate() {
+    super.onCreate();
+    // 每个进程都会执行！子进程(:push)不需要主进程的初始化
+    if (ProcessUtils.isMainProcess()) {
+        initMainOnly();
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onCreate() {
     super.onCreate()
@@ -129,6 +214,8 @@ override fun onCreate() {
     }
 }
 ```
+
+:::
 
 ::: warning 核心认知
 **Application 是按进程创建的**。配置了 `android:process` 的组件运行在独立进程，该进程也会各自创建 Application 实例并执行 `onCreate`。不做进程判断，会导致子进程重复初始化、甚至崩溃。
@@ -153,6 +240,33 @@ Context(抽象)
 | 绑定 Service | 支持 | 支持 |
 | 适用场景 | 单例、全局管理器、静态工具 | 界面相关操作 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 正确：单例传 Application 而非 Activity
+public class NetworkManager {
+    private NetworkManager(Application app) { /* 持有 app，安全不泄漏 */ }
+
+    @Volatile
+    private static NetworkManager instance;
+
+    public static NetworkManager get(Application app) {
+        if (instance == null) {
+            synchronized (NetworkManager.class) {
+                if (instance == null) {
+                    instance = new NetworkManager(app);
+                }
+            }
+        }
+        return instance;
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 正确：单例传 Application 而非 Activity
 class NetworkManager private constructor(app: Application) {
@@ -165,6 +279,8 @@ class NetworkManager private constructor(app: Application) {
     }
 }
 ```
+
+:::
 
 ## 五、Application 相关高频考点
 

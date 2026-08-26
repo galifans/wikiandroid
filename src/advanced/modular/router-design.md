@@ -44,6 +44,10 @@ flowchart LR
 
 ### 2.2 核心类
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ① 路由表:path → 目标类
 public class RouteTable {
@@ -74,7 +78,41 @@ public class Postcard {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ① 路由表:path → 目标类
+object RouteTable {
+    val ROUTES: MutableMap<String, RouteMeta> = HashMap()
+    init {
+        ROUTES["/home/main"] = RouteMeta(HomeActivity::class.java, 0)
+        ROUTES["/user/profile"] = RouteMeta(ProfileActivity::class.java, 1)
+        ROUTES["/order/detail"] = RouteMeta(OrderDetailActivity::class.java, 2)
+    }
+}
+
+// ② 路由元信息
+class RouteMeta(
+    var target: Class<*>,   // 目标 Activity / Fragment
+    var flags: Int          // 标志:是否需要登录等
+)
+
+// ③ 跳转请求
+class Postcard {
+    var path: String = ""      // 路由路径
+    var extras: Bundle? = null // 参数
+    var requestCode: Int = 0   // 请求码
+    var options: Bundle? = null // 转场动画等
+}
+```
+
+:::
+
 ## 三、注解处理器(APT)生成路由表
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // 注解定义
@@ -104,6 +142,40 @@ public class RouteProcessor extends AbstractProcessor {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 注解定义
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.BINARY)
+annotation class Route(
+    val path: String,        // 路由路径,如 /user/profile
+    val flags: Int = 0       // 标志位
+)
+
+// 处理器:编译期收集注解 → 生成路由表
+@AutoService(Processor::class)
+class RouteProcessor : AbstractProcessor() {
+    override fun process(
+        annotations: Set<TypeElement>,
+        roundEnv: RoundEnvironment
+    ): Boolean {
+        // 1. 扫描所有 @Route 注解的类
+        for (element in roundEnv.getElementsAnnotatedWith(Route::class.java)) {
+            val route = element.getAnnotation(Route::class.java)
+            val type = element as TypeElement
+            // 2. 收集 path → 类名
+            routeMap[route.path] = type.qualifiedName.toString()
+        }
+        // 3. 生成 RouteTable.java
+        generateRouteTable(routeMap)
+        return true
+    }
+}
+```
+
+:::
+
 | APT 工具 | 说明 |
 |---------|------|
 | javapoet | 生成 Java 代码 |
@@ -112,6 +184,39 @@ public class RouteProcessor extends AbstractProcessor {
 | kapt / ksp | Kotlin 注解处理 |
 
 ## 四、拦截器与降级
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 拦截器:登录校验 / 埋点 / 权限
+interface RouterInterceptor {
+    void process(Postcard postcard, InterceptorCallback callback);
+}
+
+class LoginInterceptor implements RouterInterceptor {
+    @Override
+    public void process(Postcard postcard, InterceptorCallback callback) {
+        if ((postcard.flags & FLAG_NEED_LOGIN) != 0 && !UserManager.isLogin()) {
+            // 未登录:拦截并跳转登录页
+            callback.onInterrupt(new RouterException("需要登录"));
+        } else {
+            callback.onContinue(postcard);   // 放行
+        }
+    }
+}
+
+// 降级:路由不存在时兜底
+class DegradeService implements IDegradeService {
+    @Override
+    public void onLost(Context context, Postcard postcard) {
+        // 404 页面 / 提示
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 拦截器:登录校验 / 埋点 / 权限
@@ -138,6 +243,8 @@ class DegradeService : IDegradeService {
 }
 ```
 
+:::
+
 ```mermaid
 sequenceDiagram
     participant C as 调用方
@@ -154,6 +261,39 @@ sequenceDiagram
 ```
 
 ## 五、服务暴露与发现(SPI)
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 组件提供能力:如 UserService
+public interface UserService {
+    boolean isLogin();
+    String getUserName();
+}
+
+// 实现类注册
+@Service
+public class UserServiceImpl implements UserService {
+    @Override
+    public boolean isLogin() {
+        return UserManager.isLogin();
+    }
+    @Override
+    public String getUserName() {
+        return UserManager.userName();
+    }
+}
+
+// 调用方使用:跨组件调用服务,无需直接依赖
+UserService userService = Router.getService(UserService.class);
+if (userService.isLogin()) {
+    showName(userService.getUserName());
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 组件提供能力:如 UserService
@@ -175,6 +315,8 @@ if (userService.isLogin()) {
     showName(userService.getUserName())
 }
 ```
+
+:::
 
 | 能力 | 说明 |
 |------|------|

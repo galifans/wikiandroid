@@ -99,6 +99,38 @@ sequenceDiagram
 
 ## 四、启动耗时测量
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. 系统日志（adb 命令）
+// adb shell am start -W -n com.example/.MainActivity
+// TotalTime: 1234ms（关键指标）
+
+// 2. 代码埋点
+public class WikiApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.i("Startup", "Application.onCreate 开始: " + SystemClock.elapsedRealtime());
+    }
+}
+
+// 3. 首帧回调
+public class MainActivity extends ComponentActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContent(...);   // Compose 内容
+        // 报告完全绘制（首屏关键内容已展示）
+        reportFullyDrawn();
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 1. 系统日志（adb 命令）
 // adb shell am start -W -n com.example/.MainActivity
@@ -122,6 +154,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 ```
+
+:::
 
 ```bash
 # 命令行测量冷启动
@@ -163,6 +197,31 @@ adb shell am start -W -n com.example.app/.MainActivity
 
 ### 3. 初始化优化（App Startup）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. 依赖 appstartup 库，自动注册初始化器
+public class DatabaseInitializer implements Initializer<Unit> {
+    @NonNull
+    @Override
+    public Unit create(@NonNull Context context) {
+        // 在后台线程初始化（库自动调度）
+        AppDatabase.create(context);
+        return Unit.INSTANCE;
+    }
+
+    @NonNull
+    @Override
+    public List<Class<? extends Initializer<?>>> dependencies() {
+        return Collections.emptyList();
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 1. 依赖 appstartup 库，自动注册初始化器
 class DatabaseInitializer : Initializer<Unit> {
@@ -174,7 +233,40 @@ class DatabaseInitializer : Initializer<Unit> {
 }
 ```
 
+:::
+
 ### 4. 数据预加载
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 首屏数据本地缓存优先，网络数据异步刷新
+public class HomeRepository {
+    private final Api api;
+    private final Cache cache;
+
+    public HomeRepository(Api api, Cache cache) {
+        this.api = api;
+        this.cache = cache;
+    }
+
+    // 回调式等价实现（对应 Kotlin 的 Flow）
+    public void loadHomeData(Consumer<HomeUiState> onState) {
+        onState.accept(cache.getHome());          // 先出缓存，秒开
+        api.getHome(new Callback<HomeUiState>() { // 再拉网络
+            @Override
+            public void onSuccess(HomeUiState fresh) {
+                cache.save(fresh);
+                onState.accept(fresh);
+            }
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 首屏数据本地缓存优先，网络数据异步刷新
@@ -187,6 +279,8 @@ class HomeRepository(private val api: Api, private val cache: Cache) {
     }
 }
 ```
+
+:::
 
 ## 六、高频面试题精讲
 

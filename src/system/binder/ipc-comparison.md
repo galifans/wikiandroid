@@ -50,6 +50,10 @@ flowchart TD
     end
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class BinderPool extends Binder implements IBinderPool {
 
@@ -69,6 +73,28 @@ public class BinderPool extends Binder implements IBinderPool {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class BinderPool : Binder(), IBinderPool {
+
+    companion object {
+        const val BINDER_A = 1
+        const val BINDER_B = 2
+    }
+
+    override fun queryBinder(binderCode: Int): IBinder? {
+        return when (binderCode) {
+            BINDER_A -> ModuleAService()
+            BINDER_B -> ModuleBService()
+            else -> null
+        }
+    }
+}
+```
+
+:::
 
 **收益**：
 

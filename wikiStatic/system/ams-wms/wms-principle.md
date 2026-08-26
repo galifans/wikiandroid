@@ -38,6 +38,24 @@ WindowManagerService：系统侧实现
   - 管理 WindowState（窗口状态）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 应用侧添加窗口（悬浮窗示例）
+WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+        WindowManager.LayoutParams.WRAP_CONTENT,
+        WindowManager.LayoutParams.WRAP_CONTENT,
+        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,   // 类型
+        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,        // 标志
+        PixelFormat.TRANSLUCENT
+);
+windowManager.addView(floatView, params);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 应用侧添加窗口（悬浮窗示例）
 val params = WindowManager.LayoutParams(
@@ -49,6 +67,8 @@ val params = WindowManager.LayoutParams(
 )
 windowManager.addView(floatView, params)
 ```
+
+:::
 
 ## 3. 窗口类型与 Z-order
 

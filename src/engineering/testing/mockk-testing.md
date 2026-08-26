@@ -23,6 +23,25 @@ description: MockK 基础用法、验证、协程测试、插桩、与 Mockito �
 
 ### 2.1 创建 Mock 与 Stub
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 创建 mock
+OrderRepository repository = Mockito.mock(OrderRepository.class);
+
+// Stub:定义行为
+when(repository.getOrder(1)).thenReturn(new Order(1, 99.0));
+when(repository.getOrder(anyInt())).thenThrow(new IllegalStateException("not found"));
+
+// 参数匹配
+doNothing().when(repository).save(any(), gt(0));
+when(repository.search(argThat(s -> s.startsWith("A")))).thenReturn(Collections.emptyList());
+```
+
+@tab Kotlin
+
 ```kotlin
 // 创建 mock
 val repository = mockk<OrderRepository>()
@@ -36,6 +55,8 @@ every { repository.save(any(), more()) } just Runs
 every { repository.search(match { it.startsWith("A") }) } returns listOf()
 ```
 
+:::
+
 | API | 用途 |
 |-----|------|
 | mockk&lt;T&gt;() | 创建 mock 对象 |
@@ -46,6 +67,28 @@ every { repository.search(match { it.startsWith("A") }) } returns listOf()
 | match { } | 自定义匹配 |
 
 ### 2.2 验证调用
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 验证:确认交互发生
+verify(repository).getOrder(1);
+verify(repository, times(2)).save(any());   // 恰好 2 次
+verify(repository, atLeast(1)).getOrder(anyInt());
+verify(repository, atMost(3)).delete(any());
+verify(repository, never()).close();        // 从未调用
+
+// 验证顺序
+InOrder inOrder = inOrder(repository);
+inOrder.verify(repository).loadConfig();
+inOrder.verify(repository).init();
+// 宽松验证:确认没有未验证的调用(等价 verifyAll + confirmVerified)
+verifyNoMoreInteractions(repository);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 验证:确认交互发生
@@ -65,7 +108,26 @@ verifyAll { repository.close() }
 confirmVerified(repository)   // 确认无其他调用
 ```
 
+:::
+
 ## 三、Spy 与部分 Mock
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Spy:保留真实实现,只覆盖部分方法
+OrderService orderService = Mockito.spy(new OrderService());
+when(orderService.calculateTax(any())).thenReturn(0.0);
+// 未 stub 的方法走真实实现
+
+// 对已有对象部分 mock
+OrderService real = new OrderService();
+OrderService spy = Mockito.spy(real);
+```
+
+@tab Kotlin
 
 ```kotlin
 // Spy:保留真实实现,只覆盖部分方法
@@ -78,11 +140,25 @@ val real = OrderService()
 val spy = spyk(real)
 ```
 
+:::
+
 | 类型 | 行为 |
 |------|------|
 | mockk() | 全部打桩,无 stub 返回默认值 |
 | spyk() | 真实实现,可覆盖个别方法 |
 | relaxed mock | 自动返回"合理"默认值 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 宽松 mock:免写 stub,返回默认值(集合/字符串等)
+OrderRepository repo = Mockito.mock(OrderRepository.class);
+repo.getOrders();   // Mockito 对集合返回类型默认返回空列表,无需 when
+```
+
+@tab Kotlin
 
 ```kotlin
 // relaxed:免写 stub,返回默认值(集合/字符串等)
@@ -90,7 +166,36 @@ val repo = relaxedMockk<OrderRepository>()
 repo.getOrders()   // 返回空列表,无需 every
 ```
 
+:::
+
 ## 四、协程测试
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// suspend 函数同样可打桩(suspend 在 Java 中多一个 Continuation 参数)
+ApiService api = Mockito.mock(ApiService.class);
+
+// 打桩/验证(等价 coEvery / coVerify)
+when(api.fetchUser(any())).thenReturn(new User("tom"));
+verify(api).fetchUser("tom");
+
+// runTest:kotlinx-coroutines-test 提供虚拟时间
+// Java 中运行协程测试需借助 kotlinx-coroutines 的 runBlocking 包裹
+@Test
+public void 协程测试() throws Exception {
+    when(api.fetchUser(any())).thenReturn(new User("tom"));
+    runBlocking(cont -> {   // 将 suspend 调用包进 runBlocking
+        User user = viewModel.loadUser();
+        assertEquals("tom", user.name);
+        return null;
+    });
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // MockK 原生支持 suspend 函数
@@ -109,6 +214,8 @@ fun `协程测试`() = runTest {
 }
 ```
 
+:::
+
 | API | 用途 |
 |-----|------|
 | coEvery / coVerify | suspend 函数打桩/验证 |
@@ -117,6 +224,31 @@ fun `协程测试`() = runTest {
 | StandardTestDispatcher | 手动调度 |
 
 ## 五、Object 与静态 Mock
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 单例类(等价 Kotlin object)
+final class Logger {
+    static final Logger INSTANCE = new Logger();
+    void log(String msg) {}
+}
+
+// mock 静态方法需 mockito-inline
+try (MockedStatic<Logger> mocked = Mockito.mockStatic(Logger.class)) {
+    mocked.when(() -> Logger.INSTANCE.log(any())).thenAnswer(inv -> null);
+    mocked.verify(() -> Logger.INSTANCE.log("启动"));
+}
+
+// mock 静态/顶层函数
+try (MockedStatic<Utils> mocked = Mockito.mockStatic(Utils.class)) {
+    mocked.when(() -> Utils.formatTime(any())).thenReturn("00:00");
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // mock object 单例
@@ -131,9 +263,32 @@ mockkStatic("com.example.Utils")
 every { Utils.formatTime(any()) } returns "00:00"
 ```
 
+:::
+
 >  注意:mockkStatic/mockkObject 会影响全局,测试后记得 `unmockkAll()` 清理。
 
 ## 六、Android 环境测试
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Robolectric + Mockito 结合
+@RunWith(RobolectricTestRunner.class)
+public class MainViewModelTest {
+    @Test
+    public void 测试ViewModel() {
+        Context context = ApplicationProvider.getApplicationContext();
+        Repo repo = Mockito.mock(Repo.class);
+        when(repo.load()).thenReturn(new Data());
+        MainViewModel vm = new MainViewModel(repo);
+        // 断言 ViewModel 逻辑
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // Robolectric + MockK 结合
@@ -150,6 +305,8 @@ class MainViewModelTest {
 }
 ```
 
+:::
+
 ## 七、最佳实践
 
 | 实践 | 说明 |
@@ -160,6 +317,37 @@ class MainViewModelTest {
 | 测试行为非实现 | 验证交互而非内部细节 |
 | 命名清晰 | `fun \`应该...\`()` 中文描述 |
 | 与协程测试结合 | runTest 控制时间 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class OrderViewModelTest {
+    private final OrderRepository repository = Mockito.mock(OrderRepository.class);
+    private OrderViewModel viewModel;
+
+    @Before public void setUp() { viewModel = new OrderViewModel(repository); }
+    @After public void tearDown() { /* Mockito 无需全局清理 */ }
+
+    @Test
+    public void 加载订单成功时更新状态() throws Exception {
+        when(repository.getOrder(1)).thenReturn(new Order(1, 99.0));
+        runBlocking(cont -> { viewModel.loadOrder(1); return null; });
+        assertEquals(OrderState.Success, viewModel.getState());
+        verify(repository, times(1)).getOrder(1);
+    }
+
+    @Test
+    public void 加载失败时显示错误() throws Exception {
+        when(repository.getOrder(1)).thenThrow(new IOException("network"));
+        runBlocking(cont -> { viewModel.loadOrder(1); return null; });
+        assertTrue(viewModel.getState() instanceof OrderState.Error);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class OrderViewModelTest {
@@ -185,6 +373,8 @@ class OrderViewModelTest {
     }
 }
 ```
+
+:::
 
 ## 八、高频面试题
 

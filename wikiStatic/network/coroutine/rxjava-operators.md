@@ -23,6 +23,22 @@ Observer（观察者）
     └─ onComplete()   完成
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 订阅
+Observable.just(1, 2, 3)
+    .subscribe(
+        item -> System.out.println("onNext: " + item),   // onNext
+        error -> System.out.println("onError: " + error), // onError
+        () -> System.out.println("onComplete")            // onComplete
+    );
+```
+
+@tab Kotlin
+
 ```kotlin
 // 订阅
 Observable.just(1, 2, 3)
@@ -33,7 +49,28 @@ Observable.just(1, 2, 3)
     )
 ```
 
+:::
+
 ### 1.2 线程调度：subscribeOn / observeOn
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+Observable.create((ObservableEmitter<String> emitter) -> {
+    System.out.println("数据源线程: " + Thread.currentThread().getName());
+    emitter.onNext("data");
+    emitter.onComplete();
+})
+.subscribeOn(Schedulers.io())      // 上游（数据源）在 IO 线程
+.observeOn(AndroidSchedulers.mainThread())  // 下游（观察者）在主线程
+.subscribe(value ->
+    System.out.println("观察者线程: " + Thread.currentThread().getName())  // main
+);
+```
+
+@tab Kotlin
 
 ```kotlin
 Observable.create<String> { emitter ->
@@ -48,6 +85,8 @@ Observable.create<String> { emitter ->
 }
 ```
 
+:::
+
 | 调度器 | 用途 |
 | --- | --- |
 | `Schedulers.io()` | IO 操作（网络、文件） |
@@ -61,6 +100,22 @@ Observable.create<String> { emitter ->
 
 ## 2. 创建操作符
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Observable.just(1, 2, 3)              // 直接发射多个值
+Observable.fromArray(1, 2, 3)         // 从数组
+Observable.fromIterable(list)         // 从集合
+Observable.range(1, 10)               // 范围 1..10
+Observable.interval(1, TimeUnit.SECONDS)  // 周期发射（热流）
+Observable.defer(() -> ...)           // 订阅时才创建
+Observable.create(emitter -> ...)     // 手动创建
+```
+
+@tab Kotlin
+
 ```kotlin
 Observable.just(1, 2, 3)              // 直接发射多个值
 Observable.fromArray(1, 2, 3)         // 从数组
@@ -71,7 +126,40 @@ Observable.defer { ... }              // 订阅时才创建
 Observable.create { emitter -> ... }  // 手动创建
 ```
 
+:::
+
 ## 3. 变换操作符
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// map：一对一变换
+Observable.just(1, 2, 3).map(x -> x * 10)       // 10, 20, 30
+
+// flatMap：一对多 + 合并（无序）
+Observable.just("a", "b")
+    .flatMap(s -> Observable.just(s + "-1", s + "-2"))
+    // 结果：a-1, b-1, a-2, b-2（顺序不定）
+
+// concatMap：一对多 + 顺序（有序，保序）
+Observable.just("a", "b")
+    .concatMap(s -> Observable.just(s + "-1", s + "-2"))
+    // 结果：a-1, a-2, b-1, b-2（严格保序）
+
+// switchMap：取最新
+Observable.just("a", "b")
+    .switchMap(s -> fetch(s))   // 新值到来取消旧的
+
+// scan：累加
+Observable.just(1, 2, 3).scan((acc, x) -> acc + x)  // 1, 3, 6
+
+// buffer：分批
+Observable.range(1, 6).buffer(3)   // [1,2,3], [4,5,6]
+```
+
+@tab Kotlin
 
 ```kotlin
 // map：一对一变换
@@ -98,7 +186,25 @@ Observable.just(1, 2, 3).scan { acc, x -> acc + x }  // 1, 3, 6
 Observable.range(1, 6).buffer(3)   // [1,2,3], [4,5,6]
 ```
 
+:::
+
 ## 4. 过滤操作符
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+Observable.just(1, 2, 3, 4, 5)
+    .filter(x -> x % 2 == 0)        // 2, 4
+    .take(2)                       // 取前2个：1, 2
+    .skip(1)                       // 跳过前1个
+    .distinct()                    // 去重
+    .firstElement()                // 第一个
+    .elementAt(2)                  // 第3个
+```
+
+@tab Kotlin
 
 ```kotlin
 Observable.just(1, 2, 3, 4, 5)
@@ -110,7 +216,39 @@ Observable.just(1, 2, 3, 4, 5)
     .elementAt(2)                  // 第3个
 ```
 
+:::
+
 ## 5. 组合操作符
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// zip：配对组合（按序配对）
+Observable.zip(
+    Observable.just(1, 2, 3),
+    Observable.just("a", "b"),
+    (num, ch) -> num + ch
+)
+// "1a", "2b"（短者为准）
+
+// combineLatest：任一变化触发（取最新）
+Observable.combineLatest(
+    Observable.just(1, 2, 3),
+    Observable.just("a", "b"),
+    (num, ch) -> num + ch
+)
+// 3a, 3b（最后一个 num 与每个 ch 组合）
+
+// merge：合并（交错）
+Observable.merge(obs1, obs2)      // 事件交错发射
+
+// concat：拼接（先1后2）
+Observable.concat(obs1, obs2)     // 1 全部发完再发 2
+```
+
+@tab Kotlin
 
 ```kotlin
 // zip：配对组合（按序配对）
@@ -134,7 +272,27 @@ Observable.merge(obs1, obs2)      // 事件交错发射
 Observable.concat(obs1, obs2)     // 1 全部发完再发 2
 ```
 
+:::
+
 ## 6. 错误处理
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+Observable.just(1, 2, 0, 3)
+    .map(x -> 10 / x)
+    .onErrorReturn(e -> -1)          // 出错返回默认值
+    .onErrorResumeNext(e -> Observable.just(100))  // 出错切换新流
+    .retry(2)                      // 重试 2 次
+    .retryWhen(errors ->
+        errors.zipWith(Observable.range(1, 3), (e, retry) -> retry)
+    )
+    .subscribe(...)
+```
+
+@tab Kotlin
 
 ```kotlin
 Observable.just(1, 2, 0, 3)
@@ -148,7 +306,39 @@ Observable.just(1, 2, 0, 3)
     .subscribe(...)
 ```
 
+:::
+
 ## 7. 背压（Backpressure）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 策略：生产 > 消费时如何处理
+Flowable.just(1, 2, 3, 4, 5, 6)
+    .onBackpressureBuffer()       // 缓冲全部（可能 OOM）
+    .onBackpressureDrop()         // 丢弃超出部分
+    .onBackpressureLatest()       // 只保留最新
+    .observeOn(Schedulers.computation())
+    .subscribe(...)
+
+// 手动请求
+Flowable.create(emitter -> {
+    for (int i = 0; i <= 100; i++) emitter.onNext(i);
+}, BackpressureStrategy.BUFFER)
+    .subscribe(new Subscriber<Integer>() {
+        @Override
+        public void onSubscribe(Subscription s) {
+            s.request(10);         // 每次请求 10 个
+        }
+        @Override
+        public void onNext(Integer t) { /* 处理 */ }
+        // onError / onComplete ...
+    });
+```
+
+@tab Kotlin
 
 ```kotlin
 // 策略：生产 > 消费时如何处理
@@ -171,6 +361,8 @@ Flowable.create({ emitter ->
         ...
     })
 ```
+
+:::
 
 ## 8. RxJava vs 协程
 

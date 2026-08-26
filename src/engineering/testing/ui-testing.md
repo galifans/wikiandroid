@@ -54,6 +54,49 @@ dependencies {
 
 ## 3. Espresso（View 体系）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 测试目录：app/src/androidTest/
+@RunWith(AndroidJUnit4.class)
+public class LoginActivityTest {
+
+    @Rule
+    public ActivityScenarioRule<LoginActivity> activityRule =
+            new ActivityScenarioRule<>(LoginActivity.class);
+
+    @Test
+    public void 输入凭证并登录成功() {
+        // ① 输入用户名
+        onView(withId(R.id.etUsername))
+            .perform(typeText("user"), closeSoftKeyboard());
+
+        // ② 输入密码
+        onView(withId(R.id.etPassword))
+            .perform(typeText("123456"), closeSoftKeyboard());
+
+        // ③ 点击登录
+        onView(withId(R.id.btnLogin)).perform(click());
+
+        // ④ 断言跳转到主页
+        onView(withId(R.id.tvWelcome))
+            .check(matches(withText("欢迎回来")));
+    }
+
+    @Test
+    public void 空输入提示错误() {
+        onView(withId(R.id.btnLogin)).perform(click());
+
+        onView(withId(R.id.tvError))
+            .check(matches(withText("请输入用户名")));
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 测试目录：app/src/androidTest/
 @RunWith(AndroidJUnit4::class)
@@ -90,6 +133,8 @@ class LoginActivityTest {
 }
 ```
 
+:::
+
 ```text
 Espresso 核心 API：
 - onView：查找 View（withId / withText / withContentDescription）
@@ -99,6 +144,40 @@ Espresso 核心 API：
 ```
 
 ## 4. Compose UI Test
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose UI Test 基于 Kotlin DSL(@Composable 无法在 Java 中直接书写)
+// Java 侧等价:同一登录流程用 Espresso 测 View 体系
+@RunWith(AndroidJUnit4.class)
+public class LoginScreenTest {
+
+    @Rule
+    public ActivityScenarioRule<LoginActivity> activityRule =
+            new ActivityScenarioRule<>(LoginActivity.class);
+
+    @Test
+    public void 登录流程正常() {
+        // ① 输入
+        onView(withId(R.id.etUsername))
+            .perform(typeText("user"), closeSoftKeyboard());
+        onView(withId(R.id.etPassword))
+            .perform(typeText("123456"), closeSoftKeyboard());
+
+        // ② 点击
+        onView(withId(R.id.btnLogin)).perform(click());
+
+        // ③ 断言(Espresso 自动等待主线程空闲)
+        onView(withId(R.id.tvWelcome))
+            .check(matches(withText("欢迎回来")));
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @RunWith(AndroidJUnit4::class)
@@ -129,6 +208,8 @@ class LoginScreenTest {
     }
 }
 ```
+
+:::
 
 ```text
 Compose 测试 API：
@@ -162,6 +243,33 @@ Compose 测试 API：
    - 核心流程必测，其余按需
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// MockWebServer 示例（依赖：mockwebserver）
+public class ApiTest {
+    private final MockWebServer server = new MockWebServer();
+
+    @Before public void setup() throws IOException {
+        server.enqueue(new MockResponse().setBody("{\"name\":\"user\"}"));
+        server.start();
+    }
+
+    @Test public void 网络接口解析正确() {
+        // 指向 mock 服务器
+        UserApi api = new Retrofit.Builder()
+            .baseUrl(server.url("/"))
+            .build()
+            .create(UserApi.class);
+        // ... 断言
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // MockWebServer 示例（依赖：mockwebserver）
 class ApiTest {
@@ -182,6 +290,8 @@ class ApiTest {
     }
 }
 ```
+
+:::
 
 ## 6. 高频面试题
 

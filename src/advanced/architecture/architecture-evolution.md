@@ -33,6 +33,26 @@ Android 中的 MVC：
 - Model：数据层（Bean / 数据库 / 网络）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// MVC：Controller（Activity）持有 Model
+public class MainActivity extends AppCompatActivity {
+    private UserModel userModel = new UserModel();
+
+    public void onLoadClick() {
+        // Controller 调用 Model 获取数据
+        User user = userModel.getUser();
+        // 直接更新 View
+        tvName.setText(user.getName());
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // MVC：Controller（Activity）持有 Model
 class MainActivity : AppCompatActivity() {
@@ -47,6 +67,8 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+:::
+
 **问题**：Activity 既承担 View 又承担 Controller，业务逻辑膨胀，难以测试。
 
 ## 3. MVP
@@ -58,6 +80,57 @@ Presenter：持有 View 引用，处理业务，更新 View
 
 特点：View 与 Model 完全解耦，通过 Presenter 桥接
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// View 接口
+interface LoginView {
+    void showLoading();
+    void showSuccess(User user);
+    void showError(String msg);
+}
+
+// Presenter
+class LoginPresenter {
+    private final LoginView view;
+
+    public LoginPresenter(LoginView view) {
+        this.view = view;
+    }
+
+    public void login(String name, String pwd) {
+        view.showLoading();
+        User user = new LoginRepository().login(name, pwd); // Model
+        if (user != null) view.showSuccess(user);
+        else view.showError("登录失败");
+    }
+}
+
+// Activity 实现 View
+class LoginActivity extends AppCompatActivity implements LoginView {
+    private LoginPresenter presenter;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        presenter = new LoginPresenter(this);
+    }
+
+    public void onLoginClick() {
+        presenter.login(etName.getText().toString(), etPwd.getText().toString());
+    }
+
+    @Override
+    public void showSuccess(User user) { /* 更新 UI */ }
+    @Override
+    public void showError(String msg) { Toast.makeText(this, msg, Toast.LENGTH_SHORT).show(); }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // View 接口
@@ -95,6 +168,8 @@ class LoginActivity : AppCompatActivity(), LoginView {
 }
 ```
 
+:::
+
 **优点**：职责清晰、View 可 mock 测试。
 **缺点**：接口爆炸（每页一套 View/Presenter 接口）、内存泄漏风险（Presenter 持有 View）。
 
@@ -107,6 +182,65 @@ ViewModel：持有状态（State），暴露给 View 观察
 
 特点：数据驱动 UI（双向绑定/状态观察），ViewModel 不持有 View 引用
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ViewModel（Jetpack，Kotlin 的 StateFlow 用 LiveData 等价表达）
+class LoginViewModel extends ViewModel {
+    private final MutableLiveData<LoginUiState> uiState =
+            new MutableLiveData<>(new LoginUiState.Idle());
+    public LiveData<LoginUiState> getUiState() { return uiState; }
+
+    public void login(String name, String pwd) {
+        uiState.setValue(new LoginUiState.Loading());
+        try {
+            uiState.setValue(new LoginUiState.Success(
+                    new LoginRepository().login(name, pwd)));
+        } catch (Exception e) {
+            uiState.setValue(new LoginUiState.Error(
+                    e.getMessage() != null ? e.getMessage() : "失败"));
+        }
+    }
+}
+
+// UI 状态（sealed 语义用抽象类 + 子类表达）
+abstract class LoginUiState {
+    static class Idle extends LoginUiState {}
+    static class Loading extends LoginUiState {}
+    static class Success extends LoginUiState {
+        final User user;
+        Success(User user) { this.user = user; }
+    }
+    static class Error extends LoginUiState {
+        final String msg;
+        Error(String msg) { this.msg = msg; }
+    }
+}
+
+// Activity 观察状态
+class LoginActivity extends AppCompatActivity {
+    private LoginViewModel viewModel;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viewModel = new ViewModelProvider(this).get(LoginViewModel.class);
+        // 在 STARTED 生命周期内观察（等价 repeatOnLifecycle）
+        viewModel.getUiState().observe(this, state -> {
+            if (state instanceof LoginUiState.Loading) showLoading();
+            else if (state instanceof LoginUiState.Success)
+                showSuccess(((LoginUiState.Success) state).user);
+            else if (state instanceof LoginUiState.Error)
+                showError(((LoginUiState.Error) state).msg);
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ViewModel（Jetpack）
@@ -155,6 +289,8 @@ class LoginActivity : AppCompatActivity() {
 }
 ```
 
+:::
+
 **优点**：ViewModel 不感知 View、自动处理生命周期、可测试性强。
 **缺点**：状态分散（多个 StateFlow 难管理）、调试困难。
 
@@ -167,6 +303,62 @@ Intent：用户意图（Action）
 
 特点：单向数据流 + 状态不可变（类似 Redux）
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// MVI：Intent → Reducer → State → View
+abstract class LoginIntent {
+    static class Submit extends LoginIntent {
+        final String name;
+        final String pwd;
+        Submit(String name, String pwd) {
+            this.name = name;
+            this.pwd = pwd;
+        }
+    }
+}
+
+abstract class LoginState {
+    static class Idle extends LoginState {}
+    static class Loading extends LoginState {}
+    static class Success extends LoginState {
+        final User user;
+        Success(User user) { this.user = user; }
+    }
+    static class Error extends LoginState {
+        final String msg;
+        Error(String msg) { this.msg = msg; }
+    }
+}
+
+class LoginViewModel extends ViewModel {
+    private final MutableLiveData<LoginState> state =
+            new MutableLiveData<>(new LoginState.Idle());
+    public LiveData<LoginState> getState() { return state; }
+
+    public void dispatch(LoginIntent intent) {
+        if (intent instanceof LoginIntent.Submit) {
+            reduce((LoginIntent.Submit) intent);
+        }
+    }
+
+    private void reduce(LoginIntent.Submit intent) {
+        state.setValue(new LoginState.Loading());
+        try {
+            state.setValue(new LoginState.Success(
+                    new LoginRepository().login(intent.name, intent.pwd)));
+        } catch (Exception e) {
+            state.setValue(new LoginState.Error(
+                    e.getMessage() != null ? e.getMessage() : "失败"));
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // MVI：Intent → Reducer → State → View
@@ -203,6 +395,8 @@ class LoginViewModel : ViewModel() {
     }
 }
 ```
+
+:::
 
 **优点**：状态唯一来源、可预测、易调试（时间旅行）。
 **缺点**：样板代码多、学习成本高、状态合并复杂。

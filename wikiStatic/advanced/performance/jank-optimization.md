@@ -62,6 +62,32 @@ Android 渲染：
 
 ### 3.2 代码检测（Looper 监控原理）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 卡顿监控核心：监听主线程消息执行时间
+Looper.getMainLooper().setMessageLogging(new Printer() {
+    @Override
+    public void println(String x) {
+        if (x.startsWith(">>>>> Dispatching")) {
+            // 消息开始
+            startTime = SystemClock.uptimeMillis();
+        } else if (x.startsWith("<<<<< Finished")) {
+            // 消息结束
+            long cost = SystemClock.uptimeMillis() - startTime;
+            if (cost > 100) { // 超过阈值
+                // 抓取主线程堆栈（卡顿现场）
+                Thread.currentThread().getStackTrace();
+            }
+        }
+    }
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 // 卡顿监控核心：监听主线程消息执行时间
 Looper.getMainLooper().setMessageLogging(object : Printer {
@@ -80,6 +106,8 @@ Looper.getMainLooper().setMessageLogging(object : Printer {
     }
 })
 ```
+
+:::
 
 ## 4. 常见卡顿原因与优化
 

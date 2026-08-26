@@ -33,6 +33,22 @@ title: 内存优化
 
 ## 四、Bitmap 优化
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 采样压缩：按需加载
+BitmapFactory.Options options = new BitmapFactory.Options();
+options.inSampleSize = 2;  // 1/2 采样
+BitmapFactory.decodeResource(resources, R.drawable.large, options);
+
+// 使用 LruCache 缓存
+LruCache<String, Bitmap> cache = new LruCache<>(maxMemory / 8);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 采样压缩：按需加载
 val options = BitmapFactory.Options().apply {
@@ -43,6 +59,8 @@ BitmapFactory.decodeResource(resources, R.drawable.large, options)
 // 使用 LruCache 缓存
 val cache = LruCache<String, Bitmap>(maxMemory / 8)
 ```
+
+:::
 
 ## 五、OOM 常见原因
 

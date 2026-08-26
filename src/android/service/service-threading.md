@@ -21,6 +21,29 @@ flowchart LR
     A --> D[Broadcast 消息]
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+class DemoService extends Service {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d("Thread", "onCreate 线程: " + Thread.currentThread().getName());  // main
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("Thread", "onStartCommand 线程: " + Thread.currentThread().getName());  // main
+        // 直接做耗时操作会 ANR（超过 5 秒超时）！
+        return START_STICKY;
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class DemoService : Service() {
     override fun onCreate() {
@@ -36,6 +59,8 @@ class DemoService : Service() {
 }
 ```
 
+:::
+
 ### 1.2 常见误区
 
 | 误区 | 真相 |
@@ -49,6 +74,45 @@ class DemoService : Service() {
 ## 二、正确姿势：Service + 线程/协程
 
 ### 2.1 手动管理线程
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class DownloadService extends Service {
+    private final ExecutorService executor = Executors.newFixedThreadPool(3);
+    private final Map<Integer, Future<?>> tasks = new HashMap<>();
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        String action = intent != null ? intent.getAction() : null;
+        if (ACTION_DOWNLOAD.equals(action)) {
+            final String url = intent.getStringExtra("url");
+            if (url == null) return START_STICKY;
+            // 开线程执行耗时任务
+            tasks.put(startId, executor.submit(() -> {
+                download(url);
+                // 任务完成更新 UI（主线程）
+                new Handler(Looper.getMainLooper()).post(() -> notifyProgress(url));
+            }));
+        } else if (ACTION_STOP.equals(action)) {
+            tasks.values().forEach(future -> future.cancel(true));
+            stopSelf();  // 无任务后停止服务
+        }
+        return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        tasks.values().forEach(future -> future.cancel(true));
+        executor.shutdown();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class DownloadService : Service() {
@@ -82,6 +146,8 @@ class DownloadService : Service() {
 }
 ```
 
+:::
+
 ### 2.2 startService vs bindService 的线程差异
 
 | 维度 | startService | bindService |
@@ -97,6 +163,29 @@ class DownloadService : Service() {
 
 ### 3.1 原理
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// IntentService（API 30 已废弃）
+class UploadService extends IntentService {
+    public UploadService() {
+        super("UploadService");
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        // 在单独的工作线程顺序执行（串行队列）
+        String file = intent != null ? intent.getStringExtra("file") : null;
+        upload(file);
+        // 任务执行完自动 stopSelf
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // IntentService（API 30 已废弃）
 class UploadService : IntentService("UploadService") {
@@ -109,6 +198,8 @@ class UploadService : IntentService("UploadService") {
     }
 }
 ```
+
+:::
 
 **原理**：
 
@@ -157,6 +248,36 @@ flowchart LR
 | 前台展示 | 需自己管理通知 | 自带 ForegroundInfo |
 | 适用 | 即时、交互式 | 后台可靠任务 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class SyncWorker extends CoroutineWorker {
+    public SyncWorker(Context context, WorkerParameters params) {
+        super(context, params);
+    }
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        // Java 无协程环境，用同步代码 + ListenableWorker 也可
+        return syncData() ? Result.success() : Result.retry();  // 自动重试
+    }
+}
+
+// 调度：带约束的周期任务
+PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
+        SyncWorker.class, 6, TimeUnit.HOURS)
+        .setConstraints(new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build())
+        .build();
+WorkManager.getInstance(context).enqueue(request);
+```
+
+@tab Kotlin
+
 ```kotlin
 class SyncWorker(context: Context, params: WorkerParameters) :
     CoroutineWorker(context, params) {
@@ -180,6 +301,8 @@ val request = PeriodicWorkRequestBuilder<SyncWorker>(6, TimeUnit.HOURS)
     .build()
 WorkManager.getInstance(context).enqueue(request)
 ```
+
+:::
 
 ## 五、前台服务与后台限制
 

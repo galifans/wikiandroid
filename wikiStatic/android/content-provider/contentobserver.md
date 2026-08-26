@@ -23,6 +23,56 @@ flowchart LR
 
 ### 2.1 注册与注销
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class ContactsFragment extends Fragment {
+
+    // 1. 定义观察者
+    private final ContentObserver contactsObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
+        @Override
+        public void onChange(boolean selfChange) {
+            // 数据变化回调（主线程）
+            reloadContacts();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+            // 带具体 URI 的回调（API 16+）
+        }
+    };
+
+    private boolean isRegistered = false;
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // 2. 注册监听
+        requireContext().getContentResolver().registerContentObserver(
+            ContactsContract.Contacts.CONTENT_URI,  // 观察的 URI
+            true,                                    // 是否监听子路径
+            contactsObserver
+        );
+        isRegistered = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        // 3. 必须注销，防止泄漏
+        if (isRegistered) {
+            requireContext().getContentResolver().unregisterContentObserver(contactsObserver);
+            isRegistered = false;
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class ContactsFragment : Fragment() {
 
@@ -63,9 +113,39 @@ class ContactsFragment : Fragment() {
 }
 ```
 
+:::
+
 ### 2.2 通知数据变化（Provider 侧）
 
 ContentProvider 在数据变更后需要主动通知：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MyProvider extends ContentProvider {
+    @Override
+    public Uri insert(Uri uri, ContentValues values) {
+        // ...写入数据库
+        Uri newUri = Uri.withAppendedPath(uri, id.toString());
+        // 通知所有监听该 URI 的观察者
+        getContext().getContentResolver().notifyChange(newUri, null);
+        return newUri;
+    }
+
+    @Override
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        int count = super.update(uri, values, selection, selectionArgs);
+        if (count > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return count;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MyProvider : ContentProvider() {
@@ -86,6 +166,8 @@ class MyProvider : ContentProvider() {
     }
 }
 ```
+
+:::
 
 ## 三、跨进程分发原理
 
@@ -109,13 +191,39 @@ sequenceDiagram
 
 ### 4.1 监听系统通讯录
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 通讯录变化实时感知
+Uri uri = ContactsContract.Contacts.CONTENT_URI;
+getContentResolver().registerContentObserver(uri, true, observer);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 通讯录变化实时感知
 val uri = ContactsContract.Contacts.CONTENT_URI
 contentResolver.registerContentObserver(uri, true, observer)
 ```
 
+:::
+
 ### 4.2 监听系统设置
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 监听系统语言变化
+Uri uri = Settings.System.getUriFor(Settings.System.LOCALE);
+getContentResolver().registerContentObserver(uri, false, localeObserver);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 监听系统语言变化
@@ -123,7 +231,21 @@ val uri = Settings.System.getUriFor(Settings.System.LOCALE)
 contentResolver.registerContentObserver(uri, false, localeObserver)
 ```
 
+:::
+
 ### 4.3 监听媒体库（相册）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 相册新增图片
+Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+getContentResolver().registerContentObserver(uri, true, mediaObserver);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 相册新增图片
@@ -131,7 +253,21 @@ val uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 contentResolver.registerContentObserver(uri, true, mediaObserver)
 ```
 
+:::
+
 ### 4.4 监听自己 Provider 的表变化
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 数据表变化 → 自动刷新列表
+Uri uri = Uri.parse("content://com.example.app.provider/article");
+getContentResolver().registerContentObserver(uri, true, articleObserver);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 数据表变化 → 自动刷新列表
@@ -139,9 +275,37 @@ val uri = Uri.parse("content://com.example.app.provider/article")
 contentResolver.registerContentObserver(uri, true, articleObserver)
 ```
 
+:::
+
 ## 五、与 Flow / LiveData 结合
 
 ### 5.1 封装为回调 Flow
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Java 侧等价方案：用 LiveData 封装 ContentObserver
+public class ContentObserverUtils {
+
+    public static LiveData<Uri> observeContentChanges(Context context, Uri uri,
+                                                      boolean notifyForDescendants) {
+        MutableLiveData<Uri> liveData = new MutableLiveData<>();
+        ContentObserver observer = new ContentObserver(new Handler(Looper.getMainLooper())) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri) {
+                liveData.setValue(uri);   // 数据变化时发射新值
+            }
+        };
+        context.getContentResolver().registerContentObserver(uri, notifyForDescendants, observer);
+        // 清理注销（对应 awaitClose）需在使用方生命周期回调中处理
+        return liveData;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 fun Context.observeContentChanges(uri: Uri, notifyForDescendants: Boolean = true): Flow<Uri> = callbackFlow {
@@ -157,9 +321,26 @@ fun Context.observeContentChanges(uri: Uri, notifyForDescendants: Boolean = true
 }
 ```
 
+:::
+
 ### 5.2 配合 Room invalidate
 
 Room 内部就是通过 `InvalidationTracker` + ContentObserver 机制感知表变化的：Room 在 SQLite 表上注册观察者，数据变更后自动通知 Flow 重新查询。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Dao
+public interface ArticleDao {
+    // 表数据变化时 LiveData 自动发射新数据（底层就是 ContentObserver 机制）
+    @Query("SELECT * FROM article WHERE id = :id")
+    LiveData<Article> observeArticle(long id);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @Dao
@@ -169,6 +350,8 @@ interface ArticleDao {
     fun observeArticle(id: Long): Flow<Article?>
 }
 ```
+
+:::
 
 ## 六、注意事项与坑点
 

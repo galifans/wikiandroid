@@ -11,6 +11,27 @@ title: Kotlin 协程
 
 **协程**：可挂起（suspend）和恢复的计算单元，运行在线程之上，但不受线程调度限制。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 协程等价写法：用线程池 + 延迟执行
+ExecutorService executor = Executors.newSingleThreadExecutor();
+executor.execute(() -> {
+    try {
+        Thread.sleep(1000);       // 阻塞 1 秒
+        System.out.println("World");
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+    }
+});
+System.out.println("Hello");
+// 输出：Hello → World（顺序一致）
+```
+
+@tab Kotlin
+
 ```kotlin
 import kotlinx.coroutines.*
 
@@ -23,6 +44,8 @@ fun main() = runBlocking {
 }
 // 输出：Hello → World
 ```
+
+:::
 
 ## 二、协程构建器
 
@@ -41,6 +64,22 @@ fun main() = runBlocking {
 | `Dispatchers.Default` | CPU 密集型 | 计算任务 |
 | `Dispatchers.Unconfined` | 不限制 | 极少使用 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 协程等价写法：IO 线程池执行，主线程更新 UI
+Executors.newSingleThreadExecutor().execute(() -> {
+    String data = repository.fetchData();        // IO 线程执行
+    new Handler(Looper.getMainLooper()).post(() -> {
+        _uiState.setValue(data);                 // 主线程更新 UI
+    });
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 viewModelScope.launch(Dispatchers.IO) {
     val data = repository.fetchData()   // IO 线程执行
@@ -50,7 +89,29 @@ viewModelScope.launch(Dispatchers.IO) {
 }
 ```
 
+:::
+
 ## 四、结构化并发
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 协程等价写法：通过线程池管理与取消
+ExecutorService scope = Executors.newCachedThreadPool();
+
+// Job：取消与等待
+Future<?> job = scope.submit(() -> { /* ... */ });
+job.cancel(true);
+try { job.get(); } catch (Exception e) { } // 等待完成
+
+// 子任务：父任务取消时需手动管理
+scope.execute(() -> work1());
+scope.execute(() -> work2());
+```
+
+@tab Kotlin
 
 ```kotlin
 val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -67,9 +128,36 @@ scope.launch {
 }
 ```
 
+:::
+
 **异常处理**：`SupervisorJob` 使子协程异常互不影响，配合 `CoroutineExceptionHandler` 统一兜底。
 
 ## 五、Flow 冷流
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Flow 等价写法：RxJava Observable 冷流
+Observable<String> fetchData() {
+    return Observable.create(emitter -> {
+        emitter.onNext("第一次数据");
+        try { Thread.sleep(1000); } catch (InterruptedException e) { }
+        emitter.onNext("第二次数据");
+        emitter.onComplete();
+    });
+}
+
+// 收集
+fetchData()
+    .subscribeOn(Schedulers.io())        // 切换上游执行线程
+    .map(String::toUpperCase)            // 操作符
+    .onErrorReturn(e -> "error: " + e)   // 异常捕获
+    .subscribe(data -> System.out.println(data));
+```
+
+@tab Kotlin
 
 ```kotlin
 fun fetchData(): Flow<String> = flow {
@@ -87,6 +175,8 @@ scope.launch {
         .collect { data -> println(data) }
 }
 ```
+
+:::
 
 ## 六、实战建议
 

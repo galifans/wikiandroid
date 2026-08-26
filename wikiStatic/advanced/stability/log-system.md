@@ -30,6 +30,48 @@ flowchart TD
 
 ## 二、日志分级设计
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 分级:控制采样与存储,error 必存,debug 线上不存
+enum LogLevel {
+    DEBUG(1), INFO(2), WARN(3), ERROR(4), FATAL(5);
+
+    private final int priority;
+    LogLevel(int priority) { this.priority = priority; }
+    public int getPriority() { return priority; }
+}
+
+public class AppLog {
+    // 线上级别:WARN(重要信息全保留,debug 丢弃)
+    // 开发级别:DEBUG
+    @Volatile
+    public static LogLevel minLevel =
+            BuildConfig.DEBUG ? LogLevel.DEBUG : LogLevel.WARN;
+
+    public static void log(LogLevel level, String tag, String msg, Throwable throwable) {
+        if (level.getPriority() < minLevel.getPriority()) return;   // 过滤
+        LogEntry entry = new LogEntry(
+                System.currentTimeMillis(),
+                level,
+                tag,
+                msg,
+                Thread.currentThread().getName(),
+                PageTracker.currentPage(),   // 当前页面
+                throwable
+        );
+        // 写本地文件(异步队列,避免阻塞主线程)
+        LogWriter.enqueue(entry);
+        // 同时输出到 Logcat(debug 环境)
+        if (BuildConfig.DEBUG) android.util.Log.println(level.getPriority(), tag, msg);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 分级:控制采样与存储,error 必存,debug 线上不存
 enum class LogLevel(val priority: Int) {
@@ -61,7 +103,26 @@ object AppLog {
 }
 ```
 
+:::
+
 ## 三、本地存储:环形文件
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 环形缓冲区:固定大小,写满覆盖最旧
+// 典型配置:error 日志 5MB 全保留 + 普通日志 20MB 环形
+public class LogWriter {
+    // 文件策略:
+    // logs/error.log        — 只存 error,追加不覆盖
+    // logs/debug.0.log      — 环形文件,写满轮转 debug.1.log...
+    // 每次启动新开一个文件,方便按会话检索
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 环形缓冲区:固定大小,写满覆盖最旧
@@ -74,6 +135,8 @@ class LogWriter {
 }
 ```
 
+:::
+
 | 策略 | 说明 |
 |------|------|
 | 环形覆盖 | 固定体积,写满覆盖最旧,防撑爆存储 |
@@ -83,6 +146,38 @@ class LogWriter {
 | 容量控制 | 总体积上限(如 30MB),超限清理 |
 
 ## 四、日志回捞
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 回捞场景:某个用户报问题 → 拉取他的本地日志
+// 实现方式:推送指令 → App 上传日志
+
+// ① 客户端监听回捞指令(推送通道)
+pushManager.onCommand("collect_log", () -> {
+    List<File> files = LogStorage.allFiles();
+    // 打包上传(带设备/版本/时间范围)
+    uploadService.upload(new LogPackage(
+            DeviceInfo.id,
+            BuildConfig.VERSION_NAME,
+            files
+    ));
+});
+
+// ② 也可支持:崩溃时自动附带最近日志
+public class CrashHandler implements Thread.UncaughtExceptionHandler {
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        // 崩溃前:把最近 200 条日志打进崩溃上报
+        List<LogEntry> recent = LogStorage.recent(200);
+        CrashReporter.report(t, e, recent);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 回捞场景:某个用户报问题 → 拉取他的本地日志
@@ -108,6 +203,8 @@ class CrashHandler : Thread.UncaughtExceptionHandler {
     }
 }
 ```
+
+:::
 
 > **最佳实践**:崩溃上报自动附带日志上下文,命中率远高于事后回捞;回捞用于疑难杂症(偶现问题、环境问题)。
 
@@ -136,6 +233,21 @@ class CrashHandler : Thread.UncaughtExceptionHandler {
 
 ### 5.3 日志内容规范
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 好日志:有上下文,能独立定位
+Log.w("OrderDetail", "加载订单失败, orderId=" + orderId + ", code=" + resp.getCode() + ", msg=" + resp.getMsg());
+
+// 坏日志:无信息量
+Log.e("TAG", "error!!!");
+Log.d("TAG", "load failed");   // 没说是哪个接口、什么参数
+```
+
+@tab Kotlin
+
 ```kotlin
 // 好日志:有上下文,能独立定位
 Log.w("OrderDetail", "加载订单失败, orderId=$orderId, code=${resp.code}, msg=${resp.msg}")
@@ -144,6 +256,8 @@ Log.w("OrderDetail", "加载订单失败, orderId=$orderId, code=${resp.code}, m
 Log.e("TAG", "error!!!")
 Log.d("TAG", "load failed")   // 没说是哪个接口、什么参数
 ```
+
+:::
 
 | 日志要素 | 说明 |
 |---------|------|
@@ -163,6 +277,30 @@ Log.d("TAG", "load failed")   // 没说是哪个接口、什么参数
 | 特定机型问题 | 机型维度聚合 + 差异对比 |
 | 服务端问题 | 客户端日志 + 服务端日志关联(请求 ID) |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 分布式追踪:请求 ID 贯穿客户端/服务端
+public class RequestIdInterceptor implements Interceptor {
+    @Override
+    public Response intercept(Chain chain) throws IOException {
+        String requestId = UUID.randomUUID().toString();
+        Log.i("Net", "请求发起: " + requestId + " " + chain.request().url());
+        Response response = chain.proceed(
+                chain.request().newBuilder()
+                        .header("X-Request-Id", requestId)   // 传给服务端
+                        .build()
+        );
+        Log.i("Net", "请求完成: " + requestId + " code=" + response.code());
+        return response;
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 分布式追踪:请求 ID 贯穿客户端/服务端
 class RequestIdInterceptor : Interceptor {
@@ -179,6 +317,8 @@ class RequestIdInterceptor : Interceptor {
     }
 }
 ```
+
+:::
 
 ## 七、高频面试题
 

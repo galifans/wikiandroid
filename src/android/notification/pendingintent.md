@@ -32,6 +32,37 @@ PendingIntent = **Intent + 执行权限 + 触发时机**。系统在触发时"�
 
 ## 二、三种创建方式
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. 启动 Activity（通知点击最常见）
+Intent intent = new Intent(this, DetailActivity.class);
+PendingIntent pendingIntent = PendingIntent.getActivity(
+        this,
+        1001,               // 请求码：区分不同 PendingIntent
+        intent,
+        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+// 2. 启动/绑定 Service
+Intent serviceIntent = new Intent(this, DownloadService.class);
+PendingIntent pendingService = PendingIntent.getService(
+        this, 2001, serviceIntent,
+        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+// 3. 发送广播（通知操作按钮常用）
+Intent actionIntent = new Intent("com.example.ACTION_PAUSE");
+PendingIntent pendingBroadcast = PendingIntent.getBroadcast(
+        this, 3001, actionIntent,
+        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 1. 启动 Activity（通知点击最常见）
 val intent = Intent(this, DetailActivity::class.java)
@@ -57,6 +88,8 @@ val pendingBroadcast = PendingIntent.getBroadcast(
 )
 ```
 
+:::
+
 | 方法 | 触发结果 | 典型场景 |
 |------|----------|----------|
 | `getActivity` | 启动 Activity | 点击通知跳转页面 |
@@ -75,6 +108,27 @@ PendingIntent 通过 `requestCode` + Intent 是否匹配来决定"复用还是�
 | `FLAG_IMMUTABLE` | 创建后 Intent 不可修改（**安全默认**） | 通知/小部件（Android 12 起强制） |
 | `FLAG_MUTABLE` | 允许其他组件修改 Intent 内容 | 特定系统场景（如媒体会话） |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 经典场景：通知 ID 不变、内容更新 —— 用 UPDATE_CURRENT
+void updateNotification(long articleId, String title) {
+    Intent intent = new Intent(this, DetailActivity.class);
+    intent.putExtra("id", articleId);      // 每次更新 extras
+    PendingIntent pendingIntent = PendingIntent.getActivity(
+            this,
+            (int) articleId,               // 不同文章用不同 requestCode
+            intent,
+            PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+    );
+    // 相同 requestCode + 相同 Intent → 复用同一 PendingIntent，只更新内容
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 经典场景：通知 ID 不变、内容更新 —— 用 UPDATE_CURRENT
 fun updateNotification(articleId: Long, title: String) {
@@ -91,6 +145,8 @@ fun updateNotification(articleId: Long, title: String) {
 }
 ```
 
+:::
+
 ::: warning Android 12+ 强制要求
 targetSdk 31+ 创建 PendingIntent **必须显式声明** `FLAG_IMMUTABLE` 或 `FLAG_MUTABLE`，否则抛 `IllegalArgumentException`。安全建议：一律用 `FLAG_IMMUTABLE`（除非确实需要被填充内容）。
 :::
@@ -98,6 +154,31 @@ targetSdk 31+ 创建 PendingIntent **必须显式声明** `FLAG_IMMUTABLE` 或 `
 ## 四、典型使用场景
 
 ### 场景 1：通知点击跳转
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+Intent intent = new Intent(this, ChatActivity.class);
+intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+intent.putExtra("chatId", chatId);
+PendingIntent contentIntent = PendingIntent.getActivity(
+        this, chatId, intent,
+        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+Notification notification = new NotificationCompat.Builder(this, "messages")
+        .setSmallIcon(R.drawable.ic_chat)
+        .setContentTitle(sender)
+        .setContentText(message)
+        .setContentIntent(contentIntent)
+        .setAutoCancel(true)
+        .build();
+NotificationManagerCompat.from(this).notify(chatId, notification);
+```
+
+@tab Kotlin
 
 ```kotlin
 val intent = Intent(this, ChatActivity::class.java).apply {
@@ -119,7 +200,28 @@ val notification = NotificationCompat.Builder(this, "messages")
 NotificationManagerCompat.from(this).notify(chatId, notification)
 ```
 
+:::
+
 ### 场景 2：通知操作按钮（播放/暂停）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 操作按钮用广播 PendingIntent
+PendingIntent pauseIntent = PendingIntent.getBroadcast(
+        this, 1,
+        new Intent("com.example.MEDIA_PAUSE"),
+        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+);
+
+new NotificationCompat.Builder(this, "media")
+        .addAction(R.drawable.ic_pause, "暂停", pauseIntent);
+        // 用户点击"暂停" → 系统发广播 → Receiver 处理
+```
+
+@tab Kotlin
 
 ```kotlin
 // 操作按钮用广播 PendingIntent
@@ -134,7 +236,25 @@ NotificationCompat.Builder(this, "media")
     // 用户点击"暂停" → 系统发广播 → Receiver 处理
 ```
 
+:::
+
 ### 场景 3：桌面小部件
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// AppWidgetProvider 中
+Intent intent = new Intent(context, MainActivity.class);
+PendingIntent pending = PendingIntent.getActivity(
+        context, 0, intent,
+        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+);
+views.setOnClickPendingIntent(R.id.widget_root, pending);
+```
+
+@tab Kotlin
 
 ```kotlin
 // AppWidgetProvider 中
@@ -146,7 +266,26 @@ val pending = PendingIntent.getActivity(
 views.setOnClickPendingIntent(R.id.widget_root, pending)
 ```
 
+:::
+
 ### 场景 4：AlarmManager 闹钟
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+PendingIntent pending = PendingIntent.getBroadcast(
+        this, 0,
+        new Intent(this, AlarmReceiver.class),
+        PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+);
+alarmManager.setExactAndAllowWhileIdle(
+        AlarmManager.RTC_WAKEUP, triggerAtMillis, pending
+);
+```
+
+@tab Kotlin
 
 ```kotlin
 val pending = PendingIntent.getBroadcast(
@@ -159,6 +298,8 @@ alarmManager.setExactAndAllowWhileIdle(
 )
 ```
 
+:::
+
 ## 五、安全最佳实践
 
 | 风险 | 说明 | 防护 |
@@ -168,6 +309,21 @@ alarmManager.setExactAndAllowWhileIdle(
 | 隐私泄露 | extras 携带敏感数据被读取 | 不把敏感数据放 PendingIntent 的 extras |
 | 滥用特权 | 利用"以应用身份执行"特性 | 接收方校验来源（`getCallingPackage` 等） |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 安全规范
+// 1. 一律 FLAG_IMMUTABLE
+PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT;
+// 2. 敏感数据不要放 extras（改为 ID，目标页面再查）
+intent.putExtra("id", 42L);   // ✓ 只传 ID
+// intent.putExtra("token", secretToken);  // ✗ 不传敏感数据
+```
+
+@tab Kotlin
+
 ```kotlin
 // 安全规范
 // 1. 一律 FLAG_IMMUTABLE
@@ -176,6 +332,8 @@ PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 intent.putExtra("id", 42L)   // ✓ 只传 ID
 // intent.putExtra("token", secretToken)  // ✗ 不传敏感数据
 ```
+
+:::
 
 ## 六、高频面试题精讲
 

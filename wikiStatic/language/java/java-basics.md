@@ -15,12 +15,27 @@ title: Java 核心回顾
 
 ## 二、String 与常量池
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 String s1 = "abc";          // 字符串常量池
 String s2 = new String("abc"); // 堆中新建对象
 s1 == s2;                   // false
 s1.equals(s2);              // true
 ```
+
+@tab Kotlin
+
+```kotlin
+val s1 = "abc"              // 字符串常量池
+val s2 = String("abc")      // 堆中新建对象
+s1 === s2                   // false：引用比较（等价 Java 的 ==）
+s1 == s2                    // true：内容比较（等价 Java 的 equals）
+```
+
+:::
 
 **面试重点**：`String` 不可变、`StringBuilder` 可变、字符串拼接的底层原理。
 
@@ -36,12 +51,27 @@ s1.equals(s2);              // true
 
 ## 四、反射与注解
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 Class<?> clazz = Class.forName("com.example.User");
 Object obj = clazz.getDeclaredConstructor().newInstance();
 Method method = clazz.getMethod("setName", String.class);
 method.invoke(obj, "Android");
 ```
+
+@tab Kotlin
+
+```kotlin
+val clazz = Class.forName("com.example.User")
+val obj = clazz.getDeclaredConstructor().newInstance()
+val method = clazz.getMethod("setName", String::class.java)
+method.invoke(obj, "Android")
+```
+
+:::
 
 反射是 **Retrofit、Glide、EventBus** 等框架的底层基石。
 

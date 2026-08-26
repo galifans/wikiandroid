@@ -87,6 +87,40 @@ if (project.hasProperty('isModuleHome') && isModuleHome.toBoolean()) {
 
 ## 5. 组件间通信：路由
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 路由表（Router）
+@Router(path = "/user/profile")
+public class UserProfileActivity extends AppCompatActivity {}
+
+// 跳转（跨组件调用，编译期无依赖）
+Router.getInstance().build("/user/profile")
+    .withString("userId", "123")
+    .navigation(this);
+
+// 服务调用（组件间方法调用）
+public interface UserService {
+    boolean isLogin();
+}
+
+@Router(path = "/user/service")
+public class UserServiceImpl implements UserService {
+    @Override
+    public boolean isLogin() {
+        return SessionManager.isLogin();
+    }
+}
+
+// 其他组件通过路由获取服务
+UserService userService = (UserService) Router.getInstance()
+    .getService(UserService.class);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 路由表（Router）
 @Router(path = "/user/profile")
@@ -111,6 +145,8 @@ class UserServiceImpl : UserService {
 val userService = Router.getInstance()
     .getService(UserService::class.java) as? UserService
 ```
+
+:::
 
 **常用框架**：ARouter（阿里）、自研路由（注解 + 编译期生成路由表）。
 

@@ -170,3 +170,28 @@
     display: none !important; // 隐藏 tooltip 气泡与箭头
   }
 }
+
+// ============ 代码块 Java/Kotlin 切换选项卡（::: code-tabs）============
+// 需求：示例代码支持 Java/Kotlin 切换，默认 Java，切换按钮位于代码块右上角。
+// 主题基于 @vuepress/plugin-markdown-tab 渲染 .vp-code-tabs 结构：
+//   .vp-code-tabs > .vp-code-tabs-nav（按钮行） + .vp-code-tab（内容面板）
+// 默认按钮在左侧，这里右对齐到“右上角”，并保持与代码块一致的圆角配色。
+
+.vp-code-tabs {
+  // 按钮右对齐：Java/Kotlin 切换按钮固定位于代码块右上角
+  .vp-code-tabs-nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 2px;
+  }
+
+  // 非激活按钮悬停反馈：绿色高亮文字
+  .vp-code-tab-nav:not(.active):hover {
+    color: var(--vp-c-accent);
+  }
+
+  // 激活按钮：绿色高亮文字（底色与圆角过渡沿用主题默认 var(--code-c-bg)）
+  .vp-code-tab-nav.active {
+    color: var(--vp-c-accent);
+  }
+}

@@ -21,6 +21,33 @@ HandlerThread：Looper 循环等待消息，可反复 post 任务，线程不退
 
 ## 2. 基本使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. 创建并启动
+HandlerThread handlerThread = new HandlerThread("worker-thread");
+handlerThread.start();
+
+// 2. 拿到该线程的 Looper 创建 Handler
+Handler handler = new Handler(handlerThread.getLooper());
+
+// 3. 提交任务（依次执行，串行队列）
+handler.post(() -> {
+    // 在子线程执行任务1
+    Data data = loadFromDisk();
+    handler.post(() -> {
+        // 任务2 依赖任务1，一定在其后执行
+    });
+});
+
+// 4. 不再使用时退出
+handlerThread.quitSafely();   // 处理完队列中已有消息后退出
+```
+
+@tab Kotlin
+
 ```kotlin
 // 1. 创建并启动
 val handlerThread = HandlerThread("worker-thread")
@@ -42,7 +69,39 @@ handler.post {
 handlerThread.quitSafely()   // 处理完队列中已有消息后退出
 ```
 
+:::
+
 ### 2.1 典型场景：顺序执行耗时任务
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class ImageLoader {
+
+    // 单线程队列：解码任务串行执行，避免并发争抢
+    private final HandlerThread thread;
+    private final Handler handler;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    public ImageLoader() {
+        thread = new HandlerThread("image-decode");
+        thread.start();
+        handler = new Handler(thread.getLooper());
+    }
+
+    public void load(String path, Callback<Bitmap> callback) {
+        handler.post(() -> {
+            Bitmap bitmap = decode(path);
+            // 切回主线程回调
+            mainHandler.post(() -> callback.onSuccess(bitmap));
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class ImageLoader {
@@ -61,7 +120,13 @@ class ImageLoader {
 }
 ```
 
+:::
+
 ## 3. 源码解析
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // HandlerThread 源码（核心）
@@ -95,6 +160,42 @@ public class HandlerThread extends Thread {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// HandlerThread 源码（核心）
+class HandlerThread : Thread() {
+
+    override fun run() {
+        mTid = Process.myTid()
+        Looper.prepare()          // ① 创建 Looper（ThreadLocal 绑定本线程）
+        synchronized(this) {
+            mLooper = Looper.myLooper()
+            notifyAll()           // ② 唤醒等待 getLooper() 的线程
+        }
+        Process.setThreadPriority(mPriority)
+        onLooperPrepared()        // ③ 回调（可在这里初始化）
+        Looper.loop()             // ④ 进入消息循环（阻塞式）
+        mTid = -1
+    }
+
+    fun getLooper(): Looper? {
+        if (!isAlive) return null
+        synchronized(this) {
+            while (isAlive && mLooper == null) {
+                try {
+                    wait()        // 等待 run() 中 notifyAll
+                } catch (e: InterruptedException) {
+                }
+            }
+        }
+        return mLooper
+    }
+}
+```
+
+:::
+
 **关键点**：
 
 1. `Looper.prepare()` 创建并绑定当前线程的 Looper。
@@ -115,6 +216,10 @@ public class HandlerThread extends Thread {
 ## 5. SerialExecutor：AOSP 中的经典用法
 
 `AsyncTask` 的串行执行器就是用 HandlerThread 实现的：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // AsyncTask.SERIAL_EXECUTOR 内部（简化）
@@ -143,9 +248,92 @@ private static class SerialExecutor implements Executor {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// AsyncTask.SERIAL_EXECUTOR 内部（简化）
+private class SerialExecutor : Executor {
+    private val mTasks = ArrayDeque<Runnable>()
+    private var mActive: Runnable? = null
+
+    @Synchronized
+    override fun execute(r: Runnable) {
+        mTasks.offer(object : Runnable {
+            override fun run() {
+                try {
+                    r.run()
+                } finally {
+                    scheduleNext()   // 执行完取下一个任务
+                }
+            }
+        })
+        if (mActive == null) scheduleNext()
+    }
+
+    @Synchronized
+    protected fun scheduleNext() {
+        mTasks.poll()?.let {
+            mActive = it
+            THREAD_POOL_EXECUTOR.execute(it)  // 单线程池
+        }
+    }
+}
+```
+
+:::
+
 > 核心思想：**任务队列 + 单线程消费者** = 串行执行。HandlerThread 就是天然的实现。
 
 ## 6. 常见应用场景
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 场景1：数据库批量写入
+class DbWriter {
+    private final AppDatabase db;
+    private final HandlerThread thread;
+    private final Handler handler;
+
+    public DbWriter(AppDatabase db) {
+        this.db = db;
+        thread = new HandlerThread("db-writer");
+        thread.start();
+        handler = new Handler(thread.getLooper());
+    }
+
+    public void enqueue(List<User> users) {
+        handler.post(() -> db.userDao().insertAll(users));  // 串行写，避免并发锁
+    }
+}
+
+// 场景2：传感器数据聚合
+class SensorCollector {
+    private final HandlerThread thread;
+    private final Handler handler;
+
+    public SensorCollector() {
+        thread = new HandlerThread("sensor");
+        thread.start();
+        handler = new Handler(thread.getLooper());
+    }
+
+    public void start() {
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                SensorData data = readSensor();
+                process(data);
+                handler.postDelayed(this, 100);  // 每 100ms 轮询
+            }
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 场景1：数据库批量写入
@@ -175,7 +363,23 @@ class SensorCollector {
 }
 ```
 
+:::
+
 ### 6.1 生命周期注意
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    handlerThread.quitSafely();   // 必须退出，否则线程泄漏
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 override fun onDestroy() {
@@ -183,6 +387,8 @@ override fun onDestroy() {
     handlerThread.quitSafely()   // 必须退出，否则线程泄漏
 }
 ```
+
+:::
 
 ## 7. 高频面试题
 

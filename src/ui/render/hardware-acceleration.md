@@ -127,10 +127,23 @@ flowchart TD
 | 极端兼容性要求 | 旧设备 GPU 驱动问题 |
 | 特定动画效果 | 需要 CPU 精确控制 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 在 View 层面关闭（API 11+）
+view.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 在 View 层面关闭（API 11+）
 view.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 ```
+
+:::
 
 | LayerType | 说明 |
 |-----------|------|

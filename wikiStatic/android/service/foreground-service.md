@@ -43,6 +43,27 @@ description: 前台服务的使用场景、通知渠道、Android 8.0+ 限制与
 
 Android 8.0 起，所有通知**必须**关联一个渠道，否则通知不显示：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 创建渠道（应用启动时执行一次）
+NotificationChannel channel = new NotificationChannel(
+        CHANNEL_ID,          // 渠道 ID（全局唯一）
+        "下载任务",           // 用户可见名称
+        NotificationManager.IMPORTANCE_LOW  // 重要级别
+);
+channel.setDescription("文件下载与进度通知");
+channel.setSound(null, null);          // 前台服务建议静音
+channel.enableVibration(false);
+
+NotificationManager manager = getSystemService(NotificationManager.class);
+manager.createNotificationChannel(channel);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 创建渠道（应用启动时执行一次）
 val channel = NotificationChannel(
@@ -59,6 +80,8 @@ val manager = getSystemService(NotificationManager::class.java)
 manager.createNotificationChannel(channel)
 ```
 
+:::
+
 重要级别（`IMPORTANCE_*`）决定通知是否弹横幅/发声音：
 
 | 级别 | 行为 |
@@ -69,6 +92,52 @@ manager.createNotificationChannel(channel)
 | IMPORTANCE_MIN | 折叠进抽屉，无声音 |
 
 ## 3. 启动前台服务（完整示例）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class DownloadService extends Service {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        startForeground(NOTIFICATION_ID, buildNotification());
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        // 处理业务（如开启线程池下载）
+        return START_STICKY;
+    }
+
+    private Notification buildNotification() {
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("正在下载")
+                .setContentText("progress 0%")
+                .setSmallIcon(R.drawable.ic_download)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true)          // 不可滑动清除
+                .build();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    private static final String CHANNEL_ID = "download_channel";
+    private static final int NOTIFICATION_ID = 1001;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class DownloadService : Service() {
@@ -107,6 +176,8 @@ class DownloadService : Service() {
 }
 ```
 
+:::
+
 ### 3.1 Manifest 声明（Android 14+ 必须指定类型）
 
 ```xml
@@ -121,6 +192,21 @@ Android 14（API 34）+ 常用类型：`dataSync`、`mediaPlayback`、`location`
 
 ### 3.2 启动服务
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Android 8+ 启动前台服务的推荐方式
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    startForegroundService(new Intent(this, DownloadService.class));
+} else {
+    startService(new Intent(this, DownloadService.class));
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // Android 8+ 启动前台服务的推荐方式
 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -130,10 +216,33 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 }
 ```
 
+:::
+
 **注意**：`startForegroundService` 要求服务在 **5 秒内** 调用 `startForeground()`，
 否则抛 `ForegroundServiceDidNotStartInTimeException`（ANR）。
 
 ## 4. 更新与移除通知
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 更新进度（服务内部）
+NotificationManager manager = getSystemService(NotificationManager.class);
+manager.notify(NOTIFICATION_ID, newNotification(percent));
+
+// 移除前台状态 + 清除通知
+stopForeground(STOP_FOREGROUND_REMOVE);
+
+// 或仅移除通知、保留前台状态
+stopForeground(STOP_FOREGROUND_DETACH);
+
+// 停止服务
+stopSelf();
+```
+
+@tab Kotlin
 
 ```kotlin
 // 更新进度（服务内部）
@@ -150,6 +259,8 @@ stopForeground(STOP_FOREGROUND_DETACH)
 stopSelf()
 ```
 
+:::
+
 ## 5. 后台启动限制（重点）
 
 ### 5.1 Android 12+ 的限制
@@ -163,6 +274,28 @@ Android 12 起，**从后台启动前台服务**被严格限制（`BackgroundAct
 - 闹钟、Geofence 等场景
 
 ### 5.2 开机自启的正确姿势（BOOT_COMPLETED）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 开机广播接收后，不能直接 startForegroundService？
+// 可以，但必须立即 startForeground 且依赖系统广播豁免；
+// 更稳妥：用 WorkManager 处理"开机后的初始化任务"
+public class BootReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+            OneTimeWorkRequest workRequest =
+                    new OneTimeWorkRequest.Builder(InitWorker.class).build();
+            WorkManager.getInstance(context).enqueue(workRequest);
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 开机广播接收后，不能直接 startForegroundService？
@@ -178,6 +311,8 @@ class BootReceiver : BroadcastReceiver() {
 }
 ```
 
+:::
+
 ::: tip 注意
 - `BOOT_COMPLETED` 广播在 Android 15 起默认**不再自动送达**（`RECEIVER_BOOT_COMPLETED` 权限改为"限制"级别），声明权限的同时需在应用被用户启动过至少一次后才有效。
 - 开机后直接启动前台服务受限；使用 WorkManager + 前台服务组合是标准做法。
@@ -187,6 +322,20 @@ class BootReceiver : BroadcastReceiver() {
 
 用户可以从通知设置中关闭通知渠道，前台服务通知被关闭会导致服务异常。开发时注意：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 前台服务通知渠道建议使用低重要性 + 不可关闭的提示逻辑
+NotificationChannel channel =
+        new NotificationChannel(CHANNEL_ID, "前台服务", NotificationManager.IMPORTANCE_LOW);
+channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+// 无法强制用户开启，只能引导
+```
+
+@tab Kotlin
+
 ```kotlin
 // 前台服务通知渠道建议使用低重要性 + 不可关闭的提示逻辑
 val channel = NotificationChannel(CHANNEL_ID, "前台服务", NotificationManager.IMPORTANCE_LOW)
@@ -194,7 +343,26 @@ channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
 // 无法强制用户开启，只能引导
 ```
 
+:::
+
 ### 5.2 最佳实践
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 需要后台执行任务时，优先考虑 WorkManager（系统调度，无需前台）
+OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(SyncWorker.class)
+        .setConstraints(new Constraints.Builder().setRequiresCharging(true).build())
+        .build();
+WorkManager.getInstance(this).enqueue(request);
+
+// 只有当任务必须"长时间且用户可见"时才用前台服务
+// 例如：下载、播放音乐、导航、录屏
+```
+
+@tab Kotlin
 
 ```kotlin
 // 需要后台执行任务时，优先考虑 WorkManager（系统调度，无需前台）
@@ -206,6 +374,8 @@ WorkManager.getInstance(this).enqueue(request)
 // 只有当任务必须"长时间且用户可见"时才用前台服务
 // 例如：下载、播放音乐、导航、录屏
 ```
+
+:::
 
 ## 6. 前台服务 vs WorkManager 对比
 
@@ -230,6 +400,23 @@ A：`startForegroundService` 是 8.0 后启动前台服务的专用入口，要�
 **Q3：通知渠道被用户关闭后，如何判断？**
 A：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+NotificationChannel channel = manager.getNotificationChannel(CHANNEL_ID);
+if (channel.getImportance() == NotificationManager.IMPORTANCE_NONE) {
+    // 引导用户去系统设置打开
+    Intent intent = new Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS);
+    intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+    intent.putExtra(Settings.EXTRA_CHANNEL_ID, CHANNEL_ID);
+    startActivity(intent);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 val channel = manager.getNotificationChannel(CHANNEL_ID)
 if (channel.importance == NotificationManager.IMPORTANCE_NONE) {
@@ -241,6 +428,8 @@ if (channel.importance == NotificationManager.IMPORTANCE_NONE) {
     startActivity(intent)
 }
 ```
+
+:::
 
 **Q4：FCM 推送消息如何在不开启前台服务的情况下后台执行任务？**
 A：使用 WorkManager 调度；或对高优先级消息走 FCM 的 `high_priority` + 前台服务组合，

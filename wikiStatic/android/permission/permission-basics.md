@@ -76,6 +76,41 @@ stateDiagram-v2
 
 ### 标准申请代码
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MainActivity extends ComponentActivity {
+
+    private final ActivityResultLauncher<String> permissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted) {
+                    openCamera();
+                } else {
+                    // 1. 用户拒绝：是否要解释原因
+                    if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+                        showRationaleDialog(); // 解释后再申请
+                    } else {
+                        showGoSettingsDialog(); // 永久拒绝，引导去设置
+                    }
+                }
+            });
+
+    void requestCamera() {
+        if (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED) {
+            openCamera();
+        } else {
+            permissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class MainActivity : ComponentActivity() {
 
@@ -104,6 +139,8 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
+:::
+
 ### 三种"拒绝"状态的区分
 
 | 状态 | `shouldShowRequestPermissionRationale` | 处理 |
@@ -111,6 +148,21 @@ class MainActivity : ComponentActivity() {
 | 首次拒绝 | `true` | 弹自定义解释弹窗，说明用途后重新申请 |
 | 拒绝并勾选"不再询问" | `false` | 只能跳系统设置页让用户手动开启 |
 | 永久拒绝（系统策略） | `false` | 同上，引导设置页 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 跳转应用详情设置页
+void goToAppSettings() {
+    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+    intent.setData(Uri.fromParts("package", getPackageName(), null));
+    startActivity(intent);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 跳转应用详情设置页
@@ -121,6 +173,8 @@ fun goToAppSettings() {
     }
 }
 ```
+
+:::
 
 ## 四、权限版本演进（面试高频）
 
@@ -140,6 +194,23 @@ fun goToAppSettings() {
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Android 13+ 需要动态申请通知权限
+ActivityResultLauncher<String> launcher = registerForActivityResult(
+        new ActivityResultContracts.RequestPermission(),
+        granted -> { /* granted */ }
+);
+if (Build.VERSION.SDK_INT >= 33) {
+    launcher.launch(Manifest.permission.POST_NOTIFICATIONS);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // Android 13+ 需要动态申请通知权限
 val launcher = registerForActivityResult(
@@ -149,6 +220,8 @@ if (Build.VERSION.SDK_INT >= 33) {
     launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
 }
 ```
+
+:::
 
 ## 五、底层校验流程（源码视角）
 

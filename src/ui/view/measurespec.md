@@ -19,6 +19,10 @@ description: MeasureSpec 三种模式、EXACTLY/AT_MOST/UNSPECIFIED、getChildMe
 └─ 低 30 位：SpecSize（尺寸大小）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 源码定义
 public static class MeasureSpec {
@@ -38,6 +42,34 @@ public static class MeasureSpec {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 源码定义
+class MeasureSpec {
+    companion object {
+        private const val MODE_SHIFT = 30    // 模式位移
+        private const val MODE_MASK = 0x3 shl MODE_SHIFT
+
+        const val UNSPECIFIED = 0 shl MODE_SHIFT  // 不限定
+        const val EXACTLY = 1 shl MODE_SHIFT      // 精确
+        const val AT_MOST = 2 shl MODE_SHIFT      // 最大
+
+        // 打包：模式 + 尺寸 → MeasureSpec
+        @JvmStatic
+        fun makeMeasureSpec(size: Int, mode: Int): Int { ... }
+
+        // 解包
+        @JvmStatic
+        fun getMode(measureSpec: Int) = measureSpec and MODE_MASK
+        @JvmStatic
+        fun getSize(measureSpec: Int) = measureSpec and MODE_MASK.inv()
+    }
+}
+```
+
+:::
+
 ## 2. 三种模式
 
 | 模式 | 含义 | 产生条件 |
@@ -45,6 +77,27 @@ public static class MeasureSpec {
 | `EXACTLY` | 精确尺寸（或 match_parent） | 父 ViewGroup 确定尺寸 |
 | `AT_MOST` | 最大不超过 size（wrap_content） | 父 ViewGroup 给上限 |
 | `UNSPECIFIED` | 无限制 | ScrollView 等可滚动容器 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 从 MeasureSpec 解包
+int mode = MeasureSpec.getMode(measureSpec);
+int size = MeasureSpec.getSize(measureSpec);
+
+switch (mode) {
+    case MeasureSpec.EXACTLY:     // size 是精确值
+        break;
+    case MeasureSpec.AT_MOST:     // size 是最大值
+        break;
+    case MeasureSpec.UNSPECIFIED: // 不限
+        break;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 从 MeasureSpec 解包
@@ -58,9 +111,15 @@ when (mode) {
 }
 ```
 
+:::
+
 ## 3. 测量规格的生成：getChildMeasureSpec
 
 父 ViewGroup 测量子 View 时，根据**父容器的 MeasureSpec + 子 View 的 LayoutParams** 生成子 View 的 MeasureSpec：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // ViewGroup.getChildMeasureSpec 核心逻辑（简化）
@@ -114,6 +173,65 @@ public static int getChildMeasureSpec(int spec, int padding, int childDimension)
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ViewGroup.getChildMeasureSpec 核心逻辑（简化）
+fun getChildMeasureSpec(spec: Int, padding: Int, childDimension: Int): Int {
+    val specMode = MeasureSpec.getMode(spec)
+    val specSize = MeasureSpec.getSize(spec)
+
+    val size = Math.max(0, specSize - padding)   // 减去父容器 padding
+
+    var resultSize: Int
+    var resultMode: Int
+
+    when (specMode) {
+        MeasureSpec.EXACTLY ->                    // 父容器尺寸精确
+            if (childDimension >= 0) {            // 子 View 指定具体值
+                resultSize = childDimension
+                resultMode = MeasureSpec.EXACTLY
+            } else if (childDimension == MATCH_PARENT) {   // 匹配父容器
+                resultSize = size
+                resultMode = MeasureSpec.EXACTLY
+            } else if (childDimension == WRAP_CONTENT) {   // 包裹内容
+                resultSize = size
+                resultMode = MeasureSpec.AT_MOST
+            } else {
+                resultSize = 0
+                resultMode = MeasureSpec.UNSPECIFIED
+            }
+
+        MeasureSpec.AT_MOST ->                    // 父容器有上限
+            if (childDimension >= 0) {
+                resultSize = childDimension
+                resultMode = MeasureSpec.EXACTLY
+            } else if (childDimension == MATCH_PARENT) {
+                resultSize = size
+                resultMode = MeasureSpec.AT_MOST
+            } else if (childDimension == WRAP_CONTENT) {
+                resultSize = size
+                resultMode = MeasureSpec.AT_MOST
+            } else {
+                resultSize = 0
+                resultMode = MeasureSpec.UNSPECIFIED
+            }
+
+        MeasureSpec.UNSPECIFIED ->                // 无限制（ScrollView）
+            if (childDimension >= 0) {
+                resultSize = childDimension
+                resultMode = MeasureSpec.EXACTLY
+            } else {
+                resultSize = 0
+                resultMode = MeasureSpec.UNSPECIFIED
+            }
+    }
+    return MeasureSpec.makeMeasureSpec(resultSize, resultMode)
+}
+```
+
+:::
+
 ### 3.1 规则汇总表
 
 | 父模式 | 子 LayoutParams | 子 MeasureSpec |
@@ -128,6 +246,41 @@ public static int getChildMeasureSpec(int spec, int padding, int childDimension)
 | UNSPECIFIED | MATCH/WRAP | UNSPECIFIED / 0 |
 
 ## 4. onMeasure 的正确写法
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 常见错误：wrap_content 失效（等于 match_parent）
+@Override
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    setMeasuredDimension(
+            MeasureSpec.getSize(widthMeasureSpec),
+            MeasureSpec.getSize(heightMeasureSpec)
+    );
+}
+
+// ✓ 正确处理 wrap_content
+@Override
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    // 内容默认尺寸（如 100dp x 100dp）
+    int defaultWidth = dp2px(100f);
+    int defaultHeight = dp2px(100f);
+
+    int width = resolveSize(defaultWidth, widthMeasureSpec);
+    int height = resolveSize(defaultHeight, heightMeasureSpec);
+
+    setMeasuredDimension(width, height);
+}
+
+// resolveSize 内部逻辑
+// EXACTLY → 返回 specSize
+// AT_MOST → min(size, specSize)
+// UNSPECIFIED → 返回 size
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✗ 常见错误：wrap_content 失效（等于 match_parent）
@@ -155,6 +308,8 @@ override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
 // AT_MOST → min(size, specSize)
 // UNSPECIFIED → 返回 size
 ```
+
+:::
 
 ## 5. 完整测量流程
 

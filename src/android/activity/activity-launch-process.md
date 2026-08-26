@@ -34,6 +34,10 @@ Activity 启动涉及 **App 进程** 与 **系统进程**（system_server）的�
 
 ### 2.1 startActivity → Instrumentation
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // Activity.java
 @Override
@@ -50,7 +54,30 @@ public void startActivityForResult(Intent intent, int requestCode, Bundle option
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// Activity.java
+override fun startActivity(intent: Intent) {
+    startActivityForResult(intent, -1)
+}
+
+fun startActivityForResult(intent: Intent, requestCode: Int, options: Bundle?) {
+    // 关键：通过 mInstrumentation 转发
+    val ar = mInstrumentation.execStartActivity(
+        this, mMainThread.applicationThread, mToken, this,
+        intent, requestCode, options
+    )
+}
+```
+
+:::
+
 `Instrumentation.execStartActivity` 内部：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // Instrumentation.java
@@ -68,6 +95,29 @@ public ActivityResult execStartActivity(...) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// Instrumentation.java
+fun execStartActivity(...): ActivityResult? {
+    return try {
+        intent.migrateExtraStreamToClipData()
+        // 检查是否允许启动（如后台启动限制）
+        val result = ActivityTaskManager.getService().startActivity(
+            whoThread, who.opPackageName, who.attributionTag,
+            intent, ...
+        )
+        // 检查启动结果，若失败抛 ActivityNotFoundException 等异常
+        checkStartActivityResult(result, intent)
+        null
+    } catch (e: RemoteException) {
+        throw RuntimeException(...)
+    }
+}
+```
+
+:::
+
 **关键点**：`ActivityTaskManager.getService()` 拿到的是 **ATMS（ActivityTaskManagerService）** 的 Binder 代理，跨进程调用由此开始。
 
 > Android 10（Q）之前是 `ActivityManager.getService()` → **AMS**；之后拆分为 **AMS + ATMS**，
@@ -76,6 +126,10 @@ public ActivityResult execStartActivity(...) {
 ## 3. system_server 侧（ATMS）
 
 ### 3.1 startActivity 主链
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // ActivityTaskManagerService.java
@@ -90,7 +144,27 @@ int startActivityAsUser(...) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ActivityTaskManagerService.java
+override fun startActivity(...): Int {
+    return startActivityAsUser(...)
+}
+
+fun startActivityAsUser(...): Int {
+    // 权限检查、UID 转换等
+    return mActivityTaskSupervisor.startActivityMayWait(...)
+}
+```
+
+:::
+
 `ActivityTaskSupervisor` 是 **Activity 启动的决策核心**：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // ActivityTaskSupervisor.java
@@ -101,6 +175,20 @@ int startActivityMayWait(...) {
     return startActivity(...);
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// ActivityTaskSupervisor.java
+fun startActivityMayWait(...): Int {
+    // 1. 解析 Intent（resolveActivity）
+    // 2. 校验 ActivityInfo / 权限
+    // 3. 交给 startActivity 系列方法
+    return startActivity(...)
+}
+```
+
+:::
 
 核心链路：
 
@@ -113,6 +201,10 @@ int startActivityMayWait(...) {
 
 ### 3.2 进程启动（Zygote）
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // Process.java → ZygoteProcess.java
 public final Process.ProcessStartResult start(...) {
@@ -120,7 +212,22 @@ public final Process.ProcessStartResult start(...) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// Process.java → ZygoteProcess.java
+fun start(...): Process.ProcessStartResult {
+    return startViaZygote(...)
+}
+```
+
+:::
+
 Zygote fork 后新进程的入口是 `ActivityThread.main()`：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // ActivityThread.java
@@ -132,6 +239,20 @@ public static void main(String[] args) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ActivityThread.java
+fun main(args: Array<String>) {
+    Looper.prepareMainLooper()
+    val thread = ActivityThread()
+    thread.attach(false, startSeq)   // 关键：向 system_server 注册
+    Looper.loop()                     // 进入消息循环
+}
+```
+
+:::
+
 `attach` 中通过 Binder 向 system_server 的 `ActivityManagerService.attachApplication` 注册自己，
 **注册完成后系统才会继续下发 Activity 启动指令**（保证先有 Looper，再执行生命周期）。
 
@@ -140,6 +261,10 @@ public static void main(String[] args) {
 ### 4.1 handleLaunchActivity
 
 system_server 通过 `ApplicationThread`（App 进程的 Binder 服务端）回调：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // ActivityThread.java
@@ -158,7 +283,31 @@ public void handleLaunchActivity(ActivityClientRecord r, PendingTransactionActio
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ActivityThread.java
+override fun handleLaunchActivity(r: ActivityClientRecord, pendingActions: PendingTransactionActions, customIntent: Intent) {
+    // 1. 初始化 Application（首次启动进程时）
+    if (!ThreadedRenderer.sRendererEnabled) { ... }
+    handleConfigurationChanged(...)
+
+    // 2. 真正创建 Activity
+    val a = performLaunchActivity(r, customIntent)
+    if (a != null) {
+        // 3. 创建窗口并回调 onResume
+        handleResumeActivity(r.token, false, r.isForward, !r.activity.mFinished)
+    }
+}
+```
+
+:::
+
 ### 4.2 performLaunchActivity（核心方法）
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // ActivityThread.java
@@ -183,10 +332,41 @@ private Activity performLaunchActivity(ActivityClientRecord r, Intent customInte
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ActivityThread.java
+private fun performLaunchActivity(r: ActivityClientRecord, customIntent: Intent): Activity {
+    // 1. 创建 ContextImpl（资源、主题、ClassLoader）
+    val appContext = createBaseContextForActivity(r)
+    // 2. 实例化 Activity（反射）
+    val activity = mInstrumentation.newActivity(cl, component.className, r.intent)
+    // 3. 创建 Application（首次）
+    val app = r.packageInfo.makeApplication(false, mInstrumentation)
+    // 4. 绑定 Context，调用 attach
+    activity.attach(appContext, this, instrumentation, r.token, ...)
+    // 5. 回调 onCreate / onStart / onRestoreInstanceState
+    if (r.isPersistable) {
+        mInstrumentation.callActivityOnCreate(activity, r.state, r.persistentState)
+    } else {
+        mInstrumentation.callActivityOnCreate(activity, r.state)
+    }
+    // ...
+    r.activity = activity
+    return activity
+}
+```
+
+:::
+
 **生命周期回调的幕后**：`Instrumentation.callActivityOnCreate` 最终调用 `activity.performCreate` → `activity.onCreate`。
 从这里能看到：**Activity 实例是反射创建的**，`attach` 完成 Context 注入，`onCreate` 由 Instrumentation 触发。
 
 ### 4.3 handleResumeActivity
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public void handleResumeActivity(ActivityClientRecord r, ...) {
@@ -203,6 +383,26 @@ public void handleResumeActivity(ActivityClientRecord r, ...) {
     Looper.myQueue().addIdleHandler(new Idler());
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+fun handleResumeActivity(r: ActivityClientRecord, ...) {
+    // 1. 回调 onResume（performResumeActivity → activity.onResume）
+    // 2. 创建 PhoneWindow 并添加 DecorView 到 WindowManager
+    if (r.window == null && !a.mFinished && willBeVisible) {
+        r.window = r.activity.window
+        val decor = r.window.decorView
+        val wm = a.windowManager
+        wm.addView(decor, r.window.attributes)  // 此时界面才可见
+        a.onWindowAttributesChanged(l)
+    }
+    // 3. 通知 AMS：onResume 完成
+    Looper.myQueue().addIdleHandler(Idler())
+}
+```
+
+:::
 
 **关键点**：`onResume` 回调发生在 `WindowManager.addView` **之前**，所以 `onResume` 时视图已创建但尚未真正绘制到屏幕。
 
@@ -243,6 +443,38 @@ sequenceDiagram
 | Activity.onCreate/onStart | 布局 inflate、数据加载 | 布局扁平化（ConstraintLayout）、`AsynchronousLayoutInflater`、ViewStub 懒加载、列表分页 |
 | 首帧渲染 | measure/layout/draw 全流程 | 减少过度绘制、避免主线程 IO、启动主题（SplashScreen）掩盖白屏 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 启动优化示例：Application 中拆分初始化
+class MyApp extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        initImmediately();      // 必须的：崩溃上报、日志
+        // 延迟到需要时才初始化
+        InitHolder.ensureInitialized(this);
+    }
+}
+
+class InitHolder {
+    private static boolean initialized = false;
+
+    static void ensureInitialized(Context context) {
+        if (initialized) return;
+        synchronized (InitHolder.class) {
+            if (initialized) return;
+            // 数据库、图片库、网络库等
+            initialized = true;
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 启动优化示例：Application 中拆分初始化
 class MyApp : Application() {
@@ -266,6 +498,8 @@ object InitHolder {
     }
 }
 ```
+
+:::
 
 ## 7. Android 12+ 的启动流程变化
 
@@ -304,6 +538,24 @@ A：`startActivityForResult`（旧）有两大痛点：Activity 重建后回调�
 **Activity Result API**（AndroidX）通过 `registerForActivityResult` 注册回调，结果由
 `ActivityResultRegistry` 管理，配置变更后自动恢复回调，且 `ActivityResultContract` 提供类型安全契约。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 现代写法：Activity Result API
+private final ActivityResultLauncher<String> pickImage = registerForActivityResult(
+        new ActivityResultContracts.GetContent(),
+        uri -> { if (uri != null) binding.image.setImageURI(uri); }
+);
+
+private void onClick() {
+    pickImage.launch("image/*");   // 类型安全，无回调丢失
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 现代写法：Activity Result API
 private val pickImage = registerForActivityResult(
@@ -314,6 +566,8 @@ private fun onClick() {
     pickImage.launch("image/*")   // 类型安全，无回调丢失
 }
 ```
+
+:::
 
 **Q7：onResume 回调时界面可见吗？为什么 onCreate 中测量宽高为 0？**
 A：`onResume` 回调发生在 `WindowManager.addView(DecorView)` **之前**——此时视图已创建但尚未

@@ -57,6 +57,10 @@ sequenceDiagram
 
 ### doFrame 调用链
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 核心调用链
 Choreographer.postCallback(CALLBACK_ANIMATION, ...)
@@ -64,6 +68,18 @@ Choreographer.postCallback(CALLBACK_ANIMATION, ...)
     → 等待 VSYNC 信号
     → doFrame(long frameTimeNanos)   // 处理输入、动画、绘制三类回调
 ```
+
+@tab Kotlin
+
+```kotlin
+// 核心调用链
+Choreographer.postCallback(CALLBACK_ANIMATION, ...)
+    → scheduleVsyncLocked()
+    → 等待 VSYNC 信号
+    → doFrame(long frameTimeNanos)   // 处理输入、动画、绘制三类回调
+```
+
+:::
 
 ```mermaid
 flowchart LR
@@ -83,6 +99,31 @@ flowchart LR
 - 若 UI 线程繁忙，VSYNC 回调延迟 → **掉帧**
 - `Choreographer.FrameCallback` 可自定义帧率监听：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义帧率统计
+Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+    long lastFrameNanos = 0L;
+
+    @Override
+    public void doFrame(long frameTimeNanos) {
+        if (lastFrameNanos != 0L) {
+            long frameInterval = (frameTimeNanos - lastFrameNanos) / 1_000_000;
+            if (frameInterval > 16.6) {
+                // 掉帧：frameInterval 超过 16.6ms
+            }
+        }
+        lastFrameNanos = frameTimeNanos;
+        Choreographer.getInstance().postFrameCallback(this);  // 持续监听
+    }
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 // 自定义帧率统计
 Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
@@ -99,6 +140,8 @@ Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallba
     }
 })
 ```
+
+:::
 
 > 这也是 BlockCanary、Matrix、Profiler 等卡顿监控工具的底层原理。
 
@@ -139,10 +182,23 @@ flowchart TD
 </application>
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 运行时检测
+boolean isAccelerated = view.isHardwareAccelerated();
+```
+
+@tab Kotlin
+
 ```kotlin
 // 运行时检测
 val isAccelerated = view.isHardwareAccelerated
 ```
+
+:::
 
 >  硬件加速下不支持的自定义 View API（如 `drawText` 的某些参数组合）会静默降级或抛异常，自绘 View 需注意兼容。
 

@@ -52,6 +52,10 @@ sequenceDiagram
 
 ### 2.2 异步请求 enqueue
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // RealCall.enqueue 核心
 @Override
@@ -71,7 +75,33 @@ void enqueue(AsyncCall call) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// RealCall.enqueue 核心
+override fun enqueue(responseCallback: Callback) {
+    synchronized(this) { ... }
+    // 包装成 AsyncCall 交给 Dispatcher
+    client.dispatcher().enqueue(AsyncCall(responseCallback))
+}
+
+// Dispatcher.enqueue
+fun enqueue(call: AsyncCall) {
+    synchronized(this) {
+        readyAsyncCalls.add(call)          // 加入等待队列
+        if (!call.get().isRunning()) { ... }
+    }
+    promoteAndExecute()                    // 尝试执行
+}
+```
+
+:::
+
 ## 三、Dispatcher 线程调度
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public final class Dispatcher {
@@ -98,11 +128,44 @@ public final class Dispatcher {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class Dispatcher {
+    // 异步任务执行线程池:核心线程 0,最大 Integer.MAX,保活 60s
+    private var executorService: ExecutorService? = null
+
+    private var maxRequests = 64           // 同时执行任务上限
+    private var maxRequestsPerHost = 5     // 每主机并发上限
+
+    private val readyAsyncCalls = ArrayDeque<AsyncCall>()   // 等待队列
+    private val runningAsyncCalls = ArrayDeque<AsyncCall>() // 执行队列
+    private val runningSyncCalls = ArrayDeque<RealCall>()   // 同步队列
+
+    private fun promoteAndExecute() {
+        // 从等待队列取出任务,满足条件则启动
+        while (executableCalls < maxRequests && !readyAsyncCalls.isEmpty()) {
+            val call = readyAsyncCalls.poll()
+            if (runningCallsForHost(call) < maxRequestsPerHost) {
+                runningAsyncCalls.add(call)
+                executorService.execute(call)   // 线程池执行
+            }
+        }
+    }
+}
+```
+
+:::
+
 > **关键设计**:Dispatcher 用两个队列(等待/执行)+ 两个上限(64 总并发、5 每主机)控制并发,避免主机被打爆。
 
 ## 四、拦截器责任链
 
 ### 4.1 链的构建
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // RealCall.getResponseWithInterceptorChain
@@ -121,6 +184,28 @@ Response getResponseWithInterceptorChain() throws IOException {
     return chain.proceed(originalRequest);
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// RealCall.getResponseWithInterceptorChain
+fun getResponseWithInterceptorChain(): Response {
+    val interceptors = mutableListOf<Interceptor>()
+    interceptors.addAll(client.interceptors)               // ① 应用拦截器(自定义)
+    interceptors.add(retryAndFollowUpInterceptor)          // ② 重试与重定向
+    interceptors.add(BridgeInterceptor(client.cookieJar()))       // ③ 桥接(补请求头/压缩)
+    interceptors.add(CacheInterceptor(client.internalCache()))    // ④ 缓存
+    interceptors.add(ConnectInterceptor(client))           // ⑤ 连接
+    if (!forWebSocket) {
+        interceptors.addAll(client.networkInterceptors())  // ⑥ 网络拦截器
+    }
+    interceptors.add(CallServerInterceptor(forWebSocket))  // ⑦ 最终 IO
+    val chain = RealInterceptorChain(interceptors, ...)
+    return chain.proceed(originalRequest)
+}
+```
+
+:::
 
 ### 4.2 责任链执行模型
 
@@ -160,6 +245,10 @@ sequenceDiagram
 
 ## 五、连接池复用
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public final class ConnectionPool {
     // 空闲连接队列 + 清理线程
@@ -177,6 +266,28 @@ public final class ConnectionPool {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class ConnectionPool {
+    // 空闲连接队列 + 清理线程
+    private val connections = ArrayDeque<RealConnection>()
+
+    // 获取连接:复用相同地址的空闲连接
+    fun get(address: Address, allocation: StreamAllocation, route: Route): RealConnection? {
+        for (connection in connections) {
+            if (connection.isEligible(address, route)) {
+                allocation.acquire(connection, ...)
+                return connection
+            }
+        }
+        return null   // 无可用 → 新建
+    }
+}
+```
+
+:::
 
 > **连接池价值**:HTTP 建连成本高(TCP 握手 + TLS 握手),复用连接(Keep-Alive)大幅降低延迟。默认保活 5 分钟、最多 5 个空闲连接,空闲连接由后台线程清理。
 

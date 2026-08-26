@@ -17,6 +17,10 @@ title: HashMap 源码剖析
 
 ## 关键成员
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class HashMap<K,V> extends AbstractMap<K,V>
     implements Map<K,V>, Cloneable, Serializable {
@@ -33,9 +37,39 @@ public class HashMap<K,V> extends AbstractMap<K,V>
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class HashMap<K, V> : AbstractMap<K, V>(),
+    Map<K, V>, Cloneable, Serializable {
+
+    companion object {
+        const val DEFAULT_INITIAL_CAPACITY = 16   // 默认容量，须为 2 的幂
+        val MAXIMUM_CAPACITY = 1 shl 30
+        const val DEFAULT_LOAD_FACTOR = 0.75f     // 默认加载因子
+    }
+
+    @Transient
+    var table: Array<Entry<K, V>?>? = null  // Entry 数组，每个 Entry 是单向链表
+    @Transient
+    var size: Int = 0                       // 已用槽数量
+    var threshold: Int = 0                  // 阈值 = 容量 × 加载因子
+    val loadFactor: Float
+    @Transient
+    @Volatile
+    var modCount: Int = 0                   // 修改次数（fail-fast）
+}
+```
+
+:::
+
 构造时找出**大于 initialCapacity 的最小 2 的幂**作为容量，`threshold = capacity * loadFactor`。
 
 ## 高性能查找的关键
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // 1. hash 算法必须高效：全部基于位运算
@@ -50,11 +84,33 @@ static int indexFor(int h, int length) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 1. hash 算法必须高效：全部基于位运算
+private fun hash(h: Int): Int {
+    var h = h
+    h = h xor (h ushr 20) xor (h ushr 12)
+    return h xor (h ushr 7) xor (h ushr 4)
+}
+
+// 2. hash 值到数组索引的映射要快：按位与
+private fun indexFor(h: Int, length: Int): Int {
+    return h and (length - 1)
+}
+```
+
+:::
+
 通过 `hashCode()` + `hash()` 位运算 + `indexFor()` 按位与，直接得到数组下标，内存访问速度极快。
 
 ## 哈希冲突与 put 流程
 
 HashMap 底层是数组，数组元素是 Entry 对象（含 key、value、next、hash）。发生冲突时，新 Entry 放在对应索引并**头插**（新 Entry 的 next 指向旧值），即"链表数组"：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public V put(K key, V value) {
@@ -76,6 +132,32 @@ public V put(K key, V value) {
     return null;
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+fun put(key: K, value: V): V? {
+    if (key == null)
+        return putForNullKey(value)
+    val hash = hash(key.hashCode())
+    val i = indexFor(hash, table.size)
+    var e = table[i]
+    while (e != null) {
+        // key 已存在则替换 value 并返回旧值
+        if (e.hash == hash && (e.key === key || key == e.key)) {
+            val oldValue = e.value
+            e.value = value
+            return oldValue
+        }
+        e = e.next
+    }
+    modCount++
+    addEntry(hash, key, value, i)
+    return null
+}
+```
+
+:::
 
 ## hashCode 的作用
 

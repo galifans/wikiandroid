@@ -61,6 +61,39 @@ flowchart LR
 - 页面 A 发起多个请求后跳转 B，A 的请求仍在线程池排队，**阻塞 B 的请求**
 - 改用 **`ThreadPoolExecutor` + Runnable + Handler** 原生封装，可控、可取消
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+class NetworkManager {
+
+    private static final NetworkManager INSTANCE = new NetworkManager();
+
+    private final ExecutorService executor = new ThreadPoolExecutor(
+        4,                          // corePoolSize
+        8,                          // maximumPoolSize
+        60L, TimeUnit.SECONDS,      // keepAliveTime
+        new LinkedBlockingQueue<>(64)   // workQueue
+    );
+
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    public <T> void enqueue(Request<T> request, Callback<T> callback) {
+        executor.execute(() -> {
+            try {
+                T result = execute(request); // 网络请求（子线程）
+                mainHandler.post(() -> { if (callback != null) callback.onSuccess(result); });
+            } catch (Exception e) {
+                mainHandler.post(() -> { if (callback != null) callback.onFail(e); });
+            }
+        });
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class NetworkManager private constructor() {
 
@@ -85,6 +118,8 @@ class NetworkManager private constructor() {
     }
 }
 ```
+
+:::
 
 ### 封装优化点
 
@@ -118,6 +153,23 @@ flowchart TD
 
 ### 强制更新
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public void invoke(String url, Map<String, Object> params, boolean forceUpdate, Callback callback) {
+    long expires = forceUpdate ? 0L : UrlConfigManager.getExpires(url);
+    // expires = 0 跳过缓存，直接走网络
+    Object cached = expires > 0 ? CacheManager.read(url) : null;
+    if (cached != null) { if (callback != null) callback.onSuccess(cached); return; }
+    // ... 发起网络请求，成功后写缓存
+    CacheManager.write(url, result);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 fun invoke(url: String, params: Map<String, Any>, forceUpdate: Boolean, callback: Callback?) {
     val expires = if (forceUpdate) 0L else UrlConfigManager.getExpires(url)
@@ -129,10 +181,31 @@ fun invoke(url: String, params: Map<String, Any>, forceUpdate: Boolean, callback
 }
 ```
 
+:::
+
 ## 四、MockService：后端未就绪时模拟数据
 
 - url.xml 中通过 `MockClass` 属性指定接口对应的 Mock 类
 - `MockService` 基类定义抽象方法 `getJsonData()`，各接口子类返回假 JSON
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+abstract class MockService {
+    public abstract String getJsonData();
+}
+
+class LoginMockService extends MockService {
+    @Override
+    public String getJsonData() {
+        return "{\"isError\":false,\"errorType\":0,\"result\":{\"token\":\"mock-token\"}}";
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 abstract class MockService {
@@ -144,6 +217,25 @@ class LoginMockService : MockService() {
 }
 ```
 
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 反射实例化：有 MockClass 走假数据，否则走真实请求
+String mockClass = UrlConfigManager.getMockClass(url);
+if (mockClass != null) {
+    MockService service = (MockService) Class.forName(mockClass).getDeclaredConstructor().newInstance();
+    callback.onSuccess(service.getJsonData());
+} else {
+    enqueueRealRequest(url, params, callback);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 反射实例化：有 MockClass 走假数据，否则走真实请求
 val mockClass = UrlConfigManager.getMockClass(url)
@@ -154,6 +246,8 @@ if (mockClass != null) {
     enqueueRealRequest(url, params, callback)
 }
 ```
+
+:::
 
 ## 五、Cookie 登录与自动登录
 

@@ -26,6 +26,18 @@ flowchart LR
 
 ## 二、Compose 中嵌入 View:AndroidView
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// AndroidView 的 factory/update/onRelease 对应 View 体系：
+// factory → 创建 WebView 并做一次性配置；update → 状态变化时 loadUrl；onRelease → destroy 防泄漏
+```
+
+@tab Kotlin
+
 ```kotlin
 @Composable
 fun WebViewDemo(url: String) {
@@ -48,6 +60,8 @@ fun WebViewDemo(url: String) {
 }
 ```
 
+:::
+
 ### AndroidView 生命周期
 
 ```mermaid
@@ -68,6 +82,17 @@ sequenceDiagram
 | `onRelease` | 移出组合 | 释放资源(WebView 销毁等) |
 
 ### 高级:拦截 View 回调到 Compose 状态
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：MapView 直接放入布局，getMapAsync 回调中 clear / addMarker
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -94,7 +119,28 @@ fun MapViewWithMarker(markerPosition: LatLng?) {
 }
 ```
 
+:::
+
 ## 三、View 中嵌入 Compose:ComposeView
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 传统 XML 布局中嵌入 Compose（XML 两版一致）
+<androidx.compose.ui.platform.ComposeView
+    android:id="@+id/composeView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+
+// 或代码创建：ComposeView 可在 Java 中 new 并 addView，
+// 但 setContent 需要 @Composable lambda，无法用 Java 编写，需 Kotlin 桥接
+ComposeView composeView = new ComposeView(context);
+container.addView(composeView);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 传统 XML 布局中嵌入 Compose
@@ -114,6 +160,32 @@ val composeView = ComposeView(context).apply {
 container.addView(composeView)
 ```
 
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Fragment 中托管 Compose
+public class ProfileFragment extends Fragment {
+    @Override
+    public View onCreateView(
+        LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState
+    ) {
+        ComposeView composeView = new ComposeView(requireContext());
+        composeView.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        );
+        // setContent 需要 @Composable lambda，仅支持 Kotlin DSL；
+        // 可通过 Kotlin 扩展 FragmentKt.setContent(composeView) { ... } 桥接
+        return composeView;
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // Fragment 中托管 Compose
 class ProfileFragment : Fragment() {
@@ -132,6 +204,8 @@ class ProfileFragment : Fragment() {
 }
 ```
 
+:::
+
 ### ViewCompositionStrategy 策略
 
 | 策略 | 说明 |
@@ -143,6 +217,17 @@ class ProfileFragment : Fragment() {
 ## 四、生命周期与状态桥接
 
 ### 4.1 生命周期感知
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：LifecycleObserver + getLifecycle().addObserver() 在 View 中监听生命周期
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -165,7 +250,20 @@ fun LifecycleAwareView() {
 }
 ```
 
+:::
+
 ### 4.2 共享 ViewModel
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// @Composable 部分仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：ViewModelProvider(requireActivity()).get(MyViewModel.class) 获取同一 ViewModel，observe() 更新控件
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -186,6 +284,8 @@ fun HybridScreen(viewModel: MyViewModel = viewModel()) {
     }
 }
 ```
+
+:::
 
 > View 体系与 Compose 共享 ViewModel 的关键:`viewModel()` 与 `ViewModelProvider` 使用同一 ViewModelStoreOwner(Activity/Fragment),实现状态统一。
 

@@ -69,6 +69,29 @@ flowchart LR
 
 **每个进程都会独立创建 Application 实例**，`onCreate` 会被执行多次：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+class App extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        String processName = getProcessName();
+        // 只初始化主进程的 UI 相关逻辑
+        if (packageName.equals(processName)) {
+            initCrashHandler();      // 只主进程
+            initRouter();            // 只主进程
+        }
+        // 所有进程都需要的基础初始化
+        initNetwork();
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class App : Application() {
     override fun onCreate() {
@@ -85,6 +108,34 @@ class App : Application() {
 }
 ```
 
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 获取当前进程名
+@Nullable
+public String getProcessName() {
+    if (Build.VERSION.SDK_INT >= 28) {
+        return Application.getProcessName();
+    }
+    int pid = Process.myPid();
+    ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+    if (am.getRunningAppProcesses() != null) {
+        for (ActivityManager.RunningAppProcessInfo info : am.getRunningAppProcesses()) {
+            if (info.pid == pid) {
+                return info.processName;
+            }
+        }
+    }
+    return null;
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 获取当前进程名
 fun getProcessName(): String? {
@@ -96,6 +147,8 @@ fun getProcessName(): String? {
     return am.runningAppProcesses?.firstOrNull { it.pid == pid }?.processName
 }
 ```
+
+:::
 
 ### 3.2 数据共享问题
 
@@ -111,12 +164,27 @@ fun getProcessName(): String? {
 
 ### 3.3 多进程下的 SP 陷阱
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 多进程写 SP：内存缓存不同步，后写覆盖先写
+// 进程 A：editor.putInt("count", 100).commit()
+// 进程 B：editor.putInt("count", 200).commit()
+// 最终结果不确定（可能 100 也可能 200），且 B 可能读不到 A 的写入
+```
+
+@tab Kotlin
+
 ```kotlin
 // 多进程写 SP：内存缓存不同步，后写覆盖先写
 // 进程 A：editor.putInt("count", 100).commit()
 // 进程 B：editor.putInt("count", 200).commit()
 // 最终结果不确定（可能 100 也可能 200），且 B 可能读不到 A 的写入
 ```
+
+:::
 
 正确做法：多进程共享数据用 **ContentProvider（或 Room/DataStore 的跨进程方案）**。
 
@@ -133,6 +201,45 @@ fun getProcessName(): String? {
 | 共享文件 | 简单但无同步 | 小量配置（不推荐） |
 
 ### 4.2 多进程 Binder 池
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// AIDL 服务端
+class RemoteService extends Service {
+    private final IRemoteInterface.Stub binder = new IRemoteInterface.Stub() {
+        @Override
+        public Result process(Task task) {
+            return handle(task);  // 独立进程执行重量任务
+        }
+    };
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+}
+
+// 客户端：绑定远程服务
+void bindRemote(Context context) {
+    Intent intent = new Intent(context, RemoteService.class);
+    context.bindService(intent, new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            IRemoteInterface remote = IRemoteInterface.Stub.asInterface(service);
+            // 跨进程调用，重量任务在独立进程执行
+            Result result = remote.process(new Task(...));
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {}
+    }, Context.BIND_AUTO_CREATE);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // AIDL 服务端
@@ -158,6 +265,8 @@ fun bindRemote(context: Context) {
     }, Context.BIND_AUTO_CREATE)
 }
 ```
+
+:::
 
 ## 五、多进程实战场景
 

@@ -11,6 +11,10 @@ title: 触摸辅助类与 View 滑动
 
 VelocityTracker 用于追踪手指在滑动中的速度：
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 view.setOnTouchListener(new View.OnTouchListener() {
     @Override
@@ -27,9 +31,30 @@ view.setOnTouchListener(new View.OnTouchListener() {
 });
 ```
 
+@tab Kotlin
+
+```kotlin
+view.setOnTouchListener { _, event ->
+    val velocityTracker = VelocityTracker.obtain()
+    velocityTracker.addMovement(event)
+    velocityTracker.computeCurrentVelocity(1000)  // 单位：像素/秒
+    val xVelocity = velocityTracker.xVelocity.toInt()
+    val yVelocity = velocityTracker.yVelocity.toInt()
+    velocityTracker.clear()
+    velocityTracker.recycle()
+    false
+}
+```
+
+:::
+
 ## 二、GestureDetector 手势检测
 
 GestureDetector 辅助检测单击、滑动、长按、双击等行为：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 final GestureDetector mGestureDetector = new GestureDetector(this,
@@ -61,6 +86,37 @@ imageView.setOnTouchListener(new View.OnTouchListener() {
 });
 ```
 
+@tab Kotlin
+
+```kotlin
+val mGestureDetector = GestureDetector(this,
+        object : GestureDetector.OnGestureListener {
+    override fun onDown(e: MotionEvent): Boolean = false
+    override fun onShowPress(e: MotionEvent) { }
+    override fun onSingleTapUp(e: MotionEvent): Boolean = false
+    override fun onScroll(e1: MotionEvent, e2: MotionEvent,
+                          distanceX: Float, distanceY: Float): Boolean = false
+    override fun onLongPress(e: MotionEvent) { }
+    override fun onFling(e1: MotionEvent, e2: MotionEvent,
+                         velocityX: Float, velocityY: Float): Boolean = false
+})
+
+mGestureDetector.setOnDoubleTapListener(object : OnDoubleTapListener {
+    override fun onSingleTapConfirmed(e: MotionEvent): Boolean = false
+    override fun onDoubleTap(e: MotionEvent): Boolean = false
+    override fun onDoubleTapEvent(e: MotionEvent): Boolean = false
+})
+
+// 解决长按屏幕后无法拖动的问题
+mGestureDetector.setIsLongpressEnabled(false)
+
+imageView.setOnTouchListener { _, event ->
+    mGestureDetector.onTouchEvent(event)
+}
+```
+
+:::
+
 ::: tip 选择建议
 监听滑动相关建议在 `onTouchEvent` 中实现；监听双击等复杂手势使用 `GestureDetector`。
 :::
@@ -68,6 +124,10 @@ imageView.setOnTouchListener(new View.OnTouchListener() {
 ## 三、Scroller 弹性滑动
 
 Scroller 本身无法让 View 弹性滑动，需要和 View 的 `computeScroll` 方法配合使用：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 Scroller mScroller = new Scroller(mContext);
@@ -89,6 +149,29 @@ public void computeScroll() {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+val mScroller = Scroller(mContext)
+
+private fun smoothScrollTo(destX: Int) {
+    val scrollX = scrollX
+    val delta = destX - scrollX
+    // 1000ms 内滑向 destX，效果就是慢慢滑动
+    mScroller.startScroll(scrollX, 0, delta, 0, 1000)
+    invalidate()
+}
+
+override fun computeScroll() {
+    if (mScroller.computeScrollOffset()) {
+        scrollTo(mScroller.currX, mScroller.currY)
+        postInvalidate()
+    }
+}
+```
+
+:::
+
 **原理：** `startScroll` 本身无法让 View 滑动；`invalidate` 导致 View 重绘，重绘时在 `draw` 方法中调用 `computeScroll`，`computeScroll` 向 Scroller 获取当前 scrollX/scrollY，通过 `scrollTo` 滑动，再调用 `postInvalidate` 如此反复，直到滑动结束。
 
 ## 四、View 的滑动方式
@@ -96,6 +179,10 @@ public void computeScroll() {
 ### 1. scrollTo / scrollBy
 
 适合对 View 内容的滑动，`scrollBy` 实际上也是调用了 `scrollTo`：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public void scrollTo(int x, int y) {
@@ -117,6 +204,30 @@ public void scrollBy(int x, int y) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+fun scrollTo(x: Int, y: Int) {
+    if (mScrollX != x || mScrollY != y) {
+        val oldX = mScrollX
+        val oldY = mScrollY
+        mScrollX = x
+        mScrollY = y
+        invalidateParentCaches()
+        onScrollChanged(mScrollX, mScrollY, oldX, oldY)
+        if (!awakenScrollBars()) {
+            postInvalidateOnAnimation()
+        }
+    }
+}
+
+fun scrollBy(x: Int, y: Int) {
+    scrollTo(mScrollX + x, mScrollY + y)
+}
+```
+
+:::
+
 **要点：**
 
 - `mScrollX` 等于 View 左边缘与 View 内容左边缘在水平方向的距离；
@@ -131,6 +242,10 @@ public void scrollBy(int x, int y) {
 
 操作稍微复杂，适用于有交互的 View：
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 ViewGroup.MarginLayoutParams params =
         (ViewGroup.MarginLayoutParams) view.getLayoutParams();
@@ -139,6 +254,18 @@ params.leftMargin += 100;
 view.requestLayout();
 // 或者 view.setLayoutParams(params);
 ```
+
+@tab Kotlin
+
+```kotlin
+val params = view.layoutParams as ViewGroup.MarginLayoutParams
+params.width += 100
+params.leftMargin += 100
+view.requestLayout()
+// 或者 view.setLayoutParams(params)
+```
+
+:::
 
 ## 五、方式对比
 

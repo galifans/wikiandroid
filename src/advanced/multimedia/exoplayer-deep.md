@@ -34,6 +34,53 @@ flowchart LR
 
 ## 二、PlayerView 与基本使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 基本用法
+public class PlayerActivity extends AppCompatActivity {
+    private ExoPlayer player;
+    private PlayerView playerView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_player);
+
+        // 1. 创建播放器
+        player = new ExoPlayer.Builder(this)
+                .setMediaSourceFactory(new DefaultMediaSourceFactory(this))
+                .build();
+
+        // 2. 绑定视图
+        playerView = findViewById(R.id.player_view);
+        playerView.setPlayer(player);
+
+        // 3. 设置媒体与播放
+        MediaItem mediaItem = MediaItem.fromUri("https://example.com/video.mp4");
+        player.setMediaItem(mediaItem);
+        player.prepare();
+        player.setPlayWhenReady(true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        player.pause();          // 暂停而非释放
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        player.release();        // 释放资源
+        playerView.setPlayer(null);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 基本用法
 class PlayerActivity : AppCompatActivity() {
@@ -71,6 +118,8 @@ class PlayerActivity : AppCompatActivity() {
     }
 }
 ```
+
+:::
 
 ## 三、MediaSource 数据管线
 
@@ -114,6 +163,24 @@ flowchart LR
 | DefaultTrackSelector | 默认:平衡画质与流畅 |
 | 手动指定 | 用户可选固定清晰度 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 限制最大清晰度:节省流量
+DefaultTrackSelector trackSelector = new DefaultTrackSelector(this);
+trackSelector.setParameters(
+        trackSelector.buildUponParameters()
+                .setMaxVideoSize(1920, 1080)      // 最大 1080p
+                .build());
+ExoPlayer player = new ExoPlayer.Builder(this)
+        .setTrackSelector(trackSelector)
+        .build();
+```
+
+@tab Kotlin
+
 ```kotlin
 // 限制最大清晰度:节省流量
 val trackSelector = DefaultTrackSelector(this).apply {
@@ -126,7 +193,39 @@ val player = ExoPlayer.Builder(this)
     .build()
 ```
 
+:::
+
 ## 五、渲染器与自定义
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 渲染器:音/视频/字幕各司其职
+// MediaCodecVideoRenderer  — 视频硬解码 + 渲染到 Surface
+// MediaCodecAudioRenderer  — 音频硬解码 + 输出到 AudioTrack
+// TextRenderer             — 字幕渲染
+
+// 自定义渲染器:继承 BaseRenderer 实现特定需求
+public class CustomRenderer extends BaseRenderer {
+    public CustomRenderer() {
+        super(C.TRACK_TYPE_VIDEO);
+    }
+
+    @Override
+    public void render(long positionUs, long elapsedRealtimeUs) {
+        // 从 SampleQueue 取帧 → 处理 → 输出
+    }
+    // 适合:自定义滤镜、水印、特殊格式
+}
+
+// 音视频同步
+// 以音频时钟为基准(音频连续),视频追时钟渲染
+// 偏移过大 → 丢帧/重复帧
+```
+
+@tab Kotlin
 
 ```kotlin
 // 渲染器:音/视频/字幕各司其职
@@ -147,7 +246,33 @@ class CustomRenderer : BaseRenderer(C.TRACK_TYPE_VIDEO) {
 // 偏移过大 → 丢帧/重复帧
 ```
 
+:::
+
 ## 六、DRM 与加密播放
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// DRM:数字版权保护(Widevine L3/L1)
+MediaItem.DrmConfiguration drmConfiguration =
+        new MediaItem.DrmConfiguration.Builder(
+                UUID.fromString("edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"))  // Widevine
+                .setLicenseUri(Uri.parse("https://license.example.com/widevine"))
+                .build();
+
+MediaItem mediaItem = new MediaItem.Builder()
+        .setUri("https://example.com/encrypted.mpd")
+        .setDrmConfiguration(drmConfiguration)
+        .build();
+
+// 流程:播放 → 请求 License Server 获取密钥 → 解密播放
+// L1:安全硬件解密(可输出到 HDMI)
+// L3:软件解密(画质受限)
+```
+
+@tab Kotlin
 
 ```kotlin
 // DRM:数字版权保护(Widevine L3/L1)
@@ -167,6 +292,8 @@ val mediaItem = MediaItem.Builder()
 // L3:软件解密(画质受限)
 ```
 
+:::
+
 ## 七、播放器最佳实践
 
 | 实践 | 说明 |
@@ -178,6 +305,33 @@ val mediaItem = MediaItem.Builder()
 | 播放进度 | 进度持久化,断点续播 |
 | 弱网降级 | 限制码率 + 超时控制 |
 | 埋点 | 播放成功率、卡顿率、平均码率 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 播放器池:列表页复用单个播放器
+public class PlayerPool {
+    private ExoPlayer player;
+
+    public ExoPlayer get() {
+        if (player == null) {
+            player = new ExoPlayer.Builder(context).build();
+        }
+        return player;
+    }
+    // 播放新视频前:清除旧媒体
+    public void play(String url) {
+        if (player == null) return;
+        player.setMediaItem(MediaItem.fromUri(url));
+        player.prepare();
+        player.setPlayWhenReady(true);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 播放器池:列表页复用单个播放器
@@ -198,6 +352,8 @@ class PlayerPool {
     }
 }
 ```
+
+:::
 
 ## 八、高频面试题
 

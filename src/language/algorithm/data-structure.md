@@ -17,14 +17,31 @@ title: 数据结构基础
 
 ### 创建方式
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 int[] c = {2, 3, 6, 10, 99}; // 静态初始化
 int[] d = new int[10];       // 动态初始化，默认值为 0
 ```
 
+@tab Kotlin
+
+```kotlin
+val c = intArrayOf(2, 3, 6, 10, 99) // 静态初始化
+val d = IntArray(10)                // 动态初始化，默认值为 0
+```
+
+:::
+
 ### 基本操作
 
 **插入：** 将 index 后面的元素依次后移，再把新值插入 index 位置。
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public static int[] insert(int[] old, int value, int index) {
@@ -36,7 +53,25 @@ public static int[] insert(int[] old, int value, int index) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+fun insert(old: IntArray, value: Int, index: Int): IntArray {
+    for (k in old.size - 1 downTo index + 1) {
+        old[k] = old[k - 1]
+    }
+    old[index] = value
+    return old
+}
+```
+
+:::
+
 **删除：** 将后面的值依次前移，最后一位置 0。
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public static int[] delete(int[] old, int index) {
@@ -48,7 +83,25 @@ public static int[] delete(int[] old, int index) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+fun delete(old: IntArray, index: Int): IntArray {
+    for (h in index until old.size - 1) {
+        old[h] = old[h + 1]
+    }
+    old[old.size - 1] = 0
+    return old
+}
+```
+
+:::
+
 ### 封装一个 GeneralArray 类
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public class GeneralArray {
@@ -100,6 +153,55 @@ public class GeneralArray {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class GeneralArray(max: Int) {
+    private val a = IntArray(max)
+    private val size = max   // 数组大小
+    private var nElem = 0    // 数组中有多少项
+
+    fun find(searchNum: Int): Boolean {   // 查找某个值
+        for (j in 0 until nElem) {
+            if (a[j] == searchNum) return true
+        }
+        return false
+    }
+
+    fun insert(value: Int): Boolean {     // 插入某个值
+        if (nElem == size) {
+            println("数组已满")
+            return false
+        }
+        a[nElem] = value
+        nElem++
+        return true
+    }
+
+    fun delete(value: Int): Boolean {     // 删除某个值
+        var j = 0
+        while (j < nElem) {
+            if (a[j] == value) break
+            j++
+        }
+        if (j == nElem) return false
+        for (k in j until nElem - 1) {
+            a[k] = a[k + 1]
+        }
+        nElem--
+        return true
+    }
+
+    fun display() {                       // 打印整个数组
+        for (i in 0 until nElem) {
+            println(a[i])
+        }
+    }
+}
+```
+
+:::
+
 ## 二、栈
 
 ### 特点
@@ -109,6 +211,10 @@ public class GeneralArray {
 - 基于数组实现的入栈、出栈时间复杂度均为 O(1)。
 
 ### 基于数组实现栈
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public class ArrayStack {
@@ -153,6 +259,48 @@ public class ArrayStack {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class ArrayStack(maxSize: Int) {
+    private val a = LongArray(maxSize)
+    private val size = maxSize  // 栈数组的大小
+    private var top = -1        // 栈顶
+
+    fun push(value: Long) {    // 入栈
+        if (isFull()) {
+            println("栈已满!")
+            return
+        }
+        a[++top] = value
+    }
+
+    fun peek(): Long {         // 返回栈顶内容，但不删除
+        if (isEmpty()) return 0
+        return a[top]
+    }
+
+    fun pop(): Long {          // 弹出栈顶内容
+        if (isEmpty()) return 0
+        return a[top--]
+    }
+
+    fun size(): Int {
+        return top + 1
+    }
+
+    fun isFull(): Boolean {
+        return (top == size - 1)
+    }
+
+    fun isEmpty(): Boolean {
+        return (top == -1)
+    }
+}
+```
+
+:::
 
 ## 三、队列
 

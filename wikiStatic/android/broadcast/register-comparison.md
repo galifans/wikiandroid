@@ -28,6 +28,26 @@ description: 静态注册与动态注册的机制差异、Android 8.0+ 隐式广
 
 ### 动态注册（代码注册）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+BroadcastReceiver receiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        // handle
+    }
+};
+
+// Android 13+ 必须指定导出标志
+registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
+// 组件销毁时必须注销
+unregisterReceiver(receiver);
+```
+
+@tab Kotlin
+
 ```kotlin
 val receiver = object : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -40,6 +60,8 @@ registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
 // 组件销毁时必须注销
 unregisterReceiver(receiver)
 ```
+
+:::
 
 - 注册信息保存在 **AMS 的进程内注册表**，跟随进程生命周期。
 - 进程被杀 → 自动失效；组件销毁不注销 → **内存泄漏**（Receiver 持有 Context 引用）。
@@ -86,6 +108,23 @@ Android 8.0 起，除豁免列表外，所有【隐式广播】不能再通过�
 
 ### 3.3 判断是否隐式
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 隐式广播：只指定 action，由系统解析
+Intent implicit = new Intent("com.example.MY_ACTION");
+sendBroadcast(implicit);
+
+// 显式广播：指定包名/组件，绕过 8.0 限制
+Intent explicit = new Intent("com.example.MY_ACTION");
+explicit.setPackage("com.example.target");   // 关键：指定包名
+sendBroadcast(explicit);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 隐式广播：只指定 action，由系统解析
 val implicit = Intent("com.example.MY_ACTION")
@@ -98,11 +137,27 @@ val explicit = Intent("com.example.MY_ACTION").apply {
 sendBroadcast(explicit)
 ```
 
+:::
+
 > **跨应用发送广播的推荐做法**：总是 `setPackage()` 指定目标包名，既绕开限制又更安全。
 
 ## 4. 高版本动态注册的导出标志
 
 Android 13（API 33）起：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 只接收自己应用发出的广播（推荐默认）
+registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
+
+// 需要接收其他应用/系统的广播
+registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 只接收自己应用发出的广播（推荐默认）
@@ -111,6 +166,8 @@ registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
 // 需要接收其他应用/系统的广播
 registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
 ```
+
+:::
 
 - `RECEIVER_NOT_EXPORTED`：只能接收**同应用或系统（UID 相同）** 的广播。
 - `RECEIVER_EXPORTED`：可接收所有来源，同时暴露为其他应用可攻击的目标（注意权限校验）。
@@ -151,6 +208,44 @@ onReceive 返回后 → 进程优先级回落（可能瞬间被杀）
 
 ### 5.1 一个实用模板：网络变化监听
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 推荐：使用 ConnectivityManager 回调而非广播
+public class MainActivity extends AppCompatActivity {
+
+    private final ConnectivityManager.NetworkCallback callback = new ConnectivityManager.NetworkCallback() {
+        @Override
+        public void onAvailable(Network network) {
+            runOnUiThread(() -> toast("网络已连接"));
+        }
+
+        @Override
+        public void onLost(Network network) {
+            runOnUiThread(() -> toast("网络已断开"));
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        ConnectivityManager cm = getSystemService(ConnectivityManager.class);
+        cm.registerDefaultNetworkCallback(callback);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        getSystemService(ConnectivityManager.class)
+            .unregisterNetworkCallback(callback);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 推荐：使用 ConnectivityManager 回调而非广播
 class MainActivity : AppCompatActivity() {
@@ -178,6 +273,8 @@ class MainActivity : AppCompatActivity() {
     }
 }
 ```
+
+:::
 
 ## 6. 高频面试题
 

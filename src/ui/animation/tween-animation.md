@@ -41,11 +41,25 @@ flowchart TD
 </animation-list>
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+imageView.setBackgroundResource(R.drawable.frame_anim);
+AnimationDrawable anim = (AnimationDrawable) imageView.getBackground();
+anim.start();
+```
+
+@tab Kotlin
+
 ```kotlin
 imageView.setBackgroundResource(R.drawable.frame_anim)
 val anim = imageView.background as AnimationDrawable
 anim.start()
 ```
+
+:::
 
 | 优点 | 缺点 |
 |------|------|
@@ -94,6 +108,19 @@ anim.start()
 
 ### 3.2 代码方式
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+TranslateAnimation anim = new TranslateAnimation(0f, 300f, 0f, 0f);
+anim.setDuration(1000);
+anim.setFillAfter(true);
+view.startAnimation(anim);
+```
+
+@tab Kotlin
+
 ```kotlin
 val anim = TranslateAnimation(0f, 300f, 0f, 0f).apply {
     duration = 1000
@@ -102,7 +129,24 @@ val anim = TranslateAnimation(0f, 300f, 0f, 0f).apply {
 view.startAnimation(anim)
 ```
 
+:::
+
 ### 3.3 补间动画的致命缺陷
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+//  问题：动画结束后，view 的实际位置/大小没变！
+view.startAnimation(new TranslateAnimation(0f, 300f, 0f, 0f));
+
+// 点击事件仍在原位置：
+// 动画只是修改了 View 的绘制 Matrix（视觉位移），
+// 并没有修改 layout 参数 → getX()/点击区域都在原地
+```
+
+@tab Kotlin
 
 ```kotlin
 //  问题：动画结束后，view 的实际位置/大小没变！
@@ -112,6 +156,8 @@ view.startAnimation(TranslateAnimation(0f, 300f, 0f, 0f))
 // 动画只是修改了 View 的绘制 Matrix（视觉位移），
 // 并没有修改 layout 参数 → getX()/点击区域都在原地
 ```
+
+:::
 
 | 缺陷 | 说明 |
 |------|------|
@@ -125,6 +171,39 @@ view.startAnimation(TranslateAnimation(0f, 300f, 0f, 0f))
 ## 四、属性动画（Property Animation）
 
 ### 4.1 核心类
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ValueAnimator：只负责数值变化
+ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+animator.setDuration(1000);
+animator.addUpdateListener(anim -> {
+    float value = (float) anim.getAnimatedValue();
+    view.setAlpha(value);           // 自己手动应用
+    view.setTranslationX(300f * value);
+});
+animator.start();
+
+// ObjectAnimator：自动设置属性
+ObjectAnimator objAnim = ObjectAnimator.ofFloat(view, "translationX", 0f, 300f);
+objAnim.setDuration(1000);
+objAnim.start();
+
+// 组合动画
+AnimatorSet animatorSet = new AnimatorSet();
+animatorSet.playTogether(
+        ObjectAnimator.ofFloat(view, "translationX", 0f, 300f),
+        ObjectAnimator.ofFloat(view, "alpha", 1f, 0.3f),
+        ObjectAnimator.ofFloat(view, "rotation", 0f, 360f)
+);
+animatorSet.setDuration(1000);
+animatorSet.start();
+```
+
+@tab Kotlin
 
 ```kotlin
 // ValueAnimator：只负责数值变化
@@ -156,6 +235,8 @@ AnimatorSet().apply {
 }
 ```
 
+:::
+
 ### 4.2 动画三要素
 
 ```mermaid
@@ -172,6 +253,10 @@ flowchart LR
 | **估值器** TypeEvaluator | 根据 fraction 计算**具体属性值** | `FloatEvaluator` |
 | 时间 | duration 内的时间片 | — |
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 插值器：时间 → 进度
 public interface Interpolator extends TimeInterpolator {
@@ -184,7 +269,40 @@ public interface TypeEvaluator<T> {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 插值器：时间 → 进度
+interface Interpolator : TimeInterpolator {
+    fun getInterpolation(input: Float): Float  // input 0→1 时间比例，返回 0→1 进度
+}
+
+// 估值器：进度 → 值
+interface TypeEvaluator<T> {
+    fun evaluate(fraction: Float, startValue: T, endValue: T): T
+}
+```
+
+:::
+
 ### 4.3 自定义插值器示例
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义：先加速后反弹（弹性效果）
+public class BounceInterpolator implements Interpolator {
+    @Override
+    public float getInterpolation(float t) {
+        if (t < 0.5f) return 4f * t * t * t;
+        return 1f - (float) Math.pow(-2 * t + 2, 3.0) / 2 + 0.5f;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 自定义：先加速后反弹（弹性效果）
@@ -195,6 +313,8 @@ class BounceInterpolator : Interpolator {
     }
 }
 ```
+
+:::
 
 ### 4.4 内置插值器对比
 
@@ -210,6 +330,35 @@ class BounceInterpolator : Interpolator {
 | `PathInterpolator` | 贝塞尔曲线自定义 |
 
 ### 4.5 自定义估值器（颜色渐变）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class ArgbEvaluator implements TypeEvaluator<Integer> {
+    @Override
+    public Integer evaluate(float fraction, Integer startValue, Integer endValue) {
+        int startA = (startValue >> 24) & 0xff;
+        int startR = (startValue >> 16) & 0xff;
+        int startG = (startValue >> 8) & 0xff;
+        int startB = startValue & 0xff;
+        int endA = (endValue >> 24) & 0xff;
+        int endR = (endValue >> 16) & 0xff;
+        int endG = (endValue >> 8) & 0xff;
+        int endB = endValue & 0xff;
+        return ((startA + (int) ((endA - startA) * fraction)) << 24) |
+                ((startR + (int) ((endR - startR) * fraction)) << 16) |
+                ((startG + (int) ((endG - startG) * fraction)) << 8) |
+                (startB + (int) ((endB - startB) * fraction));
+    }
+}
+
+// 使用
+ObjectAnimator.ofObject(view, "backgroundColor", new ArgbEvaluator(), Color.RED, Color.BLUE);
+```
+
+@tab Kotlin
 
 ```kotlin
 class ArgbEvaluator : TypeEvaluator<Int> {
@@ -233,6 +382,8 @@ class ArgbEvaluator : TypeEvaluator<Int> {
 ObjectAnimator.ofObject(view, "backgroundColor", ArgbEvaluator(), Color.RED, Color.BLUE)
 ```
 
+:::
+
 ## 五、属性动画的原理
 
 ```mermaid
@@ -255,6 +406,32 @@ sequenceDiagram
 
 ### setter 找不到怎么办？
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ObjectAnimator 通过反射调用 setter：setTranslationX()
+// 若 View 没有对应 setter：
+// 1. 报错：property 未找到
+// 2. 解决：自己实现
+public class MyView extends View {
+    private float progress = 0f;
+
+    public void setProgress(float progress) {
+        this.progress = progress;
+        invalidate();   // 触发重绘
+    }
+
+    public float getProgress() {
+        return progress;
+    }
+}
+ObjectAnimator.ofFloat(myView, "progress", 0f, 1f).start();
+```
+
+@tab Kotlin
+
 ```kotlin
 // ObjectAnimator 通过反射调用 setter：setTranslationX()
 // 若 View 没有对应 setter：
@@ -270,7 +447,27 @@ class MyView : View {
 ObjectAnimator.ofFloat(myView, "progress", 0f, 1f).start()
 ```
 
+:::
+
 ## 六、动画监听
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationX", 0f, 300f);
+animator.setDuration(1000);
+animator.addListener(new AnimatorListenerAdapter() {
+    @Override
+    public void onAnimationEnd(Animator animation) {
+        // 动画结束
+    }
+});
+animator.start();
+```
+
+@tab Kotlin
 
 ```kotlin
 ObjectAnimator.ofFloat(view, "translationX", 0f, 300f).apply {
@@ -283,6 +480,8 @@ ObjectAnimator.ofFloat(view, "translationX", 0f, 300f).apply {
     start()
 }
 ```
+
+:::
 
 ## 七、高频面试题
 

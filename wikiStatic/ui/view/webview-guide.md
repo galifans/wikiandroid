@@ -9,6 +9,10 @@ title: WebView 使用与优化
 
 ## 一、基本使用
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 webView.getUrl();              // 获取当前页面的 URL
 webView.getOriginalUrl();      // 获取原始 URL（重定向后可能与当前 url 不同）
@@ -18,9 +22,26 @@ webView.getProgress();         // 获取当前页面的加载进度
 webView.setNetworkAvailable(true); // 通知 WebView 内核网络状态
 ```
 
+@tab Kotlin
+
+```kotlin
+webView.url                    // 获取当前页面的 URL
+webView.originalUrl            // 获取原始 URL（重定向后可能与当前 url 不同）
+webView.title                  // 获取当前页面的标题
+webView.favicon                // 获取当前页面的 favicon
+webView.progress               // 获取当前页面的加载进度
+webView.setNetworkAvailable(true) // 通知 WebView 内核网络状态
+```
+
+:::
+
 ## 二、WebSettings 常用配置
 
 ### 存储
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 settings.setDomStorageEnabled(true);  // 启用 HTML5 DOM storage API
@@ -29,7 +50,22 @@ settings.setAppCacheEnabled(true);    // 启用 Application Caches API（已废�
 settings.setAppCachePath(context.getCacheDir().getAbsolutePath());
 ```
 
+@tab Kotlin
+
+```kotlin
+settings.setDomStorageEnabled(true)  // 启用 HTML5 DOM storage API
+settings.setDatabaseEnabled(true)    // 启用 Web SQL Database API（已不推荐）
+settings.setAppCacheEnabled(true)    // 启用 Application Caches API（已废弃）
+settings.setAppCachePath(context.cacheDir.absolutePath)
+```
+
+:::
+
 ### JavaScript 与窗口
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 settings.setJavaScriptEnabled(true);        // 是否支持 JavaScript，默认 false
@@ -37,7 +73,21 @@ settings.setSupportMultipleWindows(false);  // 是否支持多窗口
 settings.setJavaScriptCanOpenWindowsAutomatically(false); // 是否允许 JS(window.open) 开窗
 ```
 
+@tab Kotlin
+
+```kotlin
+settings.setJavaScriptEnabled(true)        // 是否支持 JavaScript，默认 false
+settings.setSupportMultipleWindows(false)  // 是否支持多窗口
+settings.setJavaScriptCanOpenWindowsAutomatically(false) // 是否允许 JS(window.open) 开窗
+```
+
+:::
+
 ### 资源访问与加载
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 settings.setAllowContentAccess(true);   // 是否可访问 Content Provider 资源
@@ -49,7 +99,25 @@ settings.setBlockNetworkImage(false);       // 禁止加载网络图片
 settings.setBlockNetworkLoads(false);       // 禁止加载所有网络资源
 ```
 
+@tab Kotlin
+
+```kotlin
+settings.setAllowContentAccess(true)   // 是否可访问 Content Provider 资源
+settings.setAllowFileAccess(true)      // 是否可访问本地文件
+settings.setAllowFileAccessFromFileURLs(false)   // file url 的 JS 能否读取本地文件
+settings.setAllowUniversalAccessFromFileURLs(false) // file url 的 JS 能否读取全部资源
+settings.setLoadsImagesAutomatically(true) // 是否自动加载图片
+settings.setBlockNetworkImage(false)       // 禁止加载网络图片
+settings.setBlockNetworkLoads(false)       // 禁止加载所有网络资源
+```
+
+:::
+
 ### 缩放与文本
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 settings.setSupportZoom(true);
@@ -59,7 +127,23 @@ settings.setDefaultTextEncodingName("UTF-8");
 settings.setTextZoom(100);
 ```
 
+@tab Kotlin
+
+```kotlin
+settings.setSupportZoom(true)
+settings.setBuiltInZoomControls(false)
+settings.setDisplayZoomControls(true)
+settings.setDefaultTextEncodingName("UTF-8")
+settings.setTextZoom(100)
+```
+
+:::
+
 ### 版本相关
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -74,7 +158,28 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+    settings.setMediaPlaybackRequiresUserGesture(true)
+}
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    // 5.0+ 允许加载 http 和 https 混合页面（5.0 以下默认允许，5.0+ 默认禁止）
+    settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW)
+}
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    settings.setOffscreenPreRaster(false)
+}
+```
+
+:::
+
 ### 缓存策略
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 if (isNetworkConnected(context)) {
@@ -85,6 +190,20 @@ if (isNetworkConnected(context)) {
     settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+if (isNetworkConnected(context)) {
+    // 根据 cache-control 决定是否从网络取数据
+    settings.setCacheMode(WebSettings.LOAD_DEFAULT)
+} else {
+    // 没网时优先加载缓存（即使已过期）
+    settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK)
+}
+```
+
+:::
 
 ## 三、WebViewClient 核心回调
 
@@ -117,6 +236,10 @@ if (isNetworkConnected(context)) {
 5. **预加载：** 提前初始化 WebView 并加载首屏。
 6. **本地资源替代：** 将常用静态资源放入 `assets`，重写 `shouldInterceptRequest` 拦截 URL，命中本地配置时直接返回本地资源，减少网络请求：
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 mWebView.setWebViewClient(new WebViewClient() {
     @Override
@@ -148,6 +271,37 @@ mWebView.setWebViewClient(new WebViewClient() {
 });
 ```
 
+@tab Kotlin
+
+```kotlin
+mWebView.webViewClient = object : WebViewClient() {
+    override fun shouldInterceptRequest(view: WebView, url: String): WebResourceResponse? {
+        // 命中本地资源配置则用本地资源替代，否则走网络
+        if (mDataHelper.hasLocalResource(url)) {
+            val response = mDataHelper.getReplacedWebResourceResponse(applicationContext, url)
+            if (response != null) {
+                return response
+            }
+        }
+        return super.shouldInterceptRequest(view, url)
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest): WebResourceResponse? {
+        val url = request.url.toString()
+        if (mDataHelper.hasLocalResource(url)) {
+            val response = mDataHelper.getReplacedWebResourceResponse(applicationContext, url)
+            if (response != null) {
+                return response
+            }
+        }
+        return super.shouldInterceptRequest(view, request)
+    }
+}
+```
+
+:::
+
 > 其他思路：WebView 初始化慢可**预创建实例**等待复用；后端响应慢可让服务器**分块输出**；
 > DNS/连接慢可**复用客户端域名连接**；JS 执行慢可将框架代码**提前拆分执行**、脚本后置不阻塞解析。
 
@@ -157,6 +311,10 @@ WebView 持有 Activity 引用容易造成内存泄漏，处理方式：
 
 1. **不要在布局 XML 中直接声明 WebView**，改为在代码中创建并添加到容器。
 2. **Activity 销毁时释放：**
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 @Override
@@ -170,5 +328,21 @@ protected void onDestroy() {
     super.onDestroy();
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+override fun onDestroy() {
+    if (webView != null) {
+        webView.stopLoading()
+        webView.loadUrl("about:blank")
+        webView.removeAllViews()
+        webView.destroy()
+    }
+    super.onDestroy()
+}
+```
+
+:::
 
 3. **将 WebView 放入独立进程：** 通过 `android:process` 属性，进程被杀时回收全部内存。

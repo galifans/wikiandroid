@@ -66,6 +66,10 @@ sequenceDiagram
     R->>L: 返回 ItemView
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 源码关键：getViewForPosition 内部
 View getViewForPosition(int position, boolean dryRun) {
@@ -76,6 +80,21 @@ View getViewForPosition(int position, boolean dryRun) {
     // 5. adapter.bindViewHolder() 绑定
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// 源码关键：getViewForPosition 内部
+fun getViewForPosition(position: Int, dryRun: Boolean): View {
+    // 1. 尝试从 scrap/cache 获取
+    // 2. 尝试从 viewCacheExtension 获取
+    // 3. 尝试从 RecycledViewPool 获取
+    // 4. 全部 miss → adapter.createViewHolder() 新建
+    // 5. adapter.bindViewHolder() 绑定
+}
+```
+
+:::
 
 ### 3.2 回收（recycleViewHolderInternal）
 
@@ -89,6 +108,10 @@ flowchart LR
     E --> G[需重新绑定]
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 源码关键：回收逻辑（简化）
 void recycleViewHolderInternal(ViewHolder holder) {
@@ -101,7 +124,27 @@ void recycleViewHolderInternal(ViewHolder holder) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 源码关键：回收逻辑（简化）
+fun recycleViewHolderInternal(holder: ViewHolder) {
+    // 清空动画/标志位
+    if (mCachedViews.size() >= mViewCacheMax) {   // 默认 2
+        // 淘汰最早的缓存，放入 pool（清空绑定数据）
+        recycleCachedViewAt(0)
+    }
+    mCachedViews.add(holder)   // 新回收的进缓存
+}
+```
+
+:::
+
 ## 四、LayoutManager 复用触发
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // LinearLayoutManager 填充逻辑
@@ -115,6 +158,23 @@ void fill(Recycler recycler, LayoutState layoutState) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// LinearLayoutManager 填充逻辑
+fun fill(recycler: Recycler, layoutState: LayoutState) {
+    while (layoutState.hasMore(state)) {
+        // 获取条目 View（触发五级缓存查找）
+        val view = layoutState.next(recycler)
+        // 添加到布局
+        addView(view)
+        layoutDecoratedWithMargins(view, ...)
+    }
+}
+```
+
+:::
 
 > **核心思想**：LayoutManager 只关心"把 View 摆放到正确位置"，View 从哪来（新建还是复用）完全由 Recycler 决定。
 
@@ -134,10 +194,23 @@ flowchart LR
 
 ### 5.2 预取控制
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+recyclerView.setItemViewCacheSize(5);                 // 默认 2 → 调大二级缓存
+recyclerView.setNestedScrollingEnabled(false);        // 嵌套滚动场景注意
+```
+
+@tab Kotlin
+
 ```kotlin
 recyclerView.setItemViewCacheSize(5)     // 默认 2 → 调大二级缓存
 recyclerView.isNestedScrollingEnabled = false   // 嵌套滚动场景注意
 ```
+
+:::
 
 | 参数 | 默认 | 作用 |
 |------|------|------|
@@ -148,6 +221,23 @@ recyclerView.isNestedScrollingEnabled = false   // 嵌套滚动场景注意
 ## 六、diff 更新机制
 
 ### 6.1 局部刷新 vs 全量刷新
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 全量刷新：全部条目重绘 + 闪烁
+adapter.notifyDataSetChanged();
+
+// ✓ 局部刷新：精确更新
+adapter.notifyItemChanged(3);          // 更新单个
+adapter.notifyItemInserted(5);         // 插入
+adapter.notifyItemRemoved(2);          // 删除
+adapter.notifyItemRangeChanged(0, 10); // 范围更新
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✗ 全量刷新：全部条目重绘 + 闪烁
@@ -160,7 +250,33 @@ adapter.notifyItemRemoved(2)          // 删除
 adapter.notifyItemRangeChanged(0, 10) // 范围更新
 ```
 
+:::
+
 ### 6.2 DiffUtil 高效计算差异
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class UserDiffCallback extends DiffUtil.ItemCallback<User> {
+    @Override
+    public boolean areItemsTheSame(User oldItem, User newItem) {
+        return oldItem.id == newItem.id;   // 是否是同一个条目
+    }
+
+    @Override
+    public boolean areContentsTheSame(User oldItem, User newItem) {
+        return oldItem.equals(newItem);    // 内容是否相同
+    }
+}
+
+// 异步计算差异
+DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new UserDiffCallback(), false);
+diffResult.dispatchUpdatesTo(adapter);   // 精确执行增删改移动画
+```
+
+@tab Kotlin
 
 ```kotlin
 class UserDiffCallback : DiffUtil.ItemCallback<User>() {
@@ -175,6 +291,8 @@ class UserDiffCallback : DiffUtil.ItemCallback<User>() {
 val diffResult = DiffUtil.calculateDiff(UserDiffCallback(), false)
 diffResult.dispatchUpdatesTo(adapter)   // 精确执行增删改移动画
 ```
+
+:::
 
 > 列表数据频繁变化（聊天、feed 流）用 **ListAdapter + DiffUtil**（内部子线程计算差异），配合 RecyclerView 增删移动画，性能与体验最佳。
 

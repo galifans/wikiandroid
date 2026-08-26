@@ -41,6 +41,44 @@ flowchart LR
     E --> F[core:designsystem]
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// core:network 模块:网络层只暴露接口
+// （suspend 方法在 Java 中体现为带 Continuation 参数或回调）
+public interface ApiService {
+    List<User> fetchUsers();
+}
+
+// 提供绑定的模块(在 network 模块内)
+@Module
+@InstallIn(SingletonComponent.class)
+public class NetworkModule {
+
+    @Provides
+    @Singleton
+    public static OkHttpClient provideOkHttpClient() {
+        return new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public static Retrofit provideRetrofit(OkHttpClient client) {
+        return new Retrofit.Builder()
+                .baseUrl(BuildConfig.BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // core:network 模块:网络层只暴露接口
 interface ApiService {
@@ -68,7 +106,61 @@ object NetworkModule {
 }
 ```
 
+:::
+
 ### 2.2 接口与实现分离
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 业务接口（suspend → Java 同步/回调）
+public interface UserRepository {
+    List<User> getUsers();
+}
+
+// 远程实现
+public class RemoteUserRepository implements UserRepository {
+    private final ApiService api;
+
+    @Inject
+    public RemoteUserRepository(ApiService api) {
+        this.api = api;
+    }
+
+    @Override
+    public List<User> getUsers() {
+        return api.fetchUsers();
+    }
+}
+
+// 本地实现(测试/离线模式)
+public class LocalUserRepository implements UserRepository {
+    private final UserDao dao;
+
+    @Inject
+    public LocalUserRepository(UserDao dao) {
+        this.dao = dao;
+    }
+
+    @Override
+    public List<User> getUsers() {
+        return dao.getAll();
+    }
+}
+
+// 绑定模块:运行时选择实现
+@Module
+@InstallIn(SingletonComponent.class)
+public abstract class RepositoryModule {
+    @Binds
+    @Singleton
+    public abstract UserRepository bindUserRepository(RemoteUserRepository impl);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 业务接口
@@ -100,7 +192,67 @@ abstract class RepositoryModule {
 }
 ```
 
+:::
+
 ## 三、自定义 Qualifier 与 Named
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义限定符:区分同一类型的多个绑定
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+public @interface BaseUrl {
+}
+
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+public @interface DebugInterceptor {
+}
+
+@Module
+@InstallIn(SingletonComponent.class)
+public class NetworkModule {
+
+    @Provides
+    @Singleton
+    @BaseUrl
+    public static String provideBaseUrl() {
+        return "https://api.example.com/";
+    }
+
+    @Provides
+    @Singleton
+    @Named("cdn")          // 或用 @Named
+    public static String provideCdnUrl() {
+        return "https://cdn.example.com/";
+    }
+
+    @Provides
+    @Singleton
+    @DebugInterceptor
+    public static Interceptor provideInterceptor() {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        return interceptor;
+    }
+}
+
+// 使用
+public class ApiClient {
+    @Inject
+    public ApiClient(
+            @BaseUrl String baseUrl,
+            @Named("cdn") String cdnUrl,
+            @DebugInterceptor Interceptor interceptor) {
+        // ...
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 自定义限定符:区分同一类型的多个绑定
@@ -141,12 +293,51 @@ class ApiClient @Inject constructor(
 )
 ```
 
+:::
+
 | 方式 | 适用 | 说明 |
 |------|------|------|
 | `@Named("tag")` | 快速区分 | 字符串易错,不推荐复杂场景 |
 | 自定义 `@Qualifier` | 语义化区分 | 类型安全、可读性好 |
 
 ## 四、与协程结合
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义 dispatcher 绑定（@Qualifier 注解可用 Java 定义）
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+public @interface IoDispatcher {
+}
+
+@Module
+@InstallIn(SingletonComponent.class)
+public class DispatcherModule {
+
+    @Provides
+    @IoDispatcher
+    public static CoroutineDispatcher provideIoDispatcher() {
+        return Dispatchers.getIO();
+    }
+}
+
+// 注入使用（withContext 为 Kotlin 协程 API，Java 中需协程桥接层调用）
+public class UserRepository {
+    private final ApiService api;
+    private final CoroutineDispatcher ioDispatcher;
+
+    @Inject
+    public UserRepository(ApiService api, @IoDispatcher CoroutineDispatcher ioDispatcher) {
+        this.api = api;
+        this.ioDispatcher = ioDispatcher;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 自定义 dispatcher 绑定
@@ -172,7 +363,42 @@ class UserRepository @Inject constructor(
 }
 ```
 
+:::
+
 ### 5.0 @HiltViewModel
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@HiltViewModel
+public class HomeViewModel extends ViewModel {
+    private final UserRepository repository;
+    private final SavedStateHandle savedStateHandle;
+
+    @Inject
+    public HomeViewModel(UserRepository repository, SavedStateHandle savedStateHandle) {
+        this.repository = repository;
+        this.savedStateHandle = savedStateHandle;
+    }
+}
+
+// Compose 中注入（hiltViewModel() 为 Compose DSL，仅支持 Kotlin）
+
+// 传统 View 中
+@AndroidEntryPoint
+public class HomeFragment extends Fragment {
+    private HomeViewModel viewModel;
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @HiltViewModel
@@ -198,7 +424,52 @@ class HomeFragment : Fragment() {
 }
 ```
 
+:::
+
 ## 五、测试替身注入
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 测试模块:替换网络为 Fake
+@Module
+@TestInstallIn(
+    components = SingletonComponent.class,
+    replaces = NetworkModule.class   // 替换生产模块
+)
+public class FakeNetworkModule {
+    @Provides
+    @Singleton
+    public static ApiService provideApiService() {
+        return new FakeApiService();   // 内存假实现
+    }
+}
+
+// 测试中加载（runBlocking → Java 直接同步调用；suspend 方法需协程桥接）
+@HiltAndroidTest
+public class UserRepositoryTest {
+    @Rule
+    public HiltAndroidRule hiltRule = new HiltAndroidRule(this);
+
+    @Inject
+    UserRepository repository;
+
+    @Before
+    public void setup() {
+        hiltRule.inject();
+    }
+
+    @Test
+    public void getUsers_returnsFakeData() {
+        List<User> users = repository.getUsers();
+        assertEquals(3, users.size());
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 测试模块:替换网络为 Fake
@@ -234,6 +505,8 @@ class UserRepositoryTest {
     }
 }
 ```
+
+:::
 
 ## 六、常见错误与排查
 

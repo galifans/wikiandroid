@@ -34,6 +34,24 @@ flowchart LR
 | buildSrc | 模块内源码编译 | 项目内共享 |
 | 独立插件工程 | 单独发布到仓库 | 跨项目/团队复用 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 形式一:构建脚本内定义
+public class HelloPlugin implements Plugin<Project> {
+    @Override
+    public void apply(Project project) {
+        project.getTasks().register("hello", task ->
+                task.doLast(action -> System.out.println("Hello from plugin!")));
+    }
+}
+project.getPlugins().apply(HelloPlugin.class);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 形式一:构建脚本内定义
 class HelloPlugin : Plugin<Project> {
@@ -46,6 +64,23 @@ class HelloPlugin : Plugin<Project> {
 apply<HelloPlugin>()
 ```
 
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 形式二:buildSrc 模块(src/main/java)
+// buildSrc 自动编译,项目内可直接 apply
+public class BuildSrcPlugin implements Plugin<Project> {
+    @Override
+    public void apply(Project project) { /* ... */ }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 形式二:buildSrc 模块(src/main/kotlin)
 // buildSrc 自动编译,项目内可直接 apply
@@ -53,6 +88,8 @@ class BuildSrcPlugin : Plugin<Project> {
     override fun apply(project: Project) { ... }
 }
 ```
+
+:::
 
 ## 三、独立插件工程结构
 
@@ -92,6 +129,33 @@ implementation-class=com.example.plugin.MyPlugin
 
 ## 四、Extension 扩展配置
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 扩展:让使用者可以配置
+public class MyExtension {
+    public String version = "1.0.0";
+    public boolean enableInject = true;
+    public List<String> tasks = new ArrayList<>();
+}
+
+public class MyPlugin implements Plugin<Project> {
+    @Override
+    public void apply(Project project) {
+        // 注册扩展:使用方 build.gradle 中 myPlugin { ... }
+        MyExtension ext = project.getExtensions().create("myPlugin", MyExtension.class);
+        project.getTasks().register("printConfig", task -> {
+            task.doLast(action -> System.out.println(
+                    "version=" + ext.version + ", inject=" + ext.enableInject));
+        });
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 扩展:让使用者可以配置
 open class MyExtension {
@@ -113,6 +177,8 @@ class MyPlugin : Plugin<Project> {
 }
 ```
 
+:::
+
 ```kotlin
 // 使用方
 plugins { id("com.example.plugin") }
@@ -124,6 +190,21 @@ myPlugin {
 
 ## 五、Task 与依赖编排
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 挂接到构建生命周期
+project.afterEvaluate(p -> {
+    p.getTasks().named("assembleRelease").configure(releaseTask ->
+            releaseTask.dependsOn("injectCode"));   // 打包前先插桩
+});
+// 或使用 TaskProvider API 延迟配置(推荐)
+```
+
+@tab Kotlin
+
 ```kotlin
 // 挂接到构建生命周期
 project.afterEvaluate {
@@ -133,6 +214,8 @@ project.afterEvaluate {
 }
 // 或使用 TaskProvider API 延迟配置(推荐)
 ```
+
+:::
 
 | 常用挂接点 | 时机 |
 |-----------|------|
@@ -146,6 +229,22 @@ project.afterEvaluate {
 
 > 经典场景:埋点、无埋点统计、方法耗时统计、隐私合规检测。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// AGP 7+ 使用 Transform API 已被标记废弃
+// 新方案:Transform Action / ASM + AGP API
+// 核心流程:
+// 1. 注册 Transform/TransformAction
+// 2. 遍历 class 文件
+// 3. ASM 修改字节码(注入方法调用)
+// 4. 输出修改后的 class
+```
+
+@tab Kotlin
+
 ```kotlin
 // AGP 7+ 使用 Transform API 已被标记废弃
 // 新方案:Transform Action / ASM + AGP API
@@ -156,6 +255,8 @@ project.afterEvaluate {
 // 4. 输出修改后的 class
 ```
 
+:::
+
 ```mermaid
 flowchart LR
     A[class 文件] --> B[Transform<br>输入]
@@ -165,12 +266,27 @@ flowchart LR
     E --> F[dex 打包]
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ASM 插桩示例:在方法开头注入日志
+// ClassVisitor → MethodVisitor.visitCode 时注入
+// 用 AdviceAdapter:onMethodEnter 中插入
+// visitMethodInsn(INVOKESTATIC, "Log", "d", "(String;String;)V", false)
+```
+
+@tab Kotlin
+
 ```kotlin
 // ASM 插桩示例:在方法开头注入日志
 // ClassVisitor → MethodVisitor.visitCode 时注入
 // 用 AdviceAdapter:onMethodEnter 中插入
 // visitMethodInsn(INVOKESTATIC, "Log", "d", "(String;String;)V", false)
 ```
+
+:::
 
 ## 七、调试与发布
 

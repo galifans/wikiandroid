@@ -45,11 +45,58 @@ description: AIDL 语法、in/out/inout 方向、oneway、Binder 工作原理、
 
 ### 3.1 定义 Parcelable 数据
 
-```kotlin
+```aidl
 // Book.aidl
 package com.example.ipc;
 parcelable Book;
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Book.java（实现 Parcelable）
+public class Book implements Parcelable {
+    private final int id;
+    private final String name;
+
+    public Book(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    protected Book(Parcel parcel) {
+        id = parcel.readInt();
+        name = parcel.readString() != null ? parcel.readString() : "";
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(id);
+        parcel.writeString(name);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Book> CREATOR = new Creator<Book>() {
+        @Override
+        public Book createFromParcel(Parcel parcel) {
+            return new Book(parcel);
+        }
+
+        @Override
+        public Book[] newArray(int size) {
+            return new Book[size];
+        }
+    };
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // Book.kt（实现 Parcelable）
@@ -75,6 +122,8 @@ data class Book(
     }
 }
 ```
+
+:::
 
 ### 3.2 定义 AIDL 接口
 
@@ -105,6 +154,56 @@ interface IOnBookArrivedListener {
 ```
 
 ### 3.3 服务端实现
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class BookManagerService extends Service {
+
+    private final List<Book> bookList = new ArrayList<>();
+    // RemoteCallbackList 是官方推荐的监听器管理容器（自动处理 Binder 死亡）
+    private final RemoteCallbackList<IOnBookArrivedListener> listenerList =
+            new RemoteCallbackList<>();
+
+    private final IBookManager.Stub binder = new IBookManager.Stub() {
+        @Override
+        public List<Book> getBookList() {
+            return bookList;
+        }
+
+        @Override
+        public void addBook(Book book) {
+            bookList.add(book);
+            // 通知所有客户端
+            int n = listenerList.beginBroadcast();
+            for (int i = 0; i < n; i++) {
+                IOnBookArrivedListener listener = listenerList.getBroadcastItem(i);
+                listener.onBookArrived(book);
+            }
+            listenerList.finishBroadcast();
+        }
+
+        @Override
+        public void registerListener(IOnBookArrivedListener listener) {
+            listenerList.register(listener);
+        }
+
+        @Override
+        public void unregisterListener(IOnBookArrivedListener listener) {
+            listenerList.unregister(listener);
+        }
+    };
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class BookManagerService : Service() {
@@ -140,10 +239,69 @@ class BookManagerService : Service() {
 }
 ```
 
+:::
+
 > **RemoteCallbackList 为什么好**：内部用 `IBinder` 作为 key 去重，客户端进程死亡时
 > 自动调用 `onCallbackDied` 清理，避免"内存泄漏 + 重复注册"两大经典问题。
 
 ### 3.4 客户端调用
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MainActivity extends AppCompatActivity {
+
+    private IBookManager bookManager;
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            bookManager = IBookManager.Stub.asInterface(service);
+            // 注册监听（Binder 是 IBinder，可直接传入）
+            if (bookManager != null) {
+                bookManager.registerListener(listener);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            bookManager = null;
+        }
+    };
+
+    private final IOnBookArrivedListener.Stub listener = new IOnBookArrivedListener.Stub() {
+        @Override
+        public void onBookArrived(Book newBook) {
+            // 注意：这是 Binder 线程，不是主线程！需要切换到主线程更新 UI
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // 更新 UI
+                }
+            });
+        }
+    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Intent intent = new Intent(this, BookManagerService.class);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (bookManager != null) {
+            bookManager.unregisterListener(listener);
+        }
+        unbindService(serviceConnection);
+        super.onDestroy();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
@@ -184,6 +342,8 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+:::
+
 ### 3.5 跨应用调用
 
 ```xml
@@ -198,6 +358,19 @@ class MainActivity : AppCompatActivity() {
 </service>
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 客户端：隐式 Intent 绑定
+Intent intent = new Intent("com.example.ipc.BOOK_SERVICE");
+intent.setPackage("com.example.ipc");  // 指定包名更安全
+bindService(intent, connection, Context.BIND_AUTO_CREATE);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 客户端：隐式 Intent 绑定
 val intent = Intent("com.example.ipc.BOOK_SERVICE").apply {
@@ -206,7 +379,62 @@ val intent = Intent("com.example.ipc.BOOK_SERVICE").apply {
 bindService(intent, connection, Context.BIND_AUTO_CREATE)
 ```
 
+:::
+
 ### 3.6 Kotlin 现代写法：@Parcelize 替代手写 Parcelable
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// build.gradle.kts
+// android { buildFeatures { aidl = true } }
+// plugins { id("kotlin-parcelize") }
+
+// Java 无 @Parcelize 注解，需手写 Parcelable
+public class Book implements Parcelable {
+    private final int id;
+    private final String name;
+
+    public Book(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    protected Book(Parcel parcel) {
+        id = parcel.readInt();
+        name = parcel.readString();
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(id);
+        parcel.writeString(name);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Book> CREATOR = new Creator<Book>() {
+        @Override
+        public Book createFromParcel(Parcel parcel) {
+            return new Book(parcel);
+        }
+
+        @Override
+        public Book[] newArray(int size) {
+            return new Book[size];
+        }
+    };
+}
+
+// AIDL 文件不变：parcelable Book;
+```
+
+@tab Kotlin
 
 ```kotlin
 // build.gradle.kts
@@ -222,6 +450,8 @@ data class Book(
 // AIDL 文件不变：parcelable Book;
 ```
 
+:::
+
 > 注意：`@Parcelize` 生成的 `CREATOR` 与 AIDL 生成代码兼容（AIDL 通过 `Book.CREATOR` 反序列化）。
 > Kotlin 的 AIDL 文件默认放在 `src/main/aidl`，Parcelable 类在 `src/main/java`（或 `kotlin`），
 > 二者包名必须一致。
@@ -229,6 +459,29 @@ data class Book(
 ### 3.7 线程安全：服务端方法并发访问
 
 服务端 Stub 方法执行在 **Binder 线程池**，多个客户端可并发调用，必须保证线程安全：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+private final IBookManager.Stub binder = new IBookManager.Stub() {
+    // List 非线程安全 → 加锁或使用并发容器
+    private final CopyOnWriteArrayList<Book> bookList = new CopyOnWriteArrayList<>();
+
+    @Override
+    public void addBook(Book book) {
+        bookList.add(book);
+        int n = listenerList.beginBroadcast();
+        for (int i = 0; i < n; i++) {
+            listenerList.getBroadcastItem(i).onBookArrived(book);
+        }
+        listenerList.finishBroadcast();
+    }
+};
+```
+
+@tab Kotlin
 
 ```kotlin
 private val binder = object : IBookManager.Stub() {
@@ -245,6 +498,8 @@ private val binder = object : IBookManager.Stub() {
     }
 }
 ```
+
+:::
 
 ## 4. 深入：Binder 如何支撑 AIDL
 

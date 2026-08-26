@@ -31,6 +31,32 @@ description: registerForActivityResult 机制、ActivityResultContracts 内置�
 - **生命周期安全**：回调在 `LifecycleOwner` 处于 `STARTED` 之后才派发
 - **无需 requestCode**：系统自动管理请求编号
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 旧写法
+startActivityForResult(intent, REQUEST_CODE);
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+        Uri uri = data != null ? data.getData() : null;  // 手工解析
+    }
+}
+
+// 新写法
+private final ActivityResultLauncher<String> launcher = registerForActivityResult(
+        new ActivityResultContracts.GetContent(),
+        uri -> {
+            // 类型安全：直接拿到 Uri
+            if (uri != null) loadImage(uri);
+        }
+);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 旧写法
 startActivityForResult(intent, REQUEST_CODE)
@@ -49,9 +75,33 @@ private val launcher = registerForActivityResult(
 }
 ```
 
+:::
+
 ## 二、核心 API 与注册时机
 
 ### 2.1 registerForActivityResult
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class MainActivity extends ComponentActivity {
+    // 属性初始化阶段注册（推荐）
+    private final ActivityResultLauncher<String[]> openDocument = registerForActivityResult(
+            new ActivityResultContracts.OpenDocument(),
+            uri -> handleDocument(uri)
+    );
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        btn.setOnClickListener(v -> openDocument.launch(new String[]{"text/*"}));
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MainActivity : ComponentActivity() {
@@ -67,6 +117,8 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
+:::
+
 ### 2.2 为什么必须在 onCreate 之前注册
 
 `registerForActivityResult` 的注册状态在 **Fragment/Activity 重建时会自动恢复**（由 ActivityResultRegistry 保存），所以：
@@ -75,6 +127,20 @@ class MainActivity : ComponentActivity() {
 - 若在 `onCreate` 之后（如按钮点击时才注册），**重建后回调会丢失**，启动的 Activity 结果无法分发
 - Fragment 中同理，应在 `onAttach` / 字段初始化阶段注册
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 错误示例：点击时才注册，旋转屏幕后回调丢失
+btn.setOnClickListener(v -> {
+    ActivityResultLauncher<?> launcher = registerForActivityResult(...);  // 不推荐
+    launcher.launch(...);
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 // 错误示例：点击时才注册，旋转屏幕后回调丢失
 btn.setOnClickListener {
@@ -82,6 +148,8 @@ btn.setOnClickListener {
     launcher.launch(...)
 }
 ```
+
+:::
 
 > 底层实现：`ActivityResultRegistry` 用 `savedInstanceState` 保存注册状态，`onLaunch` 时通过生成的随机 requestCode 分发，重建后按注册顺序恢复——因此注册必须稳定可恢复。
 
@@ -107,6 +175,41 @@ btn.setOnClickListener {
 | `PickContact` | 无 | `Uri?` | 联系人选择 |
 
 ### 3.2 拍照与选图实战
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 拍照：先创建输出文件，再传给 TakePicture
+private final ActivityResultLauncher<Uri> takePicture = registerForActivityResult(
+        new ActivityResultContracts.TakePicture(),
+        success -> {
+            if (success) imageView.setImageURI(currentPhotoUri);
+            else showToast("拍照取消");
+        }
+);
+
+private Uri currentPhotoUri;
+
+void openCamera() {
+    File file = new File(getCacheDir(), "photo_" + System.currentTimeMillis() + ".jpg");
+    currentPhotoUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+    takePicture.launch(currentPhotoUri);
+}
+
+// 选图：GetContent 内部封装了系统文件选择器
+private final ActivityResultLauncher<String> pickImage = registerForActivityResult(
+        new ActivityResultContracts.GetContent(),
+        uri -> { if (uri != null) imageView.setImageURI(uri); }
+);
+
+void openGallery() {
+    pickImage.launch("image/*");
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 拍照：先创建输出文件，再传给 TakePicture
@@ -136,9 +239,28 @@ fun openGallery() {
 }
 ```
 
+:::
+
 ## 四、权限申请的新姿势
 
 ### 4.1 单权限
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+private final ActivityResultLauncher<String> requestPermission = registerForActivityResult(
+        new ActivityResultContracts.RequestPermission(),
+        granted -> { if (granted) startLocation(); else showRationale(); }
+);
+
+void requestLocation() {
+    requestPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 private val requestPermission = registerForActivityResult(
@@ -152,7 +274,38 @@ fun requestLocation() {
 }
 ```
 
+:::
+
 ### 4.2 多权限批量
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+private final ActivityResultLauncher<String[]> requestMultiple = registerForActivityResult(
+        new ActivityResultContracts.RequestMultiplePermissions(),
+        result -> {
+            Set<String> denied = new HashSet<>();
+            for (Map.Entry<String, Boolean> entry : result.entrySet()) {
+                if (!entry.getValue()) denied.add(entry.getKey());
+            }
+            if (denied.isEmpty()) startCamera();
+            else showDialog("缺少权限：" + TextUtils.join(", ", denied));
+        }
+);
+
+void requestCameraAndStorage() {
+    requestMultiple.launch(
+            new String[]{
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO
+            }
+    );
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 private val requestMultiple = registerForActivityResult(
@@ -172,6 +325,8 @@ fun requestCameraAndStorage() {
     )
 }
 ```
+
+:::
 
 ### 4.3 权限回调时序
 
@@ -197,6 +352,40 @@ sequenceDiagram
 
 当内置契约不满足需求时，可继承 `ActivityResultContract<I, O>`：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义契约：裁剪图片并返回 Uri
+class CropImageContract extends ActivityResultContract<Uri, Uri> {
+    @Override
+    public Intent createIntent(Context context, Uri input) {
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(input, "image/*");
+        intent.putExtra("crop", "true");
+        intent.putExtra("aspectX", 1);
+        intent.putExtra("aspectY", 1);
+        intent.putExtra("outputX", 300);
+        intent.putExtra("outputY", 300);
+        return intent;
+    }
+
+    @Override
+    public Uri parseResult(int resultCode, Intent intent) {
+        return (resultCode == Activity.RESULT_OK) ? intent.getData() : null;
+    }
+}
+
+// 使用
+private final ActivityResultLauncher<Uri> crop = registerForActivityResult(
+        new CropImageContract(),
+        uri -> { if (uri != null) avatarView.setImageURI(uri); }
+);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 自定义契约：裁剪图片并返回 Uri
 class CropImageContract : ActivityResultContract<Uri, Uri?>() {
@@ -221,6 +410,8 @@ private val crop = registerForActivityResult(CropImageContract()) { uri ->
     uri?.let { avatarView.setImageURI(it) }
 }
 ```
+
+:::
 
 ### 自定义契约要点
 

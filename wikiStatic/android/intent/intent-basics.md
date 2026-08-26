@@ -30,6 +30,29 @@ Intent 本身**不直接调用组件**，它只是描述"意图"的数据对象�
 
 ## 二、Intent 的结构组成
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Intent intent = new Intent();
+// 1. 组件（显式跳转时设置）
+intent.setComponent(new ComponentName(this, TargetActivity.class));
+// 2. 动作（隐式匹配时使用）
+intent.setAction(Intent.ACTION_VIEW);
+// 3. 数据与类型（URI + MIME）
+intent.setData(Uri.parse("https://wikiandroid.com"));
+intent.setType("text/html");
+// 4. 分类
+intent.addCategory(Intent.CATEGORY_DEFAULT);
+// 5. 附加数据（键值对）
+intent.putExtra("key", "value");
+// 6. 标志位（控制任务栈等行为）
+intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+```
+
+@tab Kotlin
+
 ```kotlin
 val intent = Intent().apply {
     // 1. 组件（显式跳转时设置）
@@ -48,6 +71,8 @@ val intent = Intent().apply {
 }
 ```
 
+:::
+
 | 属性 | 作用 | 典型值 |
 |------|------|--------|
 | `component` | 精确指定目标组件 | `ComponentName(pkg, class)` |
@@ -62,6 +87,26 @@ val intent = Intent().apply {
 Intent 中 `action` 与 `data` 是一体的：例如 `ACTION_VIEW` + `Uri.parse("tel:10086")` 表示"查看电话号码"，`ACTION_VIEW` + `https://` 表示"打开网页"。**同一个 action 配合不同 data 会进入不同的匹配分支**。
 
 ## 三、显式 Intent：精确指定目标
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 方式一：直接传 Class（内部会构造 ComponentName）
+Intent intent = new Intent(this, ProfileActivity.class);
+startActivity(intent);
+
+// 方式二：指定包名 + 类名（跨应用跳转）
+Intent intent = new Intent();
+intent.setComponent(new ComponentName(
+        "com.example.target",
+        "com.example.target.TargetActivity"
+));
+startActivity(intent);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 方式一：直接传 Class（内部会构造 ComponentName）
@@ -78,6 +123,8 @@ val intent = Intent().apply {
 startActivity(intent)
 ```
 
+:::
+
 **使用场景**：应用内导航（绝大多数情况）、跨应用跳转到已知类名。
 
 | 特点 | 说明 |
@@ -90,6 +137,26 @@ startActivity(intent)
 ## 四、隐式 Intent：按规则匹配
 
 隐式 Intent 不指定组件，由系统根据 IntentFilter 匹配"谁能处理这个意图"。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 打开网页
+startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://wikiandroid.com")));
+
+// 发送分享
+Intent send = new Intent(Intent.ACTION_SEND);
+send.setType("text/plain");
+send.putExtra(Intent.EXTRA_TEXT, "看看这个知识库！");
+startActivity(Intent.createChooser(send, "分享到"));
+
+// 打开拨号盘
+startActivity(new Intent(Intent.ACTION_DIAL, Uri.parse("tel:10086")));
+```
+
+@tab Kotlin
 
 ```kotlin
 // 打开网页
@@ -106,6 +173,8 @@ startActivity(Intent.createChooser(send, "分享到"))
 startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:10086")))
 ```
 
+:::
+
 **匹配失败与多匹配**：
 
 | 情况 | 结果 | 处理方式 |
@@ -113,6 +182,23 @@ startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:10086")))
 | 唯一匹配 | 直接启动该组件 | — |
 | 多个匹配 | 弹出选择器（或触发默认应用） | `createChooser` 自定义标题 |
 | **无匹配** | 抛 `ActivityNotFoundException` | `resolveActivity` 预检查 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 安全调用：先检查是否有组件能处理
+Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+if (intent.resolveActivity(getPackageManager()) != null) {
+    startActivity(intent);
+} else {
+    // 无浏览器可处理，降级处理
+    Toast.makeText(this, "无法打开链接", Toast.LENGTH_SHORT).show();
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 安全调用：先检查是否有组件能处理
@@ -124,6 +210,8 @@ if (intent.resolveActivity(packageManager) != null) {
     Toast.makeText(this, "无法打开链接", Toast.LENGTH_SHORT).show()
 }
 ```
+
+:::
 
 ## 五、Flags：控制任务栈与启动行为
 
@@ -138,6 +226,19 @@ Intent Flags 用于**跨进程/跨应用场景**下干预组件的启动行为�
 | `FLAG_ACTIVITY_NO_HISTORY` | 离开即销毁，不保留历史 | — |
 | `FLAG_ACTIVITY_CLEAR_TASK` | 启动前清空目标任务栈（需配合 `NEW_TASK`） | 常用于"回到首页并清空" |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 经典场景：从通知/后台回到首页，清除中间页面
+Intent intent = new Intent(this, MainActivity.class);
+intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+startActivity(intent);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 经典场景：从通知/后台回到首页，清除中间页面
 val intent = Intent(this, MainActivity::class.java).apply {
@@ -145,6 +246,8 @@ val intent = Intent(this, MainActivity::class.java).apply {
 }
 startActivity(intent)
 ```
+
+:::
 
 ::: warning 注意
 `FLAG_ACTIVITY_CLEAR_TOP` 默认会**销毁**栈顶以上的所有 Activity；若配合 `FLAG_ACTIVITY_SINGLE_TOP`，则目标 Activity 复用实例且只回调 `onNewIntent`，不重建。
@@ -155,6 +258,25 @@ startActivity(intent)
 在 **Service / Application / 非 Activity Context** 中调用 `startActivity`，必须添加 `FLAG_ACTIVITY_NEW_TASK`，否则抛 `AndroidRuntimeException: Calling startActivity() from outside of an Activity context requires the FLAG_ACTIVITY_NEW_TASK flag`。原因：非 Activity Context 没有任务栈上下文，系统需要知道"放到哪个任务栈"。
 
 ## 六、Extras：组件间数据传递
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 发送方
+Intent intent = new Intent(this, DetailActivity.class);
+intent.putExtra("id", 42L);
+intent.putExtra("title", "Intent 详解");
+intent.putExtra("tags", new String[]{"android", "intent"});
+
+// 接收方
+long id = getIntent().getLongExtra("id", -1L);
+String title = getIntent().getStringExtra("title");
+String[] tags = getIntent().getStringArrayExtra("tags");
+```
+
+@tab Kotlin
 
 ```kotlin
 // 发送方
@@ -170,12 +292,41 @@ val title = intent.getStringExtra("title")
 val tags = intent.getStringArrayExtra("tags")
 ```
 
+:::
+
 | 传递方式 | 使用场景 | 特点 |
 |----------|----------|------|
 | `putExtra` 基本类型/序列化对象 | 常规页面间传参 | 简单直接 |
 | `Parcelable` 对象 | 传递自定义数据类 | 高效，跨进程首选（**必须 Parcelable，不能 Serializable 用于 Intent** 的跨进程场景） |
 | `Bundle` | 批量传参 | 统一封装、可复用 |
 | `Intent` 作为参数 | 携带"继续执行"的意图 | 常配合 `startActivityForResult` / PendingIntent |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Parcelable 数据类（Java 需手动实现 writeToParcel 与 CREATOR）
+public class Article implements Parcelable {
+    private final long id;
+    private final String title;
+    private final List<String> tags;
+
+    // 构造器、getter、writeToParcel、CREATOR 略
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+}
+
+// 传递
+intent.putExtra("article", article);
+// 接收
+Article article = getIntent().getParcelableExtra("article");
+```
+
+@tab Kotlin
 
 ```kotlin
 // Parcelable 数据类（Kotlin 用 @Parcelize 一行搞定）
@@ -192,6 +343,8 @@ intent.putExtra("article", article)
 val article = intent.getParcelableExtra<Article>("article")
 ```
 
+:::
+
 ## 七、Intent 在三大组件中的使用
 
 | 组件 | 启动方式 | Intent 作用 |
@@ -199,6 +352,25 @@ val article = intent.getParcelableExtra<Article>("article")
 | Activity | `startActivity(intent)` | 页面跳转、携带数据 |
 | Service | `startService(intent)` / `bindService(intent, ...)` | 启动/绑定服务，传参 |
 | BroadcastReceiver | `sendBroadcast(intent)` | 广播消息分发（可指定包名/权限） |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 启动前台服务并传参
+Intent intent = new Intent(this, DownloadService.class);
+intent.putExtra("url", url);
+intent.putExtra("file", file);
+ContextCompat.startForegroundService(this, intent);
+
+// 发送"应用内"广播（Android 13+ 建议指定包名）
+Intent intent = new Intent("com.example.ACTION_REFRESH");
+intent.setPackage(getPackageName()); // 仅本应用可接收
+sendBroadcast(intent);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 启动前台服务并传参
@@ -214,6 +386,8 @@ val intent = Intent("com.example.ACTION_REFRESH").apply {
 }
 sendBroadcast(intent)
 ```
+
+:::
 
 ## 八、Intent 安全最佳实践
 

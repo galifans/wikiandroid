@@ -9,6 +9,10 @@ title: Parcelable 序列化
 
 ## 一、使用示例
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class User implements Parcelable {
 
@@ -45,6 +49,42 @@ public class User implements Parcelable {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class User : Parcelable {
+
+    private var userId: Int = 0
+
+    private constructor(parcel: Parcel) {
+        userId = parcel.readInt()
+    }
+
+    override fun describeContents(): Int = 0
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeInt(userId)
+    }
+
+    fun getUserId(): Int = userId
+
+    companion object {
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<User> {
+            override fun createFromParcel(parcel: Parcel): User {
+                return User(parcel)
+            }
+
+            override fun newArray(size: Int): Array<User?> {
+                return arrayOfNulls(size)
+            }
+        }
+    }
+}
+```
+
+:::
 
 ## 二、核心方法说明
 

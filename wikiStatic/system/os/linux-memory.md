@@ -86,12 +86,27 @@ flowchart LR
 
 ### 4.2 AMS 动态调整
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // AMS 根据组件状态动态计算进程 oom_adj
 // 前台 Activity → 0;后台 Activity → 9;空进程 → 15
 // 每个 oom_adj 对应一个 lmkd 内存水位阈值
 // 内存不足时:lmkd 从高 oom_adj(最不重要)开始杀
 ```
+
+@tab Kotlin
+
+```kotlin
+// AMS 根据组件状态动态计算进程 oom_adj
+// 前台 Activity → 0;后台 Activity → 9;空进程 → 15
+// 每个 oom_adj 对应一个 lmkd 内存水位阈值
+// 内存不足时:lmkd 从高 oom_adj(最不重要)开始杀
+```
+
+:::
 
 > **为什么后台 Activity 比 Service 先被杀**:缓存进程(9+)先于服务进程(5)被杀,服务又先于前台。这就是"进程优先级"决定"被杀顺序"。
 
@@ -117,6 +132,21 @@ flowchart LR
 
 ## 六、内存泄漏与监控
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Android 开发者视角
+// 1. 用 Memory Profiler 抓堆转储
+// 2. 分析泄漏:Activity/Context 持有、静态集合、Handler 持有
+// 3. LeakCanary 自动检测泄漏
+// 4. 关注 PSS(按比例分摊的物理内存)
+// 5. 避免大对象:Bitmap 复用、对象池
+```
+
+@tab Kotlin
+
 ```kotlin
 // Android 开发者视角
 // 1. 用 Memory Profiler 抓堆转储
@@ -125,6 +155,8 @@ flowchart LR
 // 4. 关注 PSS(按比例分摊的物理内存)
 // 5. 避免大对象:Bitmap 复用、对象池
 ```
+
+:::
 
 ## 七、高频面试题
 

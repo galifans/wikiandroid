@@ -26,6 +26,49 @@ description: 崩溃类型、捕获原理、Native 崩溃、崩溃上报链路、
 
 ## 2. Java 崩溃捕获原理
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 核心：设置全局未捕获异常处理器
+public class CrashHandler implements Thread.UncaughtExceptionHandler {
+
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        // ① 保存崩溃日志
+        saveCrashInfo(e);
+
+        // ② 上报（异步，然后退出）
+        reportAsync(e);
+
+        // ③ 让系统默认处理器退出
+        if (defaultHandler != null) defaultHandler.uncaughtException(t, e);
+    }
+
+    private void saveCrashInfo(Throwable e) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        String stack = sw.toString();
+        // 写入本地文件（含时间、线程、堆栈、设备信息）
+        Log.e("Crash", stack);
+    }
+}
+
+// Application 中注册
+public class MyApp extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        CrashHandler crashHandler = new CrashHandler();
+        crashHandler.setDefaultHandler();
+        Thread.setDefaultUncaughtExceptionHandler(crashHandler);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 核心：设置全局未捕获异常处理器
 class CrashHandler : Thread.UncaughtExceptionHandler {
@@ -60,6 +103,8 @@ class MyApp : Application() {
     }
 }
 ```
+
+:::
 
 ```text
 原理：Thread.setDefaultUncaughtExceptionHandler

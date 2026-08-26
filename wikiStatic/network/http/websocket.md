@@ -118,6 +118,59 @@ flowchart LR
 
 ### 4.1 使用方式
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+OkHttpClient client = new OkHttpClient.Builder()
+    .pingInterval(30, TimeUnit.SECONDS)   // 30s 自动 Ping 心跳
+    .readTimeout(0, TimeUnit.SECONDS)     // 长连接不读超时
+    .build();
+
+Request request = new Request.Builder()
+    .url("wss://example.com/chat")
+    .build();
+
+WebSocketListener listener = new WebSocketListener() {
+    @Override
+    public void onOpen(WebSocket webSocket, Response response) {
+        // 连接建立
+        webSocket.send("hello");
+    }
+
+    @Override
+    public void onMessage(WebSocket webSocket, String text) {
+        // 收到文本消息
+    }
+
+    @Override
+    public void onMessage(WebSocket webSocket, ByteString bytes) {
+        // 收到二进制消息
+    }
+
+    @Override
+    public void onClosing(WebSocket webSocket, int code, String reason) {
+        // 服务端请求关闭
+        webSocket.close(1000, null);
+    }
+
+    @Override
+    public void onClosed(WebSocket webSocket, int code, String reason) {
+        // 连接已关闭
+    }
+
+    @Override
+    public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+        // 失败：网络断开等，可重连
+    }
+};
+
+WebSocket webSocket = client.newWebSocket(request, listener);
+```
+
+@tab Kotlin
+
 ```kotlin
 val client = OkHttpClient.Builder()
     .pingInterval(30, TimeUnit.SECONDS)   // 30s 自动 Ping 心跳
@@ -159,6 +212,8 @@ val listener = object : WebSocketListener() {
 val webSocket = client.newWebSocket(request, listener)
 ```
 
+:::
+
 ### 4.2 内部实现
 
 ```mermaid
@@ -198,6 +253,41 @@ sequenceDiagram
 
 ### 5.1 重连策略
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+class ReconnectingWebSocket {
+    private WebSocket webSocket;
+    private int reconnectCount = 0;
+    private final int maxRetry = 5;
+
+    public void connect() {
+        WebSocketListener listener = new WebSocketListener() {
+            @Override
+            public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+                scheduleReconnect();
+            }
+
+            @Override
+            public void onClosed(WebSocket webSocket, int code, String reason) {
+                if (code != 1000) scheduleReconnect();  // 非正常关闭重连
+            }
+        };
+        webSocket = client.newWebSocket(request, listener);
+    }
+
+    private void scheduleReconnect() {
+        // 指数退避：1s, 2s, 4s, 8s...
+        long delay = (1L << Math.min(reconnectCount, maxRetry)) * 1000;
+        new Handler(Looper.getMainLooper()).postDelayed(this::connect, delay);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class ReconnectingWebSocket {
     private var webSocket: WebSocket? = null
@@ -224,6 +314,8 @@ class ReconnectingWebSocket {
     }
 }
 ```
+
+:::
 
 ### 5.2 保活优化清单
 

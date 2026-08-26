@@ -30,6 +30,42 @@ flowchart TD
 
 ## 二、作用域生命周期绑定
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:回调 + 生命周期管理(无协程作用域,手动管理)
+public class MainActivity extends ComponentActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        // ① 对应 viewModelScope:ViewModel 销毁时自动取消(用回调 + 生命周期观察)
+        viewModel.loadData(new Callback<Data>() {
+            @Override public void onSuccess(Data data) { render(data); }
+        });
+
+        // ② 对应 lifecycleScope:只在 STARTED 时活跃
+        getLifecycle().addObserver(new LifecycleEventObserver() {
+            @Override
+            public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
+                if (event == Lifecycle.Event.ON_START) { /* 只在 STARTED 时活跃 */ }
+            }
+        });
+    }
+}
+
+// ③ 自定义作用域:手动管理(线程池 + 关闭)
+class MyScope {
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    public void onDestroy() {
+        executor.shutdownNow();   // 手动取消/关闭
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // Android 中常用作用域
 class MainActivity : ComponentActivity() {
@@ -56,6 +92,8 @@ class MyScope {
 }
 ```
 
+:::
+
 | 作用域 | 生命周期 | 用途 |
 |--------|---------|------|
 | `viewModelScope` | ViewModel 清除时 | 业务逻辑/状态加载 |
@@ -66,6 +104,29 @@ class MyScope {
 ## 三、Job 层级与取消传播
 
 ### 3.1 Job 关系
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:Future/线程池管理父子任务
+ExecutorService scope = Executors.newFixedThreadPool(4);
+
+// 启动任务返回 Future,可管理生命周期
+Future<?> parentJob = scope.submit(() -> {
+    Future<?> jobA = scope.submit(() -> taskA());   // 子任务 A
+    Future<?> jobB = scope.submit(() -> taskB());   // 子任务 B
+});
+parentJob.cancel(true);   // 取消父 → 子任务也受影响(线程池关闭需自行管理)
+
+// 子任务取消 → 父不受影响
+Future<?> job = scope.submit(() -> taskA());
+job.cancel(true);      // 只取消 taskA
+// 继续执行
+```
+
+@tab Kotlin
 
 ```kotlin
 // 启动协程返回 Job,父子自动关联
@@ -82,6 +143,8 @@ scope.launch {
     // 继续执行
 }
 ```
+
+:::
 
 ### 3.2 取消传播规则
 
@@ -107,6 +170,28 @@ flowchart TD
 
 ## 四、SupervisorJob 与异常隔离
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:独立线程池隔离任务(一个任务失败不影响其他)
+ExecutorService scope = Executors.newFixedThreadPool(2);
+
+// 每个任务独立提交,互不影响
+scope.execute(() -> {
+    throw new RuntimeException("任务 A 失败");   // 只影响自己
+});
+scope.execute(() -> {
+    try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+    System.out.println("任务 B 正常执行");       // ✓ 不受影响
+});
+
+// 注意:协程的 SupervisorJob 让子任务失败互不传播,线程池天然是隔离的
+```
+
+@tab Kotlin
+
 ```kotlin
 // 场景:一个协程失败不应影响其他任务
 val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -123,6 +208,8 @@ scope.launch {
 // 注意:viewModelScope 内部就是 SupervisorJob + Main
 ```
 
+:::
+
 | 场景 | 用 Job | 用 SupervisorJob |
 |------|--------|-----------------|
 | 任务组必须全部成功 | ✓ | |
@@ -131,6 +218,33 @@ scope.launch {
 | 并发请求(一个失败全部取消) | ✓ | |
 
 ## 五、async/await 组合并发
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:ExecutorService + Future(并发执行,等待全部结果)
+public Dashboard loadDashboard() throws ExecutionException, InterruptedException {
+    ExecutorService scope = Executors.newFixedThreadPool(3);
+    try {
+        Future<User> userFuture = scope.submit(() -> fetchUser());   // 并行
+        Future<Feed> feedFuture = scope.submit(() -> fetchFeed());
+        Future<Stats> statsFuture = scope.submit(() -> fetchStats());
+
+        // 并行执行,全部完成返回(阻塞等待各结果)
+        return new Dashboard(
+            userFuture.get(),
+            feedFuture.get(),
+            statsFuture.get()
+        );
+    } finally {
+        scope.shutdown();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 并发执行多个任务,等待全部结果
@@ -150,6 +264,8 @@ suspend fun loadDashboard(): Dashboard {
 }
 ```
 
+:::
+
 ### 并发 API 对比
 
 | API | 行为 | 场景 |
@@ -162,6 +278,43 @@ suspend fun loadDashboard(): Dashboard {
 | `awaitAll()` | 批量等待 List 结果 | N 个同构任务 |
 
 ## 六、异常处理最佳实践
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 顶层异常处理:UncaughtExceptionHandler
+Thread.setDefaultUncaughtExceptionHandler((t, e) ->
+    Log.e("TAG", "线程异常: " + e.getMessage())
+);
+
+ExecutorService scope = Executors.newFixedThreadPool(2);
+scope.execute(() -> {
+    throw new IllegalStateException("boom");
+});
+
+// ② 局部 try-catch
+scope.execute(() -> {
+    try {
+        Data data = repository.load();
+        uiState.setValue(Success.of(data));
+    } catch (Exception e) {
+        uiState.setValue(Error.of(e.getMessage()));
+    }
+});
+
+// ③ 方法内处理:返回包装结果
+public Result<Data> safeLoad() {
+    try {
+        return Result.success(repository.load());
+    } catch (Exception e) {
+        return Result.failure(e);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ① 顶层异常处理:CoroutineExceptionHandler
@@ -190,6 +343,8 @@ suspend fun safeLoad(): Result<Data> = runCatching {
 }
 ```
 
+:::
+
 | 异常处理方式 | 适用 |
 |-------------|------|
 | try-catch 局部 | 业务可控异常 |
@@ -209,6 +364,29 @@ suspend fun safeLoad(): Result<Data> = runCatching {
 | 重复启动 | 点击多次启动多次请求 | Job 保存 + cancel 再启动 |
 | 在 finally 中挂起 | 取消后挂起抛异常 | 用 NonCancellable 包裹 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 防重复提交示例(等价写法)
+private Future<?> loadJob;
+
+public void loadData() {
+    if (loadJob != null) loadJob.cancel(true);          // 取消上一次
+    loadJob = executor.submit(() -> {                   // 重新启动
+        uiState.setValue(Loading.INSTANCE);
+        try {
+            uiState.setValue(Success.of(repository.load()));
+        } catch (Exception e) {
+            uiState.setValue(Error.of(e));
+        }
+    });
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 防重复提交示例
 private var loadJob: Job? = null
@@ -225,6 +403,8 @@ fun loadData() {
     }
 }
 ```
+
+:::
 
 ## 八、高频面试题
 

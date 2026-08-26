@@ -49,6 +49,81 @@ content://com.example.provider/user/10
 
 ### 2.1 UriMatcher 匹配
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class UserProvider extends ContentProvider {
+
+    private static final int USERS = 1;
+    private static final int USER_ID = 2;
+    private static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
+    static {
+        URI_MATCHER.addURI(AUTHORITY, "user", USERS);      // content://.../user
+        URI_MATCHER.addURI(AUTHORITY, "user/#", USER_ID);  // content://.../user/10
+    }
+
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection,
+                        String[] selectionArgs, String sortOrder) {
+        switch (URI_MATCHER.match(uri)) {
+            case USERS:
+                return db.query("user", projection, selection, selectionArgs, null, null, sortOrder);
+            case USER_ID: {
+                String id = uri.getLastPathSegment();
+                String[] args = Arrays.copyOf(selectionArgs, selectionArgs.length + 1);
+                args[selectionArgs.length] = id;
+                return db.query("user", projection, selection + " AND _id=?",
+                        args, null, null, sortOrder);
+            }
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+    }
+
+    @Override
+    public Uri insert(Uri uri, ContentValues values) {
+        long id = db.insert("user", null, values);
+        // 通知观察者数据变化
+        getContext().getContentResolver().notifyChange(
+                Uri.parse("content://" + AUTHORITY + "/user"), null);
+        return ContentUris.withAppendedId(uri, id);
+    }
+
+    @Override
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        int count = db.update("user", values, selection, selectionArgs);
+        getContext().getContentResolver().notifyChange(uri, null);
+        return count;
+    }
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        int count = db.delete("user", selection, selectionArgs);
+        getContext().getContentResolver().notifyChange(uri, null);
+        return count;
+    }
+
+    @Override
+    public boolean onCreate() { /* 初始化数据库 */ return true; }
+
+    @Override
+    public String getType(Uri uri) {
+        switch (URI_MATCHER.match(uri)) {
+            case USERS:
+                return "vnd.android.cursor.dir/vnd.example.user";
+            case USER_ID:
+                return "vnd.android.cursor.item/vnd.example.user";
+            default:
+                return null;
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class UserProvider : ContentProvider() {
 
@@ -69,7 +144,7 @@ class UserProvider : ContentProvider() {
             USERS -> db.query("user", projection, selection, selectionArgs, null, null, sortOrder)
             USER_ID -> {
                 val id = uri.lastPathSegment
-                db.query("user", projection, "$selection AND _id=?", 
+                db.query("user", projection, "$selection AND _id=?",
                     selectionArgs + arrayOf(id), null, null, sortOrder)
             }
             else -> throw IllegalArgumentException("Unknown URI: $uri")
@@ -107,7 +182,7 @@ class UserProvider : ContentProvider() {
 }
 ```
 
-### 2.2 Manifest 声明
+:::
 
 ```xml
 <provider
@@ -118,6 +193,35 @@ class UserProvider : ContentProvider() {
 ```
 
 ## 3. 客户端访问（ContentResolver）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MainActivity extends AppCompatActivity {
+
+    private void queryUsers() {
+        Uri uri = Uri.parse("content://com.example.provider/user");
+        // query 返回 Cursor（跨进程传输的数据游标）
+        try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                Log.d("ContentProvider", "name=" + name);
+            }
+        }
+    }
+
+    private void insertUser(String name) {
+        Uri uri = Uri.parse("content://com.example.provider/user");
+        ContentValues values = new ContentValues();
+        values.put("name", name);
+        Uri newUri = getContentResolver().insert(uri, values);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
@@ -141,6 +245,8 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+:::
+
 ### 3.1 权限保护
 
 ```xml
@@ -163,6 +269,32 @@ class MainActivity : AppCompatActivity() {
 
 ## 4. ContentObserver 数据观察
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 客户端注册观察者
+Uri uri = Uri.parse("content://com.example.provider/user");
+getContentResolver().registerContentObserver(uri, true, observer);
+
+private final ContentObserver observer = new ContentObserver(new Handler(Looper.getMainLooper())) {
+    @Override
+    public void onChange(boolean selfChange) {
+        // 数据变化回调（主线程）
+        refreshList();
+    }
+};
+
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    getContentResolver().unregisterContentObserver(observer);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 客户端注册观察者
 val uri = Uri.parse("content://com.example.provider/user")
@@ -181,11 +313,30 @@ override fun onDestroy() {
 }
 ```
 
+:::
+
 > 服务端在 `insert/update/delete` 中调用 `notifyChange(uri, null)` 后，客户端观察者才会收到回调。
 
 ## 5. 典型应用场景
 
 ### 5.1 读取系统联系人
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+Cursor cursor = getContentResolver().query(
+    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+    new String[]{
+        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+        ContactsContract.CommonDataKinds.Phone.NUMBER
+    },
+    null, null, null
+);
+```
+
+@tab Kotlin
 
 ```kotlin
 val cursor = contentResolver.query(
@@ -198,7 +349,23 @@ val cursor = contentResolver.query(
 )
 ```
 
+:::
+
 ### 5.2 读取相册图片
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+Cursor cursor = getContentResolver().query(
+    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+    new String[]{MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA},
+    null, null, null
+);
+```
+
+@tab Kotlin
 
 ```kotlin
 val cursor = contentResolver.query(
@@ -208,9 +375,29 @@ val cursor = contentResolver.query(
 )
 ```
 
+:::
+
 ### 5.3 应用初始化钩子
 
 利用 Provider `onCreate` 在 `Application.onCreate` 前执行的特性，可做自动初始化：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class InitProvider extends ContentProvider {
+    @Override
+    public boolean onCreate() {
+        // 在 Application.onCreate 之前执行初始化
+        // 典型：WorkManager 初始化、LeakCanary 初始化
+        return true;
+    }
+    // 其他方法返回 null/0
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class InitProvider : ContentProvider() {
@@ -223,7 +410,32 @@ class InitProvider : ContentProvider() {
 }
 ```
 
+:::
+
 ### 5.4 批量操作（ContentProviderOperation）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 一次性批量增删改（事务性，性能远高于逐条调用）
+ArrayList<ContentProviderOperation> operations = new ArrayList<>();
+operations.add(ContentProviderOperation.newInsert(USER_URI)
+    .withValue("name", "Alice")
+    .build());
+operations.add(ContentProviderOperation.newUpdate(USER_URI)
+    .withSelection("_id=?", new String[]{"1"})
+    .withValue("name", "Bob")
+    .build());
+operations.add(ContentProviderOperation.newDelete(USER_URI)
+    .withSelection("_id=?", new String[]{"2"})
+    .build());
+
+getContentResolver().applyBatch(AUTHORITY, operations);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 一次性批量增删改（事务性，性能远高于逐条调用）
@@ -241,6 +453,8 @@ operations += ContentProviderOperation.newDelete(USER_URI)
 
 contentResolver.applyBatch(AUTHORITY, operations)
 ```
+
+:::
 
 > 注意：`applyBatch` 是否真正"事务"取决于 Provider 实现（需在 `ContentProvider` 子类中重写 `applyBatch` 开启 `SQLiteDatabase.beginTransaction`）。
 

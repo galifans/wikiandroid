@@ -29,6 +29,35 @@ flowchart TD
 
 ### 2.1 基本使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// AlertDialog 标准用法
+new AlertDialog.Builder(this)
+        .setTitle("确认删除")
+        .setMessage("删除后无法恢复，确定继续吗？")
+        .setPositiveButton("删除", (dialog, which) -> deleteData())
+        .setNegativeButton("取消", null)
+        .show();
+
+// 自定义 Dialog
+public class CustomDialog extends Dialog {
+    public CustomDialog(Context context) {
+        super(context);
+        setContentView(R.layout.dialog_custom);
+        getWindow().setGravity(Gravity.BOTTOM);  // 底部弹出
+        getWindow().setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // AlertDialog 标准用法
 AlertDialog.Builder(this)
@@ -52,6 +81,8 @@ class CustomDialog(context: Context) : Dialog(context) {
     }
 }
 ```
+
+:::
 
 ### 2.2 Dialog 生命周期
 
@@ -77,6 +108,34 @@ flowchart LR
 
 **推荐：DialogFragment 管理 Dialog 生命周期**
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class ConfirmDialogFragment extends DialogFragment {
+
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        return new AlertDialog.Builder(requireContext())
+                .setTitle("提示")
+                .setMessage("确定操作？")
+                .setPositiveButton("确定", (dialog, which) -> onConfirm())
+                .setNegativeButton("取消", null)
+                .create();
+    }
+
+    private void onConfirm() {
+        // 业务逻辑
+    }
+}
+
+// 使用：由 FragmentManager 管理生命周期，自动处理销毁
+new ConfirmDialogFragment().show(getSupportFragmentManager(), "confirm");
+```
+
+@tab Kotlin
+
 ```kotlin
 class ConfirmDialogFragment : DialogFragment() {
 
@@ -98,14 +157,29 @@ class ConfirmDialogFragment : DialogFragment() {
 ConfirmDialogFragment().show(supportFragmentManager, "confirm")
 ```
 
+:::
+
 ## 三、Toast 详解
 
 ### 3.1 基本使用与原理
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 标准用法
+Toast.makeText(this, "操作成功", Toast.LENGTH_SHORT).show();
+```
+
+@tab Kotlin
 
 ```kotlin
 // 标准用法
 Toast.makeText(this, "操作成功", Toast.LENGTH_SHORT).show()
 ```
+
+:::
 
 **Toast 实现原理**：
 
@@ -124,6 +198,26 @@ flowchart LR
 
 ### 3.2 自定义 Toast
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义布局 Toast
+LayoutInflater inflater = getLayoutInflater();
+View layout = inflater.inflate(R.layout.view_custom_toast, null);
+TextView textView = layout.findViewById(R.id.toast_text);
+textView.setText("自定义提示");
+
+Toast toast = new Toast(this);
+toast.setDuration(Toast.LENGTH_SHORT);
+toast.setView(layout);
+toast.setGravity(Gravity.BOTTOM, 0, 100);
+toast.show();
+```
+
+@tab Kotlin
+
 ```kotlin
 // 自定义布局 Toast
 val inflater = layoutInflater
@@ -139,6 +233,8 @@ Toast(context).apply {
 }
 ```
 
+:::
+
 ### 3.3 Toast 的限制
 
 | 限制 | 说明 |
@@ -149,15 +245,54 @@ Toast(context).apply {
 
 **替代方案：Snackbar（Material）**
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Snackbar.make(view, "操作完成", Snackbar.LENGTH_SHORT)
+        .setAction("撤销", v -> undo())  // 可交互
+        .show();
+```
+
+@tab Kotlin
+
 ```kotlin
 Snackbar.make(view, "操作完成", Snackbar.LENGTH_SHORT)
     .setAction("撤销") { undo() }  // 可交互
     .show()
 ```
 
+:::
+
 ## 四、PopupWindow 详解
 
 ### 4.1 基本使用
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 下拉菜单
+View contentView = getLayoutInflater().inflate(R.layout.view_popup_menu, null);
+PopupWindow popupWindow = new PopupWindow(
+        contentView,
+        ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams.WRAP_CONTENT
+);
+popupWindow.setFocusable(true);          // 可获取焦点（响应点击）
+popupWindow.setOutsideTouchable(true);   // 点击外部关闭
+popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));  // 必须设置，否则点击外部不消失
+
+// 显示在 anchor 下方
+popupWindow.showAsDropDown(anchorView, 0, 0);
+
+// 或指定位置
+popupWindow.showAtLocation(anchorView, Gravity.CENTER, 0, 0);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 下拉菜单
@@ -178,6 +313,8 @@ popupWindow.showAsDropDown(anchorView, 0, 0)
 // 或指定位置
 popupWindow.showAtLocation(anchorView, Gravity.CENTER, 0, 0)
 ```
+
+:::
 
 ### 4.2 关键属性
 

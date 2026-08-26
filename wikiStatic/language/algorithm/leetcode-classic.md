@@ -28,6 +28,10 @@ title: LeetCode 经典题
 
 ### 代码实现
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 import java.util.HashMap;
 
@@ -46,6 +50,29 @@ public class Solution {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+import java.util.HashMap
+
+class Solution {
+    fun twoSum(numbers: IntArray, target: Int): IntArray {
+        val map = HashMap<Int, Int>()
+        for (i in numbers.indices) {
+            val index = map[numbers[i]]
+            if (index != null) {
+                return intArrayOf(index + 1, i + 1)
+            } else {
+                map[target - numbers[i]] = i
+            }
+        }
+        return intArrayOf()
+    }
+}
+```
+
+:::
 
 ### 要点
 
@@ -79,6 +106,10 @@ Y   I   R
 
 ### 代码实现
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class Solution {
     public String convert(String s, int numRows) {
@@ -104,6 +135,33 @@ public class Solution {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class Solution {
+    fun convert(s: String, numRows: Int): String {
+        if (numRows <= 1) return s
+        val rows = Array(numRows) { StringBuilder() }
+        var row = 0
+        var goingDown = false
+        for (c in s.toCharArray()) {
+            rows[row].append(c)
+            if (row == 0 || row == numRows - 1) {
+                goingDown = !goingDown // 到达边界转向
+            }
+            row += if (goingDown) 1 else -1
+        }
+        val result = StringBuilder()
+        for (sb in rows) {
+            result.append(sb)
+        }
+        return result.toString()
+    }
+}
+```
+
+:::
 
 ### 要点
 

@@ -39,6 +39,23 @@ AMS 匹配 Intent-Filter → 找到所有符合条件的 Receiver
 </receiver>
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class BootReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
+            // 开机后自启动逻辑
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -49,10 +66,49 @@ class BootReceiver : BroadcastReceiver() {
 }
 ```
 
+:::
+
 - 系统在 **App 未启动时** 也能唤醒接收（包安装时注册）。
 - **Android 8.0+ 限制**：大多数隐式广播（非显式指定包名）无法静态注册接收。
 
 ### 2.2 动态注册（代码）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MainActivity extends AppCompatActivity {
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            batteryText.setText("电量: " + level + "%");
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        // Android 13+ 需要指定 RECEIVER_EXPORTED / RECEIVER_NOT_EXPORTED
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED);
+        } else {
+            registerReceiver(receiver, filter);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(receiver);  // 必须注销，否则泄漏
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
@@ -82,21 +138,51 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+:::
+
 **动态注册特点**：跟随组件生命周期，`onStop/onDestroy` 时必须 `unregisterReceiver`，否则内存泄漏。
 
 ## 3. 广播类型
 
 ### 3.1 普通广播（无序广播）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Intent intent = new Intent("com.example.MY_ACTION");
+sendBroadcast(intent);
+```
+
+@tab Kotlin
+
 ```kotlin
 val intent = Intent("com.example.MY_ACTION")
 sendBroadcast(intent)
 ```
 
+:::
+
 - 所有匹配的 Receiver **随机顺序**收到，互不影响。
 - 接收方不能修改结果，也不能阻断传播。
 
 ### 3.2 有序广播
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+sendOrderedBroadcast(
+    new Intent("com.example.ORDERED_ACTION"),
+    null,              // receiverPermission
+    null, null,        // resultReceiver / scheduler
+    Activity.RESULT_OK, null, null  // 初始结果
+);
+```
+
+@tab Kotlin
 
 ```kotlin
 sendOrderedBroadcast(
@@ -106,6 +192,28 @@ sendOrderedBroadcast(
     Activity.RESULT_OK, null, null  // 初始结果
 )
 ```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 接收方 1：修改结果
+@Override
+public void onReceive(Context context, Intent intent) {
+    setResultData("被修改的数据");   // 修改结果
+    abortBroadcast();                // 终止后续接收
+}
+// 接收方 2（后面的 Receiver）：读取结果
+@Override
+public void onReceive(Context context, Intent intent) {
+    String data = getResultData();  // 拿到前面修改后的数据
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 接收方 1：修改结果
@@ -119,20 +227,58 @@ override fun onReceive(context: Context, intent: Intent) {
 }
 ```
 
+:::
+
 - 按优先级（`android:priority`）依次分发。
 - 接收方可以 `setResultData` 修改结果、`abortBroadcast` 终止传递。
 - 典型场景：短信拦截、来电拦截。
 
 ### 3.3 粘性广播（已废弃）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 已废弃，不要使用
+sendStickyBroadcast(intent);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 已废弃，不要使用
 sendStickyBroadcast(intent)
 ```
 
+:::
+
 - `ACTION_BATTERY_CHANGED` 等系统粘性广播仍在使用（可通过 `registerReceiver(null, filter)` 获取当前值）。
 
 ## 3.4 广播发送的安全实践
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 跨应用发送指定包名（显式）：绕开 8.0 静态注册限制 + 更安全
+Intent intent = new Intent("com.example.ACTION_SYNC");
+intent.setPackage("com.example.target");
+sendBroadcast(intent);
+
+// ② 发送时声明权限：只有声明了该权限的应用才能收到
+sendBroadcast(intent, "com.example.permission.READ_SYNC");
+
+// ③ 接收方校验发送者 UID（防伪造）
+@Override
+public void onReceive(Context context, Intent intent) {
+    int uid = getSendingUid();
+    if (uid != expectedUid) return;   // 校验发送方身份
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ① 跨应用发送指定包名（显式）：绕开 8.0 静态注册限制 + 更安全
@@ -150,6 +296,8 @@ override fun onReceive(context: Context, intent: Intent) {
     if (uid != expectedUid) return   // 校验发送方身份
 }
 ```
+
+:::
 
 ## 3.5 广播的底层分发流程（AMS 侧）
 
@@ -201,6 +349,32 @@ sequenceDiagram
 - **跨组件通信**：ViewModel 共享。
 - **保留场景**：`sendOrderedBroadcast` 与系统广播仍用 BroadcastReceiver。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 推荐替代：LiveData 作为轻量事件总线（Java 侧等价方案）
+public class EventBus {
+    private final MutableLiveData<String> events = new MutableLiveData<>();
+
+    public void emit(String event) {
+        events.setValue(event);
+    }
+
+    public LiveData<String> getEvents() {
+        return events;
+    }
+}
+
+// 接收（Lifecycle-aware 观察）
+eventBus.getEvents().observe(this, event -> {
+    // 处理事件
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 // 推荐替代：SharedFlow 作为轻量事件总线
 class EventBus {
@@ -220,7 +394,24 @@ lifecycleScope.launch {
 }
 ```
 
+:::
+
 ## 6. onReceive 的限制
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+public void onReceive(Context context, Intent intent) {
+    // 超时限制：前台广播约 10 秒，后台广播更短
+    // onReceive 执行在主线程，不能做耗时操作
+    // 可以：goAsync() 延长处理，或启动 Service/WorkManager
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 override fun onReceive(context: Context, intent: Intent) {
@@ -229,6 +420,8 @@ override fun onReceive(context: Context, intent: Intent) {
     // 可以：goAsync() 延长处理，或启动 Service/WorkManager
 }
 ```
+
+:::
 
 **超时机制详解**：AMS 对每个广播设置超时（BroadcastQueue 中的 `BROADCAST_TIMEOUT`）：
 
@@ -240,6 +433,28 @@ override fun onReceive(context: Context, intent: Intent) {
 > 广播的超时是**从发送到 Receiver 处理完毕**的整体时限。静态注册的 Receiver 若进程未启动，系统会先启动进程再投递，这段时间也计入超时——所以静态注册的 `onReceive` 里**绝不能做耗时操作**。
 
 `goAsync()` 模式：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MyReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        final PendingResult pendingResult = goAsync();  // 声明异步处理（最多 10 秒宽限）
+        new Thread(() -> {
+            try {
+                // 耗时操作（如写数据库）
+            } finally {
+                pendingResult.finish();   // 必须调用 finish()
+            }
+        }).start();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MyReceiver : BroadcastReceiver() {
@@ -255,6 +470,8 @@ class MyReceiver : BroadcastReceiver() {
     }
 }
 ```
+
+:::
 
 ::: danger 注意
 - `goAsync()` 只是把超时"记到你的账上"，不是无限期；不调用 `finish()` 依然会超时被杀。

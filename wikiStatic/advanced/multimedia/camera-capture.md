@@ -64,6 +64,52 @@ flowchart LR
 
 ### 3.1 打开相机
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. 获取 CameraManager
+CameraManager manager =
+        (CameraManager) context.getSystemService(Context.CAMERA_SERVICE);
+
+// 2. 选择相机（后置）
+String cameraId = null;
+for (String id : manager.getCameraIdList()) {
+    CameraCharacteristics chars = manager.getCameraCharacteristics(id);
+    if (chars.get(CameraCharacteristics.LENS_FACING) ==
+            CameraCharacteristics.LENS_FACING_BACK) {
+        cameraId = id;
+        break;
+    }
+}
+
+// 3. 申请权限后打开
+if (ContextCompat.checkSelfPermission(
+        context, Manifest.permission.CAMERA
+) == PackageManager.PERMISSION_GRANTED) {
+    manager.openCamera(cameraId, new CameraDevice.StateCallback() {
+        @Override
+        public void onOpened(@NonNull CameraDevice camera) {
+            cameraDevice = camera;
+            createSession();   // 打开成功 → 创建会话
+        }
+
+        @Override
+        public void onDisconnected(@NonNull CameraDevice camera) {
+            camera.close();
+        }
+
+        @Override
+        public void onError(@NonNull CameraDevice camera, int error) {
+            camera.close();
+        }
+    }, backgroundHandler);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 1. 获取 CameraManager
 val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -97,7 +143,47 @@ if (ContextCompat.checkSelfPermission(
 }
 ```
 
+:::
+
 ### 3.2 创建会话（预览 + 拍照）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 4. 准备输出 Surface：预览 + 拍照取帧
+Surface previewSurface = null;
+if (previewTexture.getSurfaceTexture() != null) {
+    previewTexture.getSurfaceTexture()
+            .setDefaultBufferSize(previewSize.width, previewSize.height);
+    previewSurface = new Surface(previewTexture.getSurfaceTexture());
+}
+ImageReader imageReader = ImageReader.newInstance(
+        captureSize.width, captureSize.height,
+        ImageFormat.JPEG,  // 或 YUV_420_888 / RAW_SENSOR
+        2                   // 缓冲数量
+);
+
+// 5. 创建会话
+cameraDevice.createCaptureSession(
+        Arrays.asList(previewSurface, imageReader.getSurface()),
+        new CameraCaptureSession.StateCallback() {
+            @Override
+            public void onConfigured(@NonNull CameraCaptureSession session) {
+                captureSession = session;
+                startPreview();  // 会话就绪 → 发起预览请求
+            }
+
+            @Override
+            public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+                // 会话配置失败：分辨率不支持等
+            }
+        },
+        backgroundHandler);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 4. 准备输出 Surface：预览 + 拍照取帧
@@ -128,7 +214,29 @@ cameraDevice.createCaptureSession(
 )
 ```
 
+:::
+
 ### 3.3 预览请求
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 6. 构建预览请求（连续自动对焦 + 自动曝光）
+void startPreview() throws CameraAccessException {
+    CaptureRequest.Builder request = cameraDevice.createCaptureRequest(
+            CameraDevice.TEMPLATE_PREVIEW);
+    request.addTarget(previewSurface);
+    request.set(CaptureRequest.CONTROL_AF_MODE,
+            CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+    request.set(CaptureRequest.CONTROL_AE_MODE,
+            CaptureRequest.CONTROL_AE_MODE_ON);
+    captureSession.setRepeatingRequest(request.build(), null, null);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 6. 构建预览请求（连续自动对焦 + 自动曝光）
@@ -146,7 +254,39 @@ fun startPreview() {
 }
 ```
 
+:::
+
 ### 3.4 拍照请求
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 7. 拍摄：单次请求输出到 ImageReader
+void takePicture() throws CameraAccessException {
+    CaptureRequest.Builder request = cameraDevice.createCaptureRequest(
+            CameraDevice.TEMPLATE_STILL_CAPTURE);
+    request.addTarget(imageReader.getSurface());   // 输出到拍照缓冲
+    request.set(CaptureRequest.CONTROL_AF_MODE,
+            CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+    request.set(CaptureRequest.JPEG_ORIENTATION, 90);  // 旋转
+
+    // 先锁定对焦再拍照（可选优化）
+    captureSession.capture(request.build(),
+            new CameraCaptureSession.CaptureCallback() {
+                @Override
+                public void onCaptureCompleted(
+                        @NonNull CameraCaptureSession session,
+                        @NonNull CaptureRequest request,
+                        @NonNull TotalCaptureResult result) {
+                    // 拍照完成（JPEG 在 ImageReader 回调里取）
+                }
+            }, null);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 7. 拍摄：单次请求输出到 ImageReader
@@ -174,7 +314,35 @@ fun takePicture() {
 }
 ```
 
+:::
+
 ### 3.5 取帧与保存
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 8. ImageReader 回调中取 JPEG 数据
+imageReader.setOnImageAvailableListener(reader -> {
+    Image image = reader.acquireLatestImage();
+    ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+    byte[] bytes = new byte[buffer.remaining()];
+    buffer.get(bytes);
+    image.close();   // 必须 close，否则阻塞管线
+
+    // 写文件（注意方向与旋转），Kotlin 的 withContext(IO) 等价：子线程执行
+    new Thread(() -> {
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }).start();
+}, backgroundHandler);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 8. ImageReader 回调中取 JPEG 数据
@@ -191,6 +359,8 @@ imageReader.setOnImageAvailableListener({ reader ->
     }
 }, backgroundHandler)
 ```
+
+:::
 
 ## 四、关键机制
 

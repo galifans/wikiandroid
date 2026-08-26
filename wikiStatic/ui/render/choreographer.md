@@ -46,6 +46,32 @@ flowchart LR
 
 ### 2.2 doFrame 的执行
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Choreographer 内部核心：每帧执行
+private void doFrame(long frameTimeNanos, FrameInfo frame) {
+    long intendedFrameTimeNanos = frameTimeNanos;
+    // 计算掉帧数（当前帧时间 - 期望帧时间）
+    long jitterNanos = frameTimeNanos - intendedFrameTimeNanos;
+    if (jitterNanos >= SKIPPED_FRAME_WARNING_LIMIT) {
+        // 超过 32ms 视为掉帧，log 警告
+        Log.i("Choreographer", "Skipped " + frames + " frames!");
+    }
+
+    // 1. 输入事件回调（INPUT）
+    doCallbacks(Choreographer.CALLBACK_INPUT, frameTimeNanos);
+    // 2. 动画回调（ANIMATION）
+    doCallbacks(Choreographer.CALLBACK_ANIMATION, frameTimeNanos);
+    // 3. 遍历/测量/绘制请求（TRAVERSAL）
+    doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // Choreographer 内部核心：每帧执行
 private fun doFrame(frameTimeNanos: Long, frame: FrameInfo?) {
@@ -65,6 +91,8 @@ private fun doFrame(frameTimeNanos: Long, frame: FrameInfo?) {
     doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos)
 }
 ```
+
+:::
 
 ### 2.3 三类回调顺序
 
@@ -108,6 +136,39 @@ flowchart TD
 | `postCallback(type, cb)` | 指定类型回调（输入/动画/遍历） |
 | `removeFrameCallback(cb)` | 移除帧回调 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义 FPS 统计：每帧回调
+public class FpsTracker {
+    private int frameCount = 0;
+    private long startTime = 0;
+    private float fps = 0f;
+
+    public void start() {
+        startTime = System.nanoTime();
+        Choreographer.getInstance().postFrameCallback(this::onFrame);
+    }
+
+    private void onFrame(long frameTimeNanos) {
+        frameCount++;
+        long elapsed = (frameTimeNanos - startTime) / 1_000_000;
+        if (elapsed >= 1000) {
+            fps = frameCount * 1000f / elapsed;
+            Log.d("Fps", "FPS: " + fps);
+            frameCount = 0;
+            startTime = frameTimeNanos;
+        }
+        // 持续注册下一帧
+        Choreographer.getInstance().postFrameCallback(this::onFrame);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 自定义 FPS 统计：每帧回调
 class FpsTracker {
@@ -135,6 +196,8 @@ class FpsTracker {
 }
 ```
 
+:::
+
 ## 四、掉帧（Jank）分析
 
 ### 4.1 掉帧的原因
@@ -149,6 +212,31 @@ class FpsTracker {
 | 资源加载 | 主线程 decode 大图 |
 
 ### 4.2 掉帧检测手段
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 方式一：Choreographer 帧间隔检测
+final AtomicLong lastFrameTime = new AtomicLong(0);
+Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+    @Override
+    public void doFrame(long frameTimeNanos) {
+        long last = lastFrameTime.get();
+        if (last != 0L) {
+            long gapMs = (frameTimeNanos - last) / 1_000_000;
+            if (gapMs > 50) {
+                Log.w("Jank", "掉帧: 帧间隔 " + gapMs + "ms");
+            }
+        }
+        lastFrameTime.set(frameTimeNanos);
+        Choreographer.getInstance().postFrameCallback(this);
+    }
+});
+```
+
+@tab Kotlin
 
 ```kotlin
 // 方式一：Choreographer 帧间隔检测
@@ -168,6 +256,8 @@ Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallba
 })
 ```
 
+:::
+
 | 工具 | 用途 |
 |------|------|
 | `adb shell dumpsys gfxinfo <pkg> framestats` | 帧耗时统计 |
@@ -178,6 +268,25 @@ Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallba
 ## 五、Choreographer 与动画/渲染协作
 
 ### 5.1 ValueAnimator 的驱动
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ValueAnimator 内部：通过 Choreographer 每帧驱动
+private void startAnimation() {
+    mLastFrameTime = 0;
+    postAnimationCallback();   // 注册 ANIMATION 类型回调
+}
+
+private void postAnimationCallback() {
+    mChoreographer.postCallback(
+            Choreographer.CALLBACK_ANIMATION, mAnimateFromValueCallback, null);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ValueAnimator 内部：通过 Choreographer 每帧驱动
@@ -191,6 +300,8 @@ private fun postAnimationCallback() {
         Choreographer.CALLBACK_ANIMATION, mAnimateFromValueCallback, null)
 }
 ```
+
+:::
 
 ### 5.2 输入处理与渲染管线
 

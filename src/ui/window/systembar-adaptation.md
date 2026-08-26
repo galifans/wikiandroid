@@ -59,6 +59,26 @@ flowchart LR
 
 ### 2.2 传统获取方式（WindowInsets 前）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 旧方式：反射获取状态栏高度（不推荐，脆弱）
+@SuppressWarnings("deprecation")
+public int getStatusBarHeight(Context context) {
+    int result = 0;
+    int resourceId = context.getResources().getIdentifier(
+            "status_bar_height", "dimen", "android");
+    if (resourceId > 0) {
+        result = context.getResources().getDimensionPixelSize(resourceId);
+    }
+    return result;
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 旧方式：反射获取状态栏高度（不推荐，脆弱）
 @Suppress("DEPRECATION")
@@ -73,7 +93,38 @@ fun getStatusBarHeight(context: Context): Int {
 }
 ```
 
+:::
+
 ### 2.3 现代方式：OnApplyWindowInsetsListener
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class InsetsView extends View {
+
+    public InsetsView(Context context) {
+        super(context);
+        // 监听系统栏 insets 变化
+        setOnApplyWindowInsetsListener((view, insets) -> {
+            Insets systemBars = insets.getSystemWindowInsets();
+            // 设置 padding，让内容避开系统栏
+            view.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    systemBars.bottom
+            );
+            // 消费掉，防止继续向上传递
+            insets.consumeSystemWindowInsets();
+            return insets;
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class InsetsView(context: Context) : View(context) {
@@ -96,11 +147,40 @@ class InsetsView(context: Context) : View(context) {
 }
 ```
 
+:::
+
 > 关键点：OnApplyWindowInsetsListener 返回时若消费（consume）了 insets，父容器不会再处理；不消费则继续传递，可让根布局统一处理。
 
 ## 三、沉浸式实现
 
 ### 3.1 状态栏透明 + 深色图标
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 兼容 Android 4.4+
+public void setupStatusBar(Activity activity) {
+    Window window = activity.getWindow();
+    // 透明状态栏（4.4+）
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+    }
+    // 状态栏透明（5.0+）
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        window.setStatusBarColor(Color.TRANSPARENT);
+    }
+    // 深色图标（6.0+）
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        window.getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);  // 状态栏深色图标
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 兼容 Android 4.4+
@@ -124,7 +204,32 @@ fun setupStatusBar(activity: Activity) {
 }
 ```
 
+:::
+
 ### 3.2 全屏沉浸（视频/游戏）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 隐藏系统栏
+public void hideSystemBars(Activity activity) {
+    activity.getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+}
+
+// 显示系统栏
+public void showSystemBars(Activity activity) {
+    activity.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 隐藏系统栏
@@ -143,6 +248,8 @@ fun showSystemBars(activity: Activity) {
 }
 ```
 
+:::
+
 | Flag | 作用 |
 |------|------|
 | `SYSTEM_UI_FLAG_FULLSCREEN` | 隐藏状态栏 |
@@ -153,6 +260,25 @@ fun showSystemBars(activity: Activity) {
 | `SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR` | 导航栏深色图标 |
 
 ### 3.3 新 API：WindowInsetsController（API 30+）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 现代推荐方式（API 30+）
+public void setupImmersive(Activity activity) {
+    WindowInsetsController controller = activity.getWindow().getInsetsController();
+    if (controller != null) {
+        controller.hide(WindowInsets.Type.statusBars() |
+                WindowInsets.Type.navigationBars());  // 隐藏
+        controller.setSystemBarsBehavior(
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 现代推荐方式（API 30+）
@@ -165,9 +291,33 @@ fun setupImmersive(activity: Activity) {
 }
 ```
 
+:::
+
 ## 四、刘海屏适配
 
 ### 4.1 获取刘海区域
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 监听 cutout 区域
+view.setOnApplyWindowInsetsListener((v, insets) -> {
+    DisplayCutout cutout = insets.getDisplayCutout();
+    if (cutout != null) {
+        // 刘海区域：可能在上/下/左/右
+        int safeTop = cutout.getSafeInsetTop();
+        int safeLeft = cutout.getSafeInsetLeft();
+        // 给内容设置 padding 避开
+        v.setPadding(safeLeft, safeTop, 0, 0);
+    }
+    insets.consumeSystemWindowInsets();
+    return insets;
+});
+```
+
+@tab Kotlin
 
 ```kotlin
 // 监听 cutout 区域
@@ -183,6 +333,8 @@ view.setOnApplyWindowInsetsListener { v, insets ->
     insets.consumeSystemWindowInsets()
 }
 ```
+
+:::
 
 ### 4.2 布局适配策略
 
@@ -207,6 +359,22 @@ view.setOnApplyWindowInsetsListener { v, insets ->
 
 ### 5.2 适配要点
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 让内容延伸到系统栏后面
+public void enableEdgeToEdge(Activity activity) {
+    activity.getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 让内容延伸到系统栏后面
 fun enableEdgeToEdge(activity: Activity) {
@@ -217,6 +385,8 @@ fun enableEdgeToEdge(activity: Activity) {
 }
 ```
 
+:::
+
 适配清单：
 
 - 顶部内容：监听 statusBars insets，给 Toolbar 加 top padding
@@ -225,6 +395,33 @@ fun enableEdgeToEdge(activity: Activity) {
 - 全屏页面：自动隐藏系统栏
 
 ### 5.3 常见适配代码
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 通用：根布局统一处理系统栏 insets
+public class EdgeToEdgeActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        enableEdgeToEdge(this);
+        setContentView(R.layout.activity_main);
+
+        // 根布局统一处理 padding
+        findViewById(R.id.root).setOnApplyWindowInsetsListener((v, insets) -> {
+            Insets bars = insets.getSystemWindowInsets();
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            insets.consumeSystemWindowInsets();
+            return insets;
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 通用：根布局统一处理系统栏 insets
@@ -244,6 +441,8 @@ class EdgeToEdgeActivity : AppCompatActivity() {
     }
 }
 ```
+
+:::
 
 ## 六、高频面试题
 

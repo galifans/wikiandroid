@@ -16,13 +16,31 @@ title: Vector 源码剖析
 
 ## 二、核心字段
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 protected Object[] elementData;     // 保存数据的数组
 protected int elementCount;         // 实际数据的数量
 protected int capacityIncrement;    // 容量增长系数
 ```
 
+@tab Kotlin
+
+```kotlin
+protected var elementData: Array<Any?>? = null // 保存数据的数组
+protected var elementCount: Int = 0            // 实际数据的数量
+protected var capacityIncrement: Int = 0       // 容量增长系数
+```
+
+:::
+
 ## 三、构造函数
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public Vector() {
@@ -41,7 +59,30 @@ public Vector(int initialCapacity, int capacityIncrement) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+constructor() : this(10) {          // 默认容量 10
+}
+
+constructor(initialCapacity: Int) : this(initialCapacity, 0) { // 增长系数默认为 0
+}
+
+constructor(initialCapacity: Int, capacityIncrement: Int) {
+    if (initialCapacity < 0)
+        throw IllegalArgumentException("Illegal Capacity: $initialCapacity")
+    this.elementData = arrayOfNulls(initialCapacity)
+    this.capacityIncrement = capacityIncrement
+}
+```
+
+:::
+
 ## 四、扩容机制
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 private void ensureCapacityHelper(int minCapacity) {
@@ -57,6 +98,26 @@ private void ensureCapacityHelper(int minCapacity) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+private fun ensureCapacityHelper(minCapacity: Int) {
+    val oldCapacity = elementData.size
+    if (minCapacity > oldCapacity) {
+        var newCapacity = if (capacityIncrement > 0)
+                (oldCapacity + capacityIncrement)   // 按增长系数扩容
+            else
+                (oldCapacity * 2)                   // 默认扩容为原来的 2 倍
+        if (newCapacity < minCapacity) {
+            newCapacity = minCapacity
+        }
+        elementData = Arrays.copyOf(elementData, newCapacity)
+    }
+}
+```
+
+:::
 
 扩容规则：
 

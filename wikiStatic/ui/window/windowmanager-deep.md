@@ -30,6 +30,25 @@ flowchart TD
 
 ## 二、WindowManager 核心方法
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+
+// 1. 添加 Window
+wm.addView(view, params);
+
+// 2. 更新 Window（改位置/大小/透明度）
+wm.updateViewLayout(view, params);
+
+// 3. 移除 Window
+wm.removeView(view);
+```
+
+@tab Kotlin
+
 ```kotlin
 val wm = getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
@@ -42,6 +61,8 @@ wm.updateViewLayout(view, params)
 // 3. 移除 Window
 wm.removeView(view)
 ```
+
+:::
 
 ### 添加流程源码链
 
@@ -90,6 +111,20 @@ Android 8.0（API 26）开始，悬浮窗必须使用 `TYPE_APPLICATION_OVERLAY`
 <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 动态申请：跳转设置页
+if (!Settings.canDrawOverlays(this)) {
+    startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+            Uri.parse("package:" + getPackageName())));
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 动态申请：跳转设置页
 if (!Settings.canDrawOverlays(this)) {
@@ -98,7 +133,64 @@ if (!Settings.canDrawOverlays(this)) {
 }
 ```
 
+:::
+
 ### 4.2 创建悬浮窗
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class FloatWindowManager {
+
+    private final Context context;
+    private View floatView;
+    private WindowManager.LayoutParams params;
+    private final WindowManager wm =
+            (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+
+    public FloatWindowManager(Context context) {
+        this.context = context;
+    }
+
+    public void show() {
+        if (floatView != null) return;
+        LayoutInflater inflater = LayoutInflater.from(context);
+        floatView = inflater.inflate(R.layout.float_window, null);
+
+        params = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,  // 8.0+ 悬浮窗类型
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT
+        );
+        params.gravity = Gravity.TOP | Gravity.START;
+        params.x = 100;   // 初始位置
+        params.y = 300;
+        wm.addView(floatView, params);
+    }
+
+    public void updatePosition(int x, int y) {
+        if (params != null) {
+            params.x = x;
+            params.y = y;
+            wm.updateViewLayout(floatView, params);
+        }
+    }
+
+    public void dismiss() {
+        if (floatView != null) {
+            try { wm.removeView(floatView); } catch (Exception e) { /* 已移除 */ }
+        }
+        floatView = null;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class FloatWindowManager(private val context: Context) {
@@ -144,6 +236,8 @@ class FloatWindowManager(private val context: Context) {
 }
 ```
 
+:::
+
 ### 4.3 关键 FLAG 说明
 
 | FLAG | 作用 |
@@ -155,6 +249,30 @@ class FloatWindowManager(private val context: Context) {
 | `FLAG_LAYOUT_NO_LIMITS` | 布局不受屏幕边界限制 |
 
 ### 4.4 拖动与触摸监听
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+floatView.setOnTouchListener((v, event) -> {
+    switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            startX = event.getRawX(); startY = event.getRawY();
+            startWmX = params.x; startWmY = params.y;
+            break;
+        case MotionEvent.ACTION_MOVE:
+            updatePosition(
+                    (int) (startWmX + (event.getRawX() - startX)),
+                    (int) (startWmY + (event.getRawY() - startY))
+            );
+            break;
+    }
+    return true;
+});
+```
+
+@tab Kotlin
 
 ```kotlin
 floatView?.setOnTouchListener { v, event ->
@@ -173,6 +291,8 @@ floatView?.setOnTouchListener { v, event ->
     true
 }
 ```
+
+:::
 
 ## 五、悬浮窗版本适配
 

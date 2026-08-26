@@ -13,6 +13,23 @@ description: Fragment 状态丢失、重叠问题、commit 时机、懒加载、
 
 ### 问题
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 错误：在 onSaveInstanceState 之后提交事务
+@Override
+protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    getSupportFragmentManager().beginTransaction()
+            .add(R.id.container, new SomeFragment())
+            .commit();
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ✗ 错误：在 onSaveInstanceState 之后提交事务
 override fun onSaveInstanceState(outState: Bundle) {
@@ -23,6 +40,8 @@ override fun onSaveInstanceState(outState: Bundle) {
 }
 ```
 
+:::
+
 抛出 `IllegalStateException: Can not perform this action after onSaveInstanceState`。
 
 ### 原因与解决
@@ -30,11 +49,27 @@ override fun onSaveInstanceState(outState: Bundle) {
 - `onSaveInstanceState` 之后的状态变更不会保留，系统因此拒绝提交。
 - **解决**：提交前判断 `isStateSaved`：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+if (!getSupportFragmentManager().isStateSaved()) {
+    getSupportFragmentManager().beginTransaction()
+            .add(R.id.container, new SomeFragment())
+            .commit();
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 if (!supportFragmentManager.isStateSaved) {
     supportFragmentManager.commit { ... }
 }
 ```
+
+:::
 
 ## 2. 坑点二：Fragment 重叠（经典的 "replace 之后又 add"）
 
@@ -44,6 +79,25 @@ Activity 被系统重建（旋转屏幕、内存回收）后，`onCreate` 中再
 导致同一 Fragment 出现多个实例 → 界面重叠。
 
 ### 解决
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    // ✓ 先判断 savedInstanceState 是否为 null
+    if (savedInstanceState == null) {
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.container, new MainFragment())
+                .commit();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,11 +111,28 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
+:::
+
 > 系统重建时 FragmentManager 会**自动恢复**已存在的 Fragment，无需也不应该再次 add。
 
 ## 3. 坑点三：setArguments 时机
 
 ### 问题
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 错误：commit 之后再 setArguments
+MyFragment fragment = new MyFragment();
+getSupportFragmentManager().beginTransaction()
+        .add(R.id.container, fragment)
+        .commit();
+fragment.setArguments(bundle);   // 无效！
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✗ 错误：commit 之后再 setArguments
@@ -70,13 +141,32 @@ supportFragmentManager.commit { add(R.id.container, fragment) }
 fragment.arguments = bundle   // 无效！
 ```
 
+:::
+
 ### 解决
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✓ 正确：先 setArguments 再提交
+MyFragment fragment = new MyFragment();
+fragment.setArguments(bundle);
+getSupportFragmentManager().beginTransaction()
+        .add(R.id.container, fragment)
+        .commit();
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✓ 正确：先 setArguments 再提交
 val fragment = MyFragment().apply { arguments = bundle }
 supportFragmentManager.commit { add(R.id.container, fragment) }
 ```
+
+:::
 
 > 系统重建 Fragment 时通过 `arguments` 恢复数据；`arguments` 必须在 Fragment 与
 > FragmentManager 建立关联**之前**设置。
@@ -89,6 +179,34 @@ supportFragmentManager.commit { add(R.id.container, fragment) }
 `FragmentPagerAdapter` 预加载导致**首次可见时机**判断错误。
 
 ### 现代解决（Fragment + ViewPager2）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MyFragment extends Fragment {
+
+    private boolean isFirstLoad = true;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // ViewPager2 场景：当前页可见时 onResume 才回调
+        if (isFirstLoad && isVisibleToUser()) {
+            loadData();
+            isFirstLoad = false;
+        }
+    }
+
+    private boolean isVisibleToUser() {
+        // 通过 FragmentPagerAdapter 的 primaryItem 判断当前页
+        return getUserVisibleHint() || isResumed();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MyFragment : Fragment() {
@@ -111,6 +229,8 @@ class MyFragment : Fragment() {
 }
 ```
 
+:::
+
 更推荐的做法：使用 `ViewPager2` + `OnPageChangeCallback`，或 `Lifecycle` 感知加载。
 
 ## 5. 坑点五：getActivity() 为 null
@@ -120,6 +240,24 @@ class MyFragment : Fragment() {
 异步回调中调用 `getActivity()` 返回 null 或已销毁的 Activity → 崩溃或泄漏。
 
 ### 解决
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 回调中使用安全访问
+getLifecycleScope().launch(() -> {
+    String data = repository.fetchData();
+    // ✓ 用 lifecycle 感知协程，自动在销毁时取消
+    textView.setText(data);   // 协程已被自动取消，不会执行到这里
+});
+
+// 或手动判断
+if (isAdded()) { /* 安全使用 activity */ }
+```
+
+@tab Kotlin
 
 ```kotlin
 // 回调中使用安全访问
@@ -133,12 +271,29 @@ lifecycleScope.launch {
 if (isAdded) { /* 安全使用 activity */ }
 ```
 
+:::
+
 > 关键原则：**使用 `lifecycleScope` / `viewLifecycleOwner.lifecycleScope` 启动协程**，
 > 不要使用 `GlobalScope`，让生命周期自动取消异步任务。
 
 ## 6. 坑点六：视图引用泄漏（view 与 fragment 生命周期不一致）
 
 ### 问题
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 错误：onCreateView 中创建的 View 持有异步引用
+@Override
+public void onViewCreated(View view, Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    someCallback = () -> textView.setText("update");  // textView 来自 onCreateView
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✗ 错误：onCreateView 中创建的 View 持有异步引用
@@ -148,10 +303,30 @@ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 }
 ```
 
+:::
+
 ### 解决
 
 - **视图相关初始化**放在 `onViewCreated`（不要放 `onCreate`）。
 - 异步回调中使用 `viewLifecycleOwner.lifecycleScope`：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+public void onViewCreated(View view, Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    viewLifecycleOwner.getLifecycleScope().launch(() -> {
+        String data = repository.fetch();
+        // view 销毁时协程自动取消
+        binding.textView.setText(data);
+    });
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -164,6 +339,8 @@ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 }
 ```
 
+:::
+
 ## 7. 坑点七：commit 与 commitAllowingStateLoss 的选择
 
 | API | 行为 | 使用场景 |
@@ -172,9 +349,21 @@ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 | `commitAllowingStateLoss()` | 状态丢失时静默丢弃 | 异步回调、非关键 UI 变更 |
 | `commitNow()` | 同步执行 | 需要立即生效（如 `addOnBackStackChangedListener` 中） |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 推荐原则：默认 commit()；异步回调中若确实需要，用 commitAllowingStateLoss()
+```
+
+@tab Kotlin
+
 ```kotlin
 // 推荐原则：默认 commit()；异步回调中若确实需要，用 commitAllowingStateLoss()
 ```
+
+:::
 
 ## 8. 坑点八：Fragment 嵌套导致的 View 重叠/事件冲突
 
@@ -195,6 +384,35 @@ Fragment 内嵌套 Fragment，内层 `replace` 时未指定正确容器，或两
 Fragment 内部需要拦截返回键（如表单确认），但默认返回键直接退出 Activity。
 
 ### 解决（现代方案）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class FormFragment extends Fragment {
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (shouldShowConfirmDialog()) {
+                    showExitConfirmDialog();
+                } else {
+                    setEnabled(false);          // 关闭自己
+                    requireActivity().getOnBackPressedDispatcher().onBackPressed();  // 交给上层
+                }
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(viewLifecycleOwner, callback);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class FormFragment : Fragment() {
@@ -217,6 +435,8 @@ class FormFragment : Fragment() {
 }
 ```
 
+:::
+
 ## 10. 坑点十：Fragment 状态保存与恢复
 
 ### 问题
@@ -224,6 +444,31 @@ class FormFragment : Fragment() {
 Fragment 的 `arguments` 可以恢复，但**成员变量不会自动保存**；旋转屏幕后数据丢失。
 
 ### 解决
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class ProfileFragment extends Fragment {
+
+    private String userId;
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("userId", userId);
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        userId = savedInstanceState != null ? savedInstanceState.getString("userId") : null;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class ProfileFragment : Fragment() {
@@ -242,6 +487,8 @@ class ProfileFragment : Fragment() {
 }
 ```
 
+:::
+
 > 复杂状态推荐：`ViewModel`（自动跨配置变更保留）或 `SavedStateHandle`。
 
 ## 11. 坑点十一：setMaxLifecycle 与 ViewPager2 页面的状态泄漏
@@ -251,6 +498,36 @@ class ProfileFragment : Fragment() {
 ViewPager2 默认预加载相邻页，页面不可见时 Fragment 仍处于 `STARTED` 甚至 `RESUMED` 状态——`onResume` 中启动的协程/轮询在离屏页上仍在运行，造成资源浪费甚至崩溃。
 
 ### 解决
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 方案一：自定义 Behavior 精确控制页面最大生命周期
+public class MaxLifecycleBehavior extends FragmentPagerBehavior {
+    private final Lifecycle.State maxLifecycle;
+
+    public MaxLifecycleBehavior(Lifecycle.State maxLifecycle) {
+        this.maxLifecycle = maxLifecycle;
+    }
+
+    @Override
+    public boolean shouldTriggerViewPagerOffscreenPageLimit() {
+        return true;
+    }
+}
+
+// 方案二（常用）：用 viewLifecycleOwner 绑定的协程 + repeatOnLifecycle
+// 离屏页虽然 onResume 已执行，但数据加载用 Flow 收集 + 页面销毁自动取消
+viewLifecycleOwner.getLifecycleScope().launch(() -> {
+    repeatOnLifecycle(Lifecycle.State.RESUMED, () -> {
+        viewModel.getPagerData().collect(state -> render(state));
+    });
+});
+```
+
+@tab Kotlin
 
 ```kotlin
 // 方案一：自定义 Behavior 精确控制页面最大生命周期
@@ -268,12 +545,30 @@ viewLifecycleOwner.lifecycleScope.launch {
 }
 ```
 
+:::
+
 > 关键认知：ViewPager2 的离屏页 `onResume` 仍会回调（`isResumed` 为 true），
 > 但用户不可见。**"用户可见"判断必须结合 `primaryItem` 或 `onPageSelected`**。
 
 ## 12. 坑点十二：viewLifecycleOwner 在 onViewCreated 时的时序陷阱
 
 ### 问题
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 错误：在 onCreateView 之前使用 viewLifecycleOwner
+@Override
+public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    // viewLifecycleOwner 此时还不可用！可能拿到旧的
+    viewLifecycleOwner.getLifecycleScope().launch(() -> { ... });
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✗ 错误：在 onCreateView 之前使用 viewLifecycleOwner
@@ -284,11 +579,30 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
+:::
+
 ### 原因
 
 `viewLifecycleOwner` 在 `onCreateView` 到 `onDestroyView` 之间才有效。在 `onCreate` 中访问可能取到**上一个 View 的 lifecycle**（Fragment 重建 View 时），导致协程没有及时取消。
 
 ### 解决
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✓ 正确：在 onViewCreated 之后访问
+@Override
+public void onViewCreated(View view, Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+    viewLifecycleOwner.getLifecycleScope().launch(() -> { ... });
+}
+
+// 需要 Activity 级数据：用 Fragment 自己的 lifecycleScope（不依赖 View）
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✓ 正确：在 onViewCreated 之后访问
@@ -299,6 +613,8 @@ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
 // 需要 Activity 级数据：用 Fragment 自己的 lifecycleScope（不依赖 View）
 ```
+
+:::
 
 ## 13. 高频面试题
 

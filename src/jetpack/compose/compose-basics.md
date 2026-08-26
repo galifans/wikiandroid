@@ -20,6 +20,24 @@ description: 声明式 UI、可组合函数、重组原理、Modifier 链、Comp
   状态变化 → 自动重组 UI（无需手动操作）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 命令式（View 体系）
+TextView tv = findViewById(R.id.tv_name);
+btn.setOnClickListener(v -> {
+    tv.setText(input.getText());        // 手动更新
+    tv.setVisibility(View.VISIBLE);
+});
+
+// 声明式（Compose）仅支持 Kotlin DSL，无 Java 等价写法；
+// 状态驱动自动更新：UI = f(state)
+```
+
+@tab Kotlin
+
 ```kotlin
 // 命令式
 val tv = findViewById<TextView>(R.id.tv_name)
@@ -37,7 +55,20 @@ fun Greeting(name: String) {
 }
 ```
 
+:::
+
 ## 2. 可组合函数（Composable）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：XML 布局 + findViewById + setText / setOnClickListener
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -51,6 +82,8 @@ fun ProfileCard(user: User) {
     }
 }
 ```
+
+:::
 
 **规则**：
 
@@ -71,6 +104,17 @@ fun ProfileCard(user: User) {
 ③ 幂等：重组可被随时取消/重放
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：TextView + Button，onClick 中手动更新文本
+```
+
+@tab Kotlin
+
 ```kotlin
 @Composable
 fun Counter() {
@@ -85,6 +129,8 @@ fun Counter() {
 }
 ```
 
+:::
+
 **性能注意**：
 
 ```text
@@ -94,6 +140,17 @@ fun Counter() {
 ```
 
 ## 4. Modifier：链式修饰
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// Modifier 链对应 View 体系的 XML 属性 / setPadding / setBackground 等 API
+```
+
+@tab Kotlin
 
 ```kotlin
 // Modifier 按顺序应用（从上到下）
@@ -106,6 +163,8 @@ Modifier
     .testTag("card")
 ```
 
+:::
+
 **常用 Modifier 分类**：
 
 | 分类 | 示例 |
@@ -116,6 +175,18 @@ Modifier
 | 语义 | `semantics` `testTag` `contentDescription` |
 
 ## 5. Compose 与 View 互操作
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// ① AndroidView：Compose 中嵌入 View 的唯一入口，只能由 Kotlin 编写
+// ② ComposeView：View 中嵌入 Compose，Java 中 findViewById 后 setContent 的 Composable lambda 仍需 Kotlin 桥接
+```
+
+@tab Kotlin
 
 ```kotlin
 // ① Compose 中嵌入 View（AndroidView）
@@ -139,7 +210,20 @@ composeView.setContent {
 }
 ```
 
+:::
+
 ## 6. 状态提升（State Hoisting）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 状态提升对应 View 体系：自定义 View 暴露回调接口（如 OnTextChangedListener），数据由外部持有
+```
+
+@tab Kotlin
 
 ```kotlin
 // 无状态可组合：状态由调用方持有（单一数据源）
@@ -158,6 +242,8 @@ fun Screen() {
     NameInput(name = name, onNameChange = { name = it })
 }
 ```
+
+:::
 
 **优点**：可测试、可复用、状态可预测。
 

@@ -48,6 +48,39 @@ flowchart TD
 
 ### 2.2 HTTPDNS 方案
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 使用 HTTPDNS:直接向 DNS 服务器发 HTTP 请求
+// 请求: https://10.0.0.1/d?dn=api.example.com
+// 返回: {"ips":["1.2.3.4","5.6.7.8"],"ttl":300}
+
+// ② 结合 OkHttp:自定义 DNS 实现
+public class HttpDns implements Dns {
+    @Override
+    public List<InetAddress> lookup(String hostname) {
+        // 优先查本地缓存(内存 + 本地存储)
+        if (cache.containsKey(hostname)) {
+            return cache.get(hostname);
+        }
+        // 未命中 → HTTPDNS 解析
+        List<InetAddress> ips = httpDnsProvider.resolve(hostname);
+        cache.put(hostname, ips);
+        return ips;
+    }
+}
+
+// ③ 注入 OkHttp
+OkHttpClient client = new OkHttpClient.Builder()
+        .dns(new HttpDns())          // 替换系统 DNS
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .build();
+```
+
+@tab Kotlin
+
 ```kotlin
 // ① 使用 HTTPDNS:直接向 DNS 服务器发 HTTP 请求
 // 请求: https://10.0.0.1/d?dn=api.example.com
@@ -71,6 +104,8 @@ val client = OkHttpClient.Builder()
     .connectTimeout(10, TimeUnit.SECONDS)
     .build()
 ```
+
+:::
 
 > 大厂实践:自建 HTTPDNS(腾讯、阿里、字节都有 SDK),配合 IP 直连 + 失败回退,能显著降低解析耗时与劫持风险。
 
@@ -100,6 +135,40 @@ sequenceDiagram
 
 ### 3.2 超时与重试策略
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 超时分级:根据网络质量动态调整
+public class TimeoutPolicy {
+    // 4G/5G:连接 5s,读 10s
+    // 3G:连接 10s,读 20s
+    // 弱网(信号差):连接 15s,读 30s
+    Pair<Integer, Integer> timeoutsFor(NetworkType networkType) {
+        switch (networkType) {
+            case WIFI:
+            case CELLULAR_4G:
+                return new Pair<>(5_000, 10_000);
+            case CELLULAR_3G:
+                return new Pair<>(10_000, 20_000);
+            default:
+                return new Pair<>(15_000, 30_000);
+        }
+    }
+}
+
+// 重试策略:指数退避 + 抖动
+long retryDelay(int attempt) {
+    long base = 1_000L << attempt;      // 1s, 2s, 4s, 8s
+    long jitter = ThreadLocalRandom.current().nextLong(0, 300);
+    return base + jitter;
+}
+// 幂等请求(GET)可重试;非幂等(POST)慎重重试
+```
+
+@tab Kotlin
+
 ```kotlin
 // 超时分级:根据网络质量动态调整
 class TimeoutPolicy {
@@ -121,6 +190,8 @@ fun retryDelay(attempt: Int): Long {
 }
 // 幂等请求(GET)可重试;非幂等(POST)慎重重试
 ```
+
+:::
 
 ## 四、弱网适配
 
@@ -154,6 +225,29 @@ flowchart LR
 | 增量更新 | 只传变更数据 | 按场景 |
 | 合并请求 | 接口聚合(BFF) | 减少请求次数 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// OkHttp 自动解压(Brotli 需要额外支持)
+OkHttpClient client = new OkHttpClient.Builder()
+        .addInterceptor(chain -> {
+            Request request = chain.request().newBuilder()
+                    .header("Accept-Encoding", "gzip, br")
+                    .build();
+            return chain.proceed(request);
+        })
+        .build();
+
+// 图片:根据网络加载不同规格
+String imageUrl(String url, int width) {
+    return url + "?imageView2/2/w/" + width;   // CDN 裁剪
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // OkHttp 自动解压(Brotli 需要额外支持)
 val client = OkHttpClient.Builder()
@@ -170,6 +264,8 @@ fun imageUrl(url: String, width: Int): String =
     "$url?imageView2/2/w/$width"   // CDN 裁剪
 ```
 
+:::
+
 ### 5.2 缓存策略
 
 ```text
@@ -181,6 +277,38 @@ fun imageUrl(url: String, width: Int): String =
 ```
 
 ## 六、网络监控
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 全局拦截器采集指标
+public class NetworkMonitorInterceptor implements Interceptor {
+    @Override
+    public Response intercept(Chain chain) throws IOException {
+        long start = SystemClock.elapsedRealtime();
+        Request request = chain.request();
+        try {
+            Response response = chain.proceed(request);
+            report(new Event(
+                    request.url().toString(),
+                    dnsMs,
+                    connectMs,
+                    response.sentRequestAtMillis() - ...,
+                    response.code(),
+                    response.body() != null ? response.body().contentLength() : 0
+            ));
+            return response;
+        } catch (IOException e) {
+            reportError(request, e);   // 错误上报:超时/断连/解析失败
+            throw e;
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ① 全局拦截器采集指标
@@ -206,6 +334,8 @@ class NetworkMonitorInterceptor : Interceptor {
     }
 }
 ```
+
+:::
 
 | 监控指标 | 含义 |
 |---------|------|

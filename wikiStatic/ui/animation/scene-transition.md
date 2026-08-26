@@ -24,6 +24,22 @@ flowchart TD
 
 ### 2.1 传统方式：overridePendingTransition
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 启动时
+startActivity(new Intent(this, DetailActivity.class));
+overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+
+// 返回时（在 B 页面）
+finish();
+overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 启动时
 startActivity(Intent(this, DetailActivity::class.java))
@@ -33,6 +49,8 @@ overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
 finish()
 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
 ```
+
+:::
 
 ```xml
 <!-- res/anim/slide_in_right.xml -->
@@ -45,6 +63,21 @@ overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
 
 ### 2.2 现代方式：Activity Transition API（5.0+）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 进入页面
+Bundle options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+        this,
+        imageView, "shared_image"    // (共享 View, 过渡名)
+).toBundle();
+startActivity(new Intent(this, DetailActivity.class), options);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 进入页面
 val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
@@ -53,6 +86,8 @@ val options = ActivityOptionsCompat.makeSceneTransitionAnimation(
 ).toBundle()
 startActivity(Intent(this, DetailActivity::class.java), options)
 ```
+
+:::
 
 ```xml
 <!-- A 页面布局 -->
@@ -77,6 +112,30 @@ startActivity(Intent(this, DetailActivity::class.java), options)
 
 ### 3.2 Scene 切换（同一容器内状态切换）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 场景一：初始布局
+Scene scene1 = Scene.getSceneForLayout(container, R.layout.scene_start, this);
+// 场景二：目标布局
+Scene scene2 = Scene.getSceneForLayout(container, R.layout.scene_end, this);
+
+// 默认过渡
+TransitionManager.go(scene2);
+
+// 自定义过渡（渐变 + 位移动画）
+TransitionManager.go(scene2, new AutoTransition());
+
+// 延迟切换
+TransitionManager.beginDelayedTransition(container);   // 记录当前状态
+// ...修改 container 内的 View（如移位置、改大小）
+// 结束时自动生成过渡动画
+```
+
+@tab Kotlin
+
 ```kotlin
 // 场景一：初始布局
 val scene1 = Scene.getSceneForLayout(container, R.layout.scene_start, this)
@@ -95,6 +154,8 @@ TransitionManager.beginDelayedTransition(container)   // 记录当前状态
 // 结束时自动生成过渡动画
 ```
 
+:::
+
 ### 3.3 内置 Transition 类型
 
 | Transition | 效果 |
@@ -110,6 +171,24 @@ TransitionManager.beginDelayedTransition(container)   // 记录当前状态
 
 ### 3.4 共享元素支持的动画类型
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 全局配置（Theme 中定义更佳）
+TransitionSet enterTransition = new TransitionSet();
+enterTransition.addTransition(new ChangeBounds());
+enterTransition.addTransition(new ChangeTransform());
+enterTransition.addTransition(new ChangeImageTransform());
+enterTransition.addTransition(new ChangeClipBounds());
+enterTransition.setDuration(400);
+getWindow().setSharedElementEnterTransition(enterTransition);
+getWindow().setSharedElementReturnTransition(enterTransition);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 全局配置（Theme 中定义更佳）
 window.sharedElementEnterTransition = TransitionSet().apply {
@@ -122,7 +201,29 @@ window.sharedElementEnterTransition = TransitionSet().apply {
 window.sharedElementReturnTransition = window.sharedElementEnterTransition
 ```
 
+:::
+
 ## 四、Fragment 转场
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+supportFragmentManager.beginTransaction()
+        .setCustomAnimations(
+                R.anim.slide_in_right,     // 进入动画
+                R.anim.slide_out_left,     // 退出动画
+                R.anim.slide_in_left,      // 返回进入
+                R.anim.slide_out_right     // 返回退出
+        )
+        .replace(R.id.container, new DetailFragment())
+        .addSharedElement(imageView, "shared_image")   // 共享元素
+        .addToBackStack(null)
+        .commit();
+```
+
+@tab Kotlin
 
 ```kotlin
 supportFragmentManager.beginTransaction()
@@ -137,6 +238,8 @@ supportFragmentManager.beginTransaction()
     .addToBackStack(null)
     .commit()
 ```
+
+:::
 
 ## 五、Transition 原理
 
@@ -167,6 +270,17 @@ sequenceDiagram
 
 ## 七、Compose 时代的动画
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 动画仅支持 Kotlin DSL，无 Java 等价写法；
+// View 体系中对应的页面切换 / 共享元素方案见上文 2.2 与 3.4 小节
+```
+
+@tab Kotlin
+
 ```kotlin
 // Compose 中页面/内容切换
 AnimatedContent(
@@ -192,6 +306,8 @@ SharedTransitionLayout {
     }
 }
 ```
+
+:::
 
 | 方案 | 场景 |
 |------|------|

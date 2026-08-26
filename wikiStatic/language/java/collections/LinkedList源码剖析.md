@@ -16,6 +16,10 @@ title: LinkedList 源码剖析
 
 ## 关键成员
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class LinkedList<E>
     extends AbstractSequentialList<E>
@@ -31,7 +35,32 @@ public class LinkedList<E>
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class LinkedList<E> : AbstractSequentialList<E>(),
+    List<E>, Deque<E>, Cloneable, java.io.Serializable {
+
+    // 表头不包含任何数据，只保存前后节点的引用
+    @Transient
+    private var header = Entry<E>(null, null, null)
+    @Transient
+    private var size: Int = 0
+
+    constructor() {
+        header.next = header
+        header.previous = header // 空链表
+    }
+}
+```
+
+:::
+
 ## 基本操作
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public E getFirst() {
@@ -48,6 +77,26 @@ public E removeFirst() {
     return remove(header.next);
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+fun getFirst(): E {
+    if (size == 0) throw NoSuchElementException()
+    return header.next.element      // 表头下一个节点
+}
+
+fun getLast(): E {
+    if (size == 0) throw NoSuchElementException()
+    return header.previous.element  // 表头前一个节点
+}
+
+fun removeFirst(): E {
+    return remove(header.next)
+}
+```
+
+:::
 
 由于是**双向链表**且表头 `header` 不包含数据，`getFirst` 返回 `header.next`，`getLast` 返回 `header.previous`。
 

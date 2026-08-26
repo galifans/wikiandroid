@@ -97,6 +97,38 @@ flowchart LR
 
 ## 四、KMP 逻辑共享(趋势)
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// KMP:共享业务逻辑,各端只写 UI 壳
+// expect/actual 是 Kotlin 多平台专有能力,Java 中可用接口 + 平台实现表达
+
+// 共享层:定义抽象(相当于 expect)
+public interface PlatformNameProvider {
+    String platformName();
+}
+
+// Android 实现(相当于 actual)
+public class AndroidPlatformNameProvider implements PlatformNameProvider {
+    @Override
+    public String platformName() {
+        return "Android";
+    }
+}
+
+// iOS 实现(相当于 actual)
+public class IosPlatformNameProvider implements PlatformNameProvider {
+    @Override
+    public String platformName() {
+        return "iOS";
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // KMP:共享业务逻辑,各端只写 UI 壳
 // commonMain 共享代码
@@ -111,6 +143,8 @@ actual fun platformName(): String = "Android"
 // iosMain/Network.kt
 actual fun platformName(): String = "iOS"
 ```
+
+:::
 
 | KMP 共享层 | 内容 |
 |-----------|------|

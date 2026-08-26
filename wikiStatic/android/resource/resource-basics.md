@@ -75,6 +75,10 @@ res/
 
 ## 三、R 文件与资源 ID
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 编译期生成（app/build/generated/.../R.java）
 public final class R {
@@ -86,6 +90,23 @@ public final class R {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// 编译期生成（app/build/generated/.../R.java）
+// Kotlin 中仍直接引用生成的 Java R 类，这里是等价示意
+object R {
+    object string {
+        const val app_name = 0x7f0a0001
+    }
+    object color {
+        const val primary = 0x7f0b0002
+    }
+}
+```
+
+:::
 
 资源 ID 是 32 位 int，编码规则：
 
@@ -113,6 +134,26 @@ context.getResources()
   → 返回资源（字符串 / Drawable / XML 解析为 View）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 常用加载 API
+Resources res = context.getResources();
+String appName = res.getString(R.string.app_name);
+int primary = res.getColor(R.color.primary);
+Drawable icon = res.getDrawable(R.drawable.ic_logo);
+float width = res.getDimension(R.dimen.margin);
+String[] arr = res.getStringArray(R.array.planets);
+
+// XML 资源：解析为对象
+XmlResourceParser parser = res.getXml(R.xml.config);
+InputStream config = res.openRawResource(R.raw.config);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 常用加载 API
 val res = context.resources
@@ -126,6 +167,8 @@ val arr = res.getStringArray(R.array.planets)
 val parser = res.getXml(R.xml.config)
 val config = res.openRawResource(R.raw.config)
 ```
+
+:::
 
 ::: tip 资源表（resources.arsc）
 AAPT2 将 `res/` 下所有资源编译进 APK 的 `resources.arsc`（二进制资源表），包含：每个资源 ID 的条目、对应配置（限定符）、值的数据偏移。运行时查找基于这张表，**一次 IO 定位、按配置过滤**，性能远高于解析 XML 文本。
@@ -197,6 +240,20 @@ AAPT2 将 `res/` 下所有资源编译进 APK 的 `resources.arsc`（二进制�
 <string name="cancel">取消</string>
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 正确引用（多语言自动适配）
+String confirm = getString(R.string.confirm);
+
+// 错误示范（无法翻译、无法适配）
+// String confirm = "确定";
+```
+
+@tab Kotlin
+
 ```kotlin
 // 正确引用（多语言自动适配）
 val confirm = getString(R.string.confirm)
@@ -204,6 +261,8 @@ val confirm = getString(R.string.confirm)
 // 错误示范（无法翻译、无法适配）
 // val confirm = "确定"
 ```
+
+:::
 
 ## 七、高频面试题精讲
 

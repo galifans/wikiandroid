@@ -26,6 +26,44 @@ description: 面试高频算法题分类精讲、双指针/滑动窗口/二分/D
 
 ### 2.1 双指针
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 模板：快慢指针 / 左右指针
+// 快慢指针（判断链表环、找中点）
+public boolean hasCycle(ListNode head) {
+    ListNode slow = head;
+    ListNode fast = head;
+    while (fast != null && fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+        if (slow == fast) return true;
+    }
+    return false;
+}
+
+// 左右指针（有序数组两数之和）
+public int[] twoSum(int[] nums, int target) {
+    int left = 0;
+    int right = nums.length - 1;
+    while (left < right) {
+        int sum = nums[left] + nums[right];
+        if (sum < target) {
+            left++;
+        } else if (sum > target) {
+            right--;
+        } else {
+            return new int[]{nums[left], nums[right]};
+        }
+    }
+    return new int[]{};
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 模板：快慢指针 / 左右指针
 // 快慢指针（判断链表环、找中点）
@@ -56,9 +94,36 @@ fun twoSum(nums: IntArray, target: Int): IntArray {
 }
 ```
 
+:::
+
 **高频题**：两数之和、三数之和、盛最多水的容器、判断回文串、环形链表。
 
 ### 2.2 滑动窗口
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 模板：固定/可变窗口
+public int lengthOfLongestSubstring(String s) {
+    Set<Character> set = new HashSet<>();
+    int left = 0;
+    int maxLen = 0;
+    for (int right = 0; right < s.length(); right++) {
+        // 右指针扩张，出现重复时收缩左指针
+        while (set.contains(s.charAt(right))) {
+            set.remove(s.charAt(left));
+            left++;
+        }
+        set.add(s.charAt(right));
+        maxLen = Math.max(maxLen, right - left + 1);
+    }
+    return maxLen;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 模板：固定/可变窗口
@@ -79,9 +144,36 @@ fun lengthOfLongestSubstring(s: String): Int {
 }
 ```
 
+:::
+
 **高频题**：无重复字符的最长子串、最小覆盖子串、字符串排列、滑动窗口最大值。
 
 ### 2.3 二分查找
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 模板：标准二分（左闭右闭）
+public int binarySearch(int[] nums, int target) {
+    int left = 0;
+    int right = nums.length - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;   // 防溢出
+        if (nums[mid] < target) {
+            left = mid + 1;
+        } else if (nums[mid] > target) {
+            right = mid - 1;
+        } else {
+            return mid;
+        }
+    }
+    return -1;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 模板：标准二分（左闭右闭）
@@ -100,9 +192,52 @@ fun binarySearch(nums: IntArray, target: Int): Int {
 }
 ```
 
+:::
+
 **高频题**：搜索旋转排序数组、寻找峰值、x 的平方根、在排序数组中查找元素的第一个和最后一个位置。
 
 ### 2.4 二叉树遍历
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 模板：前/中/后序遍历（递归）
+public List<Integer> inorderTraversal(TreeNode root) {
+    List<Integer> result = new ArrayList<>();
+    dfs(root, result);
+    return result;
+}
+
+private void dfs(TreeNode node, List<Integer> result) {
+    if (node == null) return;
+    dfs(node.left, result);           // 左
+    result.add(node.val);             // 中（前序：先 add；后序：后 add）
+    dfs(node.right, result);          // 右
+}
+
+// 层次遍历（BFS）
+public List<List<Integer>> levelOrder(TreeNode root) {
+    List<List<Integer>> result = new ArrayList<>();
+    Queue<TreeNode> queue = new LinkedList<>();
+    if (root != null) queue.add(root);
+    while (!queue.isEmpty()) {
+        List<Integer> level = new ArrayList<>();
+        int size = queue.size();
+        for (int i = 0; i < size; i++) {
+            TreeNode node = queue.remove();
+            level.add(node.val);
+            if (node.left != null) queue.add(node.left);
+            if (node.right != null) queue.add(node.right);
+        }
+        result.add(level);
+    }
+    return result;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 模板：前/中/后序遍历（递归）
@@ -137,9 +272,54 @@ fun levelOrder(root: TreeNode?): List<List<Int>> {
 }
 ```
 
+:::
+
 **高频题**：二叉树的最大深度、翻转二叉树、验证二叉搜索树、二叉树的最近公共祖先、路径总和。
 
 ### 2.5 动态规划
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 模板：五步法
+// ① 定义 dp 数组含义
+// ② 确定递推公式
+// ③ 初始化
+// ④ 遍历顺序
+// ⑤ 举例验证
+
+// 爬楼梯：dp[i] = dp[i-1] + dp[i-2]
+public int climbStairs(int n) {
+    if (n <= 2) return n;
+    int prev = 1;
+    int curr = 2;
+    for (int i = 3; i <= n; i++) {
+        int next = prev + curr;
+        prev = curr;
+        curr = next;
+    }
+    return curr;
+}
+
+// 最长公共子序列
+public int longestCommonSubsequence(String text1, String text2) {
+    int m = text1.length();
+    int n = text2.length();
+    int[][] dp = new int[m + 1][n + 1];
+    for (int i = 1; i <= m; i++) {
+        for (int j = 1; j <= n; j++) {
+            dp[i][j] = text1.charAt(i - 1) == text2.charAt(j - 1)
+                    ? dp[i - 1][j - 1] + 1
+                    : Math.max(dp[i - 1][j], dp[i][j - 1]);
+        }
+    }
+    return dp[m][n];
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 模板：五步法
@@ -180,9 +360,35 @@ fun longestCommonSubsequence(text1: String, text2: String): Int {
 }
 ```
 
+:::
+
 **高频题**：爬楼梯、打家劫舍、最大子数组和、最长递增子序列、编辑距离、零钱兑换、背包问题。
 
 ### 2.6 回溯
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 模板：选择 → 递归 → 撤销
+public List<List<Integer>> subsets(int[] nums) {
+    List<List<Integer>> result = new ArrayList<>();
+    backtrack(nums, 0, new ArrayList<>(), result);
+    return result;
+}
+
+private void backtrack(int[] nums, int start, List<Integer> path, List<List<Integer>> result) {
+    result.add(new ArrayList<>(path));        // 收集结果
+    for (int i = start; i < nums.length; i++) {
+        path.add(nums[i]);                    // 选择
+        backtrack(nums, i + 1, path, result); // 递归
+        path.remove(path.size() - 1);         // 撤销
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 模板：选择 → 递归 → 撤销
@@ -200,6 +406,8 @@ fun subsets(nums: IntArray): List<List<Int>> {
     return result
 }
 ```
+
+:::
 
 **高频题**：全排列、子集、组合总和、括号生成、岛屿数量（DFS）、单词搜索。
 

@@ -13,6 +13,10 @@ title: RecyclerView 优化与 ListView 对比
 
 2. **数据优化：** 分页拉取远端数据并缓存提升二次加载速度；新增或删除数据通过 DiffUtil 局部刷新，而不是全局刷新：
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class AdapterDiffCallback extends DiffUtil.Callback {
 
@@ -47,11 +51,46 @@ public class AdapterDiffCallback extends DiffUtil.Callback {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class AdapterDiffCallback(
+    private val mOldList: List<String>,
+    private val mNewList: List<String>
+) : DiffUtil.Callback() {
+
+    override fun getOldListSize(): Int = mOldList.size
+
+    override fun getNewListSize(): Int = mNewList.size
+
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+        mOldList[oldItemPosition].javaClass == mNewList[newItemPosition].javaClass
+
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
+        mOldList[oldItemPosition] == mNewList[newItemPosition]
+}
+```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
 ```java
 DiffUtil.DiffResult diffResult =
         DiffUtil.calculateDiff(new AdapterDiffCallback(oldList, newList));
 diffResult.dispatchUpdatesTo(mAdapter);
 ```
+
+@tab Kotlin
+
+```kotlin
+val diffResult = DiffUtil.calculateDiff(AdapterDiffCallback(oldList, newList))
+diffResult.dispatchUpdatesTo(mAdapter)
+```
+
+:::
 
 3. **布局优化：** 减少布局层级，简化 ItemView。
 

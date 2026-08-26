@@ -55,6 +55,10 @@ title: Java 进阶特性
 
 动态代理在运行期动态生成代理类，无需手动编写代理类。Java 提供 `java.lang.reflect.Proxy` 支持基于接口的动态代理。
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 定义接口
 public interface BaseInterface {
@@ -87,6 +91,39 @@ BaseInterface proxyInstance = (BaseInterface) Proxy.newProxyInstance(
 
 proxyInstance.doSomething();
 ```
+
+@tab Kotlin
+
+```kotlin
+// 定义接口
+interface BaseInterface {
+    fun doSomething()
+}
+
+// 实现类
+class BaseImpl : BaseInterface {
+    override fun doSomething() {
+        println("doSomething")
+    }
+}
+
+// 动态代理
+val base = BaseImpl()
+val proxyInstance = Proxy.newProxyInstance(
+        base.javaClass.classLoader,
+        base.javaClass.interfaces,
+        InvocationHandler { proxy, method, args ->
+            if (method.name == "doSomething") {
+                method.invoke(base, args)
+                println("do more")
+            }
+            null
+        }) as BaseInterface
+
+proxyInstance.doSomething()
+```
+
+:::
 
 **核心要素：**
 

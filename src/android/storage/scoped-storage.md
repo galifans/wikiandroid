@@ -37,6 +37,23 @@ flowchart LR
 
 ### 2.1 目录获取
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 内部存储（data/data/pkg/）
+context.getFilesDir()      // 私有文件
+context.getCacheDir()      // 私有缓存（系统可随时清理）
+
+// 外部存储应用专属目录（/storage/emulated/0/Android/data/pkg/）
+context.getExternalFilesDir(null)      // 外部文件
+context.getExternalFilesDir("images")  // 外部图片子目录
+context.getExternalCacheDir()          // 外部缓存
+```
+
+@tab Kotlin
+
 ```kotlin
 // 内部存储（data/data/pkg/）
 context.filesDir      // 私有文件
@@ -48,6 +65,8 @@ context.getExternalFilesDir("images")  // 外部图片子目录
 context.externalCacheDir               // 外部缓存
 ```
 
+:::
+
 ### 2.2 特点
 
 | 特性 | 说明 |
@@ -56,6 +75,26 @@ context.externalCacheDir               // 外部缓存
 | 私有性 | 其他应用默认不可访问（除非 root/ADB） |
 | 卸载清除 | 应用卸载时目录被系统清除 |
 | 不占公共空间 | 不进入用户相册/音乐库 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 保存图片到应用专属目录
+void saveToAppDir(Context context, Bitmap bitmap) {
+    File dir = context.getExternalFilesDir("images");
+    if (dir == null) return;
+    File file = new File(dir, "photo_" + System.currentTimeMillis() + ".jpg");
+    try (FileOutputStream fos = new FileOutputStream(file)) {
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 保存图片到应用专属目录
@@ -68,9 +107,42 @@ fun saveToAppDir(context: Context, bitmap: Bitmap) {
 }
 ```
 
+:::
+
 ## 三、MediaStore：公共媒体库
 
 ### 3.1 插入媒体文件
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 保存图片到公共相册（Android 10+ 推荐方式）
+void saveToGallery(Context context, Bitmap bitmap) {
+    ContentValues values = new ContentValues();
+    values.put(MediaStore.Images.Media.DISPLAY_NAME,
+            "photo_" + System.currentTimeMillis() + ".jpg");
+    values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+    values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/MyApp");  // Android 10+
+    values.put(MediaStore.Images.Media.IS_PENDING, 1);                    // 标记待完成
+    Uri uri = context.getContentResolver().insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+    if (uri == null) return;
+    try (OutputStream out = context.getContentResolver().openOutputStream(uri)) {
+        if (out != null) {
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    values.clear();
+    values.put(MediaStore.Images.Media.IS_PENDING, 0);  // 完成写入
+    context.getContentResolver().update(uri, values, null, null);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 保存图片到公共相册（Android 10+ 推荐方式）
@@ -93,7 +165,40 @@ fun saveToGallery(context: Context, bitmap: Bitmap) {
 }
 ```
 
+:::
+
 ### 3.2 查询媒体
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+List<Uri> queryImages(Context context) {
+    List<Uri> result = new ArrayList<>();
+    String[] projection = new String[]{
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DISPLAY_NAME
+    };
+    String sortOrder = MediaStore.Images.Media.DATE_ADDED + " DESC";
+    Cursor cursor = context.getContentResolver().query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection, null, null, sortOrder);
+    if (cursor != null) {
+        try (Cursor c = cursor) {
+            int idCol = c.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
+            while (c.moveToNext()) {
+                long id = c.getLong(idCol);
+                result.add(ContentUris.withAppendedId(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id));
+            }
+        }
+    }
+    return result;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 fun queryImages(context: Context): List<Uri> {
@@ -122,7 +227,25 @@ fun queryImages(context: Context): List<Uri> {
 }
 ```
 
+:::
+
 ### 3.3 更新与删除
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 更新（修改显示名）
+ContentValues values = new ContentValues();
+values.put(MediaStore.Images.Media.DISPLAY_NAME, "renamed.jpg");
+contentResolver.update(uri, values, null, null);
+
+// 删除（Android 10+ 标记删除，11+ 真正删除）
+contentResolver.delete(uri, null, null);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 更新（修改显示名）
@@ -135,6 +258,8 @@ contentResolver.update(uri, values, null, null)
 contentResolver.delete(uri, null, null)
 ```
 
+:::
+
 ### 3.4 IS_PENDING 机制
 
 写入公共媒体库时使用 `IS_PENDING=1` 标记"写入中"，系统 UI 不显示该文件；写完置 0 后立即对用户可见。这是**避免半写文件进入相册**的标准做法。
@@ -142,6 +267,25 @@ contentResolver.delete(uri, null, null)
 ## 四、SAF：任意文件访问
 
 ### 4.1 SAF 文件选择器
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 使用 Activity Result API 打开系统文件选择器
+private final ActivityResultLauncher<String[]> openDocument = registerForActivityResult(
+        new ActivityResultContracts.OpenDocument(),
+        uri -> {
+            if (uri != null) readPdf(uri);
+        });
+
+void pickPdf() {
+    openDocument.launch(new String[]{"application/pdf"});
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 使用 Activity Result API 打开系统文件选择器
@@ -156,7 +300,29 @@ fun pickPdf() {
 }
 ```
 
+:::
+
 ### 4.2 目录选择与持久授权
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+private final ActivityResultLauncher<Uri> openTree = registerForActivityResult(
+        new ActivityResultContracts.OpenDocumentTree(),
+        uri -> {
+            if (uri != null) {
+                // 申请持久化授权
+                contentResolver.takePersistableUriPermission(
+                        uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            }
+        });
+```
+
+@tab Kotlin
 
 ```kotlin
 private val openTree = registerForActivityResult(
@@ -171,6 +337,8 @@ private val openTree = registerForActivityResult(
     }
 }
 ```
+
+:::
 
 | SAF 能力 | API |
 |----------|-----|

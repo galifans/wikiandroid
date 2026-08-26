@@ -47,6 +47,14 @@ export default hopeTheme({
   // 博客功能关闭（纯文档站）
   blog: false,
 
+  // Markdown 扩展配置
+  markdown: {
+    // 代码块选项卡：::: code-tabs + @tab Java / @tab Kotlin，
+    // 用于全站 Java/Kotlin 示例代码切换（默认激活第一个 tab，即 Java）
+    codeTabs: true,
+    tabs: true,
+  },
+
   // 插件配置
   plugins: {
     // git 插件：关闭贡献者（页面底部已有 GitHub 链接，无需重复展示）

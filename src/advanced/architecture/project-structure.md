@@ -62,6 +62,29 @@ features/
 
 把 `onCreate` 拆分为三个语义清晰的子方法，让所有页面结构一致：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public abstract class BaseActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initVariables(); // 1. 初始化变量（Intent 数据、页面内状态）
+        initViews();     // 2. 加载布局、初始化控件、挂事件
+        loadData();      // 3. 调用接口获取数据
+    }
+
+    protected abstract void initVariables();
+    protected abstract void initViews();
+    protected abstract void loadData();
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 abstract class BaseActivity : AppCompatActivity() {
 
@@ -77,6 +100,8 @@ abstract class BaseActivity : AppCompatActivity() {
     protected abstract fun loadData()
 }
 ```
+
+:::
 
 ```mermaid
 flowchart TD
@@ -100,6 +125,34 @@ flowchart TD
 
 用 Gson/kotlinx.serialization 将 JSON 直接解析为强类型实体，取代手工 `JSONObject` 取值：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 统一响应包装
+public class ApiResponse<T> {
+    public final boolean isError;
+    public final int errorType;
+    public final String errorMessage;
+    public final T result;
+
+    public ApiResponse(boolean isError, int errorType, String errorMessage, T result) {
+        this.isError = isError;
+        this.errorType = errorType;
+        this.errorMessage = errorMessage;
+        this.result = result;
+    }
+}
+
+// 直接反序列化为实体（不再手工解析）
+ApiResponse<WeatherEntity> response =
+        gson.fromJson(json, new TypeToken<ApiResponse<WeatherEntity>>() {}.getType());
+WeatherEntity entity = response.result;
+```
+
+@tab Kotlin
+
 ```kotlin
 // 统一响应包装
 data class ApiResponse<T>(
@@ -114,12 +167,30 @@ val response = gson.fromJson(json, ApiResponse::class.java)
 val entity = response.result as? WeatherEntity
 ```
 
+:::
+
 ### 页面间传实体：Intent 而非全局变量
 
 | 方式 | 风险 |
 |------|------|
 | 全局变量传实体 | App 切后台被回收后**全局变量丢失**，恢复前台直接崩溃；若必须用，需序列化到本地以便恢复 |
 | Intent 传实体 | 安全可靠，要求实体实现 `Serializable` 或 `Parcelable` |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 推荐：Intent 传实体（实体实现 Parcelable）
+Intent intent = new Intent(this, DetailActivity.class);
+intent.putExtra("entity", entity); // entity: Parcelable
+startActivity(intent);
+
+// 接收方
+WeatherEntity entity = getIntent().getParcelableExtra("entity");
+```
+
+@tab Kotlin
 
 ```kotlin
 // 推荐：Intent 传实体（实体实现 Parcelable）
@@ -130,6 +201,8 @@ startActivity(intent)
 // 接收方
 val entity = intent.getParcelableExtra<WeatherEntity>("entity")
 ```
+
+:::
 
 ::: warning
 超过 **1MB** 的实体不建议走 Intent（Binder 事务上限），大数据走本地持久化（文件 / Room / DataStore）+ 传 ID。

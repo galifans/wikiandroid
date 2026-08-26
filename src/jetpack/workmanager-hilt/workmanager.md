@@ -24,6 +24,36 @@ WorkManager 解决的是**可延迟、需要保证执行**的后台任务：
 
 ### 2.1 定义 Worker
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class UploadWorker extends Worker {
+
+    public UploadWorker(@NonNull Context context, @NonNull WorkerParameters params) {
+        super(context, params);
+    }
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        try {
+            // 执行任务（在后台线程）
+            String url = getInputData().getString("url");
+            if (url == null) return Result.failure();
+            uploadFile(url);
+
+            return Result.success();       // 成功
+        } catch (IOException e) {
+            return Result.retry();         // 失败重试（按 Backoff 策略）
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class UploadWorker(
     context: Context,
@@ -44,7 +74,33 @@ class UploadWorker(
 }
 ```
 
+:::
+
 ### 2.2 提交任务
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(UploadWorker.class)
+        .setInputData(new Data.Builder()
+                .putString("url", "https://example.com/file")
+                .build())
+        .setConstraints(new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)  // 需要网络
+                .setRequiresCharging(true)                      // 需要充电
+                .setRequiresBatteryNotLow(true)                 // 电量充足
+                .build())
+        .setBackoffCriteria(
+                BackoffPolicy.EXPONENTIAL,   // 指数退避
+                TimeUnit.SECONDS.toMillis(10))
+        .build();
+
+WorkManager.getInstance(context).enqueue(request);
+```
+
+@tab Kotlin
 
 ```kotlin
 val request = OneTimeWorkRequestBuilder<UploadWorker>()
@@ -65,7 +121,29 @@ val request = OneTimeWorkRequestBuilder<UploadWorker>()
 WorkManager.getInstance(context).enqueue(request)
 ```
 
+:::
+
 ### 2.3 观察结果
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+WorkManager.getInstance(context)
+        .getWorkInfoByIdLiveData(request.getId())
+        .observe(this, workInfo -> {
+            if (workInfo == null) return;
+            switch (workInfo.getState()) {
+                case SUCCEEDED: showSuccess(); break;
+                case FAILED: showFailed(); break;
+                case RUNNING: showProgress(workInfo.getProgress()); break;
+                default: break;
+            }
+        });
+```
+
+@tab Kotlin
 
 ```kotlin
 WorkManager.getInstance(context)
@@ -80,7 +158,30 @@ WorkManager.getInstance(context)
     }
 ```
 
+:::
+
 ## 3. 任务链（Chain）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 顺序执行：压缩 → 上传 → 清理
+WorkManager.getInstance(context)
+        .beginWith(compressWork)       // 第一步
+        .then(uploadWork)              // 第二步（依赖第一步成功）
+        .then(cleanupWork)             // 第三步
+        .enqueue();
+
+// 并行执行
+WorkManager.getInstance(context)
+        .beginWith(Arrays.asList(compressA, compressB))   // 并行
+        .then(uploadWork)                                 // 都完成后执行
+        .enqueue();
+```
+
+@tab Kotlin
 
 ```kotlin
 // 顺序执行：压缩 → 上传 → 清理
@@ -97,7 +198,33 @@ WorkManager.getInstance(context)
     .enqueue()
 ```
 
+:::
+
 ## 4. 周期性任务
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+PeriodicWorkRequest periodicRequest = new PeriodicWorkRequest.Builder(
+        SyncWorker.class,
+        6, TimeUnit.HOURS          // 最小间隔 15 分钟
+)
+        .setConstraints(new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.UNMETERED)  // Wi-Fi
+                .setRequiresCharging(true)
+                .build())
+        .build();
+
+WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+        "sync_work",
+        ExistingPeriodicWorkPolicy.UPDATE,   // 更新已存在的任务
+        periodicRequest
+);
+```
+
+@tab Kotlin
 
 ```kotlin
 val periodicRequest = PeriodicWorkRequestBuilder<SyncWorker>(
@@ -118,9 +245,25 @@ WorkManager.getInstance(context).enqueueUniquePeriodicWork(
 )
 ```
 
+:::
+
 ## 5. 高级特性
 
 ### 5.1 唯一任务（避免重复）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+WorkManager.getInstance(context).enqueueUniqueWork(
+        "upload_" + userId,
+        ExistingWorkPolicy.REPLACE,   // KEEP / APPEND / REPLACE
+        uploadRequest
+);
+```
+
+@tab Kotlin
 
 ```kotlin
 WorkManager.getInstance(context).enqueueUniqueWork(
@@ -130,7 +273,21 @@ WorkManager.getInstance(context).enqueueUniqueWork(
 )
 ```
 
+:::
+
 ### 5.2 取消任务
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+WorkManager.getInstance(context).cancelWorkById(workId);
+WorkManager.getInstance(context).cancelUniqueWork("sync_work");
+WorkManager.getInstance(context).cancelAllWork();
+```
+
+@tab Kotlin
 
 ```kotlin
 WorkManager.getInstance(context).cancelWorkById(workId)
@@ -138,7 +295,49 @@ WorkManager.getInstance(context).cancelUniqueWork("sync_work")
 WorkManager.getInstance(context).cancelAllWork()
 ```
 
+:::
+
 ### 5.3 进度上报
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class DownloadWorker extends Worker {
+
+    public DownloadWorker(@NonNull Context context, @NonNull WorkerParameters params) {
+        super(context, params);
+    }
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        // 对应 CoroutineWorker + repeat/delay：Java 中用循环 + Thread.sleep
+        for (int i = 0; i < 10; i++) {
+            setProgress(new Data.Builder()
+                    .putInt("progress", (i + 1) * 10)
+                    .build());
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                return Result.retry();
+            }
+        }
+        return Result.success();
+    }
+}
+
+// 观察进度
+WorkManager.getInstance(context)
+        .getWorkInfoByIdLiveData(workId)
+        .observe(this, info -> {
+            int progress = info.getProgress().getInt("progress", 0);
+            progressBar.setProgress(progress);
+        });
+```
+
+@tab Kotlin
 
 ```kotlin
 class DownloadWorker(...) : CoroutineWorker(context, params) {
@@ -160,7 +359,36 @@ WorkManager.getInstance(context)
     }
 ```
 
+:::
+
 ### 5.4 CoroutineWorker（推荐）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class SyncWorker extends Worker {
+
+    public SyncWorker(@NonNull Context appContext, @NonNull WorkerParameters params) {
+        super(appContext, params);
+    }
+
+    @NonNull
+    @Override
+    public Result doWork() {
+        // 对应 withContext(Dispatchers.IO)：Worker.doWork 本身在后台线程执行
+        try {
+            syncData();
+            return Result.success();
+        } catch (Exception e) {
+            return Result.retry();
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class SyncWorker(
@@ -178,6 +406,8 @@ class SyncWorker(
     }
 }
 ```
+
+:::
 
 > `CoroutineWorker` 基于协程，任务自动绑定协程取消（`setForeground` 可更新进度）。
 

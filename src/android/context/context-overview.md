@@ -33,6 +33,10 @@ flowchart TD
 
 ### 1.2 ContextWrapper 代理机制（核心）
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ContextWrapper 的所有方法都是委托给 mBase
 public class ContextWrapper extends Context {
@@ -54,6 +58,28 @@ public class ContextWrapper extends Context {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ContextWrapper 的所有方法都是委托给 mBase
+class ContextWrapper(private var mBase: Context) : Context() {
+
+    override fun getResources(): Resources {
+        return mBase.getResources()   // 委托给 ContextImpl
+    }
+
+    override fun getSystemService(name: String): Any? {
+        return mBase.getSystemService(name)
+    }
+}
+```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 组件创建时注入 base
 protected void attachBaseContext(Context newBase) {
@@ -63,6 +89,20 @@ protected void attachBaseContext(Context newBase) {
     mBase = newBase;
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// 组件创建时注入 base
+protected fun attachBaseContext(newBase: Context) {
+    if (mBase != null) {
+        throw IllegalStateException("Base context already set")
+    }
+    mBase = newBase
+}
+```
+
+:::
 
 **设计好处**：
 - 可以**子类化 Context 修改行为**而不改原始实现（如 ContextThemeWrapper 注入主题）。
@@ -106,6 +146,24 @@ protected void attachBaseContext(Context newBase) {
 
 ### 4.1 内存泄漏案例
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 泄漏：单例持有 Activity Context
+public class UserManager {
+    static Context context;   // 持有的是 Activity → Activity 无法回收
+}
+
+// ✓ 正确：用 Application Context
+public class UserManager {
+    static Context context = MyApp.instance;   // 进程级，不泄漏
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ✗ 泄漏：单例持有 Activity Context
 object UserManager {
@@ -118,7 +176,23 @@ object UserManager {
 }
 ```
 
+:::
+
 **泄漏链条**：单例 → Activity Context → Activity 持有 Window/DecorView → 整个 Activity 无法 GC。**LeakCanary 检测到的泄漏绝大多数是这类。**
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 泄漏：静态 View 引用（View 内部持 Activity）
+static View sView;
+
+// ✗ 泄漏：内部类 Handler 持有 Activity
+// ✓ 解决：静态内部类 + WeakReference，或 Lifecycle 感知组件
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✗ 泄漏：静态 View 引用（View 内部持 Activity）
@@ -130,6 +204,8 @@ companion object {
 // ✓ 解决：静态内部类 + WeakReference，或 lifecycleScope
 ```
 
+:::
+
 ### 4.2 使用规则清单
 
 1. **Dialog 必须用 Activity Context**（需要 Window token）；Application Context 会报 `BadTokenException`。
@@ -140,6 +216,10 @@ companion object {
 6. `getBaseContext()` 返回 mBase（ContextImpl），业务中不要直接用。
 
 ## 五、getSystemService 原理
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // ContextImpl.getSystemService
@@ -154,6 +234,23 @@ public static Object getSystemService(ContextImpl ctx, String name) {
     return fetcher != null ? fetcher.getService(ctx) : null;
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// ContextImpl.getSystemService
+override fun getSystemService(name: String): Any? {
+    return SystemServiceRegistry.getSystemService(this, name)
+}
+
+// SystemServiceRegistry 维护服务单例注册表
+fun getSystemService(ctx: ContextImpl, name: String): Any? {
+    val fetcher = SYSTEM_SERVICE_FETCHERS[name]
+    return fetcher?.getService(ctx)
+}
+```
+
+:::
 
 ```mermaid
 sequenceDiagram
@@ -178,6 +275,27 @@ sequenceDiagram
 
 ## 六、多进程与 Application 初始化
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MyApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        String processName = getProcessName();
+        if (processName != null && processName.equals(getPackageName())) {
+            // 主进程：完整初始化（推送、图片库、崩溃收集）
+        } else {
+            // 子进程（如 :remote）：只初始化必要的
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class MyApplication : Application() {
     override fun onCreate() {
@@ -191,6 +309,8 @@ class MyApplication : Application() {
     }
 }
 ```
+
+:::
 
 > 多进程下 Application.onCreate 执行**多次**（每个进程一次），必须按进程名分支。详见[进程与保活](/android/process/process-lifecycle.md)。
 

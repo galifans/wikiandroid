@@ -46,6 +46,22 @@ Map（键值对）
 | 内存 | 连续、省 | 节点 + 指针，占内存 |
 | 适用 | 读多写少、随机访问 | 频繁头尾操作 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ArrayList 扩容机制
+// 默认容量 10，每次扩容为 1.5 倍
+// add 时：ensureCapacityInternal → grow
+List<String> list = new ArrayList<>();
+list.add("a");   // 容量不够时扩容
+
+// 扩容源码要点：newCapacity = oldCapacity + (oldCapacity >> 1)
+```
+
+@tab Kotlin
+
 ```kotlin
 // ArrayList 扩容机制
 // 默认容量 10，每次扩容为 1.5 倍
@@ -56,7 +72,23 @@ list.add("a")   // 容量不够时扩容
 // 扩容源码要点：newCapacity = oldCapacity + (oldCapacity >> 1)
 ```
 
+:::
+
 ### 2.2 线程安全
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 普通 ArrayList 非线程安全
+// 方案：
+List<String> syncList = Collections.synchronizedList(new ArrayList<>());  // 同步包装
+List<String> copyList = new CopyOnWriteArrayList<>();                     // 写时复制
+// CopyOnWriteArrayList：读无锁（快照），写加锁复制整个数组（适合读多写少）
+```
+
+@tab Kotlin
 
 ```kotlin
 // 普通 ArrayList 非线程安全
@@ -65,6 +97,8 @@ val syncList = java.util.Collections.synchronizedList(ArrayList<String>())  // �
 val copyList = java.util.concurrent.CopyOnWriteArrayList<String>()          // 写时复制
 // CopyOnWriteArrayList：读无锁（快照），写加锁复制整个数组（适合读多写少）
 ```
+
+:::
 
 ## 3. HashMap 源码详解（核心重点）
 
@@ -97,10 +131,23 @@ JDK 1.8+ 结构：
 ⑦ 元素个数 > 阈值 → 扩容（resize，2 倍）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 为什么用 2 的幂：index = (n - 1) & hash 等价于 hash % n，位运算更快
+// 为什么扰动：hash >>> 16 让高位参与运算，减少冲突
+```
+
+@tab Kotlin
+
 ```kotlin
 // 为什么用 2 的幂：index = (n - 1) & hash 等价于 hash % n，位运算更快
 // 为什么扰动：hash >>> 16 让高位参与运算，减少冲突
 ```
+
+:::
 
 ### 3.3 get 流程
 
@@ -123,6 +170,25 @@ JDK 1.8 优化：利用 (e.hash & oldCap) == 0 判断
 
 ## 4. Set 与 Map 的关系
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// HashSet 底层就是 HashMap（value 用固定 PRESENT 占位）
+Set<String> set = new HashSet<>();
+
+// LinkedHashMap：维护插入顺序（LRU 缓存基础）
+LinkedHashMap<String, Integer> lru = new LinkedHashMap<String, Integer>(16, 0.75f, true) {
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<String, Integer> eldest) {
+        return size() > 100;    // 超过 100 淘汰最久未用
+    }
+};
+```
+
+@tab Kotlin
+
 ```kotlin
 // HashSet 底层就是 HashMap（value 用固定 PRESENT 占位）
 val set = HashSet<String>()
@@ -134,6 +200,8 @@ val lru = object : LinkedHashMap<String, Int>(16, 0.75f, true) {
     }
 }
 ```
+
+:::
 
 ## 5. ConcurrentHashMap（并发安全）
 

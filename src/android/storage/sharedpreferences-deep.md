@@ -41,6 +41,10 @@ SP 以 **XML 文件**形式保存在 `/data/data/<packageName>/shared_prefs/` �
 | `PreferenceManager.getDefaultSharedPreferences(ctx)` | `packageName_preferences.xml` | 包名 + `_preferences` |
 | `Context.getSharedPreferences(name, mode)` | 自定义 name | **所有方式的最终入口** |
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ContextImpl 中的单例缓存
 public SharedPreferences getSharedPreferences(String name, int mode) {
@@ -54,6 +58,21 @@ public SharedPreferences getSharedPreferences(String name, int mode) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// ContextImpl 中的单例缓存（Kotlin 等价示意）
+@Synchronized
+fun getSharedPreferences(name: String, mode: Int): SharedPreferences {
+    val sp = mSharedPrefs[name]   // ArrayMap 缓存
+    return sp ?: SharedPreferencesImpl(file, mode).also {
+        mSharedPrefs[name] = it  // 首次创建
+    }
+}
+```
+
+:::
 
 **核心机制：进程级单例缓存** —— 同一个 name 的 SP 在进程内只加载一次（`ArrayMap` 缓存）。所有线程的 get/put 都操作**同一份内存 mMap**，因此：
 
@@ -93,6 +112,26 @@ flowchart LR
 
 ### 4.2 高频写盘优化
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 高频写：每次 edit 都触发一次磁盘写
+for (int i = 0; i < 100; i++) {
+    prefs.edit().putInt("key" + i, i).apply();
+}
+
+// ✓ 批量写：一次 edit 合并所有修改，只写一次盘
+SharedPreferences.Editor editor = prefs.edit();
+for (int i = 0; i < 100; i++) {
+    editor.putInt("key" + i, i);
+}
+editor.apply();
+```
+
+@tab Kotlin
+
 ```kotlin
 // ✗ 高频写：每次 edit 都触发一次磁盘写
 repeat(100) {
@@ -104,6 +143,8 @@ val editor = prefs.edit()
 repeat(100) { editor.putInt("key$it", it) }
 editor.apply()
 ```
+
+:::
 
 ## 五、常见坑点清单
 
@@ -117,6 +158,32 @@ editor.apply()
 8. **SP 不会在应用更新后自动迁移**：key 变更需要手动处理兼容。
 
 ## 六、替代方案：DataStore
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Preferences DataStore（替代 SP 的首选）
+// 顶层扩展属性（Kotlin 特性，Java 中用 DataStoreFactory 创建）
+private val Context.dataStore by preferencesDataStore(name = "settings")
+
+val counterFlow: Flow<Integer> = context.getDataStore().getData()
+        .map(prefs -> prefs.contains(PreferencesKeys.counter)
+                ? prefs.get(PreferencesKeys.counter) : 0);
+
+public void incrementCounter(Scope scope) {
+    scope.launch(Dispatchers.IO) {
+        context.getDataStore().edit(settings -> {
+            int current = settings.contains(PreferencesKeys.counter)
+                    ? settings.get(PreferencesKeys.counter) : 0;
+            settings.put(PreferencesKeys.counter, current + 1);
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // Preferences DataStore（替代 SP 的首选）
@@ -132,6 +199,8 @@ suspend fun incrementCounter() {
     }
 }
 ```
+
+:::
 
 | 对比 | SharedPreferences | DataStore |
 |------|-------------------|-----------|

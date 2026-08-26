@@ -33,6 +33,17 @@ sequenceDiagram
 
 ### 2.1 三大基础容器
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// Row/Column/Box 对应 View 体系：LinearLayout（horizontal/vertical）与 FrameLayout
+```
+
+@tab Kotlin
+
 ```kotlin
 // Row: 水平排列
 Row(
@@ -57,6 +68,8 @@ Box(modifier = Modifier.size(200.dp)) {
 }
 ```
 
+:::
+
 ### 2.2 Arrangement / Alignment 速查
 
 | 概念 | 作用 | 常用值 |
@@ -68,6 +81,17 @@ Box(modifier = Modifier.size(200.dp)) {
 ## 三、ConstraintLayout 约束布局
 
 > 解决复杂嵌套:用约束关系代替多层布局嵌套,提升性能。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// ConstraintLayout 对应 View 体系：androidx.constraintlayout.widget.ConstraintLayout + XML 约束
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -105,6 +129,8 @@ fun ConstraintDemo() {
 }
 ```
 
+:::
+
 ### ConstraintLayout 核心 API
 
 | API | 作用 |
@@ -118,6 +144,17 @@ fun ConstraintDemo() {
 ## 四、自定义 Layout
 
 ### 4.1 测量与摆放
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：自定义 ViewGroup 重写 onMeasure / onLayout 实现流式换行
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -152,6 +189,8 @@ fun FlowLayout(
 }
 ```
 
+:::
+
 ### 4.2 自定义布局三步法
 
 ```mermaid
@@ -162,6 +201,17 @@ flowchart LR
 
 ## 五、Intrinsic 尺寸与二次测量
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：两列等高可用 ConstraintLayout 的 0dp 约束或自定义测量实现
+```
+
+@tab Kotlin
+
 ```kotlin
 // IntrinsicSize:让子布局按内容固有尺寸约束
 Row(
@@ -171,6 +221,8 @@ Row(
     VerticalDivider()   // 高度与左侧一致
 }
 ```
+
+:::
 
 > Intrinsic 尺寸允许父布局在"知道子项内容大小"之前约束子项,解决"两列高度需一致"等难题。代价是二次测量成本,仅在必要时使用。
 

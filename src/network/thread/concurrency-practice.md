@@ -12,6 +12,10 @@ description: 线程中断机制、ThreadLocal、并发容器、生产者消费�
 
 ### 1.1 中断的本质
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 中断不是"强制停止",而是"协作式"信号
 Thread thread = new Thread(() -> {
@@ -29,6 +33,28 @@ Thread thread = new Thread(() -> {
 thread.start();
 thread.interrupt();   // 设置中断标志,线程自己决定何时退出
 ```
+
+@tab Kotlin
+
+```kotlin
+// 中断不是"强制停止",而是"协作式"信号
+val thread = Thread {
+    while (!Thread.currentThread().isInterrupted) {   // 检查中断标志
+        // 执行任务...
+        try {
+            Thread.sleep(100)
+        } catch (e: InterruptedException) {
+            // sleep/wait/join 会响应中断:抛出异常并清除标志
+            Thread.currentThread().interrupt()   // 重新设置标志(保持中断状态)
+            break
+        }
+    }
+}
+thread.start()
+thread.interrupt()   // 设置中断标志,线程自己决定何时退出
+```
+
+:::
 
 | API | 作用 |
 |-----|------|
@@ -49,6 +75,28 @@ thread.interrupt();   // 设置中断标志,线程自己决定何时退出
 
 ## 二、ThreadLocal 线程隔离
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ThreadLocal:每个线程一份独立副本
+class RequestContext {
+    static final ThreadLocal<String> userId = new ThreadLocal<>();
+    static final ThreadLocal<String> traceId = new ThreadLocal<>();
+}
+
+// 主线程设置
+RequestContext.userId.set("10001");
+
+// 线程池中读取:各线程互不影响
+void handleRequest() {
+    String id = RequestContext.userId.get();   // 当前线程的副本
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ThreadLocal:每个线程一份独立副本
 class RequestContext {
@@ -66,6 +114,8 @@ fun handleRequest() {
     val id = RequestContext.userId.get()   // 当前线程的副本
 }
 ```
+
+:::
 
 ### 2.1 ThreadLocal 实现原理
 
@@ -95,6 +145,10 @@ flowchart TD
 | `BlockingQueue` 家族 | 锁+条件 | 生产者消费者 |
 | `SynchronizedList/Map` | 全锁 | 简单低频场景 |
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 正确选择:根据读写比例
 // 读多写少(配置缓存) → CopyOnWriteArrayList / ConcurrentHashMap
@@ -103,7 +157,23 @@ flowchart TD
 // 并发统计(计数器) → LongAdder
 ```
 
+@tab Kotlin
+
+```kotlin
+// 正确选择:根据读写比例
+// 读多写少(配置缓存) → CopyOnWriteArrayList / ConcurrentHashMap
+// 读写均衡(业务数据) → ConcurrentHashMap
+// 队列(任务调度) → BlockingQueue(ArrayBlockingQueue / LinkedBlockingQueue)
+// 并发统计(计数器) → LongAdder
+```
+
+:::
+
 ## 四、生产者消费者模式
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // BlockingQueue 实现:无需手动同步
@@ -133,6 +203,40 @@ for (int i = 0; i < 4; i++) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// BlockingQueue 实现:无需手动同步
+class TaskQueue {
+    private val queue = LinkedBlockingQueue<Task>(100)
+
+    // 生产者
+    @Throws(InterruptedException::class)
+    fun produce(task: Task) {
+        queue.put(task)        // 队列满则阻塞
+    }
+
+    // 消费者
+    @Throws(InterruptedException::class)
+    fun consume(): Task {
+        return queue.take()    // 队列空则阻塞
+    }
+}
+
+// 使用:单生产者 + 多消费者
+val consumers = Executors.newFixedThreadPool(4)
+repeat(4) {
+    consumers.execute {
+        while (true) {
+            val task = queue.consume()
+            process(task)
+        }
+    }
+}
+```
+
+:::
+
 ```mermaid
 sequenceDiagram
     participant P as 生产者
@@ -159,6 +263,37 @@ sequenceDiagram
 
 ### 5.2 线程池最佳实践
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Android 中推荐使用协程替代裸线程池(Java 侧对应线程池 + Handler 回主线程)
+ExecutorService ioExecutor = Executors.newFixedThreadPool(4);
+ioExecutor.execute(() -> {
+    // 耗时操作
+    new Handler(Looper.getMainLooper()).post(() -> {
+        // 更新 UI
+    });
+});
+
+// 仍需线程池时的规范
+ThreadPoolExecutor threadPool = new ThreadPoolExecutor(
+    4,                          // 核心线程
+    8,                          // 最大线程
+    60, TimeUnit.SECONDS,       // 保活时间
+    new LinkedBlockingQueue<>(100),   // 有界队列
+    r -> {
+        Thread t = new Thread(r, "worker-" + counter.incrementAndGet());
+        t.setDaemon(true);      // 守护线程,不阻止进程退出
+        return t;
+    },
+    new ThreadPoolExecutor.CallerRunsPolicy()   // 拒绝策略:调用者执行
+);
+```
+
+@tab Kotlin
+
 ```kotlin
 // Android 中推荐使用协程替代裸线程池
 viewModelScope.launch(Dispatchers.IO) {
@@ -178,6 +313,8 @@ val threadPool = ThreadPoolExecutor(
 )
 ```
 
+:::
+
 ## 六、并发实战常见坑
 
 | 坑 | 原因 | 解决 |
@@ -188,6 +325,10 @@ val threadPool = ThreadPoolExecutor(
 | 内存可见性 | 未用 volatile | volatile/CAS/锁 |
 | 竞态条件 | 检查-执行非原子 | synchronized/原子类 |
 | ThreadLocal 泄漏 | 线程池未 remove | finally 中 remove |
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // 死锁示例与解决
@@ -202,6 +343,24 @@ public void transfer(Account from, Account to, int amount) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// 死锁示例与解决
+// ✗ 两个线程互相持有对方需要的锁
+// ✓ 方案:所有线程按同一顺序获取锁(A → B)
+fun transfer(from: Account, to: Account, amount: Int) {
+    synchronized(from) {
+        synchronized(to) {   // 若其它线程先锁 to 再锁 from → 死锁
+            from.debit(amount)
+            to.credit(amount)
+        }
+    }
+}
+```
+
+:::
 
 ## 七、高频面试题
 

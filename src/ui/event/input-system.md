@@ -67,6 +67,10 @@ sequenceDiagram
 
 ## 三、应用侧：ViewRootImpl 接收事件
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ViewRootImpl 内部
 InputStage mFirstPostImeInputStage;  // 责任链：输入事件处理阶段
@@ -75,6 +79,19 @@ InputStage mFirstPostImeInputStage;  // 责任链：输入事件处理阶段
 mSyntheticInputStage → mEarlyPostImeInputStage → mPostImeInputStage
 → mFirstPostImeInputStage → ViewPostImeInputStage（默认）→ mSyntheticInputStage
 ```
+
+@tab Kotlin
+
+```kotlin
+// ViewRootImpl 内部
+var mFirstPostImeInputStage: InputStage?  // 责任链：输入事件处理阶段
+
+// 责任链构成
+mSyntheticInputStage → mEarlyPostImeInputStage → mPostImeInputStage
+→ mFirstPostImeInputStage → ViewPostImeInputStage（默认）→ mSyntheticInputStage
+```
+
+:::
 
 ```mermaid
 flowchart LR
@@ -110,6 +127,10 @@ flowchart TD
 
 ### 4.3 分发伪代码
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ViewGroup.dispatchTouchEvent 核心逻辑（简化）
 public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -135,6 +156,35 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ViewGroup.dispatchTouchEvent 核心逻辑（简化）
+override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+    if (ev.action == ACTION_DOWN) {
+        // 新一轮触摸序列：重置状态
+        mFirstTouchTarget = null
+    }
+    val intercepted = onInterceptTouchEvent(ev)   // 询问是否拦截
+    if (!intercepted) {
+        // 遍历子 View，找目标
+        for (child in children) {
+            if (child.dispatchTouchEvent(ev)) {
+                mFirstTouchTarget = child   // 找到目标
+                break
+            }
+        }
+    }
+    // 没有子 View 消费 → 自己处理
+    if (mFirstTouchTarget == null) {
+        return onTouchEvent(ev)
+    }
+    return true
+}
+```
+
+:::
+
 ## 五、事件序列与 DOWN 关键性
 
 ### 5.1 事件序列
@@ -155,6 +205,24 @@ flowchart LR
 | 触摸事件被新窗口抢占 | 收到 CANCEL |
 | 视图被移除/滚动容器接管 | 收到 CANCEL |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ViewGroup 拦截后：让子 View 先收 CANCEL 再自己处理
+@Override
+public boolean onInterceptTouchEvent(MotionEvent ev) {
+    if (ev.getAction() == MotionEvent.ACTION_MOVE && 条件满足) {
+        // 通知子 View：你的触摸被抢走了
+        return true;   // 系统会给子 View 发 ACTION_CANCEL
+    }
+    return super.onInterceptTouchEvent(ev);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ViewGroup 拦截后：让子 View 先收 CANCEL 再自己处理
 override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
@@ -165,6 +233,8 @@ override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
     return super.onInterceptTouchEvent(ev)
 }
 ```
+
+:::
 
 ## 六、事件分发机制细节
 

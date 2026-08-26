@@ -38,11 +38,25 @@ BootClassLoader（启动类加载器）
 | DexClassLoader | 加载外部 dex（SD 卡/下载） | 热修复、插件化 |
 | InMemoryDexClassLoader | 内存 dex | 启动优化 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 获取类加载器
+ClassLoader loader = getClass().getClassLoader();           // PathClassLoader
+ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
+```
+
+@tab Kotlin
+
 ```kotlin
 // 获取类加载器
 val loader = javaClass.classLoader           // PathClassLoader
 val systemLoader = ClassLoader.getSystemClassLoader()
 ```
+
+:::
 
 ## 3. 双亲委派模型
 
@@ -56,6 +70,39 @@ val systemLoader = ClassLoader.getSystemClassLoader()
 - 避免重复加载（框架类只加载一次）
 - 安全：防止自定义类覆盖系统类（如 String）
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 双亲委派的核心逻辑
+class MyClassLoader extends ClassLoader {
+
+    MyClassLoader(ClassLoader parent) {
+        super(parent);
+    }
+
+    @Override
+    public Class<?> loadClass(String name) throws ClassNotFoundException {
+        // 先让父加载器尝试
+        try {
+            return getParent().loadClass(name);
+        } catch (ClassNotFoundException e) {
+            // 父加载不到，自己加载
+            return findClass(name);
+        }
+    }
+
+    @Override
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        // 从 dex 中查找并加载
+        return super.findClass(name);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 双亲委派的核心逻辑
@@ -78,6 +125,8 @@ class MyClassLoader : ClassLoader(parent) {
 }
 ```
 
+:::
+
 ## 4. 热修复原理（类加载方案）
 
 ```text
@@ -91,6 +140,36 @@ class MyClassLoader : ClassLoader(parent) {
 
 关键：元素组 dex 顺序（补丁在前）
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 热修复框架的简化实现（如 Tinker 思路）
+void injectPatch(String patchedDexPath) {
+    PathClassLoader pathClassLoader = (PathClassLoader) getApplicationClassLoader();
+
+    // 反射获取 DexPathList 与 dexElements
+    Field pathListField = PathClassLoader.class.getDeclaredField("pathList");
+    pathListField.setAccessible(true);
+    Object pathList = pathListField.get(pathClassLoader);
+
+    // 把补丁 dex 转成 Element[]
+    Object[] newElements = createDexElements(patchedDexPath);
+
+    // 合并：补丁元素 + 原元素（补丁在前！）
+    Field dexElementsField = pathList.getClass().getDeclaredField("dexElements");
+    dexElementsField.setAccessible(true);
+    Object[] originalElements = (Object[]) dexElementsField.get(pathList);
+    Object[] merged = new Object[newElements.length + originalElements.length];
+    System.arraycopy(newElements, 0, merged, 0, newElements.length);
+    System.arraycopy(originalElements, 0, merged, newElements.length, originalElements.length);
+    dexElementsField.set(pathList, merged);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 热修复框架的简化实现（如 Tinker 思路）
@@ -112,6 +191,8 @@ fun injectPatch(patchedDexPath: String) {
     dexElementsField.set(pathList, newElements + originalElements)
 }
 ```
+
+:::
 
 **局限**：只能修复方法实现，无法新增/删除方法（结构变化需重启）。
 

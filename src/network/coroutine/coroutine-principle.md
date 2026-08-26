@@ -30,6 +30,29 @@ flowchart LR
 
 ### 2.1 suspend 关键字编译后变成什么?
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:回调 + 状态标记(Java 无挂起函数,用回调表达挂起点)
+public void fetchUser(long id, Callback<User> callback) {
+    getToken(new Callback<String>() {          // 挂起点 1(回调)
+        @Override
+        public void onSuccess(String token) {
+            getNetworkUser(id, token, new Callback<User>() {   // 挂起点 2
+                @Override
+                public void onSuccess(User user) {
+                    callback.onSuccess(user);
+                }
+            });
+        }
+    });
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 源码:挂起函数
 suspend fun fetchUser(id: Long): User {
@@ -39,7 +62,40 @@ suspend fun fetchUser(id: Long): User {
 }
 ```
 
+:::
+
 **编译后(简化 CPS 变换)**:
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// CPS 变换后的等价结构(示意):回调 + 状态机
+public Object fetchUser(long id, Continuation<User> cont) {
+    // ① 把函数体拆成状态机:每个挂起点一个状态
+    // ② 参数追加 Continuation(回调)
+    // ③ 返回值改成 Object(结果或 COROUTINE_SUSPENDED 标记)
+    class FetchUserStateMachine extends CoroutineImpl {
+        int label = 0;
+        @Override
+        public Object invokeSuspend(Object result) {
+            switch (label) {
+                case 0:
+                    label = 1; token = getToken(this);
+                    if (token == COROUTINE_SUSPENDED) return token;
+                case 1:
+                    label = 2; user = getNetworkUser(id, token, this);
+                    if (user == COROUTINE_SUSPENDED) return user;
+                case 2:
+                    return user;
+            }
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 fun fetchUser(id: Long, cont: Continuation<User>): Any? {
@@ -58,6 +114,8 @@ fun fetchUser(id: Long, cont: Continuation<User>): Any? {
     }
 }
 ```
+
+:::
 
 ```mermaid
 flowchart TD
@@ -83,6 +141,27 @@ flowchart TD
 
 ## 三、调度器:谁在哪个线程跑
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:线程池 + 回调(协程调度器对应的 Java 方案)
+ExecutorService defaultPool = Executors.newFixedThreadPool(4);  // 对应 Dispatchers.Default(CPU 密集型)
+ExecutorService ioPool = Executors.newCachedThreadPool();       // 对应 Dispatchers.IO(网络/磁盘)
+Handler mainHandler = new Handler(Looper.getMainLooper());      // 对应 Dispatchers.Main(UI 操作)
+
+// 切换线程:提交到 IO 线程池,完成后切回主线程(对应 withContext)
+public void loadData(final Callback<Data> callback) {
+    ioPool.execute(() -> {
+        Data data = networkService.fetch();   // 在 IO 线程执行
+        mainHandler.post(() -> callback.onSuccess(data));  // 完成后自动回到调用方线程
+    });
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 调度器:决定协程运行的线程池
 Dispatchers.Main      // Android 主线程(UI 操作)
@@ -96,6 +175,8 @@ suspend fun loadData(): Data = withContext(Dispatchers.IO) {
     networkService.fetch()
 }
 ```
+
+:::
 
 ```mermaid
 sequenceDiagram
@@ -119,6 +200,27 @@ sequenceDiagram
 
 ## 四、协程上下文与 Job
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:线程池 + Future(组合配置)
+ExecutorService executor = Executors.newFixedThreadPool(4);   // 对应 Dispatchers.IO
+
+// 对应 Job:Future 管理任务生命周期 + 取消
+Future<?> job = executor.submit(() -> { ... });
+job.cancel(true);          // 对应 Job.cancel()(取消任务)
+
+// 对应 CoroutineName:命名线程便于调试
+ThreadFactory factory = r -> new Thread(r, "load");           // 调试名称
+
+// 对应 CoroutineExceptionHandler:统一异常处理
+Thread.setDefaultUncaughtExceptionHandler((t, e) -> Log.e("TAG", "异常", e));
+```
+
+@tab Kotlin
+
 ```kotlin
 // CoroutineContext = 多个元素的集合
 launch(
@@ -131,6 +233,8 @@ CoroutineDispatcher: // 线程调度
 CoroutineName:     // 调试名称
 CoroutineExceptionHandler:  // 异常处理
 ```
+
+:::
 
 ### Job 层级与取消传播
 
@@ -153,6 +257,33 @@ flowchart TD
 
 ## 五、协程的执行模型
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:线程池 + 回调(完整例子)
+public static void main(String[] args) {
+    ExecutorService ioExecutor = Executors.newCachedThreadPool();
+    Handler mainHandler = new Handler(Looper.getMainLooper());
+    System.out.println("开始: " + Thread.currentThread().getName());
+
+    // 对应 withContext(Dispatchers.IO):IO 线程执行耗时操作
+    ioExecutor.execute(() -> {
+        try {
+            Thread.sleep(1000);   // 对应 delay(1000)(阻塞 IO 线程,该线程可被其他任务使用)
+            String result = "数据";
+            // 回到原上下文继续
+            mainHandler.post(() -> System.out.println("结果: " + result));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    });
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 一个完整例子
 fun main() = runBlocking {
@@ -168,6 +299,8 @@ fun main() = runBlocking {
     println("结果: $result")   // 回到原上下文继续
 }
 ```
+
+:::
 
 ```mermaid
 sequenceDiagram

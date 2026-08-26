@@ -52,11 +52,25 @@ flowchart TD
 | 大小写 | 字符串严格相等，区分大小写 |
 | 空 Intent action | Intent 未设置 action 时，不参与 action 匹配（等于绕过） |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 发送方
+Intent intent = new Intent(Intent.ACTION_VIEW);
+// 若存在 Filter 声明了 VIEW，则匹配成功
+```
+
+@tab Kotlin
+
 ```kotlin
 // 发送方
 val intent = Intent(Intent.ACTION_VIEW)
 // 若存在 Filter 声明了 VIEW，则匹配成功
 ```
+
+:::
 
 ::: warning 关键点
 `<action>` 是**唯一一个"Intent 必须命中其一"**的匹配项。如果 Intent 设置了 action，但没有任何 Filter 声明该 action → 不匹配。
@@ -79,11 +93,25 @@ val intent = Intent(Intent.ACTION_VIEW)
 | 自动补充 | `startActivity` / `startActivityForResult` 会自动给 Intent 加 `CATEGORY_DEFAULT` |
 | 隐含要求 | **隐式 Intent 的接收方 Filter 必须声明 `CATEGORY_DEFAULT`**，否则 `startActivity` 无法匹配 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 发送方源码层面：ContextImpl.startActivity → mMainThread.getApplicationThread()
+// 在 Activity.startActivityForResult 中：
+// intent.addCategory(Intent.CATEGORY_DEFAULT);  ← 系统自动添加
+```
+
+@tab Kotlin
+
 ```kotlin
 // 发送方源码层面：ContextImpl.startActivity → mMainThread.getApplicationThread()
 // 在 Activity.startActivityForResult 中：
 // intent.addCategory(Intent.CATEGORY_DEFAULT);  ← 系统自动添加
 ```
+
+:::
 
 ### 为什么接收方必须声明 DEFAULT
 
@@ -127,6 +155,19 @@ data 由四部分构成：`scheme`（协议）、`host`（主机）、`port`（�
 | data + type 都有 | data + type | 需**同时**匹配 |
 | 仅 data | 仅 type | **不匹配** |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 发送方同时携带 data + type
+Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("content://com.example/doc/1"));
+intent.setType("text/plain");
+// 接收方 Filter 必须同时声明对应 scheme/host + mimeType 才能匹配
+```
+
+@tab Kotlin
+
 ```kotlin
 // 发送方同时携带 data + type
 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("content://com.example/doc/1")).apply {
@@ -134,6 +175,8 @@ val intent = Intent(Intent.ACTION_VIEW, Uri.parse("content://com.example/doc/1")
 }
 // 接收方 Filter 必须同时声明对应 scheme/host + mimeType 才能匹配
 ```
+
+:::
 
 ::: tip 源码细节
 Android 源码 `IntentFilter.matchData()` 中，如果 Filter 未声明 data 也未声明 type，则**跳过 data 匹配**（视为匹配成功）；否则必须逐项比对。`ACTION_VIEW` 等系统 action 通常要求 data 匹配。
@@ -151,6 +194,21 @@ Android 源码 `IntentFilter.matchData()` 中，如果 Filter 未声明 data 也
 5. 输出：返回候选组件列表（可能为空 / 多个）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 手动查询验证匹配结果（开发调试利器）
+PackageManager pm = getPackageManager();
+List<ResolveInfo> candidates = pm.queryIntentActivities(intent, PackageManager.MATCH_ALL);
+for (ResolveInfo ri : candidates) {
+    Log.d("TAG", "匹配组件: " + ri.activityInfo.packageName + "/" + ri.activityInfo.name);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 手动查询验证匹配结果（开发调试利器）
 val pm = packageManager
@@ -159,6 +217,8 @@ candidates.forEach { ri ->
     Log.d("TAG", "匹配组件: ${ri.activityInfo.packageName}/${ri.activityInfo.name}")
 }
 ```
+
+:::
 
 ## 六、匹配优先级与选择器
 
@@ -171,11 +231,25 @@ candidates.forEach { ri ->
 | 3 | 用户最近选择的"始终"选项 |
 | 4 | 弹系统选择器（Chooser），用户临时选择 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 强制显示选择器（即使有默认应用）
+Intent chooser = Intent.createChooser(intent, "选择打开方式");
+startActivity(chooser);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 强制显示选择器（即使有默认应用）
 val chooser = Intent.createChooser(intent, "选择打开方式")
 startActivity(chooser)
 ```
+
+:::
 
 ## 七、常见实战场景 Filter 模板
 

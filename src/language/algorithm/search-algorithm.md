@@ -15,6 +15,10 @@ title: 查找算法
 
 ### 代码实现
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class Solution {
     public static int SequenceSearch(int[] sz, int key) {
@@ -27,6 +31,24 @@ public class Solution {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+object Solution {
+    @JvmStatic
+    fun sequenceSearch(sz: IntArray, key: Int): Int {
+        for (i in sz.indices) {
+            if (sz[i] == key) {
+                return i
+            }
+        }
+        return -1
+    }
+}
+```
+
+:::
 
 ### 特点
 
@@ -51,6 +73,10 @@ public class Solution {
 
 ### 代码实现
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class Solution {
     public static int BinarySearch(int[] sz, int key) {
@@ -71,6 +97,32 @@ public class Solution {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+object Solution {
+    @JvmStatic
+    fun binarySearch(sz: IntArray, key: Int): Int {
+        var low = 0
+        var high = sz.size - 1
+
+        while (low <= high) {
+            val middle = (low + high) / 2
+            if (sz[middle] == key) {
+                return middle
+            } else if (sz[middle] > key) {
+                high = middle - 1
+            } else {
+                low = middle + 1
+            }
+        }
+        return -1
+    }
+}
+```
+
+:::
 
 ### 特点
 

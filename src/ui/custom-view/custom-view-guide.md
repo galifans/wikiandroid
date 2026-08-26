@@ -21,6 +21,29 @@ description: 自定义 View 分类、构造方法、自定义属性、onMeasure/
 
 ### 2.1 继承 View 并实现构造方法
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class CircleView extends View {
+    // 三个构造：代码创建 / XML 使用（带属性）/ 带默认样式
+    public CircleView(Context context) {
+        this(context, null);
+    }
+
+    public CircleView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public CircleView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class CircleView @JvmOverloads constructor(
     context: Context,
@@ -30,6 +53,8 @@ class CircleView @JvmOverloads constructor(
     // 三个构造：代码创建 / XML 使用（带属性）/ 带默认样式
 }
 ```
+
+:::
 
 ### 2.2 自定义属性
 
@@ -42,6 +67,26 @@ class CircleView @JvmOverloads constructor(
     </declare-styleable>
 </resources>
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 读取自定义属性（在构造函数中）
+private int circleColor;
+private float radius;
+
+public CircleView(Context context, AttributeSet attrs, int defStyleAttr) {
+    super(context, attrs, defStyleAttr);
+    TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CircleView);
+    circleColor = ta.getColor(R.styleable.CircleView_circleColor, Color.GREEN);
+    radius = ta.getDimension(R.styleable.CircleView_radius, dp2px(50f));
+    ta.recycle();          // 必须回收！
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 读取自定义属性
@@ -56,7 +101,25 @@ init {
 }
 ```
 
+:::
+
 ### 2.3 处理 wrap_content（onMeasure）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    int defaultSize = dp2px(100f);   // 内容默认尺寸
+    int width = resolveSize(defaultSize, widthMeasureSpec);
+    int height = resolveSize(defaultSize, heightMeasureSpec);
+    setMeasuredDimension(width, height);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -67,7 +130,27 @@ override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
 }
 ```
 
+:::
+
 ### 2.4 绘制内容（onDraw）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+@Override
+protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    // 绘制圆形
+    paint.setColor(circleColor);
+    canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius, paint);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -80,7 +163,76 @@ override fun onDraw(canvas: Canvas) {
 }
 ```
 
+:::
+
 ## 3. 完整示例：可点击的圆
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class ClickableCircleView extends View {
+
+    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private float radius;
+    private boolean isPressed = false;
+
+    public ClickableCircleView(Context context) {
+        this(context, null);
+    }
+
+    public ClickableCircleView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public ClickableCircleView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        paint.setStyle(Paint.Style.FILL);
+        radius = dp2px(50f);
+        setClickable(true);      // 让 onTouchEvent 消费事件
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int size = resolveSize((int) (radius * 2), widthMeasureSpec);
+        setMeasuredDimension(size, size);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        paint.setColor(isPressed ? Color.LTGRAY : Color.GREEN);
+        canvas.drawCircle(getWidth() / 2f, getHeight() / 2f, radius, paint);
+    }
+
+    // 触摸反馈
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                isPressed = true;
+                invalidate();
+                break;
+            case MotionEvent.ACTION_UP:
+                isPressed = false;
+                invalidate();
+                performClick();    // 触发 OnClickListener
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                isPressed = false;
+                invalidate();
+                break;
+        }
+        return super.onTouchEvent(event);
+    }
+
+    private float dp2px(float dp) {
+        return dp * getResources().getDisplayMetrics().density;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class ClickableCircleView @JvmOverloads constructor(
@@ -134,15 +286,31 @@ class ClickableCircleView @JvmOverloads constructor(
 }
 ```
 
+:::
+
 ## 4. 关键知识点
 
 ### 4.1 invalidate 与 postInvalidate
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+invalidate()          // 主线程请求重绘（onDraw 会再次调用）
+postInvalidate()      // 子线程调用时使用（内部切回主线程）
+requestLayout()       // 重新测量 + 布局 + 绘制（尺寸/位置变化时）
+```
+
+@tab Kotlin
 
 ```kotlin
 invalidate()          // 主线程请求重绘（onDraw 会再次调用）
 postInvalidate()      // 子线程调用时使用（内部切回主线程）
 requestLayout()       // 重新测量 + 布局 + 绘制（尺寸/位置变化时）
 ```
+
+:::
 
 ### 4.2 坐标系
 

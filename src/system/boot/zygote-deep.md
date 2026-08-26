@@ -39,6 +39,10 @@ flowchart TD
     F --> G[进入 Socket 循环<br>等待 fork 请求]
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ZygoteInit.main(核心逻辑)
 public static void main(String[] argv) {
@@ -53,7 +57,29 @@ public static void main(String[] argv) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ZygoteInit.main(核心逻辑)
+fun main(argv: Array<String>) {
+    // 1. 创建 ServerSocket:监听 666 端口(实际用抽象 socket)
+    val zygoteServer = ZygoteServer()
+    // 2. 预加载:类/资源/主题/OpenGL 等
+    preload(ZygotePathClassLoader(...))
+    // 3. fork 出 SystemServer(系统服务进程)
+    val r = forkSystemServer(abiList, zygoteSocketName, zygoteServer)
+    // 4. 进入无限循环:处理 AMS 的进程创建请求
+    zygoteServer.runSelectLoop(abiList)
+}
+```
+
+:::
+
 ## 三、预加载机制
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // preload:加快应用启动 + 共享内存
@@ -70,6 +96,26 @@ static void preload() {
     preloadFonts();
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// preload:加快应用启动 + 共享内存
+fun preload() {
+    // 1. 预加载框架类(preload-classes 列表,数千个类)
+    preloadClasses()
+    // 2. 预加载共享资源:主题、drawable、string
+    preloadResources()
+    // 3. 预加载 OpenGL(硬件渲染)
+    preloadOpenGL()
+    // 4. 预加载字体/文本布局
+    preloadSharedLibraries()
+    preloadTextResources()
+    preloadFonts()
+}
+```
+
+:::
 
 | 预加载内容 | 作用 |
 |-----------|------|
@@ -95,6 +141,10 @@ sequenceDiagram
     Note over Z,P: fork 后父子分道:<br>Zygote 继续监听<br>子进程跑应用
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ZygoteConnection.processOneCommand:处理 fork 请求
 Runnable processOneCommand(ZygoteServer zygoteServer) {
@@ -110,6 +160,26 @@ Runnable processOneCommand(ZygoteServer zygoteServer) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// ZygoteConnection.processOneCommand:处理 fork 请求
+fun processOneCommand(zygoteServer: ZygoteServer): Runnable? {
+    // 1. 读取参数:uid/gid/应用类名(ActivityThread)等
+    // 2. fork 子进程(核心)
+    pid = Zygote.forkAndSpecialize(uid, gid, ...)
+    return if (pid == 0) {
+        // 子进程:返回应用的 main 方法
+        handleChildProc(parsedArgs, ...)
+    } else {
+        // 父进程(Zygote):继续循环
+        null
+    }
+}
+```
+
+:::
 
 ### 为什么用 fork?
 

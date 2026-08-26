@@ -18,6 +18,24 @@ description: 从 API 设计、异步模型、一致性、类型安全四个维�
 
 ### 2.1 SharedPreferences
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 获取实例
+SharedPreferences sp = getSharedPreferences("user_config", Context.MODE_PRIVATE);
+
+// 写入（两种方式）
+sp.edit().putString("nickname", "Tom").apply();    // 异步：内存立即生效，磁盘异步写
+sp.edit().putString("nickname", "Tom").commit();   // 同步：写盘完成后返回，可能卡线程
+
+// 读取（可能阻塞）
+String nickname = sp.getString("nickname", "default");
+```
+
+@tab Kotlin
+
 ```kotlin
 // 获取实例
 val sp = getSharedPreferences("user_config", Context.MODE_PRIVATE)
@@ -30,7 +48,39 @@ sp.edit().putString("nickname", "Tom").commit()   // 同步：写盘完成后返
 val nickname = sp.getString("nickname", "default")
 ```
 
+:::
+
 ### 2.2 Preferences DataStore
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Preferences DataStore（Java 中用 PreferenceDataStoreFactory 创建实例）
+private final DataStore<Preferences> dataStore =
+        new PreferenceDataStoreFactory().create(
+                CoroutineScope(Dispatchers.IO + SupervisorJob()),
+                () -> new File(context.getFilesDir(), "user_config.preferences_pb"));
+
+// 读取：Flow，异步 + 响应式
+Flow<String> nickname = dataStore.getData().map(prefs ->
+        prefs.contains(Keys.NICKNAME) ? prefs.get(Keys.NICKNAME) : "default");
+
+// 写入：suspend（Java 中在协程/WorkManager 中调用）
+public void setNickname(String name, CoroutineScope scope) {
+    scope.launch(Dispatchers.IO) {
+        dataStore.edit(prefs -> prefs.put(Keys.NICKNAME, name));
+    }
+}
+
+private static class Keys {
+    static final Preferences.Key<String> NICKNAME =
+            PreferencesKeys.stringKey("nickname");
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 private val Context.dataStore by preferencesDataStore(name = "user_config")
@@ -52,7 +102,30 @@ private object Keys {
 }
 ```
 
+:::
+
 ### 2.3 观察变化
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// SP 需要手动监听
+sp.registerOnSharedPreferenceChangeListener((prefs, key) -> { /* ... */ });
+// 记得注销，且回调线程不保证
+
+// DataStore：Flow 天然可观察
+lifecycleScope.launch {
+    repeatOnLifecycle(Lifecycle.State.STARTED) {
+        dataStore.data.collect { prefs ->
+            // 任何变化都会自动推送
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // SP 需要手动监听
@@ -68,6 +141,8 @@ lifecycleScope.launch {
     }
 }
 ```
+
+:::
 
 ## 3. 六大维度对比表
 
@@ -92,6 +167,10 @@ getSharedPreferences() 首次调用
      但 getXxx() 会调用 awaitLoadedLocked 等待加载完成）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // SP 源码关键逻辑（伪代码）
 public String getString(String key, String defValue) {
@@ -103,7 +182,24 @@ public String getString(String key, String defValue) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// SP 源码关键逻辑（伪代码，Kotlin 等价示意）
+@Synchronized
+fun getString(key: String, defValue: String): String {
+    awaitLoadedLocked()  // ← 阻塞等待磁盘加载完成
+    return mMap[key] as? String ?: defValue
+}
+```
+
+:::
+
 ### 4.2 写入路径
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public void apply() {
@@ -112,6 +208,18 @@ public void apply() {
     QueuedWork.addFinisher(...);   // 可能阻塞 onPause/onStop
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+fun apply() {
+    // ① 先同步写入内存 map（立即生效）
+    // ② 异步写磁盘（QueuedWork 排队，在 onPause 时会被强制 flush！）
+    QueuedWork.addFinisher(...)   // 可能阻塞 onPause/onStop
+}
+```
+
+:::
 
 > **经典卡顿场景**：主线程频繁 `getXxx()` 且文件大；或 `apply()` 排队任务过多，
 > 在 `onPause` 时 `QueuedWork.waitToFinish()` 强制等待写盘完成。
@@ -126,10 +234,23 @@ DataStore 核心机制：
   - 异常处理：读失败抛 IOException（需自行处理/重试），写失败不破坏原数据
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// DataStore 内部：SingleProcessDataStore 使用协程 Actor 串行化所有操作
+// 保证：不会出现 SP 那种"两个进程同时写导致数据错乱"的问题
+```
+
+@tab Kotlin
+
 ```kotlin
 // DataStore 内部：SingleProcessDataStore 使用协程 Actor 串行化所有操作
 // 保证：不会出现 SP 那种"两个进程同时写导致数据错乱"的问题
 ```
+
+:::
 
 ## 6. 迁移建议
 
@@ -148,6 +269,22 @@ DataStore 核心机制：
 
 官方推荐：**一次性迁移**（首次启动把 SP 数据导入 DataStore，之后删除 SP 文件）。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 使用 SharedPreferencesMigration（Java 中在协程作用域内调用）
+DataStore<Preferences> dataStore =
+        new PreferenceDataStoreFactory().create(
+                CoroutineScope(Dispatchers.IO + SupervisorJob()),
+                () -> new File(context.getFilesDir(), "data_store.preferences_pb"),
+                new SharedPreferencesMigration(context, "user_config")   // 自动迁移旧数据
+        );
+```
+
+@tab Kotlin
+
 ```kotlin
 // 使用 SharedPreferencesMigration
 val dataStore = PreferenceDataStoreFactory.create(
@@ -158,6 +295,8 @@ val dataStore = PreferenceDataStoreFactory.create(
     )
 )
 ```
+
+:::
 
 ## 7. 高频面试题
 

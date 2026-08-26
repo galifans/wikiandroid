@@ -31,12 +31,27 @@ flowchart TD
 
 ### 2.1 with 的 6 个重载
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Glide.with(context)          // Context：绑定 Application/Activity 生命周期
+Glide.with(activity)         // Activity：跟随 onStop/onStart 暂停恢复
+Glide.with(fragment)         // Fragment：跟随 Fragment 生命周期
+Glide.with(view)             // 从 View 推导出 Activity/Fragment
+```
+
+@tab Kotlin
+
 ```kotlin
 Glide.with(context)          // Context：绑定 Application/Activity 生命周期
 Glide.with(activity)         // Activity：跟随 onStop/onStart 暂停恢复
 Glide.with(fragment)         // Fragment：跟随 Fragment 生命周期
 Glide.with(view)             // 从 View 推导出 Activity/Fragment
 ```
+
+:::
 
 ### 2.2 生命周期绑定原理
 
@@ -54,13 +69,43 @@ flowchart LR
 
 ### 2.3 绑定 Application 的后果
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 若 Context 不是 Activity/Fragment（如自定义 View 传入 Application）
+// → 无法感知生命周期，图片加载不会随页面销毁取消
+Glide.with(applicationContext)   //  不推荐，除非确实全局
+```
+
+@tab Kotlin
+
 ```kotlin
 // 若 Context 不是 Activity/Fragment（如自定义 View 传入 Application）
 // → 无法感知生命周期，图片加载不会随页面销毁取消
 Glide.with(applicationContext)   //  不推荐，除非确实全局
 ```
 
+:::
+
 ## 三、load()：模型到数据源
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+Glide.with(this)
+    .load("https://.../image.jpg")   // 支持 String URL / Uri / File / 资源 ID / byte[]
+    .placeholder(R.drawable.placeholder)   // 占位图
+    .error(R.drawable.error)               // 错误图
+    .override(300, 300)                    // 固定尺寸
+    .centerCrop()                          // 裁剪策略
+    .into(imageView);
+```
+
+@tab Kotlin
 
 ```kotlin
 Glide.with(this)
@@ -71,6 +116,8 @@ Glide.with(this)
     .centerCrop()                          // 裁剪策略
     .into(imageView)
 ```
+
+:::
 
 ### RequestOptions 链式配置
 
@@ -106,6 +153,25 @@ sequenceDiagram
 
 ### 4.2 请求 Key 的构成
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// EngineKey：决定缓存命中与否
+public class EngineKey {
+    final Object model, signature;
+    final int width, height;
+    final List<Transformation> transformations;
+    final Class<?> resourceClass, transcodeClass;
+    final Options options;
+    final int overrideWidth, overrideHeight;
+    // equals()/hashCode() 由以上字段共同决定缓存是否命中
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // EngineKey：决定缓存命中与否
 data class EngineKey(
@@ -114,6 +180,8 @@ data class EngineKey(
     val options, val overrideWidth, val overrideHeight
 )
 ```
+
+:::
 
 > 同一个 URL，**不同尺寸/裁剪策略 = 不同 Key = 不同缓存条目**，这也是为什么 `override()` 改变后图片会重新加载。
 
@@ -148,6 +216,19 @@ flowchart TD
 | `AUTOMATIC` | 自动选择（默认推荐） |
 | `NONE` | 不缓存 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Glide.with(this)
+    .load(url)
+    .diskCacheStrategy(DiskCacheStrategy.DATA)   // 原图缓存
+    .into(imageView);
+```
+
+@tab Kotlin
+
 ```kotlin
 Glide.with(this)
     .load(url)
@@ -155,9 +236,24 @@ Glide.with(this)
     .into(imageView)
 ```
 
+:::
+
 > **RESOURCE 策略**适合"同一图多种尺寸"场景（各尺寸缓存一份）；**DATA 策略**适合"一张图只显示一次"或需要原图的场景。
 
 ## 六、图片变换（Transformations）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+Glide.with(this)
+    .load(url)
+    .transform(new CenterCrop(), new RoundedCorners(16))   // 组合变换：裁剪 + 圆角
+    .into(imageView);
+```
+
+@tab Kotlin
 
 ```kotlin
 Glide.with(this)
@@ -165,6 +261,8 @@ Glide.with(this)
     .transform(CenterCrop(), RoundedCorners(16))   // 组合变换：裁剪 + 圆角
     .into(imageView)
 ```
+
+:::
 
 | 变换 | 效果 |
 |------|------|
@@ -174,6 +272,36 @@ Glide.with(this)
 | `RoundedCorners` | 圆角 |
 | `BlurTransformation` | 高斯模糊 |
 | 自定义 Transform | 继承 BitmapTransformation |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义变换
+public class GrayscaleTransform extends BitmapTransformation {
+    @Override
+    public Bitmap transform(BitmapPool pool, Bitmap toTransform,
+                            int outWidth, int outHeight) {
+        // 颜色矩阵去色
+        ColorMatrix colorMatrix = new ColorMatrix();
+        colorMatrix.setSaturation(0f);
+        Paint paint = new Paint();
+        paint.setColorFilter(new ColorMatrixColorFilter(colorMatrix));
+        Bitmap result = pool.get(toTransform.getWidth(), toTransform.getHeight(),
+                Bitmap.Config.ARGB_8888);
+        new Canvas(result).drawBitmap(toTransform, 0f, 0f, paint);
+        return result;
+    }
+
+    @Override
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
+        messageDigest.update("grayscale".getBytes());
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 自定义变换
@@ -193,6 +321,8 @@ class GrayscaleTransform : BitmapTransformation() {
 }
 ```
 
+:::
+
 >  变换会改变 EngineKey（transformations 参与 Key 计算），因此不同变换使用独立缓存。
 
 ## 七、生命周期与内存
@@ -207,6 +337,23 @@ class GrayscaleTransform : BitmapTransformation() {
 
 ### 7.2 内存优化实践
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. 列表复用：into 前先 clear（RecyclerView 复用防错位）
+Glide.with(itemView).clear(holder.imageView);
+
+// 2. 大图降采样：override 配合 centerCrop
+.override(400, 400).centerCrop()
+
+// 3. 避免内存缓存堆积：低频大图 skipMemoryCache
+.skipMemoryCache(true)
+```
+
+@tab Kotlin
+
 ```kotlin
 // 1. 列表复用：into 前先 clear（RecyclerView 复用防错位）
 Glide.with(itemView).clear(holder.imageView)
@@ -217,6 +364,8 @@ Glide.with(itemView).clear(holder.imageView)
 // 3. 避免内存缓存堆积：低频大图 skipMemoryCache
 .skipMemoryCache(true)
 ```
+
+:::
 
 ## 八、高频面试题
 

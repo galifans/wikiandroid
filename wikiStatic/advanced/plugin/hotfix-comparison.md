@@ -47,6 +47,22 @@ description: 热修复主流方案：类加载、底层替换、Instant Run；Ti
 - 生效时机：下次启动（类加载前注入）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Tinker 使用（简化）
+// ① 生成补丁：TinkerPatch 插件
+// ② 客户端加载
+Tinker.install(applicationLike);
+
+// 补丁下载后：
+Tinker.with(appContext).loadPatch(patchPath, callback);
+```
+
+@tab Kotlin
+
 ```kotlin
 // Tinker 使用（简化）
 // ① 生成补丁：TinkerPatch 插件
@@ -56,6 +72,8 @@ Tinker.install(applicationLike)
 // 补丁下载后：
 Tinker.with(appContext).loadPatch(patchPath, callback)
 ```
+
+:::
 
 **优点**：兼容性好（不依赖系统私有 API）、覆盖面广。
 **缺点**：结构变化受限、需重启生效、补丁包较大（dex 级）。

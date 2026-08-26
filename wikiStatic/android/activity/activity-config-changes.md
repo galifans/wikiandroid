@@ -44,6 +44,21 @@ flowchart LR
 
 系统在 Activity 可能被销毁前调用，用于保存**轻量 UI 状态**：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    outState.putString("query", searchInput.getText().toString());
+    outState.putInt("position", listScrollPosition);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
@@ -51,6 +66,8 @@ override fun onSaveInstanceState(outState: Bundle) {
     outState.putInt("position", listScrollPosition)
 }
 ```
+
+:::
 
 特点：
 
@@ -60,6 +77,29 @@ override fun onSaveInstanceState(outState: Bundle) {
 - 大数据：不要存大对象（Bitmap、长列表），会触发 `TransactionTooLargeException`
 
 ### 2.2 恢复状态
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    if (savedInstanceState != null) {
+        searchInput.setText(savedInstanceState.getString("query"));
+    }
+}
+
+// 或使用 onRestoreInstanceState（在 onStart 之后调用）
+@Override
+protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    listScrollTo(savedInstanceState.getInt("position"));
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,6 +115,8 @@ override fun onRestoreInstanceState(savedInstanceState: Bundle) {
     listScrollTo(savedInstanceState.getInt("position"))
 }
 ```
+
+:::
 
 ### 2.3 View 状态的自动保存
 
@@ -92,6 +134,40 @@ override fun onRestoreInstanceState(savedInstanceState: Bundle) {
 ## 三、ViewModel：配置变更下的数据留存
 
 `onSaveInstanceState` 适合存轻量状态，但重量级数据（列表数据、网络结果）应该在 **ViewModel** 中：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class ProfileViewModel extends ViewModel {
+    // 配置变更时不会销毁，重建后同一个实例
+    private final MutableStateFlow<User> userData = new MutableStateFlow<>(null);
+
+    void loadUser(String id) {
+        viewModelScope.launch(() -> userData.setValue(api.fetchUser(id)));
+    }
+}
+
+class ProfileActivity extends ComponentActivity {
+    private final ProfileViewModel viewModel =
+            new ViewModelProvider(this).get(ProfileViewModel.class);
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // 配置变更后 onCreate 再次调用，但 viewModel 仍是同一个实例
+        if (viewModel.userData.getValue() == null) {
+            String userId = getIntent().getStringExtra("user_id");
+            if (userId != null) {
+                viewModel.loadUser(userId);
+            }
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class ProfileViewModel : ViewModel() {
@@ -118,6 +194,8 @@ class ProfileActivity : ComponentActivity() {
 }
 ```
 
+:::
+
 ### 三者的分工对比
 
 | 维度 | onSaveInstanceState | ViewModel | 持久化存储 |
@@ -142,6 +220,22 @@ class ProfileActivity : ComponentActivity() {
 
 此时系统调用 `onConfigurationChanged(newConfig)` 而非销毁：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        // 手动调整布局
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onConfigurationChanged(newConfig: Configuration) {
     super.onConfigurationChanged(newConfig)
@@ -150,6 +244,8 @@ override fun onConfigurationChanged(newConfig: Configuration) {
     }
 }
 ```
+
+:::
 
 ### configChanges 的坑
 
@@ -172,6 +268,32 @@ Fragment 状态由 FragmentManager 统一管理：
 - `FragmentManager.saveFragmentInstanceState`：整个 Fragment 的实例状态（含 view state）
 - 重建后 `onCreate` 收到 `savedInstanceState`，`getArguments()` 保留构造参数
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+class DetailFragment extends Fragment {
+    private long itemId = -1L;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        itemId = savedInstanceState != null
+                ? savedInstanceState.getLong("item_id")
+                : requireArguments().getLong("item_id");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong("item_id", itemId);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class DetailFragment : Fragment() {
     private var itemId: Long = -1L
@@ -188,6 +310,8 @@ class DetailFragment : Fragment() {
     }
 }
 ```
+
+:::
 
 ### 5.2 重建时序要点
 
@@ -214,6 +338,29 @@ flowchart TD
 
 ### SavedStateHandle：进程死亡也能恢复的 ViewModel
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+class CartViewModel extends ViewModel {
+    private final SavedStateHandle savedStateHandle;
+    private final StateFlow<Integer> cartCount;
+
+    CartViewModel(SavedStateHandle savedStateHandle) {
+        this.savedStateHandle = savedStateHandle;
+        this.cartCount = savedStateHandle.getStateFlow("cart_count", 0);
+    }
+
+    void addItem() {
+        Integer current = cartCount.getValue();
+        savedStateHandle.set("cart_count", (current != null ? current : 0) + 1);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class CartViewModel(
     private val savedStateHandle: SavedStateHandle
@@ -225,6 +372,8 @@ class CartViewModel(
     }
 }
 ```
+
+:::
 
 > `SavedStateHandle` 将 ViewModel 数据与 SavedStateRegistry 绑定，**进程被杀死也能恢复**，是当前官方推荐的状态保存方式（详见 [SavedStateHandle 详解](/jetpack/lifecycle-viewmodel/savedstate.md)）。
 

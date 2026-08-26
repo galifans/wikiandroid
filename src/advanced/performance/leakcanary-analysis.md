@@ -22,6 +22,26 @@ LeakCanary 在清单文件中注册了一个 ContentProvider 用于在应用启�
 
 在 LeakSentryInstaller 生命周期 `onCreate()` 中完成初始化：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+internal class LeakSentryInstaller extends ContentProvider {
+
+    @Override
+    public boolean onCreate() {
+        CanaryLog.logger = new DefaultCanaryLog();
+        Application application =
+                (Application) getContext().getApplicationContext();
+        InternalLeakSentry.install(application);
+        return true;
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 internal class LeakSentryInstaller : ContentProvider() {
 
@@ -34,11 +54,32 @@ internal class LeakSentryInstaller : ContentProvider() {
 }
 ```
 
+:::
+
 > 使用 ContentProvider 的 `onCreate()` 做初始化，可以免去手动调用 `LeakCanary.install()`，且保证在 Application.onCreate 之前执行。
 
 ## 二、注册组件销毁监听
 
 `InternalLeakSentry.install()` 中注册 Activity / Fragment 的销毁监听：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+void install(Application application) {
+    CanaryLog.d("Installing LeakSentry");
+    checkMainThread();
+    InternalLeakSentry.application = application;
+
+    Provider<LeakSentry.Config> configProvider = () -> LeakSentry.config;
+    ActivityDestroyWatcher.install(application, refWatcher, configProvider);
+    FragmentDestroyWatcher.install(application, refWatcher, configProvider);
+    listener.onLeakSentryInstalled(application);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 fun install(application: Application) {
@@ -53,12 +94,39 @@ fun install(application: Application) {
 }
 ```
 
+:::
+
 - **Activity：** 通过 `application.registerActivityLifecycleCallbacks()` 监听 onActivityDestroyed。
 - **Fragment：** 通过 `fragmentManager.registerFragmentLifecycleCallbacks()` 监听（Android 原生与 AndroidX 分别处理）。
 
 ## 三、引用泄漏观察
 
 `RefWatcher.watch()` 是核心方法，用 **KeyedWeakReference（带 key 的弱引用）** 观察对象：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Synchronized
+void watch(Object watchedInstance, String name) {
+    if (!isEnabled()) {
+        return;
+    }
+    removeWeaklyReachableInstances();
+    String key = UUID.randomUUID().toString();
+    long watchUptimeMillis = clock.uptimeMillis();
+    KeyedWeakReference reference = new KeyedWeakReference(
+            watchedInstance, key, name, watchUptimeMillis, queue
+    );
+    watchedInstances.put(key, reference);
+    checkRetainedExecutor.execute(() ->
+            moveToRetained(key)  // 延迟（默认 5 秒）后检查对象是否仍存活
+    );
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @Synchronized fun watch(watchedInstance: Any, name: String) {
@@ -78,6 +146,8 @@ fun install(application: Application) {
 }
 ```
 
+:::
+
 **判断泄漏的原理：**
 
 1. 给每个被观察对象生成唯一 key，用 WeakReference 包裹并关联到 ReferenceQueue。
@@ -87,6 +157,27 @@ fun install(application: Application) {
 ## 四、Dump Heap
 
 发现泄漏后，获取 Heap Dump 文件：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+public File dumpHeap() {
+    File heapDumpFile = leakDirectoryProvider.newHeapDumpFile();
+    if (heapDumpFile == null) return null;
+    try {
+        Debug.dumpHprofData(heapDumpFile.getAbsolutePath());  // 系统 API 导出堆
+        // ...
+    } catch (Exception e) {
+        return null;
+    }
+    return heapDumpFile;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 override fun dumpHeap(): File? {
@@ -100,6 +191,24 @@ override fun dumpHeap(): File? {
 }
 ```
 
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+private void checkRetainedInstances(String reason) {
+    // ...
+    File heapDumpFile = heapDumper.dumpHeap();
+    // ...
+    refWatcher.removeInstancesWatchedBeforeHeapDump(heapDumpUptimeMillis);
+    HeapAnalyzerService.runAnalysis(application, heapDumpFile);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 private fun checkRetainedInstances(reason: String) {
     ...
@@ -110,7 +219,31 @@ private fun checkRetainedInstances(reason: String) {
 }
 ```
 
+:::
+
 启动 HeapAnalyzerService 分析 heapDumpFile：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+protected void onHandleIntentInForeground(Intent intent) {
+    HeapAnalyzer heapAnalyzer = new HeapAnalyzer(this);
+    LeakCanary.Config config = LeakCanary.config;
+    HeapAnalysis heapAnalysis = heapAnalyzer.checkForLeaks(
+            heapDumpFile,
+            config.referenceMatchers,
+            config.computeRetainedHeapSize,
+            config.objectInspectors,
+            // ...
+    );
+    config.analysisResultListener(application, heapAnalysis);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 override fun onHandleIntentInForeground(intent: Intent?) {
@@ -126,6 +259,8 @@ override fun onHandleIntentInForeground(intent: Intent?) {
     config.analysisResultListener(application, heapAnalysis)
 }
 ```
+
+:::
 
 ## 五、Heap Dump 能看什么
 

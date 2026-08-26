@@ -23,12 +23,27 @@ description: SharedPreferences、DataStore、Room、文件、SQLite 五大存储
 
 ### 2.1 历史问题
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 旧时代写法
+SharedPreferences sp = getSharedPreferences("config", Context.MODE_PRIVATE);
+sp.edit().putString("name", "Tom").apply();   // 异步写
+sp.edit().putString("name", "Tom").commit();  // 同步写（阻塞主线程）
+```
+
+@tab Kotlin
+
 ```kotlin
 // 旧时代写法
 val sp = getSharedPreferences("config", Context.MODE_PRIVATE)
 sp.edit().putString("name", "Tom").apply()   // 异步写
 sp.edit().putString("name", "Tom").commit()  // 同步写（阻塞主线程）
 ```
+
+:::
 
 存在的问题：
 
@@ -44,6 +59,48 @@ Android 官方已将其标记为 **legacy API**，推荐使用 DataStore 替代�
 ## 3. DataStore（推荐）
 
 ### 3.1 Preferences DataStore
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 依赖
+// implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+// Java 中通过 PreferenceDataStoreFactory 创建实例
+private final DataStore<Preferences> dataStore =
+        new PreferenceDataStoreFactory().create(
+                CoroutineScope(Dispatchers.IO + SupervisorJob()),
+                () -> new File(context.getFilesDir(), "settings.preferences_pb"));
+
+class SettingsRepository {
+    private final Context context;
+
+    SettingsRepository(Context context) {
+        this.context = context;
+    }
+
+    Flow<Integer> themeMode() {
+        return dataStore.getData().map(prefs ->
+                prefs.contains(Keys.THEME_MODE) ? prefs.get(Keys.THEME_MODE)
+                        : THEME_MODE_SYSTEM);
+    }
+
+    void setThemeMode(int mode, CoroutineScope scope) {
+        scope.launch(Dispatchers.IO) {
+            dataStore.edit(prefs -> prefs.put(Keys.THEME_MODE, mode));
+        }
+    }
+
+    private static class Keys {
+        static final Preferences.Key<Integer> THEME_MODE =
+                PreferencesKeys.intKey("theme_mode");
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 依赖
@@ -70,6 +127,8 @@ class SettingsRepository(private val context: Context) {
 }
 ```
 
+:::
+
 ### 3.2 Proto DataStore
 
 需要定义 schema 并生成代码（类型安全）：
@@ -83,6 +142,24 @@ message UserPreferences {
 }
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 生成的类型直接读写（Java 中通过 DataStore<byte[]> + protobuf 解析）
+Flow<UserPreferences> userPrefs = context.getUserDataStore().getData()
+        .map(bytes -> parseFrom(bytes));
+
+public void updateUser(UserPreferences newPrefs, CoroutineScope scope) {
+    scope.launch(Dispatchers.IO) {
+        context.getUserDataStore().updateData(current -> newPrefs);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 生成的类型直接读写
 val userPrefs: Flow<UserPreferences> = context.userDataStore.data
@@ -91,6 +168,8 @@ suspend fun updateUser(block: (UserPreferences) -> UserPreferences) {
 }
 ```
 
+:::
+
 ### 3.3 注意事项
 
 - `data` 是 `Flow`，天然支持响应式。
@@ -98,6 +177,42 @@ suspend fun updateUser(block: (UserPreferences) -> UserPreferences) {
 - **跨进程**：DataStore 自身保证单进程单实例，多进程使用有额外配置。
 
 ## 4. Room（结构化数据首选）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Room 的注解与抽象类在 Java 中同样适用
+@Entity(tableName = "user")
+public class User {
+    @PrimaryKey
+    public int id;
+    public String name;
+    public int age;
+}
+
+@Dao
+public interface UserDao {
+    @Query("SELECT * FROM user")
+    Flow<List<User>> observeAll();   // 响应式查询
+
+    @Insert
+    void insert(User user);
+}
+
+@Database(entities = {User.class}, version = 1)
+public abstract class AppDatabase extends RoomDatabase {
+    public abstract UserDao userDao();
+}
+
+// 创建数据库
+AppDatabase db = Room.databaseBuilder(context, AppDatabase.class, "app.db")
+        .fallbackToDestructiveMigration()   // 慎用！开发期方便，上线需手写 Migration
+        .build();
+```
+
+@tab Kotlin
 
 ```kotlin
 @Entity(tableName = "user")
@@ -127,6 +242,8 @@ val db = Room.databaseBuilder(context, AppDatabase::class.java, "app.db")
     .build()
 ```
 
+:::
+
 Room 优势：
 
 - 编译期 SQL 校验。
@@ -135,6 +252,23 @@ Room 优势：
 - 自动处理线程切换（suspend DAO 方法自动切 IO 线程）。
 
 ## 5. 文件存储
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 应用私有目录（无需权限）
+File file = new File(context.getFilesDir(), "cache.json");
+file.writeText(jsonString);
+
+// 缓存目录（系统可能清理）
+File cacheFile = new File(context.getCacheDir(), "temp.txt");
+
+// 外部存储（Android 10+ 分区存储后需 MediaStore/SAF）
+```
+
+@tab Kotlin
 
 ```kotlin
 // 应用私有目录（无需权限）
@@ -146,6 +280,8 @@ val cacheFile = File(context.cacheDir, "temp.txt")
 
 // 外部存储（Android 10+ 分区存储后需 MediaStore/SAF）
 ```
+
+:::
 
 | 目录 | 用途 | 权限 |
 | --- | --- | --- |
@@ -168,6 +304,29 @@ val cacheFile = File(context.cacheDir, "temp.txt")
 
 ### 6.2 分区存储下的正确姿势
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 应用私有目录：完全不受影响（无需权限）
+File f = new File(context.getFilesDir(), "data.json");
+writeText(f, json);
+
+// ② 媒体文件（图片/视频/音频）：用 MediaStore，无需权限写入
+ContentValues values = new ContentValues();
+values.put(MediaStore.Images.Media.DISPLAY_NAME, "photo.jpg");
+values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+values.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/MyApp");
+Uri uri = contentResolver.insert(
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+// ③ 任意公共目录文件：用 SAF（Storage Access Framework）
+// ActivityResultContracts.OpenDocument / CreateDocument
+```
+
+@tab Kotlin
+
 ```kotlin
 // ① 应用私有目录：完全不受影响（无需权限）
 File(context.filesDir, "data.json").writeText(json)
@@ -185,6 +344,8 @@ val uri = contentResolver.insert(
 // ③ 任意公共目录文件：用 SAF（Storage Access Framework）
 // ActivityResultContracts.OpenDocument / CreateDocument
 ```
+
+:::
 
 **对选型的影响**：
 - 过去"直接写 `/sdcard/xxx` 路径"的方案全部失效，必须走 MediaStore 或 SAF。

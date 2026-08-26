@@ -36,10 +36,55 @@ Service（主线程）
 
 ### 2.1 启动式：startService
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 启动（Context 方法）
+startService(new Intent(this, DownloadService.class));
+```
+
+@tab Kotlin
+
 ```kotlin
 // 启动（Context 方法）
 startService(Intent(this, DownloadService::class.java))
 ```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class DownloadService extends Service {
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;   // 不绑定，返回 null
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        // 主线程执行！耗时任务需自行开线程/线程池
+        executor.execute(() -> {
+            downloadFiles();
+            stopSelf();   // 任务完成后自行停止
+        });
+        return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        executor.shutdown();
+        super.onDestroy();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class DownloadService : Service() {
@@ -62,6 +107,8 @@ class DownloadService : Service() {
 }
 ```
 
+:::
+
 **生命周期**：`onCreate → onStartCommand → ... → onDestroy`
 **特点**：
 - 调用方**无法获取结果**（单向通知）
@@ -69,6 +116,29 @@ class DownloadService : Service() {
 - `startService()` 每次调用都会触发 `onStartCommand`（`onCreate` 只执行一次）
 
 ### 2.2 绑定式：bindService
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+ServiceConnection connection = new ServiceConnection() {
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder binder) {
+        DownloadService.DownloadBinder myBinder =
+                (DownloadService.DownloadBinder) binder;
+        myBinder.startDownload();          // 拿到 Binder，调用服务端方法
+    }
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        // 服务异常断开（如进程被杀）时回调；正常 unbind 不会回调
+    }
+};
+
+bindService(intent, connection, Context.BIND_AUTO_CREATE);
+```
+
+@tab Kotlin
 
 ```kotlin
 val connection = object : ServiceConnection {
@@ -83,6 +153,37 @@ val connection = object : ServiceConnection {
 
 bindService(intent, connection, Context.BIND_AUTO_CREATE)
 ```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class DownloadService extends Service {
+
+    class DownloadBinder extends Binder {
+        void startDownload() { /* 具体逻辑 */ }
+        int getProgress() { return progress; }
+    }
+
+    private final DownloadBinder binder = new DownloadBinder();
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;   // 返回 Binder 给客户端
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        // 所有客户端解绑后回调
+        return false;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class DownloadService : Service() {
@@ -102,6 +203,8 @@ class DownloadService : Service() {
 }
 ```
 
+:::
+
 **生命周期**：`onCreate → onBind → onUnbind → onDestroy`
 **特点**：
 - 客户端**可以调用服务端方法**（通过 Binder）
@@ -110,6 +213,20 @@ class DownloadService : Service() {
 
 ### 2.3 两种方式混合使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 场景：音乐播放器
+// 1. startService：保证播放不因 UI 退出而停止（如用户退出界面仍在播放）
+startService(intent);
+// 2. bindService：Activity 存活期间获取控制接口（播放/暂停/切歌）
+bindService(intent, connection, Context.BIND_AUTO_CREATE);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 场景：音乐播放器
 // 1. startService：保证播放不因 UI 退出而停止（如用户退出界面仍在播放）
@@ -117,6 +234,8 @@ startService(intent)
 // 2. bindService：Activity 存活期间获取控制接口（播放/暂停/切歌）
 bindService(intent, connection, Context.BIND_AUTO_CREATE)
 ```
+
+:::
 
 ```mermaid
 stateDiagram-v2
@@ -141,6 +260,25 @@ stateDiagram-v2
 | `START_STICKY` | 系统杀死后**重建**，回调 `onStartCommand` 但 intent 为 **null** | 媒体播放、不依赖参数的长任务 | 需处理 intent 为 null |
 | `START_REDELIVER_INTENT` | 系统杀死后**重建并重新投递最后一个 Intent** | 下载、上传等必须恢复的任务 | 需正确处理重入 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+public int onStartCommand(Intent intent, int flags, int startId) {
+    String action = intent != null ? intent.getAction() : null;
+    if (ACTION_DOWNLOAD.equals(action)) {
+        startDownload(intent.getStringExtra("url"));
+    } else {
+        Log.w(TAG, "START_STICKY 重建：intent 为 null，无需处理");  // 常见场景
+    }
+    return START_STICKY;
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     when (intent?.action) {
@@ -150,6 +288,8 @@ override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     return START_STICKY
 }
 ```
+
+:::
 
 ## 四、完整生命周期回调细节
 
@@ -161,6 +301,28 @@ override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 | `onUnbind` | 所有客户端解绑 | 返回 true 时后续 bind 会回调 `onRebind` |
 | `onRebind` | `onUnbind` 返回 true 后再次 bind | 可恢复状态 |
 | `onDestroy` | 销毁 | 释放资源、取消协程、移除通知 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class MyService extends Service {
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+        // 客户端重新绑定时恢复数据
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MyService : Service() {
@@ -174,9 +336,33 @@ class MyService : Service() {
 }
 ```
 
+:::
+
 ## 五、绑定服务的通信方式
 
 ### 5.1 Binder（同进程 / 跨进程皆可）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 服务端
+class LocalBinder extends Binder {
+    MyService getService() {
+        return MyService.this;
+    }
+}
+
+// 客户端（同进程场景，直接强转）
+@Override
+public void onServiceConnected(ComponentName name, IBinder service) {
+    MyService.LocalBinder binder = (MyService.LocalBinder) service;
+    MyService myService = binder.getService();   // 拿到 Service 实例直接调用
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 服务端
@@ -191,7 +377,39 @@ override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
 }
 ```
 
+:::
+
 ### 5.2 Messenger（基于 Handler 的轻量 IPC）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 服务端
+class MessengerService extends Service {
+    private final Handler handler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            // 处理客户端消息；可 msg.replyTo 回复
+        }
+    };
+    private final Messenger messenger = new Messenger(handler);
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return messenger.getBinder();
+    }
+}
+
+// 客户端
+Messenger messenger = new Messenger(service);
+Message msg = Message.obtain(null, MSG_DOWNLOAD);
+msg.replyTo = new Messenger(clientHandler);   // 服务端可回信
+messenger.send(msg);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 服务端
@@ -213,6 +431,8 @@ messenger.send(Message.obtain(null, MSG_DOWNLOAD).apply {
 })
 ```
 
+:::
+
 | 方式 | 原理 | 适用场景 |
 |------|------|----------|
 | Binder | 直接方法调用 | 复杂通信、需要类型安全 |
@@ -222,6 +442,39 @@ messenger.send(Message.obtain(null, MSG_DOWNLOAD).apply {
 ## 六、IntentService（已废弃，理解即可）
 
 `IntentService` 封装了"队列 + 工作线程 + 自动停止"，Android 8.0 后官方弃用，**改用协程 + WorkManager**：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 旧写法（了解）
+class OldIntentService extends IntentService {
+    public OldIntentService() {
+        super("OldIntentService");
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        // 子线程顺序执行，任务完成后自动 stopSelf
+    }
+}
+
+// 现代等价写法
+class DownloadService extends Service {
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        executor.execute(() -> {
+            doWork();          // 线程池执行耗时任务
+            stopSelf();        // 完成后停止
+        });
+        return START_NOT_STICKY;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 旧写法（了解）
@@ -244,6 +497,8 @@ class DownloadService : Service() {
 }
 ```
 
+:::
+
 ## 七、Android 8.0+ 后台服务限制
 
 ```mermaid
@@ -265,6 +520,43 @@ flowchart TD
 > 详见 [前台服务与通知](foreground-service.md) 与 [WorkManager](/jetpack/workmanager-hilt/)。
 
 ## 八、Service 与线程/协程的正确配合
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class DownloadService extends Service {
+
+    // 1. 用 ExecutorService：一个任务失败不影响其他
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        String url = intent != null ? intent.getStringExtra("url") : null;
+        if (url == null) return START_NOT_STICKY;
+        executor.execute(() -> {
+            try {
+                repository.download(url);   // IO 线程执行
+                notifySuccess(url);
+            } catch (Exception e) {
+                Log.e(TAG, "download failed", e);
+            } finally {
+                stopSelf();                 // 全部任务完成后停止
+            }
+        });
+        return START_NOT_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        executor.shutdown();               // 2. 销毁时关闭线程池
+        super.onDestroy();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class DownloadService : Service() {
@@ -293,6 +585,8 @@ class DownloadService : Service() {
     }
 }
 ```
+
+:::
 
 ## 九、常见坑点清单
 

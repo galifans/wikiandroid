@@ -43,6 +43,45 @@ flowchart TD
 
 ### 创建渠道
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 必须在首次发送通知前创建渠道（Application 中统一创建）
+public class WikiApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        createNotificationChannels();
+    }
+
+    private void createNotificationChannels() {
+        NotificationManager manager = getSystemService(NotificationManager.class);
+
+        // 消息渠道：高重要性（悬浮窗 + 声音）
+        NotificationChannel messages = new NotificationChannel(
+                "messages",          // channel id
+                "消息提醒",           // 用户可见的名称
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        messages.setDescription("新消息提醒");
+        messages.enableVibration(true);
+        manager.createNotificationChannel(messages);
+
+        // 下载渠道：默认重要性（声音，无悬浮窗）
+        NotificationChannel downloads = new NotificationChannel(
+                "downloads",
+                "下载进度",
+                NotificationManager.IMPORTANCE_DEFAULT
+        );
+        manager.createNotificationChannel(downloads);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 必须在首次发送通知前创建渠道（Application 中统一创建）
 class WikiApplication : Application() {
@@ -78,6 +117,8 @@ class WikiApplication : Application() {
 }
 ```
 
+:::
+
 | 重要性 | 行为 |
 |--------|------|
 | `IMPORTANCE_HIGH` | 悬浮窗 + 声音 + 震动 |
@@ -90,6 +131,37 @@ class WikiApplication : Application() {
 :::
 
 ## 三、构建通知
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+void showMessageNotification(String title, String content) {
+    // 1. 构建点击意图（PendingIntent）
+    Intent intent = new Intent(this, MessageActivity.class);
+    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    PendingIntent pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+    );
+
+    // 2. 构建通知
+    Notification notification = new NotificationCompat.Builder(this, "messages")
+            .setSmallIcon(R.drawable.ic_message)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setContentIntent(pendingIntent)      // 点击跳转
+            .setAutoCancel(true)                   // 点击后自动消失
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setWhen(System.currentTimeMillis())
+            .build();
+
+    // 3. 发送（id 唯一，重复 id 覆盖）
+    NotificationManagerCompat.from(this).notify(1001, notification);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 fun showMessageNotification(title: String, content: String) {
@@ -117,6 +189,8 @@ fun showMessageNotification(title: String, content: String) {
 }
 ```
 
+:::
+
 ### Builder 常用方法
 
 | 方法 | 作用 |
@@ -133,6 +207,36 @@ fun showMessageNotification(title: String, content: String) {
 | `setDeleteIntent` | 用户滑动删除时回调 |
 
 ## 四、通知样式（Style）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. 长文本样式
+new NotificationCompat.BigTextStyle()
+        .bigText(longContent)
+        .setBigContentTitle("标题")
+        .setSummaryText("摘要");
+
+// 2. 收件箱样式（多条消息）
+new NotificationCompat.InboxStyle()
+        .addLine("第一条消息")
+        .addLine("第二条消息")
+        .setSummaryText("+2 条新消息");
+
+// 3. 大图样式
+new NotificationCompat.BigPictureStyle()
+        .bigPicture(bitmap);
+
+// 4. 进度条样式（下载）
+new NotificationCompat.Builder(this, "downloads")
+        .setContentTitle("下载中")
+        .setProgress(100, 45, false)   // max, progress, indeterminate
+        // 更新时：progress(100, 60, false); 完成后移除或转完成态
+```
+
+@tab Kotlin
 
 ```kotlin
 // 1. 长文本样式
@@ -158,11 +262,32 @@ NotificationCompat.Builder(this, "downloads")
     // 更新时：progress(100, 60, false); 完成后移除或转完成态
 ```
 
+:::
+
 ## 五、通知权限（Android 13+）
 
 ```xml
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// targetSdk 33+ 必须动态申请，否则通知被静默丢弃
+void ensureNotificationPermission() {
+    if (Build.VERSION.SDK_INT >= 33) {
+        ActivityResultLauncher<String> launcher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                granted -> { /* granted? */ }
+        );
+        launcher.launch(Manifest.permission.POST_NOTIFICATIONS);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // targetSdk 33+ 必须动态申请，否则通知被静默丢弃
@@ -176,6 +301,8 @@ fun ensureNotificationPermission() {
 }
 ```
 
+:::
+
 | targetSdk | 行为 |
 |-----------|------|
 | < 33 | 无需申请，默认可发通知 |
@@ -185,6 +312,34 @@ fun ensureNotificationPermission() {
 ## 六、前台服务通知
 
 后台任务必须配合前台服务 + 常驻通知（Android 8.0 起后台服务受限）：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MusicService extends Service {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        startForegroundWithNotification();
+    }
+
+    private void startForegroundWithNotification() {
+        Notification notification = new NotificationCompat.Builder(this, "media")
+                .setSmallIcon(R.drawable.ic_music)
+                .setContentTitle("正在播放")
+                .setContentText("歌曲名")
+                .setOngoing(true)                 // 不可滑动移除
+                .addAction(0, "暂停", pauseIntent) // 操作按钮
+                .build();
+        startForeground(NOTIFICATION_ID, notification);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MusicService : Service() {
@@ -206,6 +361,8 @@ class MusicService : Service() {
     }
 }
 ```
+
+:::
 
 ## 七、常见问题排查
 

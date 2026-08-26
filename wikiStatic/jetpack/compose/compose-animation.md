@@ -30,6 +30,17 @@ flowchart TD
 
 ## 二、值动画:animate*AsState
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：ObjectAnimator / ValueAnimator 命令式实现，或 AnimatedVectorDrawable
+```
+
+@tab Kotlin
+
 ```kotlin
 @Composable
 fun LikeButton(isLiked: Boolean) {
@@ -50,6 +61,8 @@ fun LikeButton(isLiked: Boolean) {
 }
 ```
 
+:::
+
 ### 常用 animate*AsState
 
 | API | 类型 | 典型场景 |
@@ -62,6 +75,17 @@ fun LikeButton(isLiked: Boolean) {
 | `animateRectAsState` | Rect | 区域 |
 
 ## 三、可见性动画:AnimatedVisibility
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：View.animate() + 可见性切换，或 TransitionManager 过渡
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -82,6 +106,8 @@ fun ExpandableCard(expanded: Boolean) {
 }
 ```
 
+:::
+
 ### EnterTransition / ExitTransition 组合
 
 | 动画 | 说明 |
@@ -94,6 +120,17 @@ fun ExpandableCard(expanded: Boolean) {
 | `+` 运算符 | 组合多个动画 |
 
 ## 四、内容转场:AnimatedContent
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：FragmentTransaction.setCustomAnimations / Transition 转场
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -117,7 +154,20 @@ Crossfade(targetState = isLoading, label = "loading") { loading ->
 }
 ```
 
+:::
+
 ## 五、高级控制:Animatable
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：ViewDragHelper + Scroller 实现手势跟随与松手回弹
+```
+
+@tab Kotlin
 
 ```kotlin
 @Composable
@@ -149,6 +199,8 @@ Box(
 )
 ```
 
+:::
+
 ### Animatable 特性
 
 | 特性 | 说明 |
@@ -160,6 +212,17 @@ Box(
 | 线程安全 | 协程中调用,支持多协程控制 |
 
 ## 六、弹簧与关键帧
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：XML 中的 interpolator（overshoot / bounce / fast_out_slow_in）与 duration 时长
+```
+
+@tab Kotlin
 
 ```kotlin
 // 弹簧动画
@@ -185,6 +248,8 @@ val tweenSpec = tween(
 )
 ```
 
+:::
+
 | AnimationSpec | 特点 | 场景 |
 |--------------|------|------|
 | `tween(duration, easing)` | 固定时长线性过渡 | 常规 UI 动画 |
@@ -194,6 +259,17 @@ val tweenSpec = tween(
 | `snap` | 瞬间切换 | 状态恢复 |
 
 ## 七、Transition 多属性动画
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：ObjectAnimator + AnimatorSet 组合多个属性动画
+```
+
+@tab Kotlin
 
 ```kotlin
 enum class BoxState { Collapsed, Expanded }
@@ -224,6 +300,8 @@ fun AnimatedBox() {
 }
 ```
 
+:::
+
 ## 八、性能与最佳实践
 
 | 实践 | 说明 |
@@ -233,6 +311,17 @@ fun AnimatedBox() {
 | 复用 AnimationSpec | 定义为常量避免重组重建 |
 | `derivedStateOf` | 高频变化值派生时避免重组风暴 |
 | 可打断优先 | 手势动画用 Animatable 支持打断 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：View.setTranslationX / setRotation / setScaleX 走 GPU 合成，避免 setLayoutParams 触发布局
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✓ 推荐:graphicsLayer 做位移动画(GPU 合成)
@@ -244,6 +333,8 @@ Modifier.graphicsLayer {
 // ✗ 避免:offset 触发布局重排
 Modifier.offset { IntOffset(x, 0) }
 ```
+
+:::
 
 ## 九、高频面试题
 

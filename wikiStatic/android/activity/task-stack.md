@@ -95,6 +95,24 @@ flowchart LR
 - 若**栈顶已是该 Activity 实例**，不创建新实例，而是回调 `onNewIntent()`。
 - 若不在栈顶，行为同 `standard`。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+class SearchActivity extends AppCompatActivity {
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        // 复用已有实例，更新搜索词
+        setIntent(intent);
+        refreshSearch(intent.getStringExtra("keyword"));
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class SearchActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
@@ -105,6 +123,8 @@ class SearchActivity : AppCompatActivity() {
     }
 }
 ```
+
+:::
 
 **典型场景**：通知栏点击跳转（避免连续点击创建多个详情页）。
 
@@ -142,6 +162,20 @@ class SearchActivity : AppCompatActivity() {
 
 启动模式还可以通过 Flag 动态指定（优先级高于 Manifest）：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Intent intent = new Intent(this, DetailActivity.class);
+intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+        Intent.FLAG_ACTIVITY_CLEAR_TOP |
+        Intent.FLAG_ACTIVITY_SINGLE_TOP);
+startActivity(intent);
+```
+
+@tab Kotlin
+
 ```kotlin
 val intent = Intent(this, DetailActivity::class.java).apply {
     flags = Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -150,6 +184,8 @@ val intent = Intent(this, DetailActivity::class.java).apply {
 }
 startActivity(intent)
 ```
+
+:::
 
 | Flag | 作用 |
 | --- | --- |
@@ -165,6 +201,24 @@ startActivity(intent)
 
 ### 5.1 清空栈
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 方式一：Intent 清栈（常用于"退出登录回到登录页"）
+Intent intent = new Intent(this, LoginActivity.class);
+intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+startActivity(intent);
+
+// 方式二：TaskStackBuilder（保留指定栈）
+TaskStackBuilder stackBuilder = TaskStackBuilder.create(this)
+        .addNextIntentWithParentStack(new Intent(this, MainActivity.class));
+stackBuilder.startActivities();
+```
+
+@tab Kotlin
+
 ```kotlin
 // 方式一：Intent 清栈（常用于"退出登录回到登录页"）
 val intent = Intent(this, LoginActivity::class.java).apply {
@@ -178,12 +232,27 @@ val stackBuilder = TaskStackBuilder.create(this)
 stackBuilder.startActivities()
 ```
 
+:::
+
 ### 5.2 判断是否栈底
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 栈中是否只有当前 Activity
+boolean isTaskRoot = isTaskRoot();
+```
+
+@tab Kotlin
 
 ```kotlin
 // 栈中是否只有当前 Activity
 val isTaskRoot = isTaskRoot
 ```
+
+:::
 
 ### 5.3 调整 Task 归属（taskAffinity）
 

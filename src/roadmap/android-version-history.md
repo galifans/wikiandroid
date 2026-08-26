@@ -92,6 +92,29 @@ flowchart LR
 
 ### 3.2 行为变更检查
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 运行时判断版本（处理行为差异）
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    // Android 13+：动态申请通知权限
+    requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+} else {
+    // 旧版本无需申请
+}
+
+// 分区存储：targetSdk 29+ 默认作用域存储
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    // 使用 MediaStore / SAF 访问
+} else {
+    // 可直接读写公共目录
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 运行时判断版本（处理行为差异）
 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -108,6 +131,8 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
     // 可直接读写公共目录
 }
 ```
+
+:::
 
 ## 四、碎片化问题
 

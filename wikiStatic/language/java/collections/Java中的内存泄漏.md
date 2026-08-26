@@ -28,6 +28,10 @@ title: Java 中的内存泄漏
 
 静态变量的生命周期与应用程序一致，它们引用的所有对象都无法释放：
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 static Vector v = new Vector(10);
 for (int i = 1; i < 100; i++) {
@@ -37,11 +41,29 @@ for (int i = 1; i < 100; i++) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 静态集合（如伴生对象中的 Vector）引起泄漏
+val v = Vector<Any?>(10)
+for (i in 1 until 100) {
+    var o: Any? = Any()
+    v.add(o)
+    o = null // 只释放引用本身没用，Vector 仍引用该对象
+}
+```
+
+:::
+
 **解决**：从集合中删除对象，或把集合对象本身置为 null。
 
 ### 2. 集合元素属性被修改后 remove() 失效
 
 对象加入 HashSet 后若修改了影响 hashCode 的属性，remove() 将无法找到它：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 Set<Person> set = new HashSet<>();
@@ -52,6 +74,20 @@ p3.setAge(2);   // 修改 p3 的年龄，hashCode 改变
 set.remove(p3); // remove 不掉 → 内存泄漏
 set.add(p3);    // 反而添加成功，出现两个"重复"元素
 ```
+
+@tab Kotlin
+
+```kotlin
+val set = HashSet<Person>()
+set.add(p1)
+set.add(p3)
+
+p3.setAge(2)   // 修改 p3 的年龄，hashCode 改变
+set.remove(p3) // remove 不掉 → 内存泄漏
+set.add(p3)    // 反而添加成功，出现两个"重复"元素
+```
+
+:::
 
 **解决**：加入集合后不要修改影响 hashCode/equals 的属性。
 

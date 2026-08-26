@@ -58,6 +58,10 @@ flowchart TD
 | 按标签 | 白名单用户/内测团 |
 | 按设备 | 机型/系统版本分层 |
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // UID 哈希灰度示例
 boolean inGray(String uid, int percent) {
@@ -65,6 +69,18 @@ boolean inGray(String uid, int percent) {
     return hash % 100 < percent;   // percent = 5 → 5% 用户
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// UID 哈希灰度示例
+fun inGray(uid: String, percent: Int): Boolean {
+    val hash = (uid + "salt").hashCode() and 0x7fffffff
+    return hash % 100 < percent   // percent = 5 → 5% 用户
+}
+```
+
+:::
 
 ## 三、灰度发布平台方案
 
@@ -114,6 +130,45 @@ flowchart LR
 
 ## 五、功能开关(Future Flag)
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 后端下发的功能开关
+public class FeatureFlag {
+    public final String key;
+    public final boolean enabled;
+
+    public FeatureFlag(String key, boolean enabled) {
+        this.key = key;
+        this.enabled = enabled;
+    }
+}
+
+public class FlagManager {
+    private final RemoteConfigRepo repo;
+
+    public FlagManager(RemoteConfigRepo repo) {
+        this.repo = repo;
+    }
+
+    // suspend 在 Java 中无直接等价,此处以同步调用示意
+    public boolean isEnabled(String key) {
+        return repo.getFlag(key).enabled;
+    }
+}
+
+// 使用:新功能代码用开关包裹
+if (flagManager.isEnabled("new_home")) {
+    showNewHome();      // 新首页
+} else {
+    showOldHome();      // 旧首页
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 后端下发的功能开关
 data class FeatureFlag(val key: String, val enabled: Boolean)
@@ -131,6 +186,8 @@ if (flagManager.isEnabled("new_home")) {
     showOldHome()      // 旧首页
 }
 ```
+
+:::
 
 | 开关类型 | 说明 |
 |---------|------|

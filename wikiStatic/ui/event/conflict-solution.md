@@ -21,6 +21,35 @@ description: 三种滑动冲突场景、外部拦截法与内部拦截法、Nest
 
 **思路**：父 View 在 `onInterceptTouchEvent` 中根据业务规则决定是否拦截。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 父容器（如纵向 ScrollView）外部拦截法
+@Override
+public boolean onInterceptTouchEvent(MotionEvent ev) {
+    boolean intercepted = false;
+    switch (ev.getActionMasked()) {
+        case MotionEvent.ACTION_DOWN:
+            // DOWN 不拦截（一旦拦截，后续事件全给父 View，子 View 无法工作）
+            intercepted = false;
+            break;
+        case MotionEvent.ACTION_MOVE:
+            // 纵向滑动 → 父 View 拦截（处理滑动）
+            // 横向滑动 → 不拦截（交给子 View）
+            intercepted = isVerticalScroll(ev) && shouldIntercept();
+            break;
+        case MotionEvent.ACTION_UP:
+            intercepted = false;     // UP 无需拦截
+            break;
+    }
+    return intercepted;
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 父容器（如纵向 ScrollView）外部拦截法
 override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
@@ -43,9 +72,45 @@ override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
 }
 ```
 
+:::
+
 **规则口诀**：**DOWN 不拦、MOVE 判断、UP 不拦**。
 
 ### 2.1 判断滑动方向
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 记录 DOWN 坐标，在 MOVE 中判断方向
+private float lastX = 0f;
+private float lastY = 0f;
+
+@Override
+public boolean onInterceptTouchEvent(MotionEvent ev) {
+    boolean intercepted = false;
+    switch (ev.getActionMasked()) {
+        case MotionEvent.ACTION_DOWN:
+            lastX = ev.getX();
+            lastY = ev.getY();
+            intercepted = false;
+            break;
+        case MotionEvent.ACTION_MOVE:
+            float dx = ev.getX() - lastX;
+            float dy = ev.getY() - lastY;
+            // 纵向距离 > 横向距离 → 纵向滑动 → 拦截
+            intercepted = Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > touchSlop;
+            break;
+        default:
+            intercepted = false;
+            break;
+    }
+    return intercepted;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 记录 DOWN 坐标，在 MOVE 中判断方向
@@ -72,12 +137,46 @@ override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
 }
 ```
 
+:::
+
 > `touchSlop`：`ViewConfiguration.get(context).scaledTouchSlop`，系统滑动最小距离。
 
 ## 3. 解决方案二：内部拦截法
 
 **思路**：子 View 消费 DOWN，通过 `requestDisallowInterceptTouchEvent(true)`
 禁止父 View 拦截，需要时再"归还"。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 子 View（如内部 RecyclerView）内部拦截法
+@Override
+public boolean dispatchTouchEvent(MotionEvent ev) {
+    switch (ev.getActionMasked()) {
+        case MotionEvent.ACTION_DOWN:
+            // 禁止父 View 拦截
+            getParent().requestDisallowInterceptTouchEvent(true);
+            break;
+        case MotionEvent.ACTION_MOVE:
+            // 父 View 需要处理时，允许父 View 拦截
+            if (shouldParentIntercept(ev)) {
+                getParent().requestDisallowInterceptTouchEvent(false);
+            }
+            break;
+    }
+    return super.dispatchTouchEvent(ev);
+}
+
+// 配合父 View：拦截除 DOWN 以外的所有事件
+@Override
+public boolean onInterceptTouchEvent(MotionEvent ev) {
+    return ev.getActionMasked() != MotionEvent.ACTION_DOWN;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 子 View（如内部 RecyclerView）内部拦截法
@@ -103,6 +202,8 @@ override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
 }
 ```
 
+:::
+
 **注意**：`FLAG_DISALLOW_INTERCEPT` 标志在 DOWN 事件时会被重置，所以子 View
 必须在 DOWN 中重新调用。
 
@@ -121,6 +222,34 @@ NestedScrollingParent  （如 CoordinatorLayout）
 剩余部分子 View 自己滚动
 子 View 滚动后再通知父 View（dispatchNestedScroll）
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 父容器（CoordinatorLayout.Behavior 示例）
+public class HeaderBehavior extends CoordinatorLayout.Behavior<View> {
+
+    // 子 View 滚动前：父 View 先"预消费"
+    @Override
+    public void onNestedPreScroll(
+            CoordinatorLayout coordinatorLayout,
+            View child,
+            View target,
+            int dx, int dy,
+            int[] consumed
+    ) {
+        // 如：向上滑动时先收起头部（消费 dy）
+        if (dy > 0 && headerVisible) {
+            child.setTranslationY(child.getTranslationY() - dy);
+            consumed[1] = dy;     // 告知子 View 已消费多少
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 父容器（CoordinatorLayout.Behavior 示例）
@@ -142,6 +271,8 @@ class HeaderBehavior : CoordinatorLayout.Behavior<View>() {
     }
 }
 ```
+
+:::
 
 **优点**：各层只关心"消费多少"，不需要判断谁拦截，逻辑清晰；
 兼容 `NestedScrollView`、`RecyclerView`、`CoordinatorLayout`。

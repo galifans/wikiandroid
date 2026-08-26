@@ -57,6 +57,10 @@ title: JNI 与 NDK 开发
 
 ## 四、JNI 访问 Java 对象
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class MyJob {
     public static String JOB_STRING = "my_job";
@@ -66,6 +70,22 @@ public class MyJob {
     public int getJobId() { return jobId; }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class MyJob(private val jobId: Int) {
+
+    companion object {
+        @JvmField
+        var JOB_STRING = "my_job"
+    }
+
+    fun getJobId(): Int = jobId
+}
+```
+
+:::
 
 ```cpp
 #include <jni.h>
@@ -105,6 +125,10 @@ Java_com_example_myjniproject_MainActivity_getJobId(JNIEnv *env, jobject thiz, j
 
 ### 1. Java 中声明 native 方法
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class MainActivity extends AppCompatActivity {
 
@@ -122,6 +146,29 @@ public class MainActivity extends AppCompatActivity {
     private native String stringFromJNI();
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    companion object {
+        init {
+            System.loadLibrary("native-lib")
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        Log.d("MainActivity", stringFromJNI())
+    }
+
+    private external fun stringFromJNI(): String
+}
+```
+
+:::
 
 ### 2. 编写 C++ 实现
 

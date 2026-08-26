@@ -38,19 +38,45 @@ y = top + translationY
 | `getX() / getY()` | 相对当前 View 左上角的坐标 |
 | `getRawX() / getRawY()` | 相对屏幕左上角的坐标 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 手指相对 View 的位移 = 屏幕位移（raw 差值相等，但 getX 受 View 位置影响）
+float dx = event.getRawX() - lastRawX;
+```
+
+@tab Kotlin
+
 ```kotlin
 // 手指相对 View 的位移 = 屏幕位移（raw 差值相等，但 getX 受 View 位置影响）
 val dx = event.rawX - lastRawX
 ```
 
+:::
+
 ### TouchSlop（最小滑动距离）
 
 系统可识别为"滑动"的最小距离，小于该值视为点击：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+int touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+// 使用：abs(dx) > touchSlop 才判定为滑动，避免误触
+```
+
+@tab Kotlin
 
 ```kotlin
 val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 // 使用：abs(dx) > touchSlop 才判定为滑动，避免误触
 ```
+
+:::
 
 ## 三、滑动辅助类
 
@@ -59,6 +85,23 @@ val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 | `VelocityTracker` | 追踪滑动速度 | `computeCurrentVelocity(1000)` 单位 px/s |
 | `GestureDetector` | 手势检测：单击/双击/长按/快速滑动 | `onSingleTapUp` / `onFling` / `onLongPress` |
 | `Scroller` | 配合 `computeScroll` 实现弹性滑动 | `startScroll` / `computeScrollOffset` |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// VelocityTracker 标准用法
+velocityTracker = VelocityTracker.obtain();
+velocityTracker.addMovement(event);
+velocityTracker.computeCurrentVelocity(1000); // 每 1000ms 的像素数
+float vx = velocityTracker.getXVelocity();
+// 使用完毕回收，避免内存泄漏
+velocityTracker.recycle();
+velocityTracker = null;
+```
+
+@tab Kotlin
 
 ```kotlin
 // VelocityTracker 标准用法
@@ -71,6 +114,8 @@ velocityTracker.recycle()
 velocityTracker = null
 ```
 
+:::
+
 ## 四、三种滑动方式对比
 
 | 方式 | 特点 | 适用场景 |
@@ -79,11 +124,25 @@ velocityTracker = null
 | 动画 | 操作 `translationX/Y`，3.0 以下需注意点击区域 | 过渡动画、进场出场 |
 | 修改 LayoutParams | 直接改布局参数，最灵活 | 需要真实位置移动的交互 View |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// scrollTo：移动到 (x, y)；scrollBy：相对当前位置移动 (x, y)
+// 注意：scrollBy(dx, dy) 传正值，内容向左/向上移动（坐标系相反）
+view.scrollBy(-dx, -dy);
+```
+
+@tab Kotlin
+
 ```kotlin
 // scrollTo：移动到 (x, y)；scrollBy：相对当前位置移动 (x, y)
 // 注意：scrollBy(dx, dy) 传正值，内容向左/向上移动（坐标系相反）
 view.scrollBy(-dx, -dy)
 ```
+
+:::
 
 ::: warning
 动画方式滑动（`translationX/Y`）只改变视觉位置，**不改变点击区域**（Android 3.0+ 的 `PropertyAnimator` 会同步更新位置，但低于 3.0 的 View 动画不会）。
@@ -108,6 +167,43 @@ sequenceDiagram
     Note over V,S: 循环直到 computeScrollOffset 返回 false
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class SmoothScrollView extends View {
+
+    private final Scroller scroller;
+
+    public SmoothScrollView(Context context) {
+        this(context, null);
+    }
+
+    public SmoothScrollView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        scroller = new Scroller(context);
+    }
+
+    public void smoothScrollTo(int destX, int destY) {
+        int dx = destX - getScrollX();
+        int dy = destY - getScrollY();
+        scroller.startScroll(getScrollX(), getScrollY(), dx, dy, 500);
+        invalidate();
+    }
+
+    @Override
+    public void computeScroll() {
+        if (scroller.computeScrollOffset()) {
+            scrollTo(scroller.getCurrX(), scroller.getCurrY());
+            postInvalidate();
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class SmoothScrollView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -131,11 +227,29 @@ class SmoothScrollView @JvmOverloads constructor(
 }
 ```
 
+:::
+
 **核心**：Scroller 本身不滑动，它只是一个"位置计算器"——通过 `computeScrollOffset()` 根据时间插值计算每一帧的位置，配合 `computeScroll` 循环 `scrollTo` + `invalidate` 完成动画。
 
 ### 2. 属性动画
 
 在 `ValueAnimator` 的 `onAnimationUpdate` 中叠加滑动逻辑：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+ValueAnimator animator = ValueAnimator.ofInt(0, 1);
+animator.setDuration(500);
+animator.addUpdateListener(animation -> {
+    float fraction = animation.getAnimatedFraction();
+    scrollTo(startX + (int) (dx * fraction), getScrollY());
+});
+animator.start();
+```
+
+@tab Kotlin
 
 ```kotlin
 ValueAnimator.ofInt(0, 1).apply {
@@ -148,9 +262,29 @@ ValueAnimator.ofInt(0, 1).apply {
 }
 ```
 
+:::
+
 ### 3. 延时策略
 
 利用 `Handler` / `View.postDelayed` 逐步移动，实现简单但效率低，适合小距离场景：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+view.postDelayed(new Runnable() {
+    @Override
+    public void run() {
+        if (view.getScrollY() < targetY) {
+            view.scrollBy(0, step);
+            view.postDelayed(this, 16); // 约 60fps
+        }
+    }
+}, 16);
+```
+
+@tab Kotlin
 
 ```kotlin
 view.postDelayed(object : Runnable {
@@ -162,6 +296,8 @@ view.postDelayed(object : Runnable {
     }
 }, 16)
 ```
+
+:::
 
 ## 六、高频面试题
 

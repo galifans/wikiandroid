@@ -40,6 +40,10 @@ title: synchronized 与可重入锁
 
 **为什么需要重入**：子类覆写父类同步方法后调用 `super.doSomething()`，如果锁不可重入，将无法获得已被持有的 Child 对象锁，产生死锁。重入避免了这种死锁。
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class Child extends Father {
     public synchronized void doSomething() {
@@ -48,9 +52,26 @@ public class Child extends Father {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class Child : Father() {
+    @Synchronized
+    fun doSomething() {
+        super.doSomething() // 锁可重入，不会死锁
+    }
+}
+```
+
+:::
+
 ## 内存可见性
 
 synchronized 不仅提供互斥，还保证**内存可见性**：线程 A 在释放锁前的所有变量修改，线程 B 获得同一把锁后都能看到。
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public class SynchronizedInteger {
@@ -60,5 +81,21 @@ public class SynchronizedInteger {
     public synchronized void set(int value) { this.value = value; }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class SynchronizedInteger {
+    private var value: Int = 0
+
+    @Synchronized
+    fun get(): Int { return value }
+
+    @Synchronized
+    fun set(value: Int) { this.value = value }
+}
+```
+
+:::
 
 对 get/set 加同一把对象锁，get 就能看到 set 的修改，每次读到最新值。

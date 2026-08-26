@@ -61,6 +61,32 @@ dependencies {
 
 ## 4. 基础用例示例
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 纯逻辑测试（JUnit）
+public class PriceCalculatorTest {
+
+    private final PriceCalculator calculator = new PriceCalculator();
+
+    @Test
+    public void 打折后价格计算正确() {
+        double price = calculator.calculate(100.0, 0.8);
+        assertEquals(80.0, price, 0.01);
+    }
+
+    @Test
+    public void 折扣为负时抛异常() {
+        assertThrows(IllegalArgumentException.class, () ->
+                calculator.calculate(100.0, -0.1));
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ① 纯逻辑测试（JUnit）
 class PriceCalculatorTest {
@@ -81,6 +107,46 @@ class PriceCalculatorTest {
     }
 }
 ```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ② ViewModel 测试（Mockito + coroutines-test）
+public class LoginViewModelTest {
+
+    private final LoginRepository repository = Mockito.mock(LoginRepository.class);
+    private LoginViewModel viewModel;
+
+    @Before
+    public void setup() {
+        viewModel = new LoginViewModel(repository);
+    }
+
+    @Test
+    public void 登录成功状态流转正确() throws Exception {
+        when(repository.login("user", "123")).thenReturn(new User("user"));
+
+        runBlocking(cont -> { viewModel.login("user", "123"); return null; });
+
+        assertEquals(LoginState.Success, viewModel.getState().getValue());
+    }
+
+    @Test
+    public void 登录失败显示错误信息() throws Exception {
+        when(repository.login("user", "wrong")).thenThrow(new RuntimeException("网络错误"));
+
+        runBlocking(cont -> { viewModel.login("user", "wrong"); return null; });
+
+        assertTrue(viewModel.getState().getValue() instanceof LoginState.Error);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ② ViewModel 测试（MockK + coroutines-test）
@@ -114,6 +180,33 @@ class LoginViewModelTest {
 }
 ```
 
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ③ 测试技巧
+// runTest：协程测试（虚拟时间，无需等待）——Java 中用 runBlocking 包裹
+// coEvery/coVerify：挂起函数 mock——用 Mockito when/verify
+// verify：验证调用次数
+@Test
+public void 缓存命中不请求网络() throws Exception {
+    when(api.getUser("1")).thenReturn(userDto);
+
+    runBlocking(cont -> {
+        repository.getUser("1");
+        repository.getUser("1");
+        return null;
+    });
+
+    verify(api, times(1)).getUser("1"); // 只请求一次（缓存生效）
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ③ 测试技巧
 // runTest：协程测试（虚拟时间，无需等待）
@@ -130,7 +223,32 @@ fun `缓存命中不请求网络`() = runTest {
 }
 ```
 
+:::
+
 ## 5. Robolectric（JVM 模拟 Android）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 需要 Android 依赖的测试（如 Context、SharedPreferences）
+@RunWith(RobolectricTestRunner.class)
+public class PrefsManagerTest {
+
+    @Test
+    public void 保存并读取配置() {
+        Context context = ApplicationProvider.getApplicationContext();
+        PrefsManager manager = new PrefsManager(context);
+
+        manager.putString("key", "value");
+
+        assertEquals("value", manager.getString("key"));
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 需要 Android 依赖的测试（如 Context、SharedPreferences）
@@ -148,6 +266,8 @@ class PrefsManagerTest {
     }
 }
 ```
+
+:::
 
 ## 6. 覆盖率与工程实践
 

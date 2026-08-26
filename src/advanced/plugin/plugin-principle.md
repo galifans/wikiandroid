@@ -34,6 +34,26 @@ vs 热修复：热修复改 bug（小），插件化加功能（大）
 
 ## 3. 类加载方案
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 插件 dex 通过 DexClassLoader 加载
+DexClassLoader pluginLoader = new DexClassLoader(
+        pluginApkPath,        // 插件 APK 路径
+        optimizedDir,         // 优化目录（odex）
+        null,
+        hostClassLoader       // 父加载器（宿主类）
+);
+
+// 加载插件类
+Class<?> clazz = pluginLoader.loadClass("com.plugin.MainActivity");
+Object instance = clazz.newInstance();
+```
+
+@tab Kotlin
+
 ```kotlin
 // 插件 dex 通过 DexClassLoader 加载
 val pluginLoader = DexClassLoader(
@@ -48,6 +68,8 @@ val clazz = pluginLoader.loadClass("com.plugin.MainActivity")
 val instance = clazz.newInstance()
 ```
 
+:::
+
 ```text
 关键点：
 - 父加载器传宿主 ClassLoader → 插件可访问宿主类
@@ -56,6 +78,35 @@ val instance = clazz.newInstance()
 ```
 
 ## 4. 资源加载方案
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 动态合并插件资源到 AssetManager
+Resources loadPluginResources(String pluginApkPath) {
+    // 反射创建新的 AssetManager
+    AssetManager assetManager = AssetManager.class.newInstance();
+    try {
+        Method addAssetPath = AssetManager.class
+                .getDeclaredMethod("addAssetPath", String.class);
+        addAssetPath.setAccessible(true);
+        addAssetPath.invoke(assetManager, pluginApkPath);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    // 基于新 AssetManager 创建 Resources
+    return new Resources(
+            assetManager,
+            context.getResources().getDisplayMetrics(),
+            context.getResources().getConfiguration()
+    );
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 动态合并插件资源到 AssetManager
@@ -75,6 +126,8 @@ fun loadPluginResources(pluginApkPath: String): Resources {
     )
 }
 ```
+
+:::
 
 ```text
 注意：
@@ -100,6 +153,36 @@ Instrumentation Hook 方案：
 - 配合占位 Activity，实现生命周期透明转发
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 占位式简化示意
+public class ProxyActivity extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // 从 Intent 获取插件 Activity 类名
+        String pluginClassName = getIntent().getStringExtra("plugin_class");
+
+        // 用插件 ClassLoader 加载并实例化
+        Activity pluginActivity = (Activity) pluginClassLoader
+                .loadClass(pluginClassName)
+                .getConstructor()
+                .newInstance();
+
+        // 设置上下文 + 生命周期代理（简化）
+        pluginActivity.attach(this, ...);
+        pluginActivity.onCreate(savedInstanceState);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 占位式简化示意
 class ProxyActivity : Activity() {
@@ -122,6 +205,8 @@ class ProxyActivity : Activity() {
     }
 }
 ```
+
+:::
 
 ## 6. 代表框架对比
 

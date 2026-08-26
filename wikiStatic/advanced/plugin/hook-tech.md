@@ -16,6 +16,10 @@ title: Hook 技术详解
 
 ## 二、使用示例：替换 View 的点击事件
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public static void hook(Context context, final View view) {
     try {
@@ -49,6 +53,41 @@ public static void hook(Context context, final View view) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+fun hook(context: Context, view: View) {
+    try {
+        // 1. 反射执行 View 的 getListenerInfo() 方法，拿到 mListenerInfo 对象（点击事件的持有者）
+        val method = View::class.java.getDeclaredMethod("getListenerInfo")
+        method.isAccessible = true  // getListenerInfo() 不是 public，需要设置访问权限
+        val mListenerInfo = method.invoke(view)
+
+        // 2. 从 ListenerInfo 中拿到当前的点击事件对象
+        val listenerInfoClz = Class.forName("android.view.View\$ListenerInfo")
+        val field = listenerInfoClz.getDeclaredField("mOnClickListener")
+        val onClickListenerInstance =
+            field.get(mListenerInfo) as View.OnClickListener
+
+        // 3. 创建自己的点击事件代理类（方式2：动态代理）
+        val proxyOnClickListener = Proxy.newProxyInstance(
+            context.javaClass.classLoader,
+            arrayOf(View.OnClickListener::class.java),
+            InvocationHandler { proxy, method, args ->
+                Log.d("Hook", "点击事件被 hook 到了")  // 加入自己的逻辑
+                method.invoke(onClickListenerInstance, *args!!) // 执行原逻辑
+            })
+
+        // 4. 用代理类替换持有者中的原点击事件
+        field.set(mListenerInfo, proxyOnClickListener)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+```
+
+:::
 
 **两种代理方式：**
 

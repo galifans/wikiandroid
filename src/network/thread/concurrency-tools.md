@@ -13,6 +13,36 @@ description: CountDownLatch、CyclicBarrier、Semaphore、Atomic、ConcurrentHas
 
 **场景**：等待 N 个任务全部完成后再继续。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 模拟：等待 3 个线程都完成
+CountDownLatch latch = new CountDownLatch(3);
+
+for (int i = 0; i < 3; i++) {
+    final int index = i;
+    new Thread(() -> {
+        try {
+            Thread.sleep(1000L * (index + 1));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        System.out.println("任务 " + index + " 完成");
+        latch.countDown();          // 计数 -1
+    }).start();
+}
+
+latch.await();                      // 阻塞直到计数归 0
+System.out.println("全部任务完成，继续执行");
+
+// 带超时（避免永久阻塞）
+latch.await(5, TimeUnit.SECONDS);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 模拟：等待 3 个线程都完成
 val latch = CountDownLatch(3)
@@ -32,6 +62,8 @@ println("全部任务完成，继续执行")
 latch.await(5, TimeUnit.SECONDS)
 ```
 
+:::
+
 **特点**：
 
 - **一次性**：计数归 0 后不能复用。
@@ -40,6 +72,30 @@ latch.await(5, TimeUnit.SECONDS)
 ## 2. CyclicBarrier：循环屏障
 
 **场景**：N 个线程互相等待，全部到达后**同时**继续。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+CyclicBarrier barrier = new CyclicBarrier(3, () -> System.out.println("所有线程已到达，集体行动！"));
+
+for (int i = 0; i < 3; i++) {
+    final int index = i;
+    new Thread(() -> {
+        try {
+            Thread.sleep(1000L * index);
+            System.out.println("线程 " + index + " 到达屏障");
+            barrier.await();            // 等待其他线程
+            System.out.println("线程 " + index + " 继续执行");
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+        }
+    }).start();
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 val barrier = CyclicBarrier(3) { println("所有线程已到达，集体行动！") }
@@ -54,6 +110,8 @@ repeat(3) { index ->
 }
 ```
 
+:::
+
 **CountDownLatch vs CyclicBarrier**：
 
 | 维度 | CountDownLatch | CyclicBarrier |
@@ -66,6 +124,34 @@ repeat(3) { index ->
 ## 3. Semaphore：信号量
 
 **场景**：控制并发访问数量（限流）。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 模拟：数据库连接池只有 2 个连接
+Semaphore semaphore = new Semaphore(2);
+
+for (int i = 0; i < 5; i++) {
+    final int index = i;
+    new Thread(() -> {
+        try {
+            semaphore.acquire();        // 获取许可（无则阻塞）
+            System.out.println("线程 " + index + " 获取连接");
+            Thread.sleep(2000);
+            System.out.println("线程 " + index + " 释放连接");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            semaphore.release();    // 释放许可（必须 finally）
+        }
+    }).start();
+}
+// 效果：同一时刻最多 2 个线程执行
+```
+
+@tab Kotlin
 
 ```kotlin
 // 模拟：数据库连接池只有 2 个连接
@@ -86,9 +172,39 @@ repeat(5) { index ->
 // 效果：同一时刻最多 2 个线程执行
 ```
 
+:::
+
 ## 4. Atomic 原子类
 
 **场景**：无锁线程安全计数。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 非原子：多线程下 i++ 会丢数据
+int count = 0;
+for (int i = 0; i < 1000; i++) {
+    new Thread(() -> count++).start();  // 结果 < 1000
+}
+
+// ✓ AtomicInteger：CAS 实现无锁原子操作
+AtomicInteger atomicCount = new AtomicInteger(0);
+for (int i = 0; i < 1000; i++) {
+    new Thread(atomicCount::incrementAndGet).start();
+}
+System.out.println(atomicCount.get());           // 1000
+
+// 常用方法
+atomicCount.get();                     // 读取
+atomicCount.incrementAndGet();         // ++i
+atomicCount.getAndIncrement();         // i++
+atomicCount.compareAndSet(expect, update);  // CAS
+atomicCount.updateAndGet(x -> x * 2);  // 函数式更新
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✗ 非原子：多线程下 i++ 会丢数据
@@ -108,12 +224,36 @@ atomicCount.compareAndSet(expect, update)  // CAS
 atomicCount.updateAndGet { it * 2 }   // 函数式更新
 ```
 
+:::
+
 **CAS 原理**：`compareAndSwapInt`（底层 Unsafe/CMPXCHG 指令）——比较期望值，
 相等则交换，不相等则自旋重试（`do while` 循环）。
 
 ## 5. ConcurrentHashMap
 
 **场景**：线程安全的 HashMap（高并发读）。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ HashMap 多线程会丢数据/死循环（JDK7 扩容头插法）
+//  Hashtable 全表锁，并发低
+
+// ✓ ConcurrentHashMap：分段锁（JDK7）/ CAS+synchronized（JDK8）
+ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<>();
+map.put("a", 1);
+map.computeIfAbsent("b", k -> 2);   // 原子操作
+
+// JDK8 实现要点
+//  - 数组 + 链表/红黑树
+//  - 头节点加锁（synchronized），非全表锁
+//  - 扩容：多线程协助迁移
+//  - size：counterCells 分散计数
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✗ HashMap 多线程会丢数据/死循环（JDK7 扩容头插法）
@@ -131,6 +271,8 @@ map.computeIfAbsent("b") { 2 }   // 原子操作
 //  - size：counterCells 分散计数
 ```
 
+:::
+
 **其他并发容器**：
 
 | 容器 | 替代 | 特性 |
@@ -140,6 +282,29 @@ map.computeIfAbsent("b") { 2 }   // 原子操作
 | `BlockingQueue` | 队列+阻塞 | 线程池任务队列 |
 
 ## 6. volatile 与 synchronized
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// volatile：可见性（禁止指令重排），不保证原子性
+volatile boolean running = true;
+
+// 典型用法：线程停止标志
+class Worker extends Thread {
+    volatile boolean running = true;
+    @Override
+    public void run() {
+        while (running) { /* 工作 */ }
+    }
+}
+
+// synchronized：互斥（原子性 + 可见性）
+synchronized void increment() { count++; }
+```
+
+@tab Kotlin
 
 ```kotlin
 // volatile：可见性（禁止指令重排），不保证原子性
@@ -159,6 +324,8 @@ class Worker : Thread() {
 @Synchronized
 fun increment() { count++ }
 ```
+
+:::
 
 | 关键字 | 可见性 | 原子性 | 使用场景 |
 | --- | --- | --- | --- |

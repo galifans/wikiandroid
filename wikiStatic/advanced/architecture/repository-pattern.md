@@ -39,6 +39,49 @@ ViewModel → Repository（接口）→ Remote / Local
 
 ## 3. 基础实现
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 接口（Domain 层定义）
+interface UserRepository {
+    // Kotlin suspend 等价：Java 中由调用方切换到 IO 线程执行
+    Result<User> getUser(String userId);
+    Result<List<User>> getFollowers(String userId, int page);
+}
+
+// 实现（Data 层）
+class UserRepositoryImpl implements UserRepository {
+    private final UserApi api;
+    private final UserDao dao;
+    private final SharedPreferences prefs; // 简单缓存
+
+    public UserRepositoryImpl(UserApi api, UserDao dao, SharedPreferences prefs) {
+        this.api = api;
+        this.dao = dao;
+        this.prefs = prefs;
+    }
+
+    @Override
+    public Result<User> getUser(String userId) {
+        try {
+            // 策略：先缓存，后网络
+            User cached = dao.getUser(userId);
+            if (cached != null) return Result.success(cached);
+
+            UserDto dto = api.getUser(userId);
+            dao.insert(dto.toEntity());
+            return Result.success(dto.toEntity());
+        } catch (Exception e) {
+            return Result.failure(e);
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 接口（Domain 层定义）
 interface UserRepository {
@@ -67,6 +110,8 @@ class UserRepositoryImpl(
 }
 ```
 
+:::
+
 ## 4. 缓存策略设计
 
 ### 4.1 常见策略
@@ -79,6 +124,39 @@ class UserRepositoryImpl(
 | 缓存穿透 | 先缓存，过期才网络 | 配置类数据 |
 
 ### 4.2 缓存过期
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class UserRepositoryImpl implements UserRepository {
+
+    @Override
+    public Result<User> getUser(String userId) {
+        User cached = dao.getUser(userId);
+        boolean isExpired = cached != null &&
+            System.currentTimeMillis() - cached.getLastUpdate() > CACHE_TTL;
+
+        // 缓存有效 → 直接用
+        if (cached != null && !isExpired) {
+            return Result.success(cached);
+        }
+        // 缓存过期/无缓存 → 网络
+        try {
+            User user = api.getUser(userId).toEntity();
+            dao.insert(user.copyWithLastUpdate(System.currentTimeMillis()));
+            return Result.success(user);
+        } catch (Exception e) {
+            // 网络失败但有过期缓存 → 降级返回
+            if (cached != null) return Result.success(cached);
+            return Result.failure(e);
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class UserRepositoryImpl(...) : UserRepository {
@@ -105,7 +183,54 @@ class UserRepositoryImpl(...) : UserRepository {
 }
 ```
 
+:::
+
 ## 5. Flow 数据流（响应式）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 数据层暴露可观察数据：UI 自动订阅更新（Kotlin Flow 用 LiveData 等价表达）
+interface NewsRepository {
+    LiveData<List<News>> observeNews(); // 监听本地变化
+    void refreshNews();                 // 手动刷新
+}
+
+class NewsRepositoryImpl implements NewsRepository {
+    private final NewsApi api;
+    private final NewsDao dao;
+
+    @Override
+    public LiveData<List<News>> observeNews() {
+        return dao.observeNews(); // Room 原生支持 LiveData
+    }
+
+    @Override
+    public void refreshNews() {
+        List<News> news = api.getNews();
+        // 更新本地 → LiveData 自动通知
+        dao.replaceAll(news.stream()
+                .map(NewsDto::toEntity)
+                .collect(Collectors.toList()));
+    }
+}
+
+// ViewModel 使用
+class NewsViewModel extends ViewModel {
+    private final LiveData<List<NewsUiModel>> news;
+
+    public NewsViewModel(NewsRepository repo) {
+        news = Transformations.map(repo.observeNews(), list ->
+                list.stream().map(News::toUiModel).collect(Collectors.toList()));
+    }
+
+    public LiveData<List<NewsUiModel>> getNews() { return news; }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 数据层暴露 Flow：UI 自动订阅更新
@@ -132,7 +257,53 @@ class NewsViewModel(private val repo: NewsRepository) : ViewModel() {
 }
 ```
 
+:::
+
 ## 6. 多数据源结合（Remote + Local + Memory）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class UserRepositoryImpl implements UserRepository {
+    private final MemoryCache memoryCache; // 内存（最快）
+    private final UserApi api;             // 网络
+    private final UserDao dao;             // 本地数据库
+
+    public UserRepositoryImpl(MemoryCache memoryCache, UserApi api, UserDao dao) {
+        this.memoryCache = memoryCache;
+        this.api = api;
+        this.dao = dao;
+    }
+
+    @Override
+    public Result<User> getUser(String userId) {
+        // ① 内存缓存
+        User cached = memoryCache.get(userId);
+        if (cached != null) return Result.success(cached);
+
+        // ② 本地数据库
+        User fromDb = dao.getUser(userId);
+        if (fromDb != null) {
+            memoryCache.put(userId, fromDb);
+            return Result.success(fromDb);
+        }
+
+        // ③ 网络（兜底）
+        try {
+            User user = api.getUser(userId).toEntity();
+            memoryCache.put(userId, user);
+            dao.insert(user);
+            return Result.success(user);
+        } catch (Exception e) {
+            return Result.failure(e);
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class UserRepositoryImpl(
@@ -161,6 +332,8 @@ class UserRepositoryImpl(
     }
 }
 ```
+
+:::
 
 ## 7. 高频面试题
 

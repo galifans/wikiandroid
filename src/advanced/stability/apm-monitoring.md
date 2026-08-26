@@ -39,6 +39,33 @@ flowchart TD
 | Native 崩溃 | 信号处理器 + Breakpad | 符号表还原 |
 | 逻辑错误 | 自定义异常捕获 | 现场信息回捞 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Java 崩溃捕获
+public class CrashHandler implements Thread.UncaughtExceptionHandler {
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        // 1. 记录崩溃现场(堆栈/机型/版本/页面/时间)
+        CrashInfo crashInfo = new CrashInfo(
+                t.getName(),
+                Log.getStackTraceString(e),
+                DeviceInfo.get(),
+                BuildConfig.VERSION_NAME,
+                PageTracker.currentPage()
+        );
+        // 2. 异步写入本地文件(进程即将结束,同步兜底)
+        CrashStore.save(crashInfo);
+        // 3. 交给默认处理器(系统闪退)或自行重启
+        if (defaultHandler != null) defaultHandler.uncaughtException(t, e);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // Java 崩溃捕获
 class CrashHandler : Thread.UncaughtExceptionHandler {
@@ -59,7 +86,38 @@ class CrashHandler : Thread.UncaughtExceptionHandler {
 }
 ```
 
+:::
+
 ### 2.2 卡顿监控
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 方案一:Choreographer 帧回调(FrameCallback)
+public class JankMonitor {
+    private long lastFrameTime = 0L;
+    private final Choreographer.FrameCallback frameCallback =
+            new Choreographer.FrameCallback() {
+                @Override
+                public void doFrame(long frameTimeNanos) {
+                    if (lastFrameTime != 0L) {
+                        long frameMs = (frameTimeNanos - lastFrameTime) / 1_000_000;
+                        if (frameMs > 100) reportJank(frameMs);   // 超过 100ms 记为卡顿
+                    }
+                    lastFrameTime = frameTimeNanos;
+                    Choreographer.getInstance().postFrameCallback(this);
+                }
+            };
+    public void start() { Choreographer.getInstance().postFrameCallback(frameCallback); }
+}
+
+// 方案二:主线程消息耗时(Looper.getMainLooper().setMessageLogging)
+// 方案三:监控线程定期采样主线程堆栈(Sampler 方案,定位卡在哪个方法)
+```
+
+@tab Kotlin
 
 ```kotlin
 // 方案一:Choreographer 帧回调(FrameCallback)
@@ -81,6 +139,8 @@ class JankMonitor {
 // 方案三:监控线程定期采样主线程堆栈(Sampler 方案,定位卡在哪个方法)
 ```
 
+:::
+
 | 方案 | 优点 | 缺点 |
 |------|------|------|
 | FrameCallback | 准确反映掉帧 | 只能知道"卡了" |
@@ -89,6 +149,29 @@ class JankMonitor {
 | 组合方案 | 采样 + 帧率结合 | 实现复杂 |
 
 ### 2.3 ANR 监控
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ANR 捕获思路:主线程消息超时 + 兜底 dump
+// ① 主线程 Handler 发心跳消息,5s 内未回来说明主线程卡死
+// ② 触发时抓取主线程堆栈(可用 ANR-WatchDog 思路)
+
+// 系统 ANR 后 /data/anr/traces.txt 不可靠(可能被覆盖)
+// 兜底:主线程 MessageQueue 超时检测
+public class ANRMonitor {
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private final Runnable watchdogRunnable = () -> {
+        // 心跳没被重置 → 主线程可能卡死
+        dumpMainThreadStack();
+    };
+    // 每条消息执行前 post 延迟任务,消息执行后 removeCallbacks 重置
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ANR 捕获思路:主线程消息超时 + 兜底 dump
@@ -107,7 +190,33 @@ class ANRMonitor {
 }
 ```
 
+:::
+
 ## 三、网络与页面监控
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 网络监控(OkHttp 拦截器):见《网络优化实战》网络监控章节
+// 页面监控:ActivityLifecycleCallbacks 统计页面耗时
+public class PageMonitor implements ActivityLifecycleCallbacks {
+    private long startTime;
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        startTime = SystemClock.elapsedRealtime();
+    }
+    @Override
+    public void onActivityResumed(Activity activity) {
+        long cost = SystemClock.elapsedRealtime() - startTime;
+        report(new PageMetric(activity.getClass().getName(), cost));   // 页面启动耗时
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 网络监控(OkHttp 拦截器):见《网络优化实战》网络监控章节
@@ -123,6 +232,8 @@ class PageMonitor : ActivityLifecycleCallbacks {
 }
 ```
 
+:::
+
 | 监控类型 | 指标 | 采集点 |
 |---------|------|--------|
 | 页面 | 启动耗时 / 渲染完成 / 停留时长 | LifecycleCallbacks |
@@ -132,6 +243,34 @@ class PageMonitor : ActivityLifecycleCallbacks {
 | 自定义 | 业务关键事件 | 埋点 SDK |
 
 ## 四、数据上报与采样
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 批量上报:攒一批一次上报,压缩传输
+public class ReportManager {
+    public void report(Event event) {
+        buffer.add(event);
+        if (buffer.size() >= 20) flush();      // 攒 20 条
+        // 或定时(如 30s)上报
+    }
+    public void flush() {
+        // Gzip 压缩 + 批量 POST
+        client.post("https://metric.example.com/batch", gzip(buffer));
+        buffer.clear();
+    }
+}
+
+// ② 采样控制:全量采集浪费流量,一般策略
+// 崩溃/ANR:全量上报(重要)
+// 页面/卡顿:5%-10% 采样
+// 网络:1%-5% 采样(或按接口重要性)
+// 用户分级:核心用户全量,普通用户采样
+```
+
+@tab Kotlin
 
 ```kotlin
 // ① 批量上报:攒一批一次上报,压缩传输
@@ -154,6 +293,8 @@ class ReportManager {
 // 网络:1%-5% 采样(或按接口重要性)
 // 用户分级:核心用户全量,普通用户采样
 ```
+
+:::
 
 ## 五、告警与定位
 

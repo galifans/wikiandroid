@@ -11,6 +11,10 @@ title: EventBus 源码分析
 
 EventBus 通过 `@Subscribe` 注解标记订阅方法：
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -27,7 +31,31 @@ public @interface Subscribe {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+@Documented
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.FUNCTION)
+annotation class Subscribe(
+    // 线程模式
+    val threadMode: ThreadMode = ThreadMode.POSTING,
+
+    // 是否为粘性事件
+    val sticky: Boolean = false,
+
+    // 事件优先级
+    val priority: Int = 0
+)
+```
+
+:::
+
 订阅方法示例：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 @Subscribe(threadMode = ThreadMode.MAIN, priority = 1, sticky = true)
@@ -36,9 +64,24 @@ public void onEventMainThreadP1(IntTestEvent event) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+@Subscribe(threadMode = ThreadMode.MAIN, priority = 1, sticky = true)
+fun onEventMainThreadP1(event: IntTestEvent) {
+    handleEvent(1, event)
+}
+```
+
+:::
+
 ## 二、注册订阅者
 
 `EventBus.getDefault().register(object)` 的流程：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public void register(Object subscriber) {
@@ -53,7 +96,28 @@ public void register(Object subscriber) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+fun register(subscriber: Any) {
+    val subscriberClass = subscriber.javaClass
+    val subscriberMethods =
+        subscriberMethodFinder.findSubscriberMethods(subscriberClass)
+    synchronized(this) {
+        for (subscriberMethod in subscriberMethods) {
+            subscribe(subscriber, subscriberMethod)
+        }
+    }
+}
+```
+
+:::
+
 **核心：通过反射查找订阅者类里的订阅事件，并添加到 METHOD_CACHE 缓存：**
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 List<SubscriberMethod> findSubscriberMethods(Class<?> subscriberClass) {
@@ -76,6 +140,29 @@ List<SubscriberMethod> findSubscriberMethods(Class<?> subscriberClass) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+fun findSubscriberMethods(subscriberClass: Class<*>): List<SubscriberMethod> {
+    METHOD_CACHE[subscriberClass]?.let { return it }
+    val subscriberMethods = if (ignoreGeneratedIndex) {
+        findUsingReflection(subscriberClass)
+    } else {
+        findUsingInfo(subscriberClass)
+    }
+    if (subscriberMethods.isEmpty()) {
+        throw EventBusException(
+            "Subscriber $subscriberClass and its super classes have no " +
+                "public methods with the @Subscribe annotation")
+    } else {
+        METHOD_CACHE[subscriberClass] = subscriberMethods
+        return subscriberMethods
+    }
+}
+```
+
+:::
+
 **反射查找逻辑要点：**
 
 - 使用 `getDeclaredMethods()`（比 `getMethods()` 快，尤其订阅类是 Activity 这种大对象时）。
@@ -88,6 +175,10 @@ List<SubscriberMethod> findSubscriberMethods(Class<?> subscriberClass) {
 `EventBus.getDefault().post(object)` 的流程：
 
 1. **根据事件类型获取对应的订阅者列表**（subscriptionsByEventType 是 `Map<Class<?>, CopyOnWriteArrayList<Subscription>>`）：
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 private boolean postSingleEventForEventType(Object event,
@@ -119,7 +210,48 @@ private boolean postSingleEventForEventType(Object event,
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+private fun postSingleEventForEventType(
+    event: Any,
+    postingState: PostingThreadState,
+    eventClass: Class<*>
+): Boolean {
+    val subscriptions: CopyOnWriteArrayList<Subscription>?
+    synchronized(this) {
+        subscriptions = subscriptionsByEventType[eventClass]
+    }
+    if (subscriptions != null && subscriptions.isNotEmpty()) {
+        for (subscription in subscriptions) {
+            postingState.event = event
+            postingState.subscription = subscription
+            var aborted = false
+            try {
+                postToSubscription(subscription, event, postingState.isMainThread)
+                aborted = postingState.canceled
+            } finally {
+                postingState.event = null
+                postingState.subscription = null
+                postingState.canceled = false
+            }
+            if (aborted) {
+                break
+            }
+        }
+        return true
+    }
+    return false
+}
+```
+
+:::
+
 2. **根据注册时获得的 Method 对象反射调用订阅方法：**
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 void invokeSubscriber(Subscription subscription, Object event) {
@@ -132,6 +264,22 @@ void invokeSubscriber(Subscription subscription, Object event) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+fun invokeSubscriber(subscription: Subscription, event: Any) {
+    try {
+        subscription.subscriberMethod.method.invoke(subscription.subscriber, event)
+    } catch (e: InvocationTargetException) {
+        handleSubscriberException(subscription, event, e.cause)
+    } catch (e: IllegalAccessException) {
+        throw IllegalStateException("Unexpected exception", e)
+    }
+}
+```
+
+:::
 
 ## 四、线程模式
 

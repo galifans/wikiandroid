@@ -121,6 +121,27 @@ sequenceDiagram
 | Application 多次初始化 | 每进程都走 onCreate | 按进程名分支初始化 |
 | Binder 死锁风险 | 主线程等待其他进程 Binder 返回 | 避免主线程同步跨进程调用 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 按进程名分支初始化（常见做法）
+class MyApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (ProcessUtils.isMainProcess(this)) {
+            // 只初始化主进程需要的：推送、图片库、崩溃收集
+        } else {
+            // 子进程（如 :remote）：只做轻量初始化
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 按进程名分支初始化（常见做法）
 class MyApplication : Application() {
@@ -134,6 +155,8 @@ class MyApplication : Application() {
     }
 }
 ```
+
+:::
 
 ### 4.3 多进程的适用场景
 
@@ -173,11 +196,25 @@ flowchart LR
 3. **WorkManager**：系统统一调度的延迟/周期任务，优先于自行保活。
 4. **接受现实**：纯后台 App 在息屏后被杀是**系统设计**，不是 bug。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 判断是否在白名单
+PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+pm.isIgnoringBatteryOptimizations(getPackageName());
+```
+
+@tab Kotlin
+
 ```kotlin
 // 判断是否在白名单
 val pm = getSystemService(PowerManager::class.java)
 pm.isIgnoringBatteryOptimizations(packageName)
 ```
+
+:::
 
 ## 六、高频面试题（带详解）
 

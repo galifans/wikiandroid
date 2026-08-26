@@ -28,6 +28,129 @@ description: ViewGroup 测量与布局原理、onMeasure/onLayout 实战、自�
 
 ## 2. 完整示例：流式布局（FlowLayout）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class FlowLayout extends ViewGroup {
+
+    private final int horizontalSpacing = dp2px(8f);
+    private final int verticalSpacing = dp2px(8f);
+
+    // 记录每行子 View（用于 onLayout）
+    private final List<List<View>> lines = new ArrayList<>();
+    private final List<Integer> lineHeights = new ArrayList<>();
+
+    public FlowLayout(Context context) {
+        this(context, null);
+    }
+
+    public FlowLayout(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public FlowLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    // ─────────── ① onMeasure：先测量子 View ───────────
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+
+        int curLineWidth = 0;      // 当前行累计宽度
+        int curLineHeight = 0;     // 当前行最高子 View 高度
+        int totalHeight = getPaddingTop() + getPaddingBottom();
+
+        lines.clear();
+        lineHeights.clear();
+        List<View> currentLine = new ArrayList<>();
+
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            // 测量子 View（根据子 View 的 LayoutParams 生成 MeasureSpec）
+            measureChild(child, widthMeasureSpec, heightMeasureSpec);
+
+            // 判断是否需要换行（加上间距后超宽）
+            boolean needWrap = curLineWidth + child.getMeasuredWidth() >
+                    widthSize - getPaddingLeft() - getPaddingRight();
+            if (needWrap && !currentLine.isEmpty()) {
+                // 保存当前行
+                lines.add(new ArrayList<>(currentLine));
+                lineHeights.add(curLineHeight);
+                // 换行
+                currentLine.clear();
+                totalHeight += curLineHeight + verticalSpacing;
+                curLineWidth = 0;
+                curLineHeight = 0;
+            }
+
+            currentLine.add(child);
+            curLineWidth += child.getMeasuredWidth() + horizontalSpacing;
+            curLineHeight = Math.max(curLineHeight, child.getMeasuredHeight());
+        }
+
+        // 保存最后一行
+        if (!currentLine.isEmpty()) {
+            lines.add(new ArrayList<>(currentLine));
+            lineHeights.add(curLineHeight);
+            totalHeight += curLineHeight;
+        }
+
+        // 设置自身尺寸（AT_MOST 时高度为内容高度）
+        int height = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST
+                ? totalHeight
+                : MeasureSpec.getSize(heightMeasureSpec);
+        setMeasuredDimension(widthSize, height);
+    }
+
+    // ─────────── ② onLayout：摆放子 View ───────────
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        int curX = getPaddingLeft();
+        int curY = getPaddingTop();
+
+        for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
+            List<View> line = lines.get(lineIndex);
+            int lineHeight = lineHeights.get(lineIndex);
+
+            for (View child : line) {
+                child.layout(curX, curY,
+                        curX + child.getMeasuredWidth(), curY + child.getMeasuredHeight());
+                curX += child.getMeasuredWidth() + horizontalSpacing;
+            }
+
+            curX = getPaddingLeft();
+            curY += lineHeight + verticalSpacing;
+        }
+    }
+
+    // ─────────── ③ 支持 margin ───────────
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new MarginLayoutParams(getContext(), attrs);
+    }
+
+    @Override
+    public LayoutParams generateLayoutParams(LayoutParams p) {
+        return new MarginLayoutParams(p);
+    }
+
+    @Override
+    public boolean checkLayoutParams(LayoutParams p) {
+        return p instanceof MarginLayoutParams;
+    }
+
+    private int dp2px(float dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class FlowLayout @JvmOverloads constructor(
     context: Context,
@@ -126,6 +249,8 @@ class FlowLayout @JvmOverloads constructor(
     private fun dp2px(dp: Float): Float = dp * resources.displayMetrics.density
 }
 ```
+
+:::
 
 **使用方式**：
 

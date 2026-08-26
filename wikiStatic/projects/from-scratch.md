@@ -49,6 +49,39 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 
 ### 数据层（Data Layer）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+interface NewsRepository {
+    Flowable<List<News>> getNewsList(int page);
+}
+
+class NewsRepositoryImpl implements NewsRepository {
+    private final NewsApi api;
+    private final NewsDao dao;
+
+    public NewsRepositoryImpl(NewsApi api, NewsDao dao) {
+        this.api = api;
+        this.dao = dao;
+    }
+
+    @Override
+    public Flowable<List<News>> getNewsList(int page) {
+        return Flowable.defer(() -> {
+            // 网络获取
+            List<News> remote = api.getNews(page);
+            // 缓存入库
+            dao.insertAll(remote);
+            return Flowable.just(remote);
+        }).subscribeOn(Schedulers.io());   // 等价 flowOn(Dispatchers.IO)
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 interface NewsRepository {
     fun getNewsList(page: Int): Flow<List<News>>
@@ -69,7 +102,37 @@ class NewsRepositoryImpl(
 }
 ```
 
+:::
+
 ### UI 层（Compose + ViewModel）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@HiltViewModel
+public class HomeViewModel extends ViewModel {
+    private final NewsRepository repository;
+    private final MutableLiveData<HomeUiState> _uiState =
+            new MutableLiveData<>(HomeUiState.Loading);
+
+    // 对外暴露不可变 LiveData(等价 StateFlow + stateIn 的只读视图)
+    public LiveData<HomeUiState> uiState = _uiState;
+
+    @Inject
+    public HomeViewModel(NewsRepository repository) {
+        this.repository = repository;
+        // 等价 stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Loading)
+        // LiveData 无 WhileSubscribed 语义,此处以常驻订阅模拟
+        repository.getNewsList(1)
+                .map(list -> new HomeUiState.Success(list))
+                .subscribe(_uiState::setValue);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @HiltViewModel
@@ -81,6 +144,8 @@ class HomeViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeUiState.Loading)
 }
 ```
+
+:::
 
 ## 四、工程实践
 

@@ -38,6 +38,21 @@ Application.attachBaseContext → Application.onCreate
 
 ### 2. 异步初始化（启动器框架）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 使用启动器框架（如 Android Startup）分层初始化
+StartupInitializer.initialize(context, Arrays.asList(
+        CrashInit.class,      // 第一优先级（主线程）
+        NetworkInit.class,    // 异步初始化
+        ImageLoaderInit.class
+));
+```
+
+@tab Kotlin
+
 ```kotlin
 // 使用启动器框架（如 Android Startup）分层初始化
 StartupInitializer.initialize(context, listOf(
@@ -46,6 +61,8 @@ StartupInitializer.initialize(context, listOf(
     ImageLoaderInit::class
 ))
 ```
+
+:::
 
 ### 3. 优化 Application.onCreate
 

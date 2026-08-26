@@ -16,6 +16,10 @@ title: AsyncTask 与 IntentService 原理
 | `onProgressUpdate(...)` | 主线程中执行，后台任务进度改变时调用 |
 | `onPostExecute(...)` | 主线程中执行，异步任务执行完之后 |
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class DownloadTask extends AsyncTask<String, Integer, Boolean> {
 
@@ -41,6 +45,31 @@ public class DownloadTask extends AsyncTask<String, Integer, Boolean> {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class DownloadTask : AsyncTask<String, Int, Boolean>() {
+
+    override fun onPreExecute() {
+        super.onPreExecute()
+    }
+
+    override fun doInBackground(vararg strings: String): Boolean? {
+        return null
+    }
+
+    override fun onProgressUpdate(vararg values: Int?) {
+        super.onProgressUpdate(*values)
+    }
+
+    override fun onPostExecute(aBoolean: Boolean?) {
+        super.onPostExecute(aBoolean)
+    }
+}
+```
+
+:::
+
 **使用约束：**
 
 1. AsyncTask 对象必须在 UI 线程中创建；
@@ -52,12 +81,27 @@ public class DownloadTask extends AsyncTask<String, Integer, Boolean> {
 
 ## 二、AsyncTask 工作原理
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 @MainThread
 public final AsyncTask<Params, Progress, Result> execute(Params... params) {
     return executeOnExecutor(sDefaultExecutor, params);
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+@MainThread
+fun execute(vararg params: Params): AsyncTask<Params, Progress, Result> {
+    return executeOnExecutor(sDefaultExecutor, params)
+}
+```
+
+:::
 
 `execute()` 最终调用 `executeOnExecutor(sDefaultExecutor, params)`：
 
@@ -81,6 +125,10 @@ public final AsyncTask<Params, Progress, Result> execute(Params... params) {
 
 HandlerThread 继承 Thread，但内部创建了消息队列，外界通过 Handler 消息方式通知它执行任务：
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 @Override
 public void run() {
@@ -97,6 +145,25 @@ public void run() {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+override fun run() {
+    mTid = Process.myTid()
+    Looper.prepare()
+    synchronized(this) {
+        mLooper = Looper.myLooper()
+        notifyAll()
+    }
+    Process.setThreadPriority(mPriority)
+    onLooperPrepared()
+    Looper.loop()
+    mTid = -1
+}
+```
+
+:::
+
 普通的 Thread 主要用于在 run 方法中执行一个耗时任务，而 HandlerThread 通过 Handler 消息驱动，可处理多个串行任务，适合需要循环处理消息的场景（如本地文件 IO、数据库操作）。
 
 ## 四、IntentService
@@ -104,6 +171,10 @@ public void run() {
 IntentService 用于执行后台耗时任务，任务执行后自动停止。由于是 Service，优先级比单纯线程高，适合执行高优先级后台任务。实现上封装了 HandlerThread 和 Handler。
 
 **执行流程：**
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 @Override
@@ -115,6 +186,20 @@ public void onCreate() {
     mServiceHandler = new ServiceHandler(mServiceLooper);
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+override fun onCreate() {
+    super.onCreate()
+    val thread = HandlerThread("IntentService[$mName]")
+    thread.start()
+    mServiceLooper = thread.looper
+    mServiceHandler = ServiceHandler(mServiceLooper)
+}
+```
+
+:::
 
 1. 第一次启动时在 `onCreate` 创建 HandlerThread，用其 Looper 构造 `mServiceHandler`；
 2. 每次启动，`onStartCommand` 调用一次，内部调用 `onStart` 将 Intent 包装成 Message 发给 `mServiceHandler`；

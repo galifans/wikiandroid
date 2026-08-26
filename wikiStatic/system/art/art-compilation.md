@@ -60,6 +60,10 @@ flowchart LR
     E --> B
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // Profile 机制要点:
 // 1. JIT 运行中统计:哪些方法被频繁调用(热点)
@@ -68,6 +72,19 @@ flowchart LR
 // 4. 下次启动:热点方法直接执行机器码,启动更快
 // 5. 云端 profile:Google Play 收集流行 profile 下发
 ```
+
+@tab Kotlin
+
+```kotlin
+// Profile 机制要点:
+// 1. JIT 运行中统计:哪些方法被频繁调用(热点)
+// 2. 记录到 profile 文件(方法 + 调用次数)
+// 3. 空闲/充电时:dex2oat 依据 profile 编译热点方法
+// 4. 下次启动:热点方法直接执行机器码,启动更快
+// 5. 云端 profile:Google Play 收集流行 profile 下发
+```
+
+:::
 
 | Profile 类型 | 来源 | 用途 |
 |-------------|------|------|

@@ -46,6 +46,46 @@ flowchart LR
 | pointerId | `getPointerId(index)` | 手指的**唯一标识**，从按下到抬起不变 |
 | pointerIndex | `getActionIndex()` | 事件中的**位置索引**，会随手指抬起重排 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+public boolean onTouchEvent(MotionEvent event) {
+    int action = event.getActionMasked();
+    switch (action) {
+        case MotionEvent.ACTION_POINTER_DOWN:
+            // 新按下手指的 index
+            int index = event.getActionIndex();
+            int id = event.getPointerId(index);
+            float x = event.getX(index);
+            float y = event.getY(index);
+            Log.d("Multi", "第 " + event.getPointerCount() + " 指按下: id=" + id + " (" + x + ", " + y + ")");
+            break;
+        case MotionEvent.ACTION_MOVE:
+            // 遍历所有手指
+            for (int i = 0; i < event.getPointerCount(); i++) {
+                int id2 = event.getPointerId(i);
+                float x2 = event.getX(i);
+                float y2 = event.getY(i);
+            }
+            break;
+        case MotionEvent.ACTION_POINTER_UP:
+            // 抬起手指的 index（注意：抬起后该 index 失效）
+            int upIndex = event.getActionIndex();
+            int upId = event.getPointerId(upIndex);
+            break;
+        case MotionEvent.ACTION_UP:
+            // 最后一指抬起
+            break;
+    }
+    return true;
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onTouchEvent(event: MotionEvent): Boolean {
     val action = event.actionMasked
@@ -79,6 +119,8 @@ override fun onTouchEvent(event: MotionEvent): Boolean {
 }
 ```
 
+:::
+
 ### 2.2 pointerId 与 index 的区别
 
 | 场景 | pointerId | pointerIndex |
@@ -92,6 +134,56 @@ override fun onTouchEvent(event: MotionEvent): Boolean {
 ## 三、GestureDetector 手势识别
 
 ### 3.1 使用方式
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class GestureView extends View {
+
+    private final GestureDetector gestureDetector = new GestureDetector(getContext(),
+            new GestureDetector.SimpleOnGestureListener() {
+                // 单击
+                @Override
+                public boolean onSingleTapUp(MotionEvent e) {
+                    Log.d("Gesture", "单击");
+                    return true;
+                }
+                // 长按
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    Log.d("Gesture", "长按");
+                }
+                // 滑动
+                @Override
+                public boolean onFling(MotionEvent e1, MotionEvent e2,
+                                       float velocityX, float velocityY) {
+                    Log.d("Gesture", "甩动: vx=" + velocityX + " vy=" + velocityY);
+                    return true;
+                }
+                // 滚动
+                @Override
+                public boolean onScroll(MotionEvent e1, MotionEvent e2,
+                                        float distanceX, float distanceY) {
+                    Log.d("Gesture", "滚动: dx=" + distanceX + " dy=" + distanceY);
+                    return true;
+                }
+            });
+
+    public GestureView(Context context) {
+        super(context);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // 交给 GestureDetector 处理
+        return gestureDetector.onTouchEvent(event);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class GestureView(context: Context) : View(context) {
@@ -132,6 +224,8 @@ class GestureView(context: Context) : View(context) {
 }
 ```
 
+:::
+
 ### 3.2 手势与阈值的判定逻辑
 
 | 手势 | 判定条件 | 回调 |
@@ -147,6 +241,47 @@ class GestureView(context: Context) : View(context) {
 ## 四、ScaleGestureDetector 缩放
 
 ### 4.1 双指缩放实现
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class ZoomView extends View {
+
+    private float scaleFactor = 1f;
+
+    private final ScaleGestureDetector scaleDetector = new ScaleGestureDetector(getContext(),
+            new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                // 每次缩放变化回调（手指移动时持续触发）
+                @Override
+                public boolean onScale(ScaleGestureDetector detector) {
+                    scaleFactor *= detector.getScaleFactor();
+                    scaleFactor = Math.max(0.5f, Math.min(3f, scaleFactor));
+                    invalidate();
+                    return true;
+                }
+            });
+
+    public ZoomView(Context context) {
+        super(context);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        scaleDetector.onTouchEvent(event);
+        return true;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        canvas.scale(scaleFactor, scaleFactor, getWidth() / 2f, getHeight() / 2f);
+        super.onDraw(canvas);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class ZoomView(context: Context) : View(context) {
@@ -176,6 +311,8 @@ class ZoomView(context: Context) : View(context) {
 }
 ```
 
+:::
+
 ### 4.2 核心 API
 
 | API | 含义 |
@@ -187,6 +324,36 @@ class ZoomView(context: Context) : View(context) {
 | `isInProgress()` | 缩放是否进行中 |
 
 ### 4.3 缩放 + 平移组合
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 双指缩放 + 单指平移：按手指数量分流
+@Override
+public boolean onTouchEvent(MotionEvent event) {
+    scaleDetector.onTouchEvent(event);
+    if (!scaleDetector.isInProgress() && event.getPointerCount() == 1) {
+        // 单指：平移
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                lastX = event.getX();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                translateX += event.getX() - lastX;
+                translateY += event.getY() - lastY;
+                lastX = event.getX();
+                lastY = event.getY();
+                invalidate();
+                break;
+        }
+    }
+    return true;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 双指缩放 + 单指平移：按手指数量分流
@@ -209,9 +376,30 @@ override fun onTouchEvent(event: MotionEvent): Boolean {
 }
 ```
 
+:::
+
 ## 五、自定义手势识别
 
 ### 5.1 判断角度与方向
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 判断手势滑动方向
+private String getDirection(float dx, float dy) {
+    float absX = Math.abs(dx);
+    float absY = Math.abs(dy);
+    if (absX > absY && dx > 0) return "右滑";
+    if (absX > absY && dx < 0) return "左滑";
+    if (absY > absX && dy > 0) return "下滑";
+    if (absY > absX && dy < 0) return "上滑";
+    return "静止";
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 判断手势滑动方向
@@ -228,7 +416,24 @@ private fun getDirection(dx: Float, dy: Float): String {
 }
 ```
 
+:::
+
 ### 5.2 触摸阈值常量
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+ViewConfiguration vc = ViewConfiguration.get(context);
+int touchSlop = vc.getScaledTouchSlop();                      // 判定移动的阈值（约 8dp）
+int minFling = vc.getScaledMinimumFlingVelocity();            // fling 最小速度
+int maxFling = vc.getScaledMaximumFlingVelocity();            // fling 最大速度
+int doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout(); // 双击间隔
+int longPressTimeout = ViewConfiguration.getLongPressTimeout(); // 长按时间
+```
+
+@tab Kotlin
 
 ```kotlin
 val vc = ViewConfiguration.get(context)
@@ -238,6 +443,8 @@ val maxFling = vc.scaledMaximumFlingVelocity // fling 最大速度
 val doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout() // 双击间隔
 val longPressTimeout = ViewConfiguration.getLongPressTimeout() // 长按时间
 ```
+
+:::
 
 > 关键点：**判断"是否移动"用 touchSlop**，位移小于它认为是点击而非滑动，避免误判。
 

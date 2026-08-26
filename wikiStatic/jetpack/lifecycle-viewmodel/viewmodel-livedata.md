@@ -11,6 +11,31 @@ title: ViewModel 与 LiveData
 
 **作用**：存储与 UI 相关的数据，在配置变更（旋转屏幕）后仍然存活，随 Activity/Fragment 真正销毁时清空。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MainViewModel extends ViewModel {
+    private final MutableLiveData<UiState> uiState =
+            new MutableLiveData<>(UiState.Loading);
+    public LiveData<UiState> getUiState() { return uiState; }
+
+    public void loadData() {
+        // 对应 Kotlin 的 viewModelScope.launch：Java 中可用 ExecutorService / 回调执行异步
+        uiState.setValue(UiState.Success(repository.fetchData()));
+    }
+}
+
+public class MainActivity extends ComponentActivity {
+    // Java 中通过 ViewModelProvider 获取（对应 Kotlin 的 by viewModels()）
+    private final MainViewModel viewModel =
+            new ViewModelProvider(this).get(MainViewModel.class);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class MainViewModel(private val repository: Repository) : ViewModel() {
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
@@ -28,6 +53,8 @@ class MainActivity : ComponentActivity() {
 }
 ```
 
+:::
+
 ### ViewModel 为什么能存活？
 
 - 通过 `ViewModelStore`（非配置实例）持有 ViewModel
@@ -42,6 +69,22 @@ class MainActivity : ComponentActivity() {
 
 **作用**：可观察的数据持有者，感知生命周期（仅活跃时回调）。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+private final MutableLiveData<String> _data = new MutableLiveData<>();
+public LiveData<String> getData() { return _data; }
+
+data.observe(this, value -> {
+    // 仅 ON_START 之后回调
+    textView.setText(value);
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 private val _data = MutableLiveData<String>()
 val data: LiveData<String> = _data
@@ -51,6 +94,8 @@ data.observe(this) { value ->
     textView.text = value
 }
 ```
+
+:::
 
 | 特性 | 说明 |
 |------|------|

@@ -13,6 +13,25 @@ description: 冷流与热流、StateFlow/SharedFlow、背压处理、扁平化�
 
 ### 1.1 冷流（Cold Flow）：flow {}
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 冷流等价写法:RxJava Flowable(只有订阅时才执行)
+Flowable<Integer> coldFlow = Flowable.create(emitter -> {
+    System.out.println("开始发射");          // 只有 subscribe 时才执行
+    emitter.onNext(1);
+    emitter.onNext(2);
+}, BackpressureStrategy.BUFFER);
+
+// 每次 subscribe 都重新执行
+coldFlow.subscribe(item -> System.out.println("接收: " + item));  // 输出 开始发射 / 接收: 1 / 接收: 2
+coldFlow.subscribe(item -> System.out.println("接收: " + item));  // 再次输出（重新执行）
+```
+
+@tab Kotlin
+
 ```kotlin
 val coldFlow = flow {
     println("开始发射")        // 只有 collect 时才执行
@@ -25,9 +44,37 @@ coldFlow.collect { println("接收: $it") }   // 输出 开始发射 / 接收: 1
 coldFlow.collect { println("接收: $it") }   // 再次输出（重新执行）
 ```
 
+:::
+
 特征：**惰性**、每个收集者独立数据流、无状态。
 
 ### 1.2 热流（Hot Flow）：StateFlow / SharedFlow
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 热流等价写法:RxJava(多订阅者共享)
+PublishProcessor<Integer> sharedFlow = PublishProcessor.create();  // 对应 SharedFlow(replay=0)
+
+// 带状态的热流:BehaviorProcessor(对应 StateFlow,必须初始值)
+BehaviorProcessor<Integer> stateFlow = BehaviorProcessor.createDefault(0);
+
+// 生产者（任意地方）
+executor.execute(() -> {
+    while (true) {
+        Thread.sleep(1000);
+        stateFlow.onNext(stateFlow.getValue() + 1);      // 更新状态
+    }
+});
+
+// 消费者（多个，共享同一个流）
+stateFlow.subscribe(v -> log("A: " + v));
+stateFlow.subscribe(v -> log("B: " + v));
+```
+
+@tab Kotlin
 
 ```kotlin
 // SharedFlow：多收集者共享，有缓冲
@@ -49,6 +96,8 @@ lifecycleScope.launch { stateFlow.collect { log("A: $it") } }
 lifecycleScope.launch { stateFlow.collect { log("B: $it") } }
 ```
 
+:::
+
 ## 2. StateFlow vs LiveData
 
 | 维度 | LiveData | StateFlow |
@@ -59,6 +108,41 @@ lifecycleScope.launch { stateFlow.collect { log("B: $it") } }
 | 生命周期感知 | 内置 | 需 `repeatOnLifecycle` |
 | 单元测试 | 需主线程规则 | 纯协程，好测 |
 | 组合/变换 | MediatorLiveData | 丰富操作符 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:LiveData(Java 侧对应 StateFlow 的状态管理)
+class MainViewModel extends ViewModel {
+    private final MutableLiveData<MainUiState> _uiState = new MutableLiveData<>(new MainUiState());
+    public LiveData<MainUiState> getUiState() { return _uiState; }
+
+    public void load() {
+        _uiState.setValue(new MainUiState(true));   // isLoading = true
+        repository.fetch(new Callback<Data>() {
+            @Override
+            public void onSuccess(Data data) {
+                MainUiState cur = _uiState.getValue();
+                _uiState.setValue(cur.withData(data, false));   // 更新数据
+            }
+        });
+    }
+}
+
+// UI 观察（生命周期感知收集）
+getViewLifecycleOwner().getLifecycle().addObserver(new LifecycleEventObserver() {
+    @Override
+    public void onStateChanged(@NonNull LifecycleOwner source, @NonNull Lifecycle.Event event) {
+        if (event == Lifecycle.Event.ON_START) {
+            viewModel.getUiState().observe(getViewLifecycleOwner(), state -> render(state));
+        }
+    }
+});
+```
+
+@tab Kotlin
 
 ```kotlin
 // Compose/Jetpack 时代推荐 StateFlow
@@ -85,9 +169,27 @@ viewLifecycleOwner.lifecycleScope.launch {
 }
 ```
 
+::: 
+
 ## 3. 背压处理
 
 当生产速度 > 消费速度时：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:RxJava 同步生产 + 慢消费
+Flowable.range(0, 100)
+    .doOnNext(i -> Thread.sleep(10))      // 生产者快
+    .observeOn(Schedulers.io())
+    .subscribe(i -> {
+        Thread.sleep(100);                // 消费者慢
+    });
+```
+
+@tab Kotlin
 
 ```kotlin
 flow {
@@ -97,25 +199,69 @@ flow {
 }
 ```
 
+:::
+
 ### 3.1 buffer（缓冲）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:RxJava buffer 操作符
+Flowable.create(emitter -> { /* ... */ }, BackpressureStrategy.BUFFER)
+    .buffer(10)   // 独立缓冲，生产者不等待消费者
+```
+
+@tab Kotlin
 
 ```kotlin
 flow { ... }.buffer(10)   // 独立缓冲，生产者不等待消费者
 ```
 
+:::
+
 ### 3.2 conflate（合并）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:RxJava onBackpressureLatest(丢弃中间值)
+Flowable.create(emitter -> { /* ... */ }, BackpressureStrategy.DROP)
+    .onBackpressureLatest()   // 只保留最新值，跳过中间值
+```
+
+@tab Kotlin
 
 ```kotlin
 flow { ... }.conflate()   // 只保留最新值，跳过中间值
 ```
 
+:::
+
 ### 3.3 collectLatest（取最新）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法:RxJava switchMap(新值到达取消前一个处理)
+Flowable.create(emitter -> { /* ... */ }, BackpressureStrategy.BUFFER)
+    .switchMap(i -> Flowable.just(i).delay(100, TimeUnit.MILLISECONDS))
+```
+
+@tab Kotlin
 
 ```kotlin
 flow { ... }.collectLatest {
     delay(100)            // 新值到达时取消前一个处理
 }
 ```
+
+:::
 
 | 操作符 | 行为 |
 | --- | --- |
@@ -125,6 +271,35 @@ flow { ... }.collectLatest {
 | `collectLatest` | 新值到达取消旧处理 |
 
 ## 4. 扁平化操作符
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 场景：每个 item 触发一个请求
+Flowable.just(1, 2, 3)
+    .map(id -> api.fetch(id))   // ✗ 错误：map 是同步的，不能返回 Flowable
+
+// ✓ concatMap：串行
+Flowable.just(1, 2, 3)
+    .concatMap(id -> api.fetchAsFlowable(id))   // 一个一个来
+
+// ✓ flatMap：并发（顺序不定）
+Flowable.just(1, 2, 3)
+    .flatMap(id -> api.fetchAsFlowable(id))    // 并发执行
+
+// ✓ switchMap：取最新
+Flowable.just(1, 2, 3)
+    .switchMap(id -> api.fetchAsFlowable(id))   // 新 item 取消旧的
+
+// ✓ 常用组合：filter + map + onErrorResumeNext
+flowable.filter(item -> item.isValid())
+    .map(item -> transform(item))
+    .onErrorResumeNext(Flowable.just(fallback))   // 捕获上游异常，发射兜底值
+```
+
+@tab Kotlin
 
 ```kotlin
 // 场景：每个 item 触发一个请求
@@ -149,7 +324,30 @@ flow.filter { it.isValid }
     .catch { e -> emit(fallback) }   // 捕获上游异常，发射兜底值
 ```
 
+:::
+
 ## 5. 错误处理
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 使用 onErrorResumeNext 捕获上游异常
+viewModel.fetchData()
+    .onErrorResumeNext(e -> {
+        _uiState.setValue(cur.withError(e.getMessage()));
+        return Flowable.just(Collections.emptyList());   // 出错后必须发射或抛
+    })
+    .subscribe(data -> _uiState.setValue(cur.withData(data)));
+
+// 重试
+Flowable.create(emitter -> { /* ... */ }, BackpressureStrategy.BUFFER)
+    .retryWhen(errors -> errors.zipWith(Flowable.range(1, 3), (e, i) -> i))  // 重试 3 次(可加条件)
+    .onErrorResumeNext(e -> Flowable.empty())
+```
+
+@tab Kotlin
 
 ```kotlin
 // 使用 catch 捕获上游异常
@@ -170,7 +368,29 @@ flow { ... }
     .catch { ... }
 ```
 
+:::
+
 ## 6. 组合多个流
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// combineLatest：任一变化都触发
+Flowable<User> userFlow = ...;
+Flowable<List<Post>> postsFlow = ...;
+
+Flowable.combineLatest(userFlow, postsFlow, (user, posts) ->
+    new ProfileUiState(user, posts)
+).subscribe(state -> render(state));
+
+// zip：配对（按顺序一一对应）
+Flowable.just(1, 2, 3).zipWith(Flowable.just("a", "b"), (a, b) -> a + b)
+// 结果："1a", "2b"
+```
+
+@tab Kotlin
 
 ```kotlin
 // combine：任一变化都触发
@@ -185,6 +405,8 @@ combine(userFlow, postsFlow) { user, posts ->
 flowOf(1, 2, 3).zip(flowOf("a", "b")) { a, b -> "$a$b" }
 // 结果："1a", "2b"
 ```
+
+:::
 
 ## 7. 高频面试题
 

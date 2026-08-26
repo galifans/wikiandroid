@@ -10,6 +10,23 @@ description: Retrofit 接口如何变成网络请求、动态代理、CallAdapte
 
 ## 一、Retrofit 做了什么
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public interface ApiService {
+    @GET("users/{id}")
+    Call<User> getUser(@Path("id") long id);
+}
+
+// 使用:一行代码拿到实现
+ApiService api = retrofit.create(ApiService.class);
+User user = api.getUser(1).execute().body();   // 实际发生了网络请求!
+```
+
+@tab Kotlin
+
 ```kotlin
 interface ApiService {
     @GET("users/{id}")
@@ -21,11 +38,17 @@ val api = retrofit.create(ApiService::class.java)
 val user = api.getUser(1)   // 实际发生了网络请求!
 ```
 
+:::
+
 **问题**:`ApiService` 是接口,没有实现类,`create()` 返回的对象是什么?
 
 **答案**:Retrofit 用 **动态代理** 在运行时生成了接口的实现——所有方法调用都会被拦截,解析注解后构造 OkHttp 请求。
 
 ## 二、动态代理核心
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // Retrofit.create 源码(核心逻辑)
@@ -46,6 +69,28 @@ public <T> T create(final Class<T> service) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// Retrofit.create 源码(核心逻辑)
+fun <T> create(service: Class<T>): T {
+    // 校验接口...
+    return Proxy.newProxyInstance(
+        service.classLoader,
+        arrayOf<Class<*>>(service),
+        object : InvocationHandler {
+            override fun invoke(proxy: Any, method: Method, args: Array<out Any>?): Any {
+                // ① 每个方法调用都进入这里
+                val serviceMethod = loadServiceMethod<T>(method)  // 解析注解
+                val okHttpCall = OkHttpCall<Any>(serviceMethod, args) // 包装参数
+                return serviceMethod.callAdapter.adapt(okHttpCall)   // 适配返回类型
+            }
+        }) as T
+}
+```
+
+:::
+
 ```mermaid
 sequenceDiagram
     participant U as 调用方
@@ -61,6 +106,10 @@ sequenceDiagram
 ```
 
 ## 三、ServiceMethod:注解 → 请求
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 final class ServiceMethod {
@@ -80,6 +129,28 @@ final class ServiceMethod {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class ServiceMethod {
+    val callFactory: okhttp3.Call.Factory   // OkHttpClient
+    val callAdapter: CallAdapter<*, *>       // 返回类型适配器
+    val responseConverter: Converter<ResponseBody, *>  // 响应转换器
+
+    // 把方法注解 + 参数注解解析为 HttpUrl 请求
+    fun toRequest(args: Array<Any>): Request {
+        val requestBuilder = ...
+        for (annotation in methodAnnotations) {
+            // @GET/@POST/@PUT... → 请求方法
+            // @Path/@Query/@Body/@Header... → 参数绑定
+        }
+        return requestBuilder.build()
+    }
+}
+```
+
+:::
+
 ### 注解解析规则
 
 | 注解 | 作用 | 示例 |
@@ -93,6 +164,10 @@ final class ServiceMethod {
 | `@Multipart + @Part` | 文件上传 | `file=@xxx` |
 
 ## 四、CallAdapter:返回类型适配
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // 接口:把 OkHttpCall 适配成各种返回类型
@@ -109,6 +184,26 @@ class DefaultCallAdapterFactory implements CallAdapter.Factory {
 // 协程支持:KotlinExtensions
 // suspend 方法 → 内部 await() 挂起等待
 ```
+
+@tab Kotlin
+
+```kotlin
+// 接口:把 OkHttpCall 适配成各种返回类型
+interface CallAdapter<R, T> {
+    fun responseType(): Type      // 响应类型(如 User)
+    fun adapt(call: Call<R>): T   // 适配(如 Call → suspend → Observable)
+}
+
+// 内置:普通 Call
+class DefaultCallAdapterFactory : CallAdapter.Factory {
+    // adapt: 直接返回 call
+}
+
+// 协程支持:KotlinExtensions
+// suspend 方法 → 内部 await() 挂起等待
+```
+
+:::
 
 ### 返回类型对照
 
@@ -131,6 +226,10 @@ flowchart LR
 
 ## 五、Converter:响应体转换
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 接口:把 ResponseBody 转成目标类型
 public interface Converter<F, T> {
@@ -145,6 +244,26 @@ final class GsonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// 接口:把 ResponseBody 转成目标类型
+interface Converter<F, T> {
+    @Throws(IOException::class)
+    fun convert(value: F): T
+}
+
+// Gson 转换器:JSON → 对象
+class GsonResponseBodyConverter<T> : Converter<ResponseBody, T> {
+    @Throws(IOException::class)
+    override fun convert(value: ResponseBody): T {
+        return gson.fromJson(value.charStream(), type)  // JSON 反序列化
+    }
+}
+```
+
+:::
 
 | Converter | 用途 |
 |-----------|------|

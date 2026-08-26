@@ -38,6 +38,10 @@ ServiceManager ◄─────┘        │
 
 ## 三、通信流程（以 AIDL 为例）
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 1. 获取服务代理
 IBinder binder = ServiceManager.getService("my_service");
@@ -46,6 +50,19 @@ IMyService proxy = IMyService.Stub.asInterface(binder);
 // 2. 调用方法（跨进程）
 proxy.doSomething(data);  // 同步阻塞调用
 ```
+
+@tab Kotlin
+
+```kotlin
+// 1. 获取服务代理
+val binder = ServiceManager.getService("my_service")
+val proxy = IMyService.Stub.asInterface(binder)
+
+// 2. 调用方法（跨进程）
+proxy.doSomething(data)  // 同步阻塞调用
+```
+
+:::
 
 **调用链**：
 ```

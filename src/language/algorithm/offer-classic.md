@@ -25,6 +25,10 @@ title: 剑指 Offer 精选题
 
 ### 代码实现
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class Solution {
     public boolean find(int[][] array, int target) {
@@ -44,6 +48,30 @@ public class Solution {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class Solution {
+    fun find(array: Array<IntArray>?, target: Int): Boolean {
+        if (array == null || array.isEmpty()) return false
+        var row = 0                    // 第一行
+        var col = array[0].size - 1    // 最后一列（右上角）
+        while (row < array.size && col >= 0) {
+            if (array[row][col] == target) {
+                return true
+            } else if (array[row][col] > target) {
+                col--  // 排除当前列
+            } else {
+                row++  // 排除当前行
+            }
+        }
+        return false
+    }
+}
+```
+
+:::
 
 ### 要点
 
@@ -65,6 +93,10 @@ public class Solution {
 - 由此得到左、右子树的前序遍历和中序遍历，用同样的方法递归构建左右子树。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public class Solution {
@@ -89,6 +121,33 @@ public class Solution {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class Solution {
+    fun constructCore(preorder: IntArray?, inorder: IntArray?): BinaryTreeNode? {
+        if (preorder == null || inorder == null) return null
+        if (preorder.size != inorder.size) return null
+
+        val root = BinaryTreeNode()
+        for (i in inorder.indices) {
+            if (inorder[i] == preorder[0]) {
+                root.value = inorder[i]
+                root.leftNode = constructCore(
+                    preorder.copyOfRange(1, i + 1),
+                    inorder.copyOfRange(0, i))
+                root.rightNode = constructCore(
+                    preorder.copyOfRange(i + 1, preorder.size),
+                    inorder.copyOfRange(i + 1, inorder.size))
+            }
+        }
+        return root
+    }
+}
+```
+
+:::
+
 ## 三、旋转数组的最小数字
 
 ### 题目
@@ -109,6 +168,10 @@ public class Solution {
 
 ### 代码实现
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class Solution {
     public int minNumberInRotateArray(int[] array) {
@@ -128,6 +191,29 @@ public class Solution {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class Solution {
+    fun minNumberInRotateArray(array: IntArray?): Int {
+        if (array == null || array.isEmpty()) return 0
+        var left = 0
+        var right = array.size - 1
+        while (left < right) {
+            val mid = (left + right) / 2
+            if (array[mid] > array[right]) {
+                left = mid + 1  // 最小值在右半部分
+            } else {
+                right = mid     // 最小值在左半部分（含 mid）
+            }
+        }
+        return array[left]
+    }
+}
+```
+
+:::
+
 ## 四、合并两个排序的链表
 
 ### 题目
@@ -139,6 +225,10 @@ public class Solution {
 使用递归：比较两个链表头结点的值，较小的作为合并后的头结点，其 next 指向剩余部分合并的结果。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public class Solution {
@@ -158,6 +248,27 @@ public class Solution {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class Solution {
+    fun merge(list1: ListNode?, list2: ListNode?): ListNode? {
+        if (list1 == null) return list2 // 空链表处理
+        if (list2 == null) return list1
+
+        return if (list1.`val` < list2.`val`) {
+            list1.next = merge(list1.next, list2)
+            list1
+        } else {
+            list2.next = merge(list1, list2.next)
+            list2
+        }
+    }
+}
+```
+
+:::
 
 ### 容易犯的错误
 
@@ -180,6 +291,10 @@ public class Solution {
 - **0 的 0 次方**：数学上无意义，输出 0 或 1 都可以接受。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public class Solution {
@@ -214,6 +329,43 @@ public class Solution {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class Solution {
+    fun power(base: Double, exponent: Int): Double {
+        var result = 0.0
+        if (equal(base, 0.0) && exponent < 0) {
+            throw RuntimeException("0 的负数次幂无意义")
+        }
+        if (exponent == 0) {
+            return 1.0
+        }
+        result = if (exponent < 0) {
+            powerWithExponent(1.0 / base, -exponent)
+        } else {
+            powerWithExponent(base, exponent)
+        }
+        return result
+    }
+
+    private fun powerWithExponent(base: Double, exponent: Int): Double {
+        var result = 1.0
+        for (i in 1..exponent) {
+            result *= base
+        }
+        return result
+    }
+
+    // 判断两个 double 型数据是否相等（计算机表示小数有误差）
+    private fun equal(num1: Double, num2: Double): Boolean {
+        return (num1 - num2 > -0.0000001) && (num1 - num2 < 0.0000001)
+    }
+}
+```
+
+:::
+
 ### 要点
 
 判断底数 base 是否等于 0 时，不能直接写 `base == 0`。计算机内表示小数（float 和 double）都有误差，判断两个数是否相等，只能判断它们之间的绝对值是否在一个很小的范围内。
@@ -233,6 +385,10 @@ public class Solution {
 3. 最高位产生进位时说明已打印完所有 n 位数，停止。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public class Solution {
@@ -285,6 +441,61 @@ public class Solution {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+class Solution {
+    fun printToMaxOfNDigits(n: Int) {
+        if (n <= 0) return
+        val number = CharArray(n)
+        number.fill('0')
+        while (!increment(number)) {
+            printNumber(number)
+        }
+    }
+
+    // 加 1，返回 true 表示最高位溢出
+    private fun increment(number: CharArray): Boolean {
+        var overflow = false
+        var carry = 0
+        for (i in number.size - 1 downTo 0) {
+            var digit = number[i] - '0' + carry
+            if (i == number.size - 1) {
+                digit++ // 最低位加 1
+            }
+            if (digit >= 10) {
+                if (i == 0) {
+                    overflow = true // 最高位进位，溢出
+                } else {
+                    digit -= 10
+                    carry = 1
+                    number[i] = '0' + digit
+                }
+            } else {
+                number[i] = '0' + digit
+                break
+            }
+        }
+        return overflow
+    }
+
+    private fun printNumber(number: CharArray) {
+        var isBeginning = true
+        for (c in number) {
+            if (isBeginning && c != '0') {
+                isBeginning = false
+            }
+            if (!isBeginning) {
+                print(c)
+            }
+        }
+        println()
+    }
+}
+```
+
+:::
+
 ## 七、扑克牌的顺子
 
 ### 题目
@@ -302,6 +513,10 @@ public class Solution {
 5. 若数组中非 0 数字重复出现（对子），则不可能是顺子。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 import java.util.Arrays;
@@ -333,6 +548,40 @@ public class Solution {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+import java.util.Arrays
+
+class Solution {
+    fun isContinuous(number: IntArray?): Boolean {
+        if (number == null) return false
+        Arrays.sort(number)
+        var numberZero = 0
+        var numberGap = 0
+        // 计算数组中 0 的个数
+        for (i in 0 until number.size) {
+            if (number[i] == 0) numberZero++ else break
+        }
+        // 统计数组中的间隔数目
+        var small = numberZero
+        var big = small + 1
+        while (big < number.size) {
+            // 两个数相等，有对子，不可能是顺子
+            if (number[small] == number[big]) {
+                return false
+            }
+            numberGap += number[big] - number[small] - 1
+            small = big
+            big++
+        }
+        return numberGap <= numberZero
+    }
+}
+```
+
+:::
+
 ## 八、圆圈中最后剩下的数字（约瑟夫环）
 
 ### 题目
@@ -353,6 +602,10 @@ $$
 
 ### 代码实现
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public class Solution {
     public static int lastRemaining(int n, int m) {
@@ -367,6 +620,28 @@ public class Solution {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+class Solution {
+    companion object {
+        @JvmStatic
+        fun lastRemaining(n: Int, m: Int): Int {
+            if (n < 1 || m < 1) {
+                return -1
+            }
+            var last = 0 // n = 1 时最后剩下的数字是 0
+            for (i in 2..n) {
+                last = (last + m) % i
+            }
+            return last
+        }
+    }
+}
+```
+
+:::
 
 时间复杂度 O(n)，空间复杂度 O(1)，相比链表模拟大幅优化。
 

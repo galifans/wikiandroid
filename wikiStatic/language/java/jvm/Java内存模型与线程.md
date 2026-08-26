@@ -62,6 +62,21 @@ JMM 是**抽象模型**，对应到实际硬件：主内存 ≈ 物理内存，�
 1. 运算结果**不依赖变量当前值**，或只有单线程修改
 2. 变量**不与其他状态变量共同参与不变约束**
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✓ 安全：只有单线程写
+volatile boolean ready = false;
+
+// ✗ 不安全：复合操作依赖当前值
+volatile int count = 0;
+count++; // 读-改-写三步，非原子
+```
+
+@tab Kotlin
+
 ```kotlin
 // ✓ 安全：只有单线程写
 @Volatile var ready = false
@@ -70,6 +85,8 @@ JMM 是**抽象模型**，对应到实际硬件：主内存 ≈ 物理内存，�
 @Volatile var count = 0
 count++ // 读-改-写三步，非原子
 ```
+
+:::
 
 ### long 与 double 的特殊性
 

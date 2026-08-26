@@ -57,6 +57,22 @@ android {
 </application>
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 读取渠道
+String getChannel(Context context) {
+    PackageManager pm = context.getPackageManager();
+    ApplicationInfo info = pm.getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+    String channel = info.metaData.getString("CHANNEL");
+    return channel != null ? channel : "unknown";
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 读取渠道
 fun getChannel(context: Context): String {
@@ -65,6 +81,8 @@ fun getChannel(context: Context): String {
     return info.metaData?.getString("CHANNEL") ?: "unknown"
 }
 ```
+
+:::
 
 **缺点**：每个渠道**完整编译打包一次**（慢），几十个渠道就要编译几十次。
 
@@ -110,10 +128,23 @@ vivo
 googleplay
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ③ 读取渠道（Walle 提供）
+String channel = WalleChannelReader.getChannel(context);
+```
+
+@tab Kotlin
+
 ```kotlin
 // ③ 读取渠道（Walle 提供）
 val channel = WalleChannelReader.getChannel(context)
 ```
+
+:::
 
 **打包命令**：
 

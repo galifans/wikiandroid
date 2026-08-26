@@ -13,6 +13,33 @@ description: 扩展函数原理与实战、作用域函数 let/run/with/apply/al
 
 ### 1.1 定义与使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 扩展函数等价写法：静态工具方法，接收者作为第一个参数
+static boolean isEmail(String receiver) {
+    return receiver.contains("@") && receiver.contains(".");
+}
+
+// 给 View 添加工具方法
+static void visible(View receiver) {
+    receiver.setVisibility(View.VISIBLE);
+}
+
+static void gone(View receiver) {
+    receiver.setVisibility(View.GONE);
+}
+
+// 使用
+String email = "user@example.com";
+System.out.println(isEmail(email));     // true
+visible(button);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 给 String 添加扩展函数
 fun String.isEmail(): Boolean {
@@ -34,7 +61,22 @@ println(email.isEmail())     // true
 button.visible()
 ```
 
+:::
+
 **原理**：扩展函数**不会修改原类**，编译后是静态方法，接收者作为第一个参数：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 编译后的伪代码（与 Kotlin 扩展函数编译结果一致）
+public static boolean isEmail(String $this) {
+    return $this.contains("@") && $this.contains(".");
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 编译后的伪代码
@@ -43,7 +85,29 @@ public static boolean isEmail(String $this) {
 }
 ```
 
+:::
+
 ### 1.2 扩展属性
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 扩展属性等价写法：静态 getter 方法（Java 无扩展属性）
+static char lastChar(String receiver) {
+    return receiver.charAt(receiver.length() - 1);
+}
+
+static int dp(int receiver) {
+    return (int) (receiver * Resources.getSystem().getDisplayMetrics().density);
+}
+
+// 使用
+System.out.println(lastChar("hello"));    // 'o'
+```
+
+@tab Kotlin
 
 ```kotlin
 // 扩展属性（不能有 backing field）
@@ -57,7 +121,29 @@ val dp: Int.dp
 println("hello".lastChar)    // 'o'
 ```
 
+:::
+
 ### 1.3 成员函数优先级更高
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class Foo {
+    String bar() { return "成员函数"; }
+}
+
+// 扩展函数等价写法：静态工具方法（Java 中需显式调用）
+static String bar(Foo receiver) { return "扩展函数"; }
+
+// 使用：Java 无成员/扩展歧义，只能调用成员
+Foo foo = new Foo();
+System.out.println(foo.bar());      // "成员函数"（成员优先于扩展）
+System.out.println(bar(foo));       // "扩展函数"（需显式调用静态方法）
+```
+
+@tab Kotlin
 
 ```kotlin
 class Foo {
@@ -69,7 +155,27 @@ fun Foo.bar() = "扩展函数"
 Foo().bar()    // "成员函数"（成员优先于扩展）
 ```
 
+:::
+
 ### 1.4 扩展函数与泛型
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 泛型工具方法等价写法
+static <T> T secondOrNull(List<T> receiver) {
+    return receiver.size() >= 2 ? receiver.get(1) : null;
+}
+
+// 可空接收者等价写法
+static boolean isEmptyOrNull(String receiver) {
+    return receiver == null || receiver.isEmpty();
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 泛型扩展
@@ -78,6 +184,8 @@ fun <T> List<T>.secondOrNull(): T? = if (size >= 2) this[1] else null
 // 可空接收者
 fun String?.isEmptyOrNull(): Boolean = this == null || this.isEmpty()
 ```
+
+:::
 
 ## 2. 作用域函数（Scope Functions）
 
@@ -92,6 +200,37 @@ fun String?.isEmptyOrNull(): Boolean = this == null || this.isEmpty()
 | `also` | it | **对象本身** | 副作用（日志/校验） |
 
 ### 2.2 各函数实战
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① let 等价写法：判空 + 结果转换
+int length = name != null ? name.length() : 0;
+
+// ② run 等价写法：配置 + 返回结果
+textView.setText("hello");
+textView.setTextSize(20f);
+String result = textView.getText() + " 长度: " + textView.getText().length();
+
+// ③ with 等价写法：批量操作
+String info = user.getName() + " - " + user.getEmail() + " - " + user.getAge();
+
+// ④ apply 等价写法：构建器链式初始化（返回对象本身）
+AlertDialog.Builder builder = new AlertDialog.Builder(context);
+builder.setTitle("提示");
+builder.setMessage("确定删除吗？");
+builder.setPositiveButton("确定", (d, w) -> delete());
+AlertDialog dialog = builder.create();
+
+// ⑤ also 等价写法：副作用（返回对象本身）
+User user = new User();
+System.out.println("创建用户: " + user.getName());
+if (user.getEmail().isEmpty()) throw new IllegalStateException("邮箱不能为空");
+```
+
+@tab Kotlin
 
 ```kotlin
 // ① let：空安全 + 结果转换
@@ -123,7 +262,36 @@ val user = User().also {
 }
 ```
 
+:::
+
 ### 2.3 典型用法模式
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 链式调用等价写法：Stream + peek 打日志
+void process(List<Integer> list) {
+    list.stream()
+        .filter(it -> it > 0)
+        .peek(it -> System.out.println("过滤后: " + it))
+        .map(it -> it * 2)
+        .peek(it -> System.out.println("加倍后: " + it))
+        .collect(Collectors.toList());   // 终端操作触发执行
+}
+
+// 判空后初始化等价写法：判空 + 配置
+void initView() {
+    TextView tv = findViewById(R.id.tv);
+    if (tv != null) {
+        tv.setText("loading");
+        tv.setVisibility(View.VISIBLE);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 链式调用 + also 打日志
@@ -145,7 +313,40 @@ fun initView() {
 }
 ```
 
+:::
+
 ## 3. 其他常用标准库函数
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// takeIf 等价写法：条件判断
+Integer max = list.stream().max(Integer::compare).orElse(null);
+max = max != null && max > 0 ? max : null;   // 满足条件返回，否则 null
+
+// repeat 等价写法：for 循环
+for (int index = 0; index < 3; index++) {
+    System.out.println("第 " + index + " 次");
+}
+
+// runCatching 等价写法：try-catch
+Object result;
+try {
+    result = riskyOperation();
+    System.out.println("成功: " + result);
+} catch (Exception e) {
+    System.out.println("失败: " + e.getMessage());
+    result = default;
+}
+
+// takeIf + also 组合等价写法
+Integer even = number % 2 == 0 ? number : null;
+if (even != null) System.out.println("偶数: " + even);
+```
+
+@tab Kotlin
 
 ```kotlin
 // takeIf / takeUnless：条件过滤
@@ -163,6 +364,8 @@ val result = runCatching { riskyOperation() }
 // also/apply 与 takeIf 组合
 val even = number.takeIf { it % 2 == 0 }?.also { println("偶数: $it") }
 ```
+
+:::
 
 ## 4. 高频面试题
 

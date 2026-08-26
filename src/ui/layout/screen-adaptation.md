@@ -27,6 +27,10 @@ dp = px / density
 
 核心思路：**修改系统的 Density 值，让设计稿宽度（如 360dp）在所有设备上保持一致**，从而所有 dp 单位自动适配。
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 private static float sNoncompatDensity;
 private static float sNoncompatScaledDensity;
@@ -70,6 +74,50 @@ private static void setCustomDensity(Activity activity, Application application)
     activityDisplayMetrics.densityDpi = targetDensityDpi;
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+private var sNoncompatDensity = 0f
+private var sNoncompatScaledDensity = 0f
+
+private fun setCustomDensity(activity: Activity, application: Application) {
+    val appDisplayMetrics = application.resources.displayMetrics
+    if (sNoncompatDensity == 0f) {
+        sNoncompatDensity = appDisplayMetrics.density
+        sNoncompatScaledDensity = appDisplayMetrics.scaledDensity
+        // 监听字体切换
+        application.registerComponentCallbacks(object : ComponentCallbacks {
+            override fun onConfigurationChanged(newConfig: Configuration) {
+                if (newConfig != null && newConfig.fontScale > 0) {
+                    sNoncompatScaledDensity =
+                        application.resources.displayMetrics.scaledDensity
+                }
+            }
+
+            override fun onLowMemory() {
+            }
+        })
+    }
+
+    // 适配后的 dpi 统一为 360
+    val targetDensity = appDisplayMetrics.widthPixels / 360f
+    val targetScaledDensity =
+        targetDensity * (sNoncompatScaledDensity / sNoncompatDensity)
+    val targetDensityDpi = (160 * targetDensity).toInt()
+
+    appDisplayMetrics.density = targetDensity
+    appDisplayMetrics.scaledDensity = targetScaledDensity
+    appDisplayMetrics.densityDpi = targetDensityDpi
+
+    val activityDisplayMetrics = activity.resources.displayMetrics
+    activityDisplayMetrics.density = targetDensity
+    activityDisplayMetrics.scaledDensity = targetScaledDensity
+    activityDisplayMetrics.densityDpi = targetDensityDpi
+}
+```
+
+:::
 
 **优缺点：** 侵入性小（几行代码全局生效），所有 dp 单位自动按宽度缩放；但设计稿宽高比与设备不一致时可能出现拉伸问题。
 

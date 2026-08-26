@@ -52,6 +52,42 @@ Presentation → Domain ← Data
 
 ### 3.1 Domain 层（纯 Kotlin）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 领域实体（不包含 Android 依赖）
+public class User {
+    private final String id;
+    private final String name;
+    private final String avatar;
+
+    public User(String id, String name, String avatar) {
+        this.id = id;
+        this.name = name;
+        this.avatar = avatar;
+    }
+    // getter...
+}
+
+// 用例（每个业务动作一个 UseCase）
+class GetUserUseCase {
+    private final UserRepository userRepository; // 依赖抽象接口
+
+    public GetUserUseCase(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    // Kotlin suspend 等价：Java 中由调用方切换到 IO 线程执行
+    public Result<User> invoke(String userId) {
+        return userRepository.getUser(userId);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 领域实体（不包含 Android 依赖）
 data class User(
@@ -69,7 +105,56 @@ class GetUserUseCase(
 }
 ```
 
+:::
+
 ### 3.2 Data 层（实现接口 + Mapper）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Repository 接口（Domain 定义）
+interface UserRepository {
+    // Kotlin suspend 等价：Java 中由调用方切换到 IO 线程执行
+    Result<User> getUser(String userId);
+    Result<List<User>> getUsers();
+}
+
+// 数据实现（Data 层）
+class UserRepositoryImpl implements UserRepository {
+    private final UserApi api;       // 网络
+    private final UserDao dao;       // 数据库
+    private final UserMapper mapper; // DTO ↔ Entity 转换
+
+    public UserRepositoryImpl(UserApi api, UserDao dao, UserMapper mapper) {
+        this.api = api;
+        this.dao = dao;
+        this.mapper = mapper;
+    }
+
+    @Override
+    public Result<User> getUser(String userId) {
+        try {
+            UserDto dto = api.getUser(userId);      // 网络 DTO
+            User entity = mapper.toEntity(dto);     // 转领域实体
+            dao.insert(entity);                     // 本地缓存
+            return Result.success(entity);
+        } catch (Exception e) {
+            return Result.failure(e);
+        }
+    }
+}
+
+// Mapper：数据格式转换
+class UserMapper {
+    public User toEntity(UserDto dto) {
+        return new User(dto.getId(), dto.getName(), dto.getAvatarUrl());
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // Repository 接口（Domain 定义）
@@ -102,7 +187,52 @@ class UserMapper {
 }
 ```
 
+:::
+
 ### 3.3 Presentation 层（UI + ViewModel）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class UserViewModel extends ViewModel {
+    private final GetUserUseCase getUser; // 注入用例
+    private final MutableLiveData<UserState> state =
+            new MutableLiveData<>(new UserState.Loading());
+    public LiveData<UserState> getState() { return state; }
+
+    public UserViewModel(GetUserUseCase getUser) {
+        this.getUser = getUser;
+    }
+
+    public void load(String userId) {
+        // Kotlin fold 等价：try/catch 分支
+        try {
+            User user = getUser.invoke(userId).getOrThrow();
+            state.setValue(new UserState.Success(user));
+        } catch (Exception e) {
+            state.setValue(new UserState.Error(
+                    e.getMessage() != null ? e.getMessage() : "加载失败"));
+        }
+    }
+}
+
+// sealed 语义用抽象类 + 子类表达
+abstract class UserState {
+    static class Loading extends UserState {}
+    static class Success extends UserState {
+        final User user;
+        Success(User user) { this.user = user; }
+    }
+    static class Error extends UserState {
+        final String msg;
+        Error(String msg) { this.msg = msg; }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class UserViewModel(
@@ -129,7 +259,38 @@ sealed interface UserState {
 }
 ```
 
+:::
+
 ## 4. 依赖注入
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 推荐用 Hilt（Google 官方 DI 框架）
+@HiltViewModel
+public class UserViewModel extends ViewModel {
+    private final GetUserUseCase getUser;
+
+    @Inject
+    public UserViewModel(GetUserUseCase getUser) {
+        this.getUser = getUser;
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent.class)
+public class RepositoryModule {
+    @Provides
+    @Singleton
+    public static UserRepository provideUserRepository(UserApi api, UserDao dao) {
+        return new UserRepositoryImpl(api, dao, new UserMapper());
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 推荐用 Hilt（Google 官方 DI 框架）
@@ -147,6 +308,8 @@ object RepositoryModule {
         UserRepositoryImpl(api, dao, UserMapper())
 }
 ```
+
+:::
 
 ## 5. 优缺点与适用场景
 

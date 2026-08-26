@@ -13,6 +13,32 @@ description: Lifecycle 观察者模式原理、LifecycleOwner、状态机流转�
 
 传统方式管理生命周期的问题：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 传统方式：手动管理，容易遗漏
+public class MainActivity extends AppCompatActivity {
+
+    private LocationListener locationListener;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (locationListener != null) locationListener.start();   // 忘记判断状态
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (locationListener != null) locationListener.stop();
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ✗ 传统方式：手动管理，容易遗漏
 class MainActivity : AppCompatActivity() {
@@ -30,6 +56,8 @@ class MainActivity : AppCompatActivity() {
     }
 }
 ```
+
+:::
 
 问题：
 
@@ -86,6 +114,36 @@ stateDiagram-v2
 
 ### 3.1 实现 LifecycleObserver
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class LocationManager implements LifecycleObserver {
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    public void start() {
+        // 开始定位
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    public void stop() {
+        // 停止定位
+    }
+}
+
+// 使用
+public class MainActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getLifecycle().addObserver(new LocationManager());
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class LocationManager : LifecycleObserver {
 
@@ -109,7 +167,30 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+:::
+
 ### 3.2 现代写法：DefaultLifecycleObserver
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class LocationManager implements DefaultLifecycleObserver {
+
+    @Override
+    public void onStart(LifecycleOwner owner) {
+        // 开始定位
+    }
+
+    @Override
+    public void onStop(LifecycleOwner owner) {
+        // 停止定位
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class LocationManager : DefaultLifecycleObserver {
@@ -123,6 +204,8 @@ class LocationManager : DefaultLifecycleObserver {
     }
 }
 ```
+
+:::
 
 > `@OnLifecycleEvent` 注解已废弃，推荐实现 `DefaultLifecycleObserver` 接口。
 
@@ -143,7 +226,11 @@ Activity onStart()
 
 ### 4.2 状态回退同步
 
-```kotlin
+::: code-tabs
+
+@tab:active Java
+
+```java
 // LifecycleRegistry 核心逻辑（伪代码）
 private void sync() {
     while (!isSynced()) {
@@ -159,6 +246,26 @@ private void sync() {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// LifecycleRegistry 核心逻辑（伪代码）
+private fun sync() {
+    while (!isSynced()) {
+        mNewEventOccurred = false
+        if (mState < mObserverMap.eldest().value.mState) {
+            // 状态下降：倒序遍历，派发 ON_PAUSE / ON_STOP / ON_DESTROY
+            backwardPass()
+        } else {
+            // 状态上升：正序遍历，派发 ON_CREATE / ON_START / ON_RESUME
+            forwardPass()
+        }
+    }
+}
+```
+
+:::
+
 ### 4.3 使用 LinearLayout 的原因
 
 - `ReportFragment`：通过向 Activity 注入无 UI Fragment 来接收生命周期回调（API < 29 时）。
@@ -166,6 +273,33 @@ private void sync() {
 - 使用 `LinearLayout` 保证**同步性**：在真正执行 onCreate 之前完成状态更新。
 
 ## 5. 常见应用场景
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 场景 1：摄像头/传感器释放
+public class CameraController implements DefaultLifecycleObserver {
+    @Override public void onStart(LifecycleOwner owner) { camera.open(); }
+    @Override public void onStop(LifecycleOwner owner) { camera.release(); }
+}
+
+// 场景 2：定时器/轮询（Java 中用 ExecutorService 替代协程）
+public class PollingManager implements DefaultLifecycleObserver {
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    @Override public void onResume(LifecycleOwner owner) { startPolling(); }
+    @Override public void onPause(LifecycleOwner owner) { stopPolling(); }
+}
+
+// 场景 3：自定义 View 感知生命周期
+public class MyView extends View implements LifecycleOwner {
+    private final LifecycleRegistry lifecycleRegistry = new LifecycleRegistry(this);
+    @Override public Lifecycle getLifecycle() { return lifecycleRegistry; }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 场景 1：摄像头/传感器释放
@@ -187,6 +321,8 @@ class MyView(context: Context) : View(context), LifecycleOwner {
     override val lifecycle: Lifecycle get() = lifecycleRegistry
 }
 ```
+
+:::
 
 ## 6. 高频面试题
 

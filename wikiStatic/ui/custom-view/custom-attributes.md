@@ -97,6 +97,56 @@ flowchart TD
 
 ### 3.1 构造函数解析
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class GaugeView extends View {
+
+    private int gaugeColor = Color.BLUE;
+    private int maxValue = 100;
+    private boolean showMark = true;
+    private int gaugeStyle = 0;
+
+    public GaugeView(Context context) {
+        this(context, null);
+    }
+
+    public GaugeView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public GaugeView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        // 获取 TypedArray
+        TypedArray ta = context.obtainStyledAttributes(
+                attrs,                 // XML 属性集合
+                R.styleable.GaugeView,  // 需要读取的属性
+                defStyleAttr,           // 主题中的默认样式属性
+                0                       // 直接默认样式资源
+        );
+
+        try {
+            // 读取属性（第二个参数是默认值）
+            gaugeColor = ta.getColor(
+                    R.styleable.GaugeView_gaugeColor, Color.BLUE);
+            maxValue = ta.getInt(
+                    R.styleable.GaugeView_maxValue, 100);
+            showMark = ta.getBoolean(
+                    R.styleable.GaugeView_showMark, true);
+            gaugeStyle = ta.getInt(
+                    R.styleable.GaugeView_gaugeStyle, 0);
+        } finally {
+            // 必须回收，否则资源泄漏（lint 报错）
+            ta.recycle();
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class GaugeView @JvmOverloads constructor(
     context: Context,
@@ -136,6 +186,8 @@ class GaugeView @JvmOverloads constructor(
 }
 ```
 
+:::
+
 ### 3.2 读取方法对应
 
 | format | 读取方法 |
@@ -153,6 +205,22 @@ class GaugeView @JvmOverloads constructor(
 
 ### 3.3 资源引用解析
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 属性是引用类型时的两种读取
+int drawableRes = ta.getResourceId(
+        R.styleable.GaugeView_backgroundDrawable, 0);
+
+// 方式一：如果 XML 写的是引用，getDrawable 会自动解引用
+Drawable drawable = ta.getDrawable(
+        R.styleable.GaugeView_backgroundDrawable);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 属性是引用类型时的两种读取
 val drawableRes = ta.getResourceId(
@@ -162,6 +230,8 @@ val drawableRes = ta.getResourceId(
 val drawable = ta.getDrawable(
     R.styleable.GaugeView_backgroundDrawable)
 ```
+
+:::
 
 ## 四、主题样式与默认值
 
@@ -178,6 +248,29 @@ flowchart LR
 **优先级**：XML 显式 > 主题 style 中指定 > defStyleRes > 代码默认值。
 
 ### 4.2 完整构造函数示例
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class GaugeView extends View {
+
+    public GaugeView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        TypedArray ta = context.obtainStyledAttributes(
+                attrs,
+                R.styleable.GaugeView,
+                defStyleAttr,           // 来自主题（如 android:gaugeStyle）
+                R.style.GaugeViewStyle   // 默认样式资源
+        );
+        ...
+        ta.recycle();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class GaugeView @JvmOverloads constructor(
@@ -198,6 +291,8 @@ class GaugeView @JvmOverloads constructor(
     }
 }
 ```
+
+:::
 
 > 关键点：defStyleAttr 是主题中的属性名（如 `?attr/gaugeStyle`），defStyleRes 是默认样式资源（`@style/GaugeViewStyle`），两者配合实现"不写属性也有合理默认值"。
 
@@ -237,6 +332,20 @@ class GaugeView @JvmOverloads constructor(
     app:maxValue="@{viewModel.max}" />
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// BindingAdapter 处理属性设置
+@BindingAdapter("gaugeColor")
+public static void setGaugeColor(GaugeView view, int color) {
+    view.setGaugeColor(color);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // BindingAdapter 处理属性设置
 @BindingAdapter("gaugeColor")
@@ -244,6 +353,8 @@ fun setGaugeColor(view: GaugeView, color: Int) {
     view.setGaugeColor(color)
 }
 ```
+
+:::
 
 > 自定义属性 + BindingAdapter 是 DataBinding 数据驱动的标准姿势。
 

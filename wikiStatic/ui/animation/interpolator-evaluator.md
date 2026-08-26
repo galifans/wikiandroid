@@ -65,6 +65,25 @@ flowchart LR
 
 ### 2.3 自定义插值器
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 贝塞尔曲线插值器（ease-in-out 平滑）
+public class EaseInOutCubicInterpolator implements Interpolator {
+    @Override
+    public float getInterpolation(float input) {
+        if (input < 0.5f) {
+            return 4f * input * input * input;
+        }
+        return 1f - (float) Math.pow(-2f * input + 2f, 3.0) / 2f;
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 贝塞尔曲线插值器（ease-in-out 平滑）
 class EaseInOutCubicInterpolator : Interpolator {
@@ -77,6 +96,8 @@ class EaseInOutCubicInterpolator : Interpolator {
     }
 }
 ```
+
+:::
 
 > 关键点：自定义 Interpolator 只需实现 `getInterpolation(input: Float): Float`，返回 0-1（可超界）即可。
 
@@ -125,6 +146,35 @@ sequenceDiagram
 
 ### 4.1 TypeEvaluator 实现
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义估值器：颜色渐变（HSL 空间插值）
+public class HslEvaluator implements TypeEvaluator<Integer> {
+    @Override
+    public Integer evaluate(float fraction, Integer startValue, Integer endValue) {
+        float startHue = Color.hue(startValue);
+        float endHue = Color.hue(endValue);
+        float hue = startHue + (endHue - startHue) * fraction;
+        float sat = Color.saturation(startValue) +
+                (Color.saturation(endValue) - Color.saturation(startValue)) * fraction;
+        float lum = Color.luminance(startValue) +
+                (Color.luminance(endValue) - Color.luminance(startValue)) * fraction;
+        return Color.HSVToColor(new float[]{hue, sat, lum});
+    }
+}
+
+// 使用
+ValueAnimator animator = ValueAnimator.ofObject(new HslEvaluator(), Color.RED, Color.BLUE);
+animator.addUpdateListener(va -> {
+    view.setBackgroundColor((Integer) va.getAnimatedValue());
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 // 自定义估值器：颜色渐变（HSL 空间插值）
 class HslEvaluator : TypeEvaluator<Int> {
@@ -132,9 +182,9 @@ class HslEvaluator : TypeEvaluator<Int> {
         val startHue = Color.hue(startValue)
         val endHue = Color.hue(endValue)
         val hue = startHue + (endHue - startHue) * fraction
-        val sat = Color.saturation(startValue) + 
+        val sat = Color.saturation(startValue) +
             (Color.saturation(endValue) - Color.saturation(startValue)) * fraction
-        val lum = Color.luminance(startValue) + 
+        val lum = Color.luminance(startValue) +
             (Color.luminance(endValue) - Color.luminance(startValue)) * fraction
         return Color.HSVToColor(floatArrayOf(hue, sat, lum))
     }
@@ -147,7 +197,25 @@ animator.addUpdateListener { va ->
 }
 ```
 
+:::
+
 ### 4.2 ObjectAnimator 与估值器
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ObjectAnimator 通过估值器求值，再反射调用 setter
+ObjectAnimator animator = ObjectAnimator.ofObject(
+        view, "backgroundColor",
+        new ArgbEvaluator(), Color.WHITE, Color.BLACK
+);
+animator.setDuration(500);
+animator.start();
+```
+
+@tab Kotlin
 
 ```kotlin
 // ObjectAnimator 通过估值器求值，再反射调用 setter
@@ -159,11 +227,28 @@ animator.duration = 500
 animator.start()
 ```
 
+:::
+
 > ObjectAnimator 要求目标属性有 `setXxx()` 方法（setBackgroundColor），否则无法工作。
 
 ## 五、TimeAnimator 与关键帧
 
 ### 5.1 关键帧（Keyframe）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 分段关键帧：0% → 30% → 100% 三段速度
+Keyframe kf1 = Keyframe.ofFloat(0f, 0f);
+Keyframe kf2 = Keyframe.ofFloat(0.3f, 0.8f);   // 前 30% 走 80%
+Keyframe kf3 = Keyframe.ofFloat(1f, 1f);
+PropertyValuesHolder property = PropertyValuesHolder.ofKeyframe("scaleX", kf1, kf2, kf3);
+ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(view, property);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 分段关键帧：0% → 30% → 100% 三段速度
@@ -174,9 +259,31 @@ val property = PropertyValuesHolder.ofKeyframe("scaleX", kf1, kf2, kf3)
 val animator = ObjectAnimator.ofPropertyValuesHolder(view, property)
 ```
 
+:::
+
 关键帧允许：**不同阶段使用不同插值器**（通过 `kf.interpolator` 设置），实现复杂节奏。
 
 ### 5.2 动画执行主循环
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Choreographer 驱动：每帧回调
+private void doFrame(long frameTime) {
+    long currentTime = System.nanoTime();
+    float fraction = (float) (currentTime - startTime) / (float) duration;
+    float interpolated = interpolator.getInterpolation(Math.max(0f, Math.min(1f, fraction)));
+    float value = evaluator.evaluate(interpolated, startValue, endValue);
+    setAnimatedValue(value);   // 反射调用 setter 或回调
+    if (fraction < 1f) {
+        choreographer.postFrameCallback(this);  // 下一帧继续
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // Choreographer 驱动：每帧回调
@@ -191,6 +298,8 @@ private fun doFrame(frameTime: Long) {
     }
 }
 ```
+
+:::
 
 ## 六、高频面试题
 

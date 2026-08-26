@@ -111,9 +111,21 @@ flowchart TD
 
 ### 3. 代码引用（自动适配）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+String welcome = getString(R.string.welcome); // 系统按当前语言返回
+```
+
+@tab Kotlin
+
 ```kotlin
 val welcome = getString(R.string.welcome) // 系统按当前语言返回
 ```
+
+:::
 
 ### 4. 格式化与占位符
 
@@ -121,9 +133,21 @@ val welcome = getString(R.string.welcome) // 系统按当前语言返回
 <string name="click_count">已点击 %1$d 次</string>
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+String msg = getString(R.string.click_count, 42);
+```
+
+@tab Kotlin
+
 ```kotlin
 val msg = getString(R.string.click_count, 42)
 ```
+
+:::
 
 | 占位符 | 类型 | 示例 |
 |--------|------|------|

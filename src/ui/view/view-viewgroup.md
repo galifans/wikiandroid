@@ -58,6 +58,38 @@ PhoneWindow（窗口）
 | 管理子 View | ✗ | ✓ add/remove |
 | 事件分发 | 处理事件 | 拦截 + 分发 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ViewGroup 核心方法（职责示例）
+public class MyViewGroup extends ViewGroup {
+
+    // ① 测量：确定子 View 尺寸
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // 测量所有子 View
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            measureChild(child, widthMeasureSpec, heightMeasureSpec);
+        }
+        setMeasuredDimension(defaultWidth, defaultHeight);
+    }
+
+    // ② 布局：摆放子 View 位置
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
+        }
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ViewGroup 核心方法（职责示例）
 class MyViewGroup : ViewGroup {
@@ -82,7 +114,28 @@ class MyViewGroup : ViewGroup {
 }
 ```
 
+:::
+
 ## 4. LayoutParams：父容器视角的约束
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// LayoutParams 是"父容器如何看待子 View"
+// 每个 ViewGroup 有自己的 LayoutParams 子类
+// LinearLayout.LayoutParams / FrameLayout.LayoutParams / MarginLayoutParams
+
+// 常见取值
+LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams.MATCH_PARENT,   // 宽度
+        LinearLayout.LayoutParams.WRAP_CONTENT    // 高度
+);
+params.weight = 1f;   // LinearLayout 特有的权重
+```
+
+@tab Kotlin
 
 ```kotlin
 // LayoutParams 是"父容器如何看待子 View"
@@ -96,6 +149,8 @@ val params = LinearLayout.LayoutParams(
 )
 params.weight = 1f   // LinearLayout 特有的权重
 ```
+
+:::
 
 **测量时的配合**：
 
@@ -125,6 +180,36 @@ draw（绘制）：从根到叶（背景 → 内容 → 子 View）
 
 ## 6. ViewGroup 的三个核心回调
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class CustomViewGroup extends ViewGroup {
+
+    // ① 生成子 View 的 LayoutParams
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new MarginLayoutParams(getContext(), attrs);
+    }
+
+    // ② 测量子 View（默认实现：读取子 View 的 LayoutParams）
+    // 可重写 measureChildren 做特殊处理
+
+    // ③ 布局子 View
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        // 必须实现！否则子 View 不显示
+    }
+
+    // ④ 是否拦截事件（可选）
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) { ... }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class CustomViewGroup : ViewGroup {
 
@@ -145,6 +230,8 @@ class CustomViewGroup : ViewGroup {
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean { ... }
 }
 ```
+
+:::
 
 ## 7. 高频面试题
 

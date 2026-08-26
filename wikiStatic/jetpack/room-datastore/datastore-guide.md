@@ -26,6 +26,44 @@ implementation("androidx.datastore:datastore-preferences:1.1.1")
 
 ### 2.2 基本使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// DataStore 基于 Kotlin 协程与 Flow，Java 中无直接等价 API；
+// 语义等价实现：SharedPreferences + OnSharedPreferenceChangeListener
+
+public class SettingsRepository {
+    private final SharedPreferences prefs;
+
+    public SettingsRepository(Context context) {
+        prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE);
+    }
+
+    // 读取（对应 Flow 可观察；SP 为同步读取）
+    public ThemeMode getThemeMode() {
+        return ThemeMode.valueOf(
+            prefs.getString("theme_mode", ThemeMode.SYSTEM.name())
+        );
+    }
+
+    // 写入（对应 suspend edit：apply 异步落盘）
+    public void setThemeMode(ThemeMode mode) {
+        prefs.edit().putString("theme_mode", mode.name()).apply();
+    }
+
+    // 数据变化监听（对应 Flow 响应式）
+    public void observeThemeMode(OnSharedPreferenceChangeListener listener) {
+        prefs.registerOnSharedPreferenceChangeListener(listener);
+    }
+}
+
+enum ThemeMode { SYSTEM, LIGHT, DARK }
+```
+
+@tab Kotlin
+
 ```kotlin
 // 顶层属性（每个文件一个实例）
 private val Context.settingsDataStore by preferencesDataStore(name = "settings")
@@ -62,6 +100,8 @@ class SettingsRepository(private val context: Context) {
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 ```
+
+:::
 
 ### 2.3 支持的 key 类型
 
@@ -120,6 +160,33 @@ dependencies {
 
 ### 3.3 使用生成的类
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Serializer 为 Kotlin 接口（suspend readFrom/writeTo），Java 中无直接等价写法；
+// 可把 proto 序列化逻辑封装为普通工具方法：
+public class UserPreferencesStore {
+
+    // 读取（对应 dataStore.data）
+    public UserPreferences read(InputStream input) throws IOException {
+        try {
+            return UserPreferences.parseFrom(input);
+        } catch (InvalidProtocolBufferException e) {
+            throw new CorruptionException("Cannot read proto.", e);
+        }
+    }
+
+    // 写入（对应 updateData）
+    public void write(UserPreferences prefs, OutputStream output) throws IOException {
+        prefs.writeTo(output);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 序列化器
 object UserPreferencesSerializer : Serializer<UserPreferences> {
@@ -155,9 +222,24 @@ class UserRepository(private val context: Context) {
 }
 ```
 
+:::
+
 ## 4. 迁移 SharedPreferences
 
 ### 4.1 自动迁移
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// preferencesDataStore + SharedPreferencesMigration 为 Kotlin 顶层扩展，
+// Java 中无直接等价写法；对应做法：
+// ① 手动迁移：把 legacy_settings 的 SP 数据读出后写入 DataStore；
+// ② 或 Java 侧继续使用 SharedPreferences，读取时做一次兼容判断。
+```
+
+@tab Kotlin
 
 ```kotlin
 val Context.dataStore by preferencesDataStore(
@@ -168,6 +250,8 @@ val Context.dataStore by preferencesDataStore(
 )
 ```
 
+:::
+
 ### 4.2 迁移时机
 
 - 首次创建 DataStore 时执行一次。
@@ -175,6 +259,29 @@ val Context.dataStore by preferencesDataStore(
 - **注意**：迁移只读取一次；若 SP 在迁移后又被写入，数据不会同步。
 
 ## 5. 异常处理
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// DataStore 的 Flow.catch / edit 均为 Kotlin 协程 API，Java 中无直接等价写法；
+// 对应语义：读取优雅降级 + 写入失败捕获：
+
+// 读取失败：SP 不存在时返回默认值（优雅降级）
+String value = prefs.getString("key", null);
+if (value == null) {
+    value = "";   // 返回空数据继续运行
+}
+
+// 写入失败：commit 同步返回是否成功
+boolean ok = prefs.edit().putString("key", value).commit();
+if (!ok) {
+    // 写入失败处理（如提示用户）
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 读取失败：IO 异常（如磁盘损坏）
@@ -194,6 +301,8 @@ try {
     // 写入失败处理（如提示用户）
 }
 ```
+
+:::
 
 ## 6. 与 SharedPreferences 对比
 

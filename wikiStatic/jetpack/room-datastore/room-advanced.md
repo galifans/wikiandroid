@@ -12,6 +12,48 @@ description: Room 实体关系、TypeConverter、数据库迁移、事务与 Flo
 
 ### 1.1 一对多:嵌套对象与关系
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Entity(tableName = "users")
+public class User {
+    @PrimaryKey
+    public long id;
+    public String name;
+
+    public User(long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+}
+
+@Entity(tableName = "pets",
+    foreignKeys = @ForeignKey(
+        entity = User.class,
+        parentColumns = {"id"},
+        childColumns = {"ownerId"},
+        onDelete = ForeignKey.CASCADE
+    ),
+    indices = {@Index("ownerId")}   // 外键查询必须建索引!
+)
+public class Pet {
+    @PrimaryKey
+    public long id;
+    public long ownerId;
+    public String name;
+
+    public Pet(long id, long ownerId, String name) {
+        this.id = id;
+        this.ownerId = ownerId;
+        this.name = name;
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 @Entity(tableName = "users")
 data class User(
@@ -35,7 +77,33 @@ data class Pet(
 )
 ```
 
+:::
+
 ### 1.2 关系查询:@Embedded + @Relation
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 查询结果:一个用户 + 其所有宠物
+public class UserWithPets {
+    @Embedded
+    public User user;
+
+    @Relation(parentColumn = "id", entityColumn = "ownerId")
+    public List<Pet> pets;
+}
+
+@Dao
+public interface UserDao {
+    @Transaction   // 一对多查询必须加 @Transaction(多次查询原子化)
+    @Query("SELECT * FROM users WHERE id = :id")
+    UserWithPets getUserWithPets(long id);   // suspend → Java 同步/Executor 调用
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 查询结果:一个用户 + 其所有宠物
@@ -53,7 +121,36 @@ interface UserDao {
 }
 ```
 
+:::
+
 ### 1.3 多对多:关联表
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Entity(tableName = "user_follow")
+public class UserFollow {
+    @PrimaryKey(autoGenerate = true)
+    public long id;
+    public long followerId;
+    public long followeeId;
+
+    public UserFollow(long followerId, long followeeId) {
+        this.followerId = followerId;
+        this.followeeId = followeeId;
+    }
+}
+
+// 查询我关注的所有用户
+@Query("SELECT users.* FROM users " +
+       "INNER JOIN user_follow ON users.id = user_follow.followeeId " +
+       "WHERE user_follow.followerId = :followerId")
+List<User> getFollowing(long followerId);
+```
+
+@tab Kotlin
 
 ```kotlin
 @Entity(tableName = "user_follow")
@@ -72,7 +169,41 @@ data class UserFollow(
 fun getFollowing(followerId: Long): List<User>
 ```
 
+:::
+
 ## 二、TypeConverter 类型转换
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 存储 List<String> 为 JSON 字符串
+public class StringListConverter {
+    @TypeConverter
+    public String fromList(List<String> value) {
+        return new Gson().toJson(value);
+    }
+
+    @TypeConverter
+    public List<String> toList(String value) {
+        Type type = new TypeToken<List<String>>() {}.getType();
+        return new Gson().fromJson(value, type);
+    }
+}
+
+@Database(
+    entities = {User.class},
+    version = 2,
+    exportSchema = true
+)
+@TypeConverters(StringListConverter.class)   // 全局注册
+public abstract class AppDatabase extends RoomDatabase {
+    public abstract UserDao userDao();
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 存储 List<String> 为 JSON 字符串
@@ -96,6 +227,8 @@ abstract class AppDatabase : RoomDatabase() {
 }
 ```
 
+:::
+
 | 场景 | Converter 示例 |
 |------|---------------|
 | List/Set/Map | JSON 序列化 |
@@ -111,6 +244,34 @@ abstract class AppDatabase : RoomDatabase() {
 ### 3.1 为什么必须写迁移
 
 > 直接改实体再 `fallbackToDestructiveMigration()` 会**清空用户数据**。生产应用必须提供 Migration 保数据。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// v1 → v2:新增 age 列
+public static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+    @Override
+    public void migrate(SupportSQLiteDatabase db) {
+        db.execSQL("ALTER TABLE users ADD COLUMN age INTEGER NOT NULL DEFAULT 0");
+    }
+};
+
+// v2 → v3:新建表
+public static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+    @Override
+    public void migrate(SupportSQLiteDatabase db) {
+        db.execSQL("CREATE TABLE pets (id INTEGER PRIMARY KEY NOT NULL, ownerId INTEGER NOT NULL, name TEXT)");
+    }
+};
+
+Room.databaseBuilder(context, AppDatabase.class, "app.db")
+    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+    .build();
+```
+
+@tab Kotlin
 
 ```kotlin
 // v1 → v2:新增 age 列
@@ -131,6 +292,8 @@ Room.databaseBuilder(context, AppDatabase::class.java, "app.db")
     .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
     .build()
 ```
+
+:::
 
 ### 3.2 迁移原则
 
@@ -155,6 +318,31 @@ flowchart LR
 
 ### 4.1 事务使用
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Dao
+public interface UserDao {
+    // suspend 事务方法 → Java 中用 default 方法包装，保证原子性
+    @Transaction
+    default void transferPoints(long from, long to, int amount) {
+        // 两个操作原子执行,要么都成功要么都回滚
+        subtractPoints(from, amount);
+        addPoints(to, amount);
+    }
+
+    @Query("UPDATE users SET points = points - :amount WHERE id = :from")
+    void subtractPoints(long from, int amount);
+
+    @Query("UPDATE users SET points = points + :amount WHERE id = :to")
+    void addPoints(long to, int amount);
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 @Dao
 interface UserDao {
@@ -173,6 +361,8 @@ interface UserDao {
 }
 ```
 
+:::
+
 | 场景 | 是否用事务 |
 |------|-----------|
 | 单条写操作 | ✗ 不需要 |
@@ -181,6 +371,28 @@ interface UserDao {
 | 批量插入 | ✓ 提升性能(单事务) |
 
 ### 4.2 批量操作性能
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 循环单条插入(每条一个事务,慢)
+for (User user : users) {
+    dao.insert(user);
+}
+
+// ✓ 批量插入(单事务,快 10-50 倍)
+dao.insertAll(users);
+
+@Dao
+public interface UserDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAll(List<User> users);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // ✗ 循环单条插入(每条一个事务,慢)
@@ -196,7 +408,41 @@ interface UserDao {
 }
 ```
 
+:::
+
 ## 五、Flow 响应式查询
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Dao
+public interface UserDao {
+    // 返回 Flow:表数据变化自动重新查询
+    @Query("SELECT * FROM users WHERE id = :id")
+    Flow<User> observeUser(long id);
+
+    @Query("SELECT * FROM users ORDER BY createTime DESC")
+    Flow<List<User>> observeAllUsers();
+}
+
+// ViewModel 中（对应 stateIn：Java 侧用 LiveData 承载最新值）
+public class UserViewModel extends ViewModel {
+    private final MutableLiveData<List<User>> users = new MutableLiveData<>();
+
+    public UserViewModel(UserDao dao) {
+        // 对应 observeAllUsers().map{...}.stateIn(...)：
+        // 通过协程桥接收集 Flow 后 setValue(转换结果)，或直接用 Room 的 LiveData 返回
+    }
+
+    public LiveData<List<User>> getUsers() {
+        return users;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @Dao
@@ -216,6 +462,8 @@ class UserViewModel(private val dao: UserDao) : ViewModel() {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 }
 ```
+
+:::
 
 > Flow 查询的优势:任何 `@Insert/@Update/@Delete` 变更都会**自动触发重新查询**,UI 自动刷新,无需手动 notify。
 

@@ -12,6 +12,35 @@ description: Kotlin 高阶函数、Lambda、集合操作符与函数式编程范
 
 在 Kotlin 中，**函数可以被赋值给变量、作为参数传递、作为返回值返回**——这就是"函数一等公民"。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 函数引用等价写法：方法引用赋值给变量
+static boolean isEven(int x) { return x % 2 == 0; }
+
+Predicate<Integer> predicate = Functional::isEven;   // 方法引用赋值给变量
+
+// 函数作为参数
+static List<Integer> filter(List<Integer> list, Predicate<Integer> pred) {
+    return list.stream().filter(pred).collect(Collectors.toList());
+}
+
+// 函数作为返回值
+static Function<Integer, Integer> makeAdder(int x) {
+    return y -> x + y;
+}
+
+void main() {
+    Function<Integer, Integer> add5 = makeAdder(5);
+    System.out.println(add5.apply(3));   // 8
+    System.out.println(filter(Arrays.asList(1, 2, 3, 4), Functional::isEven));  // [2, 4]
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 函数引用（可调用引用）
 fun isEven(x: Int): Boolean = x % 2 == 0
@@ -32,7 +61,22 @@ fun main() {
 }
 ```
 
+:::
+
 ### 函数类型语法
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法：java.util.function 函数式接口
+BiFunction<Integer, Integer, Integer> f1 = (a, b) -> a + b;
+Runnable f2 = () -> System.out.println("hello");
+Consumer<String> f3 = it -> System.out.println(it);   // 单参数可用任意名字
+```
+
+@tab Kotlin
 
 ```kotlin
 // (参数类型...) -> 返回类型
@@ -40,6 +84,8 @@ val f1: (Int, Int) -> Int = { a, b -> a + b }
 val f2: () -> Unit = { println("hello") }
 val f3: (String) -> Unit = { println(it) }   // 单参数可用 it
 ```
+
+:::
 
 | 写法 | 含义 |
 |------|------|
@@ -51,6 +97,26 @@ val f3: (String) -> Unit = { println(it) }   // 单参数可用 it
 ## 二、Lambda 表达式
 
 ### 2.1 语法要点
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 完整写法
+BiFunction<Integer, Integer, Integer> sum = (a, b) -> a + b;
+
+// 简化：Lambda 参数类型可推断时省略
+BiFunction<Integer, Integer, Integer> sum2 = (a, b) -> a + b;
+
+// 单参数
+Consumer<String> printIt = it -> System.out.println(it);
+
+// 无参数
+Runnable greet = () -> System.out.println("hi");
+```
+
+@tab Kotlin
 
 ```kotlin
 // 完整写法
@@ -66,9 +132,29 @@ val printIt: (String) -> Unit = { println(it) }
 val greet = { println("hi") }
 ```
 
+:::
+
 ### 2.2 尾随 Lambda（Trailing Lambda）
 
 **当 Lambda 是函数最后一个参数时，可以移出括号**：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Java 无尾随 Lambda 语法，Lambda 始终在括号内
+Arrays.asList(1, 2, 3).stream().map(x -> x * 2).collect(Collectors.toList());
+Arrays.asList(1, 2, 3).stream().reduce(0, (acc, x) -> acc + x);
+
+// 自定义函数等价写法
+static <T> void myForEach(List<T> list, Consumer<T> action) {
+    for (T item : list) action.accept(item);
+}
+Arrays.asList("a", "b").forEach(it -> System.out.println(it));
+```
+
+@tab Kotlin
 
 ```kotlin
 // 标准库经典用法
@@ -82,11 +168,26 @@ fun <T> List<T>.myForEach(action: (T) -> Unit) {
 listOf("a", "b").myForEach { println(it) }
 ```
 
+:::
+
 ### 2.3 匿名函数
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 匿名函数等价写法：Lambda（Java 中无独立匿名函数语法）
+Function<Integer, Integer> f = x -> x * 2;
+```
+
+@tab Kotlin
 
 ```kotlin
 val f = fun(x: Int): Int = x * 2   // 匿名函数，可显式声明返回类型
 ```
+
+:::
 
 > 与 Lambda 的区别：匿名函数可以显式指定返回类型；Lambda 的 `return` 返回外层函数（见下文"非局部返回"）。
 
@@ -95,6 +196,31 @@ val f = fun(x: Int): Int = x * 2   // 匿名函数，可显式声明返回类型
 函数式编程在集合处理上威力最大：
 
 ### 3.1 转换类
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+List<Integer> list = Arrays.asList(1, 2, 3, 4, 5);
+
+list.stream().map(x -> x * 2).collect(Collectors.toList());           // [2, 4, 6, 8, 10]  一一映射
+list.stream().flatMap(x -> Arrays.asList(x, x * 10).stream()).collect(Collectors.toList());  // 拍平再映射 [1,10,2,20,...]
+list.stream().collect(Collectors.groupingBy(x -> x % 2));             // {0=[2,4], 1=[1,3,5]} 分组
+list.stream().collect(Collectors.toMap(x -> x, x -> x * x));          // {1=1, 2=4, ...} 以元素为键
+// zip 配对：Java 无内置，用索引循环
+List<String> letters = Arrays.asList("a", "b", "c");
+List<Map.Entry<Integer, String>> zipped = new ArrayList<>();
+for (int i = 0; i < Math.min(list.size(), letters.size()); i++) {
+    zipped.add(new AbstractMap.SimpleEntry<>(list.get(i), letters.get(i)));  // [(1,a),(2,b),(3,c)]
+}
+// 带索引
+IntStream.range(0, list.size())
+    .mapToObj(i -> i + ":" + list.get(i))
+    .collect(Collectors.toList());
+```
+
+@tab Kotlin
 
 ```kotlin
 val list = listOf(1, 2, 3, 4, 5)
@@ -107,7 +233,27 @@ list.zip(listOf("a","b","c"))   // [(1,a),(2,b),(3,c)] 配对
 list.mapIndexed { i, v -> "$i:$v" }  // 带索引
 ```
 
+:::
+
 ### 3.2 过滤类
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+list.stream().filter(x -> x % 2 == 0).collect(Collectors.toList());      // [2, 4]
+list.stream().filter(x -> x % 2 != 0).collect(Collectors.toList());      // [1, 3, 5]
+list.stream().filter(Objects::nonNull).collect(Collectors.toList());     // 过滤 null
+list.stream().limit(3).collect(Collectors.toList());                     // 前 3 个
+list.stream().skip(2).collect(Collectors.toList());                      // 去掉前 2 个
+list.stream().distinct().collect(Collectors.toList());                   // 去重
+// single：恰好一个满足，否则抛异常
+List<Integer> singles = list.stream().filter(x -> x > 4).collect(Collectors.toList());
+if (singles.size() != 1) throw new IllegalStateException();
+```
+
+@tab Kotlin
 
 ```kotlin
 list.filter { it % 2 == 0 }      // [2, 4]
@@ -119,7 +265,25 @@ list.distinct()                  // 去重
 list.single { it > 4 }           // 恰好一个满足，否则抛异常
 ```
 
+:::
+
 ### 3.3 聚合类
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+list.stream().mapToInt(Integer::intValue).sum();                          // 15
+list.stream().reduce((acc, x) -> acc + x).orElse(0);                      // 15（首元素作为初值）
+list.stream().reduce(10, (acc, x) -> acc + x);                            // 25（指定初值 10）
+list.stream().filter(x -> x > 3).count();                                 // 2
+list.stream().max(Integer::compare).orElse(null);                         // 5
+list.stream().min(Integer::compare).orElse(null);                         // 1
+list.stream().mapToInt(Integer::intValue).average().orElse(0);            // 3.0
+```
+
+@tab Kotlin
 
 ```kotlin
 list.sum()                       // 15
@@ -131,7 +295,26 @@ list.minOrNull()                 // 1
 list.average()                   // 3.0
 ```
 
+:::
+
 ### 3.4 顺序与条件
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+list.stream().sorted().collect(Collectors.toList());                     // 升序
+list.stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());  // 按属性排序（降序）
+list.stream().anyMatch(x -> x > 4);                                      // true
+list.stream().allMatch(x -> x > 0);                                      // true
+list.stream().noneMatch(x -> x > 10);                                    // true
+list.stream().filter(x -> x > 3).findFirst().orElse(null);               // 4
+// 安全取值
+Integer v = 99 < list.size() ? list.get(99) : null;                      // null（安全取值）
+```
+
+@tab Kotlin
 
 ```kotlin
 list.sorted()                    // 升序
@@ -143,9 +326,32 @@ list.firstOrNull { it > 3 }      // 4
 list.elementAtOrNull(99)         // null（安全取值）
 ```
 
+:::
+
 ### 3.5 惰性序列 `asSequence()`
 
 **大量数据时避免中间集合创建**：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Java：集合操作多为立即创建新集合（Eager）
+List<Integer> eager = new ArrayList<>();
+for (int i = 1; i <= 1000000; i++) eager.add(i * 2);   // 创建 100w 元素的中间集合
+// filter 又创建 100w 元素
+List<Integer> filtered = new ArrayList<>();
+for (int x : eager) if (x % 3 == 0) filtered.add(x);
+
+// 优化：Java 8 Stream 惰性求值（Lazy），只在终端操作时执行
+List<Integer> result = IntStream.rangeClosed(1, 1000000).boxed()
+    .map(x -> x * 2)
+    .filter(x -> x % 3 == 0)
+    .collect(Collectors.toList());   // 只在最终 collect 时一次性执行
+```
+
+@tab Kotlin
 
 ```kotlin
 // 问题：每个操作符都会创建新 List（Eager）
@@ -160,6 +366,8 @@ listOf(1, 2, ..., 1000000)
     .filter { it % 3 == 0 }
     .toList()              // 只在最终 toList 时一次性执行
 ```
+
+:::
 
 | 场景 | 集合操作符 | Sequence |
 |------|-----------|----------|
@@ -179,6 +387,33 @@ listOf(1, 2, ..., 1000000)
 | `with` | `this` | Lambda 结果 | 对同一对象多次操作 |
 | `apply` | `this` | **对象本身** | 初始化/配置对象 |
 | `also` | `it` | **对象本身** | 副作用（日志、校验） |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// let 等价写法：判空 + 转换
+int length = name != null ? name.length() : 0;
+
+// apply 等价写法：Builder 配置
+AlertDialog.Builder builder = new AlertDialog.Builder(context);
+builder.setTitle("提示");
+builder.setMessage("确定删除？");
+builder.setPositiveButton("确定", (d, w) -> { });
+AlertDialog dialog = builder.create();
+
+// also 等价写法：调试日志
+User user = new User("tom");
+Log.d("TAG", "created: " + user);
+
+// with 等价写法：同一对象多次操作
+builder.add(1);
+builder.add(2);
+Object result = builder.build();
+```
+
+@tab Kotlin
 
 ```kotlin
 // let：安全调用 + 转换
@@ -204,11 +439,38 @@ val result = with(builder) {
 }
 ```
 
+:::
+
 > 进阶阅读：[Kotlin 基础语法详解](/language/kotlin/kotlin-basics.md)、[Kotlin 协程从入门到进阶](/language/kotlin/kotlin-coroutines.md)
 
 ## 五、非局部返回与标签
 
 Lambda 中的 `return` 默认返回**外层函数**（非局部返回），因为 Lambda 被内联：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 非局部返回等价写法：普通循环 + return
+static int findFirst(List<Integer> list) {
+    for (int it : list) {
+        if (it == 3) return it;   // 直接返回外层函数 findFirst！
+    }
+    return -1;
+}
+
+// 标签返回等价写法：continue 跳过本次迭代
+static void test(List<Integer> list) {
+    for (int it : list) {
+        if (it == 3) continue;    // 只跳过本次循环
+        System.out.println(it);
+    }
+    System.out.println("done");  // 会执行
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 fun findFirst(list: List<Int>): Int {
@@ -228,11 +490,31 @@ fun test(list: List<Int>) {
 }
 ```
 
+:::
+
 **注意**：只有 `inline` 函数（如 `forEach`、`map`）才支持非局部返回；非内联函数会编译报错。
 
 ## 六、内联函数与性能
 
 高阶函数创建 Lambda 会产生**匿名内部类或 Function 对象**，内联可消除该开销：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法：普通方法 + Runnable 参数（每次调用创建函数对象）
+static void repeat(int n, Runnable action) {
+    for (int i = 0; i < n; i++) action.run();
+}
+
+// Java 无 inline 关键字：编译期无展开，由 JIT 决定是否内联
+static void repeatInline(int n, Runnable action) {
+    for (int i = 0; i < n; i++) action.run();
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 未内联：每次调用都创建 Function 对象
@@ -241,6 +523,8 @@ fun repeat(n: Int, action: () -> Unit) { for (i in 0 until n) action() }
 // 内联：编译期展开，无对象创建
 inline fun repeatInline(n: Int, action: () -> Unit) { for (i in 0 until n) action() }
 ```
+
+:::
 
 ```mermaid
 flowchart LR
@@ -260,6 +544,24 @@ flowchart LR
 
 ### noinline 与 crossinline
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Java 无 inline/noinline/crossinline：Lambda 始终是对象，可存储/传递
+static void f(Runnable a, Runnable b) {
+    // a 与 b 均为函数对象，可被存储/传递
+}
+
+static void g(Runnable h) {
+    // Lambda 内 return 仅返回 Lambda 本身（Java 无非局部返回）
+    Runnable r = () -> h.run();
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 inline fun f(a: () -> Unit, noinline b: () -> Unit) {
     // a 内联展开；b 保持函数对象（可被存储/传递）
@@ -271,9 +573,27 @@ inline fun g(crossinline h: () -> Unit) {
 }
 ```
 
+:::
+
 ## 七、reified 泛型
 
 内联函数配合 `reified` 可在运行时获取泛型类型：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// reified 等价写法：显式传入 Class 参数（Java 类型擦除无 reified）
+static <T> T fromJson(Gson gson, String json, Class<T> clazz) {
+    return gson.fromJson(json, clazz);
+}
+
+// 使用
+User user = fromJson(gson, "{\"name\":\"tom\"}", User.class);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 普通泛型：类型被擦除，无法 T::class
@@ -284,6 +604,8 @@ inline fun <reified T> Gson.fromJson(json: String): T =
 // 使用
 val user: User = gson.fromJson("""{"name":"tom"}""")
 ```
+
+:::
 
 > Gson/Moshi 的扩展函数、协程的 `launch`、Compose 的 `remember` 都大量使用 reified。
 

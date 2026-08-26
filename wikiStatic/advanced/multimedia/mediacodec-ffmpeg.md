@@ -57,6 +57,34 @@ flowchart TD
 
 ## 三、硬编解码完整流程
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 解码:MediaExtractor + MediaCodec → Surface 播放
+MediaCodec createDecoder(String mimeType, Surface surface) {
+    MediaFormat format = MediaFormat.createVideoFormat(mimeType, width, height);
+    MediaCodec codec = MediaCodec.createDecoderByType(mimeType);
+    codec.configure(format, surface, null, 0);   // 输出到 Surface
+    codec.start();
+    return codec;
+}
+
+// 编码:H.264 硬编码参数
+MediaFormat format = MediaFormat.createVideoFormat(
+        MediaFormat.MIMETYPE_VIDEO_AVC, 1280, 720);
+format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
+        MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+format.setInteger(MediaFormat.KEY_BIT_RATE, 2_000_000);          // 2Mbps
+format.setInteger(MediaFormat.KEY_FRAME_RATE, 30);               // 30fps
+format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2);          // 关键帧间隔 2s
+format.setInteger(MediaFormat.KEY_BITRATE_MODE,
+        MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR); // 可变码率
+```
+
+@tab Kotlin
+
 ```kotlin
 // 解码:MediaExtractor + MediaCodec → Surface 播放
 fun createDecoder(mimeType: String, surface: Surface): MediaCodec {
@@ -77,6 +105,53 @@ val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, 1280,
         MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_VBR) // 可变码率
 }
 ```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 编解码循环(核心):异步回调模式(API 21+)
+public class CodecPipeline {
+    private final MediaCodec codec;
+
+    public CodecPipeline(MediaCodec codec) {
+        this.codec = codec;
+    }
+
+    // 使用 setCallback 异步模式,避免手写循环
+    public void start() {
+        codec.setCallback(new MediaCodec.Callback() {
+            @Override
+            public void onInputBufferAvailable(MediaCodec codec, int index) {
+                // ① 拿到输入缓冲 → 写入待编码数据
+                ByteBuffer buffer = codec.getInputBuffer(index);
+                byte[] data = readNextFrame();
+                if (buffer != null) buffer.put(data);
+                codec.queueInputBuffer(index, 0, data.length, ptsUs, 0);
+            }
+            @Override
+            public void onOutputBufferAvailable(MediaCodec codec, int index, MediaCodec.BufferInfo info) {
+                // ② 拿到输出缓冲 → 写入输出文件/渲染
+                writeOutput(codec.getOutputBuffer(index), info);
+                codec.releaseOutputBuffer(index, false);
+            }
+            @Override
+            public void onError(MediaCodec codec, MediaCodec.CodecException e) { handleError(e); }
+            @Override
+            public void onOutputFormatChanged(MediaCodec codec, MediaFormat format) {
+                // ③ 编码器输出格式变化(如 SPS/PPS)
+                writeFormat(format);
+            }
+        });
+        codec.start();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 编解码循环(核心):异步回调模式(API 21+)
@@ -107,6 +182,8 @@ class CodecPipeline(private val codec: MediaCodec) {
 }
 ```
 
+:::
+
 ## 四、音视频编辑管线
 
 ```mermaid
@@ -130,6 +207,27 @@ flowchart LR
 
 ### 4.2 音视频同步
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 时间戳同步是编辑的难点
+// 关键点:
+// 1. 解码后保留原始 PTS(呈现时间戳)
+// 2. 处理(滤镜)不改变 PTS
+// 3. 编码时把处理后的帧 PTS 传给编码器
+// 4. Muxer 按 PTS 写入音视频轨道
+// 5. 基准对齐:首帧时间戳归零
+
+// 常见问题:
+// - 音画不同步 → PTS 被修改/偏移
+// - 视频加速/变慢 → PTS 间距不对
+// - 掉帧 → 缓冲不足,需要背压控制
+```
+
+@tab Kotlin
+
 ```kotlin
 // 时间戳同步是编辑的难点
 // 关键点:
@@ -144,6 +242,8 @@ flowchart LR
 // - 视频加速/变慢 → PTS 间距不对
 // - 掉帧 → 缓冲不足,需要背压控制
 ```
+
+:::
 
 ## 五、FFmpeg 集成
 

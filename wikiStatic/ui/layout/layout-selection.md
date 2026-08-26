@@ -144,10 +144,23 @@ flowchart TD
     android:layout_height="wrap_content" />
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 使用时才 inflate（只 inflate 一次）
+View adView = ((ViewStub) findViewById(R.id.stub_ad)).inflate();
+```
+
+@tab Kotlin
+
 ```kotlin
 // 使用时才 inflate（只 inflate 一次）
 val adView = findViewById<ViewStub>(R.id.stub_ad).inflate()
 ```
+
+:::
 
 ## 五、性能优化清单
 

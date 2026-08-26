@@ -68,6 +68,23 @@ traces.txt 内容：
 
 ### 3.2 代码监控
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 主动监控主线程状态（线上 ANR 预警）
+// 原理：主线程空闲时发消息，超时未执行 → 可能 ANR
+new Handler(Looper.getMainLooper()).post(() -> {
+    mainThreadIdle = true;
+});
+
+// 或者：监控消息执行时间（同卡顿监控）
+// 主线程消息执行 > 5s → 抓取堆栈上报
+```
+
+@tab Kotlin
+
 ```kotlin
 // 主动监控主线程状态（线上 ANR 预警）
 // 原理：主线程空闲时发消息，超时未执行 → 可能 ANR
@@ -78,6 +95,8 @@ Handler(Looper.getMainLooper()).post {
 // 或者：监控消息执行时间（同卡顿监控）
 // 主线程消息执行 > 5s → 抓取堆栈上报
 ```
+
+:::
 
 ## 4. 典型 ANR 分析示例
 
@@ -128,6 +147,29 @@ traces 主线程堆栈：
    - 线上 ANR 率指标 + 堆栈采集
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 正确的做法示例
+void onLoginClick() {
+    // ✗ 主线程网络（会 ANR）
+    // User user = api.login(name, pwd);
+
+    // ✓ 异步执行（协程的 withContext(IO) 等价：线程池 + 回调主线程）
+    executor.execute(() -> {
+        User user = api.login(name, pwd);
+        runOnUiThread(() -> {
+            // 回到主线程更新 UI
+            tvResult.setText(user != null ? user.getName() : "失败");
+        });
+    });
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 正确的做法示例
 fun onLoginClick() {
@@ -144,6 +186,8 @@ fun onLoginClick() {
     }
 }
 ```
+
+:::
 
 ## 6. 高频面试题
 

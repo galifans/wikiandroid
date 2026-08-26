@@ -72,6 +72,26 @@ View 生命周期：        onCreateView → ... → onDestroyView（可能多�
 - 重建 View 时（如从返回栈弹出、配置变更），会重新走 `onCreateView → onViewCreated`，**但不会重新走 onCreate**。
 - 因此 **View 相关操作必须绑定 `viewLifecycleOwner`**，而非 Fragment 本身的 lifecycle。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 正确：观察 View 的生命周期
+viewLifecycleOwner.getLifecycleScope().launch(() -> {
+    repeatOnLifecycle(Lifecycle.State.STARTED, () -> {
+        viewModel.getUiState().collect(state -> binding.render(state));
+    });
+});
+
+// 错误：Fragment 生命周期活着时 View 可能已销毁
+lifecycleScope.launch(() -> {
+    viewModel.getUiState().collect(state -> binding.render(state));  // 可能操作已销毁的 View
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 // 正确：观察 View 的生命周期
 viewLifecycleOwner.lifecycleScope.launch {
@@ -85,6 +105,8 @@ lifecycleScope.launch {
     viewModel.uiState.collect { binding.render(it) }  // 可能操作已销毁的 View
 }
 ```
+
+:::
 
 ## 二、FragmentManager 与事务
 
@@ -102,6 +124,21 @@ lifecycleScope.launch {
 
 ### 2.2 事务操作详解
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+supportFragmentManager.beginTransaction()
+        .setReorderingAllowed(true)                          // 推荐开启：优化状态恢复与动画
+        .add(R.id.container, new DetailFragment())           // 叠加添加
+        // .replace(R.id.container, new DetailFragment())    // 替换（移除旧的全部）
+        .addToBackStack("detail")                            // 加入返回栈（返回键可回退）
+        .commit();
+```
+
+@tab Kotlin
+
 ```kotlin
 supportFragmentManager.commit {
     setReorderingAllowed(true)          // 推荐开启：优化状态恢复与动画
@@ -110,6 +147,8 @@ supportFragmentManager.commit {
     addToBackStack("detail")            // 加入返回栈（返回键可回退）
 }
 ```
+
+:::
 
 | 操作 | 行为 | 状态保留 | 适用场景 |
 |------|------|----------|----------|
@@ -137,6 +176,29 @@ supportFragmentManager.commit {
 
 ### 3.1 共享 ViewModel（推荐首选）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 两个 Fragment 通过 activityViewModels() 共享同一实例
+public class ListFragment extends Fragment {
+    // 等价于 activityViewModels()：作用域为宿主 Activity
+    private SharedViewModel getSharedViewModel() {
+        return new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+    }
+}
+
+public class DetailFragment extends Fragment {
+    // 等价于 activityViewModels()：作用域为宿主 Activity
+    private SharedViewModel getSharedViewModel() {
+        return new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 两个 Fragment 通过 activityViewModels() 共享同一实例
 class ListFragment : Fragment() {
@@ -148,11 +210,38 @@ class DetailFragment : Fragment() {
 }
 ```
 
+:::
+
 - 作用域是**宿主 Activity**（或 `by viewModels()` 作用于本 Fragment）。
 - 配置变更后数据不丢；配合 `StateFlow` 天然响应式。
 - 父子 Fragment 间共享用 `by viewModels(ownerProducer = { requireParentFragment() })` 或 `activityViewModels()`。
 
 ### 3.2 setFragmentResult（官方轻量通信）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 接收方（必须在 onStart 前注册）
+public class DetailFragment extends Fragment {
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setFragmentResultListener("request_key", this, (key, bundle) -> {
+            String result = bundle.getString("result");
+            updateUI(result);
+        });
+    }
+}
+
+// 发送方
+Bundle result = new Bundle();
+result.putString("result", "data");
+setFragmentResult("request_key", result);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 接收方（必须在 onStart 前注册）
@@ -170,11 +259,44 @@ class DetailFragment : Fragment() {
 setFragmentResult("request_key", bundleOf("result" to "data"))
 ```
 
+:::
+
 - **无需相互持有引用**，解耦最彻底。
 - 适合"一次性结果回传"（表单结果、选择结果）。
 - 注意：监听器回调在 **onStart 之后才可用**（FragmentManager 会在 onStart 时投递延迟结果）。
 
 ### 3.3 接口回调（传统方式）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class ItemListFragment extends Fragment {
+
+    public interface OnItemClickListener {
+        void onItemClick(Item item);
+    }
+
+    private OnItemClickListener listener;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnItemClickListener) {
+            listener = (OnItemClickListener) context;   // 宿主实现接口
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;   // 必须清空，防止泄漏
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class ItemListFragment : Fragment() {
@@ -195,7 +317,23 @@ class ItemListFragment : Fragment() {
 }
 ```
 
+:::
+
 ### 3.4 直接访问（简单场景，谨慎使用）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 父 Fragment 访问子 Fragment
+ChildFragment child = (ChildFragment) getChildFragmentManager().findFragmentByTag("child");
+
+// Activity 访问 Fragment
+DetailFragment fragment = (DetailFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 父 Fragment 访问子 Fragment
@@ -205,6 +343,8 @@ val child = childFragmentManager.findFragmentByTag("child") as? ChildFragment
 val fragment = supportFragmentManager.findFragmentById(R.id.container) as? DetailFragment
 ```
 
+:::
+
 ## 四、Fragment 状态保存
 
 | 状态类型 | 保存机制 | 恢复时机 |
@@ -213,6 +353,31 @@ val fragment = supportFragmentManager.findFragmentById(R.id.container) as? Detai
 | View 状态（EditText 文本等） | View 自身的 onSaveInstanceState | `onViewCreated` 后自动恢复 |
 | 成员变量 | **不会自动保存** | 需手动 `onSaveInstanceState` |
 | 业务数据 | ViewModel（推荐） | 进程内跨配置变更 |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class ProfileFragment extends Fragment {
+
+    private String userId;
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("userId", userId);   // 手动保存成员变量
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        userId = savedInstanceState != null ? savedInstanceState.getString("userId") : null;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class ProfileFragment : Fragment() {
@@ -231,9 +396,47 @@ class ProfileFragment : Fragment() {
 }
 ```
 
+:::
+
 > **现代推荐**：业务数据放 ViewModel；UI 状态用 `SavedStateHandle`；只有"无法放 ViewModel 的轻量标志"才手动 `onSaveInstanceState`。
 
 ## 五、Fragment 与 ViewPager2
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MainActivity extends AppCompatActivity {
+
+    private final FragmentStateAdapter adapter = new FragmentStateAdapter(this) {
+        @Override
+        public int getItemCount() {
+            return 3;
+        }
+
+        @Override
+        public Fragment createFragment(int position) {
+            switch (position) {
+                case 0:
+                    return new HomeFragment();
+                case 1:
+                    return new DiscoverFragment();
+                default:
+                    return new ProfileFragment();
+            }
+        }
+    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding.viewPager2.setAdapter(adapter);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
@@ -254,6 +457,8 @@ class MainActivity : AppCompatActivity() {
     }
 }
 ```
+
+:::
 
 | 适配器 | 特点 | 适用场景 |
 |--------|------|----------|

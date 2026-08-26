@@ -65,6 +65,10 @@ android {
 
 ### 2.2 混淆效果对比
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 混淆前
 public class UserManager {
@@ -80,6 +84,26 @@ public class a {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// 混淆前
+class UserManager {
+    fun login(username: String, password: String) {
+        // 登录逻辑
+    }
+}
+
+// 混淆后
+class a {
+    fun a(a: String, b: String) {
+        // 逻辑还在但无法快速定位
+    }
+}
+```
+
+:::
 
 ### 2.3 需要 keep 的内容
 
@@ -106,6 +130,29 @@ public class a {
 
 **签名是 APK 的身份凭证**：防篡改、防重打包。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 运行时校验自身签名
+boolean verifySignature(Context context) {
+    String expectedHash = "你的应用签名 SHA256";
+    String currentHash = getSignatureHash(context);
+    return expectedHash.equals(currentHash);
+}
+
+private String getSignatureHash(Context context) {
+    PackageInfo info = context.getPackageManager().getPackageInfo(
+            context.getPackageName(),
+            PackageManager.GET_SIGNATURES
+    );
+    return sha256(info.signatures[0].toByteArray());
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 运行时校验自身签名
 fun verifySignature(context: Context): Boolean {
@@ -122,6 +169,8 @@ private fun getSignatureHash(context: Context): String {
     return info.signatures[0].toByteArray().sha256()
 }
 ```
+
+:::
 
 ### 3.2 校验的局限
 
@@ -159,6 +208,10 @@ flowchart TD
 
 ### 4.3 壳的加载机制
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 壳程序核心：自定义 ClassLoader 解密加载
 public class ShellClassLoader extends DexClassLoader {
@@ -180,6 +233,31 @@ public class ShellClassLoader extends DexClassLoader {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 壳程序核心：自定义 ClassLoader 解密加载
+class ShellClassLoader(dexPath: String, parent: ClassLoader) : DexClassLoader(dexPath, null, null, parent) {
+
+    companion object {
+        private val KEY = "encrypt-key".toByteArray()
+
+        // 在 Application.attachBaseContext 中
+        // 解密 assets 中的加密 dex，写入文件后加载
+        @JvmStatic
+        fun loadRealDex(context: Context) {
+            val encrypted = readAsset(context, "shell.dat")
+            val realDex = AESDecrypt(encrypted, KEY)
+            val dexFile = writeToPrivateDir(context, realDex)
+            // 用自定义 ClassLoader 加载真实 DEX
+            ShellClassLoader(dexFile.path, context.classLoader)
+        }
+    }
+}
+```
+
+:::
+
 ### 4.4 加壳方案对比
 
 | 方案 | 特点 | 适用 |
@@ -191,6 +269,26 @@ public class ShellClassLoader extends DexClassLoader {
 ## 五、运行时防护
 
 ### 5.1 反调试
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 检测调试器（基础版）
+boolean isBeingDebugged() {
+    return Debug.isDebuggerConnected();  // Java 层
+}
+
+// 检测 Xposed/Frida 等 hook 框架（需 native 层配合）
+boolean isHooked() {
+    // 检查 /proc/self/maps 中可疑模块
+    // 检查类加载器中的 hook 特征
+    // native 层校验函数地址
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 检测调试器（基础版）
@@ -206,7 +304,26 @@ fun isHooked(): Boolean {
 }
 ```
 
+:::
+
 ### 5.2 完整性校验
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 关键文件校验
+boolean verifyIntegrity(Context context) {
+    // 1. 校验 APK 签名
+    // 2. 校验 DEX 关键方法 Hash
+    // 3. 校验资源 Hash
+    // 4. 服务端二次校验（上报设备/包信息）
+    return true;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 关键文件校验
@@ -218,6 +335,8 @@ fun verifyIntegrity(context: Context): Boolean {
     return true
 }
 ```
+
+:::
 
 ### 5.3 防护建议清单
 

@@ -31,6 +31,10 @@ Activity.dispatchTouchEvent
 
 ## 2. ViewGroup 分发逻辑（伪代码）
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ViewGroup.dispatchTouchEvent 核心逻辑
 public boolean dispatchTouchEvent(MotionEvent ev) {
@@ -55,6 +59,34 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ViewGroup.dispatchTouchEvent 核心逻辑
+override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+    // ① 是否拦截
+    val intercepted = onInterceptTouchEvent(ev)
+
+    // ② 不拦截 → 分发给子 View
+    if (!intercepted) {
+        // 从后往前遍历子 View（后添加的先处理，保证 z 序）
+        for (i in childCount - 1 downTo 0) {
+            val child = getChildAt(i)
+            if (child.dispatchTouchEvent(ev)) {
+                // 子 View 消费了事件
+                mTarget = child
+                return true
+            }
+        }
+    }
+
+    // ③ 没人消费 → 自己处理
+    return super.dispatchTouchEvent(ev)   // 即 onTouchEvent
+}
+```
+
+:::
+
 **关键规则**：
 
 - `ACTION_DOWN` 决定后续事件的目标（`mTarget` 记录消费 DOWN 的 View）。
@@ -62,6 +94,10 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
 - ViewGroup 默认不拦截（`onInterceptTouchEvent` 返回 false）。
 
 ## 3. View 的消费逻辑
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // View.dispatchTouchEvent 核心逻辑
@@ -75,8 +111,28 @@ public boolean dispatchTouchEvent(MotionEvent event) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// View.dispatchTouchEvent 核心逻辑
+override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+    // ① 先给 OnTouchListener（若设置了）
+    if (mOnTouchListener != null && mOnTouchListener.onTouch(this, event)) {
+        return true                    // Listener 消费
+    }
+    // ② 再给 onTouchEvent
+    return onTouchEvent(event)
+}
+```
+
+:::
+
 **优先级**：`OnTouchListener > onTouchEvent > OnClickListener`（onClick 在
 onTouchEvent 的 ACTION_UP 中触发）。
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // onTouchEvent 中点击事件的触发
@@ -86,6 +142,19 @@ if (action == MotionEvent.ACTION_UP) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// onTouchEvent 中点击事件的触发
+if (action == MotionEvent.ACTION_UP) {
+    if (mOnClickListener != null) {
+        mOnClickListener.onClick(this)   // 点击回调在 UP 时触发
+    }
+}
+```
+
+:::
 
 **View 可点击**：`CLICKABLE`（Button 默认 true）或 `LONG_CLICKABLE` 为 true 时，
 `onTouchEvent` 返回 true 消费事件；否则返回 false（TextView 默认不消费）。
@@ -117,6 +186,20 @@ flowchart TD
 
 ### 5.2 两个关键 API
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 子 View 禁止父 View 拦截（内部拦截法的关键）
+parent.requestDisallowInterceptTouchEvent(true);
+
+// ViewGroup 主动不拦截后续事件
+// 在 onInterceptTouchEvent 中：DOWN 返回 false，MOVE 时再判断
+```
+
+@tab Kotlin
+
 ```kotlin
 // 子 View 禁止父 View 拦截（内部拦截法的关键）
 parent.requestDisallowInterceptTouchEvent(true)
@@ -125,13 +208,29 @@ parent.requestDisallowInterceptTouchEvent(true)
 // 在 onInterceptTouchEvent 中：DOWN 返回 false，MOVE 时再判断
 ```
 
+:::
+
 ### 5.3 事件的坐标
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// getX/getY：相对当前 View 的坐标
+// getRawX/getRawY：相对屏幕的坐标
+// 父 View 处理子 View 事件时注意坐标转换（ViewGroup 分发给子 View 时会减去子 View 位置）
+```
+
+@tab Kotlin
 
 ```kotlin
 // getX/getY：相对当前 View 的坐标
 // getRawX/getRawY：相对屏幕的坐标
 // 父 View 处理子 View 事件时注意坐标转换（ViewGroup 分发给子 View 时会减去子 View 位置）
 ```
+
+:::
 
 ## 6. 高频面试题
 

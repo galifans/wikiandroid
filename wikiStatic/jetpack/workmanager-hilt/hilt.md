@@ -11,6 +11,20 @@ description: Hilt 注解体系、作用域、模块定义、与 Dagger 关系、
 
 ## 1. 为什么需要依赖注入
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 手动创建依赖：耦合、难测试
+public class UserViewModel {
+    private final ApiService api = new ApiService(new OkHttpClient());  // 硬编码依赖
+    private final UserDao dao = AppDatabase.getInstance(this).userDao();
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ✗ 手动创建依赖：耦合、难测试
 class UserViewModel {
@@ -18,6 +32,8 @@ class UserViewModel {
     private val dao = UserDao(AppDatabase.getInstance(this))
 }
 ```
+
+:::
 
 问题：
 
@@ -46,12 +62,47 @@ Hilt 自动集成 Android 组件生命周期
 
 ### 3.1 开启 Hilt
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@HiltAndroidApp
+public class MyApplication extends Application {
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 @HiltAndroidApp
 class MyApplication : Application()
 ```
 
+:::
+
 ### 3.2 注入 Activity/Fragment
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@AndroidEntryPoint
+public class MainActivity extends AppCompatActivity {
+
+    @Inject
+    UserRepository repository;   // 字段注入
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // repository 已可用
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @AndroidEntryPoint
@@ -66,7 +117,27 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+:::
+
 ### 3.3 构造注入
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 依赖可构造时，直接 @Inject 构造
+public class UserRepository {
+    private final ApiService api;
+
+    @Inject
+    public UserRepository(ApiService api) {
+        this.api = api;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 依赖可构造时，直接 @Inject 构造
@@ -75,9 +146,55 @@ class UserRepository @Inject constructor(
 )
 ```
 
+:::
+
 ## 4. Module 与 Provides
 
 当依赖需要配置（第三方库、接口实现）时用 Module：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Module
+@InstallIn(SingletonComponent.class)   // 安装位置
+public class NetworkModule {
+
+    // OkHttpClient 单例（object → static 方法）
+    @Provides
+    @Singleton
+    public static OkHttpClient provideOkHttpClient() {
+        return new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .build();
+    }
+
+    // Retrofit 接口
+    @Provides
+    @Singleton
+    public static ApiService provideApiService(OkHttpClient client) {
+        return new Retrofit.Builder()
+                .baseUrl("https://api.example.com/")
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(ApiService.class);
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent.class)
+public abstract class RepositoryModule {
+
+    // 接口绑定（抽象）
+    @Binds
+    @Singleton
+    public abstract UserRepository bindUserRepository(UserRepositoryImpl impl);
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @Module
@@ -115,6 +232,8 @@ abstract class RepositoryModule {
 }
 ```
 
+:::
+
 ## 5. 作用域（Scope）
 
 | 作用域 | 存活时间 | 安装位置 |
@@ -125,14 +244,63 @@ abstract class RepositoryModule {
 | `@ViewModelScoped` | ViewModel 生命周期 | ViewModelComponent |
 | `@ServiceScoped` | Service 生命周期 | ServiceComponent |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@ActivityScoped
+public class SessionManager {
+
+    @Inject
+    public SessionManager() {
+        // ...
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 @ActivityScoped
 class SessionManager @Inject constructor() { ... }
 ```
 
+:::
+
 > **注意**：作用域必须与安装组件匹配（`@ActivityScoped` 不能放在 SingletonComponent 的 Module 中）。
 
 ## 6. ViewModel 注入
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@HiltViewModel
+public class UserListViewModel extends ViewModel {
+    private final UserRepository repository;
+
+    @Inject
+    public UserListViewModel(UserRepository repository) {
+        this.repository = repository;
+    }
+}
+
+// 使用
+@AndroidEntryPoint
+public class UserListFragment extends Fragment {
+
+    private UserListViewModel viewModel;
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        viewModel = new ViewModelProvider(this).get(UserListViewModel.class);  // Hilt 自动创建
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @HiltViewModel
@@ -151,7 +319,45 @@ class UserListFragment : Fragment() {
 }
 ```
 
+:::
+
 ## 7. 测试支持
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 替换测试模块
+@Module
+@TestInstallIn(
+    components = SingletonComponent.class,
+    replaces = NetworkModule.class
+)
+public class FakeNetworkModule {
+
+    @Provides
+    @Singleton
+    public static ApiService provideApiService() {
+        return new FakeApiService();
+    }
+}
+
+// 或手动构造
+@HiltAndroidTest
+public class UserRepositoryTest {
+
+    @Rule
+    public HiltAndroidRule hiltRule = new HiltAndroidRule(this);
+
+    @Before
+    public void setUp() {
+        hiltRule.inject();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 替换测试模块
@@ -180,6 +386,8 @@ class UserRepositoryTest {
     }
 }
 ```
+
+:::
 
 ## 8. 高频面试题
 

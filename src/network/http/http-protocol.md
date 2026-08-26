@@ -133,6 +133,21 @@ HTTP 明文传输：可被**窃听**（抓包）、**篡改**（中间人）、*
 
 ### 3.3 Android 中的 HTTPS
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// OkHttp 默认信任系统 CA，证书无效直接报错
+OkHttpClient client = new OkHttpClient.Builder()
+    .sslSocketFactory(...)   // 自定义证书（自签名需谨慎）
+    .build();
+
+// 注意：不要用信任所有证书的配置（安全隐患）
+```
+
+@tab Kotlin
+
 ```kotlin
 // OkHttp 默认信任系统 CA，证书无效直接报错
 val client = OkHttpClient.Builder()
@@ -141,6 +156,8 @@ val client = OkHttpClient.Builder()
 
 // 注意：不要用信任所有证书的配置（安全隐患）
 ```
+
+:::
 
 ## 4. HTTP/1.1 vs HTTP/2 vs HTTP/3
 

@@ -42,6 +42,10 @@ Java 共有八种基本数据类型，每种都有对应的包装类：
 
 **String 的经典例子：**
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 String str1 = "abc";
 String str2 = "abc";
@@ -52,6 +56,21 @@ String str3 = new String("abc");
 System.out.println(str1 == str3);      // false，new 创建了新对象
 System.out.println(str1.equals(str3)); // true
 ```
+
+@tab Kotlin
+
+```kotlin
+val str1 = "abc"
+val str2 = "abc"
+println(str1 === str2)      // true，字符串常量池复用（引用比较，等价 Java 的 ==）
+println(str1 == str2)       // true，内容相同
+
+val str3 = String("abc")
+println(str1 === str3)      // false，new 创建了新对象（引用比较）
+println(str1 == str3)       // true
+```
+
+:::
 
 理解要点：
 
@@ -159,12 +178,28 @@ JVM 执行字节码时，类型信息存储在方法区中。方法区的类型�
 
 `foreach` 是语法糖，编译成字节码后使用的是迭代器实现：
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // foreach 反编译后的效果
 for (Iterator iterator = list.iterator(); iterator.hasNext();) {
     Object t = iterator.next();
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// foreach 反编译后的效果（Kotlin 的 for 循环底层同样基于迭代器）
+val iterator = list.iterator()
+while (iterator.hasNext()) {
+    val t = iterator.next()
+}
+```
+
+:::
 
 只比迭代器遍历多了生成中间变量这一步，因此性能略微下降。
 

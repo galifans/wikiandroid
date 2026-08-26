@@ -28,6 +28,25 @@ description: ValueAnimator/ObjectAnimator/AnimatorSet、插值器与估值器、
 
 ### 2.1 ValueAnimator：值变化器
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ValueAnimator 只负责"值"的变化，不直接操作 View
+ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
+animator.setDuration(1000);
+animator.setInterpolator(new AccelerateDecelerateInterpolator());
+animator.addUpdateListener(animation -> {
+    float value = (float) animation.getAnimatedValue();
+    view.setAlpha(value);          // 手动应用值
+    view.setTranslationX(value * 100);
+});
+animator.start();
+```
+
+@tab Kotlin
+
 ```kotlin
 // ValueAnimator 只负责"值"的变化，不直接操作 View
 val animator = ValueAnimator.ofFloat(0f, 1f).apply {
@@ -42,7 +61,27 @@ val animator = ValueAnimator.ofFloat(0f, 1f).apply {
 animator.start()
 ```
 
+:::
+
 ### 2.2 ObjectAnimator：属性动画器（最常用）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ObjectAnimator 自动调用 setter 方法
+ObjectAnimator animator1 = ObjectAnimator.ofFloat(view, "translationX", 0f, 300f);
+animator1.setDuration(500);
+animator1.start();
+
+// 多属性同时
+ObjectAnimator animator2 = ObjectAnimator.ofFloat(view, View.ROTATION, 0f, 360f);
+animator2.setDuration(1000);
+animator2.start();
+```
+
+@tab Kotlin
 
 ```kotlin
 // ObjectAnimator 自动调用 setter 方法
@@ -58,6 +97,8 @@ ObjectAnimator.ofFloat(view, View.ROTATION, 0f, 360f).apply {
 }
 ```
 
+:::
+
 **原理**：`ObjectAnimator` 通过反射调用 `setTranslationX(float)`，所以：
 
 - View 必须提供对应的 setter（如 `setAlpha`、`setTranslationX`）。
@@ -65,6 +106,26 @@ ObjectAnimator.ofFloat(view, View.ROTATION, 0f, 360f).apply {
 - 没有 setter 的属性需自定义（`PropertyValuesHolder` + `TypeEvaluator`）。
 
 ### 2.3 AnimatorSet：动画集合
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+AnimatorSet animatorSet = new AnimatorSet();
+animatorSet.playTogether(                  // 同时播放
+        ObjectAnimator.ofFloat(view, "scaleX", 1f, 1.5f),
+        ObjectAnimator.ofFloat(view, "scaleY", 1f, 1.5f)
+);
+animatorSet.playSequentially(              // 顺序播放
+        ObjectAnimator.ofFloat(view, "rotation", 0f, 360f),
+        ObjectAnimator.ofFloat(view, "alpha", 1f, 0f)
+);
+animatorSet.setDuration(1000);
+animatorSet.start();
+```
+
+@tab Kotlin
 
 ```kotlin
 AnimatorSet().apply {
@@ -80,6 +141,8 @@ AnimatorSet().apply {
     start()
 }
 ```
+
+:::
 
 ## 3. 插值器与估值器
 
@@ -97,9 +160,21 @@ OvershootInterpolator  ：超出目标再回弹
 BounceInterpolator     ：落地弹跳
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+animator.setInterpolator(new OvershootInterpolator(2f));
+```
+
+@tab Kotlin
+
 ```kotlin
 animator.interpolator = OvershootInterpolator(2f)
 ```
+
+:::
 
 ### 3.2 估值器（Evaluator）：把进度换算成属性值
 
@@ -112,6 +187,33 @@ FloatEvaluator    ：float 值
 ArgbEvaluator     ：颜色渐变
 自定义：实现 evaluate(fraction, startValue, endValue)
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义估值器：百分比计算（圆形进度条）
+public class PercentEvaluator implements TypeEvaluator<Float> {
+    @Override
+    public Float evaluate(float fraction, Float startValue, Float endValue) {
+        return startValue + (endValue - startValue) * fraction;
+    }
+}
+
+// 颜色渐变
+ValueAnimator colorAnimator = ValueAnimator.ofObject(
+        new ArgbEvaluator(),
+        Color.RED, Color.BLUE
+);
+colorAnimator.setDuration(2000);
+colorAnimator.addUpdateListener(animation -> {
+    view.setBackgroundColor((Integer) animation.getAnimatedValue());
+});
+colorAnimator.start();
+```
+
+@tab Kotlin
 
 ```kotlin
 // 自定义估值器：百分比计算（圆形进度条）
@@ -134,6 +236,8 @@ val colorAnimator = ValueAnimator.ofObject(
 }
 ```
 
+:::
+
 ### 3.3 计算流程
 
 ```text
@@ -143,6 +247,29 @@ val colorAnimator = ValueAnimator.ofObject(
 ```
 
 ## 4. PropertyValuesHolder 与 ViewPropertyAnimator
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① PropertyValuesHolder：一个动画多个属性
+PropertyValuesHolder pvhX = PropertyValuesHolder.ofFloat("translationX", 0f, 300f);
+PropertyValuesHolder pvhY = PropertyValuesHolder.ofFloat("translationY", 0f, 300f);
+ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(view, pvhX, pvhY);
+animator.setDuration(1000);
+animator.start();
+
+// ② ViewPropertyAnimator：链式 API（性能最优，内部合并）
+view.animate()
+    .translationX(300f)
+    .alpha(0.5f)
+    .scaleX(1.5f)
+    .setDuration(1000)
+    .start();
+```
+
+@tab Kotlin
 
 ```kotlin
 // ① PropertyValuesHolder：一个动画多个属性
@@ -162,7 +289,25 @@ view.animate()
     .start()
 ```
 
+:::
+
 ## 5. 动画监听
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+animator.addListener(new AnimatorListenerAdapter() {
+    @Override
+    public void onAnimationEnd(Animator animation) {
+        // 动画结束
+    }
+});
+// Kotlin 中可用扩展函数 doOnEnd 简化：animator.doOnEnd { /* 结束回调 */ }
+```
+
+@tab Kotlin
 
 ```kotlin
 animator.addListener(object : AnimatorListenerAdapter() {
@@ -174,6 +319,8 @@ animator.addListener(object : AnimatorListenerAdapter() {
 // 或 Kotlin 扩展
 animator.doOnEnd { /* 结束回调 */ }
 ```
+
+:::
 
 ## 6. 动画与性能
 

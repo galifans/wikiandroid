@@ -23,6 +23,24 @@ description: ThreadPoolExecutor 七大参数、四种拒绝策略、Executors �
 
 ## 2. ThreadPoolExecutor 七大参数
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+new ThreadPoolExecutor(
+    2,                          // ① 核心线程数
+    8,                          // ② 最大线程数
+    60L,                        // ③ 非核心线程空闲存活时间
+    TimeUnit.SECONDS,           // ④ 时间单位
+    new LinkedBlockingQueue<Runnable>(100),  // ⑤ 任务队列
+    threadFactory,              // ⑥ 线程工厂（命名、优先级）
+    new AbortPolicy()           // ⑦ 拒绝策略
+)
+```
+
+@tab Kotlin
+
 ```kotlin
 ThreadPoolExecutor(
     corePoolSize = 2,          // ① 核心线程数
@@ -34,6 +52,8 @@ ThreadPoolExecutor(
     AbortPolicy()              // ⑦ 拒绝策略
 )
 ```
+
+:::
 
 ### 2.1 任务执行流程
 
@@ -61,6 +81,22 @@ ThreadPoolExecutor(
 | `DiscardPolicy` | 静默丢弃 |
 | `DiscardOldestPolicy` | 丢弃队列中最老的任务 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 推荐：CallerRunsPolicy —— 任务不丢失，且天然限流
+new ThreadPoolExecutor(
+    2, 8, 60, TimeUnit.SECONDS,
+    new LinkedBlockingQueue<>(100),
+    Executors.defaultThreadFactory(),
+    new ThreadPoolExecutor.CallerRunsPolicy()
+)
+```
+
+@tab Kotlin
+
 ```kotlin
 // 推荐：CallerRunsPolicy —— 任务不丢失，且天然限流
 ThreadPoolExecutor(
@@ -71,7 +107,32 @@ ThreadPoolExecutor(
 )
 ```
 
+:::
+
 ## 3. Executors 工厂方法
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 固定线程数
+ExecutorService fixed = Executors.newFixedThreadPool(4);
+// 内部：core = max = 4，LinkedBlockingQueue（无界）
+
+// 缓存线程池（弹性）
+ExecutorService cached = Executors.newCachedThreadPool();
+// 内部：core = 0，max = MAX_VALUE，SynchronousQueue（来一个建一个）
+
+// 单线程
+ExecutorService single = Executors.newSingleThreadExecutor();
+
+// 定时任务
+ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(2);
+scheduled.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 固定线程数
@@ -90,12 +151,28 @@ val scheduled = Executors.newScheduledThreadPool(2)
 scheduled.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS)
 ```
 
+:::
+
 >  **Android 开发警告**：`Executors` 的工厂方法有隐患（无界队列、线程数无上限）。
 > 推荐**手动配置 ThreadPoolExecutor**，或使用三方库（协程 Dispatchers）。
 
 ## 4. Android 中的线程池
 
 ### 4.1 协程调度器
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 协程场景：直接用调度器，不手动建池（Java 侧等价写法）
+ExecutorService ioPool = Executors.newFixedThreadPool(64);   // 对应 Dispatchers.IO
+ExecutorService cpuPool = Executors.newFixedThreadPool(
+    Runtime.getRuntime().availableProcessors());              // 对应 Dispatchers.Default
+Handler mainHandler = new Handler(Looper.getMainLooper());   // 对应 Dispatchers.Main
+```
+
+@tab Kotlin
 
 ```kotlin
 // 协程场景：直接用调度器，不手动建池
@@ -105,7 +182,29 @@ Dispatchers.Default     // CPU 密集（核心数线程）
 Dispatchers.Main        // 主线程
 ```
 
+:::
+
 ### 4.2 自定义调度器
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 限制并发（如数据库写）—— Java 侧直接用线程池
+private final ExecutorService dbExecutor = Executors.newFixedThreadPool(4);
+
+// 使用
+dbExecutor.execute(() -> db.userDao().insertAll(data));
+
+// 记得关闭
+@Override
+public void onCleared() {
+    dbExecutor.shutdown();
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 限制并发（如数据库写）
@@ -121,7 +220,13 @@ override fun onCleared() {
 }
 ```
 
+:::
+
 ## 5. 源码核心
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // execute() 流程（ThreadPoolExecutor 源码简化）
@@ -145,6 +250,33 @@ public void execute(Runnable command) {
 // runWorker()：while (task != null || (task = getTask()) != null)
 // getTask()：从队列 take()/poll(keepAliveTime) → 决定非核心线程回收
 ```
+
+@tab Kotlin
+
+```kotlin
+// execute() 流程（ThreadPoolExecutor 源码简化）
+fun execute(command: Runnable) {
+    val c = ctl.get()
+    // ① 核心线程未满 → addWorker(core)
+    if (workerCountOf(c) < corePoolSize) {
+        if (addWorker(command, true)) return
+    }
+    // ② 队列未满 → 入队
+    if (isRunning(c) && workQueue.offer(command)) {
+        // 双重检查：防止入队后线程被回收
+    }
+    // ③ 非核心线程未满 → addWorker(非core)
+    else if (!addWorker(command, false)) {
+        reject(command)   // ④ 拒绝
+    }
+}
+
+// Worker 循环取任务
+// runWorker()：while (task != null || (task = getTask()) != null)
+// getTask()：从队列 take()/poll(keepAliveTime) → 决定非核心线程回收
+```
+
+:::
 
 **核心机制**：
 

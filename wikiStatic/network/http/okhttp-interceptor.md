@@ -27,6 +27,24 @@ Interceptor1 ──→ Interceptor2 ──→ Interceptor3 ──→ 网络
 
 ### 1.2 OkHttp 的实现
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 核心接口
+public interface Interceptor {
+    Response intercept(Chain chain);
+}
+
+public interface Chain {
+    Request request();
+    Response proceed(Request request);   // 传给下一个拦截器
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 核心接口
 interface Interceptor {
@@ -38,6 +56,37 @@ interface Chain {
     fun proceed(request: Request): Response   // 传给下一个拦截器
 }
 ```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 责任链实现（简化）
+class RealInterceptorChain implements Chain {
+    private final List<Interceptor> interceptors;
+    private final int index;
+    private final Request request;
+
+    public RealInterceptorChain(List<Interceptor> interceptors, int index, Request request) {
+        this.interceptors = interceptors;
+        this.index = index;
+        this.request = request;
+    }
+
+    @Override
+    public Response proceed(Request request) {
+        // 递归调用下一个拦截器
+        RealInterceptorChain next = new RealInterceptorChain(interceptors, index + 1, request);
+        Interceptor interceptor = interceptors.get(index);
+        return interceptor.intercept(next);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 责任链实现（简化）
@@ -56,10 +105,29 @@ class RealInterceptorChain(
 }
 ```
 
+:::
+
 > 每个拦截器 `intercept` 中调用 `chain.proceed()` 就进入下一个；不调用则
 > 中断链（可用于短路，如命中缓存直接返回）。
 
 ## 2. 内置拦截器链
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// OkHttpClient 构建的默认链（顺序固定）
+// 1. 用户自定义 Application Interceptors
+// 2. RetryAndFollowUpInterceptor   重试 + 重定向
+// 3. BridgeInterceptor             桥接（补全请求头）
+// 4. CacheInterceptor              缓存
+// 5. ConnectInterceptor            连接
+// 6. 用户自定义 Network Interceptors
+// 7. CallServerInterceptor         网络读写
+```
+
+@tab Kotlin
 
 ```kotlin
 // OkHttpClient 构建的默认链（顺序固定）
@@ -71,6 +139,8 @@ class RealInterceptorChain(
 // 6. 用户自定义 Network Interceptors
 // 7. CallServerInterceptor         网络读写
 ```
+
+:::
 
 ### 2.1 RetryAndFollowUpInterceptor
 
@@ -92,11 +162,25 @@ class RealInterceptorChain(
 
 ### 2.3 CacheInterceptor
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 开启缓存
+Cache cache = new Cache(cacheDir, 10 * 1024 * 1024);  // 10MB
+OkHttpClient client = new OkHttpClient.Builder().cache(cache).build();
+```
+
+@tab Kotlin
+
 ```kotlin
 // 开启缓存
 val cache = Cache(cacheDir, maxSize = 10 * 1024 * 1024)  // 10MB
 val client = OkHttpClient.Builder().cache(cache).build()
 ```
+
+:::
 
 ```text
 缓存策略：
@@ -105,6 +189,26 @@ val client = OkHttpClient.Builder().cache(cache).build()
   3. 响应带 Last-Modified → If-Modified-Since
   4. 未过期：直接返回缓存（磁盘缓存）
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 强制刷新（跳过缓存）
+Request request = new Request.Builder()
+    .url(url)
+    .header("Cache-Control", "no-cache")   // 每次都走网络
+    .build();
+
+// 离线可用
+Request request = new Request.Builder()
+    .url(url)
+    .header("Cache-Control", "only-if-cached")
+    .build();
+```
+
+@tab Kotlin
 
 ```kotlin
 // 强制刷新（跳过缓存）
@@ -119,6 +223,8 @@ val request = Request.Builder()
     .header("Cache-Control", "only-if-cached")
     .build()
 ```
+
+:::
 
 ### 2.4 ConnectInterceptor
 
@@ -142,6 +248,36 @@ val request = Request.Builder()
 
 ### 3.1 统一鉴权
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+class AuthInterceptor implements Interceptor {
+    private final Supplier<String> tokenProvider;
+
+    public AuthInterceptor(Supplier<String> tokenProvider) {
+        this.tokenProvider = tokenProvider;
+    }
+
+    @Override
+    public Response intercept(Interceptor.Chain chain) {
+        String token = tokenProvider.get();
+        Request request;
+        if (token != null) {
+            request = chain.request().newBuilder()
+                .header("Authorization", "Bearer " + token)
+                .build();
+        } else {
+            request = chain.request();
+        }
+        return chain.proceed(request);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class AuthInterceptor(private val tokenProvider: () -> String?) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -158,7 +294,32 @@ class AuthInterceptor(private val tokenProvider: () -> String?) : Interceptor {
 }
 ```
 
+:::
+
 ### 3.2 日志打印
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class LoggingInterceptor implements Interceptor {
+    @Override
+    public Response intercept(Interceptor.Chain chain) {
+        Request request = chain.request();
+        Log.d("OkHttp", "--> " + request.method() + " " + request.url());
+
+        long t1 = System.nanoTime();
+        Response response = chain.proceed(request);
+        long ms = (System.nanoTime() - t1) / 1_000_000;
+
+        Log.d("OkHttp", "<-- " + response.code() + " 耗时 " + ms + "ms");
+        return response;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class LoggingInterceptor : Interceptor {
@@ -176,7 +337,48 @@ class LoggingInterceptor : Interceptor {
 }
 ```
 
+:::
+
 ### 3.3 统一错误处理 / 重试
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class RetryInterceptor implements Interceptor {
+    private final int maxRetries;
+
+    public RetryInterceptor() {
+        this(3);
+    }
+
+    public RetryInterceptor(int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    @Override
+    public Response intercept(Interceptor.Chain chain) {
+        int attempt = 0;
+        while (true) {
+            try {
+                return chain.proceed(chain.request());
+            } catch (IOException e) {
+                attempt++;
+                if (attempt >= maxRetries) throw e;
+                try {
+                    Thread.sleep(1000L * attempt);  // 退避
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(ie);
+                }
+            }
+        }
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class RetryInterceptor(private val maxRetries: Int = 3) : Interceptor {
@@ -195,7 +397,32 @@ class RetryInterceptor(private val maxRetries: Int = 3) : Interceptor {
 }
 ```
 
+:::
+
 ### 3.4 响应模拟（测试）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class MockInterceptor implements Interceptor {
+    @Override
+    public Response intercept(Interceptor.Chain chain) {
+        ResponseBody responseBody = "{\"code\":0,\"data\":\"mock\"}"
+            .toResponseBody("application/json".toMediaType());
+        return new Response.Builder()
+            .request(chain.request())
+            .protocol(Protocol.HTTP_1_1)
+            .code(200)
+            .message("OK")
+            .body(responseBody)
+            .build();
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MockInterceptor : Interceptor {
@@ -213,6 +440,8 @@ class MockInterceptor : Interceptor {
     }
 }
 ```
+
+:::
 
 ## 4. 高频面试题
 

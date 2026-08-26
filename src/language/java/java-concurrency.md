@@ -11,6 +11,10 @@ description: 线程创建方式、线程生命周期、wait/notify、ThreadLocal
 
 ## 1. 线程的创建方式
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ① 继承 Thread（不推荐，Java 单继承限制）
 class MyThread extends Thread {
@@ -32,6 +36,31 @@ ExecutorService pool = Executors.newFixedThreadPool(4);
 pool.execute(() -> { });
 ```
 
+@tab Kotlin
+
+```kotlin
+// ① 继承 Thread（不推荐，Java 单继承限制）
+class MyThread : Thread() {
+    override fun run() { }
+}
+
+// ② 实现 Runnable（推荐）
+val task = Runnable { println("run") }
+Thread(task).start()
+
+// ③ 实现 Callable（有返回值）
+val callable = Callable { 42 }
+val future = FutureTask<Int>(callable)
+Thread(future).start()
+val result = future.get()    // 阻塞获取结果
+
+// ④ 线程池（最佳实践）
+val pool = Executors.newFixedThreadPool(4)
+pool.execute { }
+```
+
+:::
+
 ## 2. 线程生命周期
 
 ```text
@@ -51,6 +80,10 @@ NEW（新建）→ RUNNABLE（就绪/运行）→ BLOCKED（阻塞，等锁）
 
 **wait/notify 使用规范**：
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 必须在同步代码块中调用
 synchronized (lock) {
@@ -61,6 +94,21 @@ synchronized (lock) {
     lock.notifyAll();
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// 必须在同步代码块中调用
+synchronized(lock) {
+    while (condition) {      // 用 while 而非 if（防止虚假唤醒）
+        lock.wait()
+    }
+    // 业务逻辑
+    lock.notifyAll()
+}
+```
+
+:::
 
 ## 3. 线程安全三要素
 
@@ -82,6 +130,10 @@ synchronized (lock) {
 
 ## 4. ThreadLocal
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 每个线程独立的变量副本
 ThreadLocal<Integer> counter = new ThreadLocal<>();
@@ -93,6 +145,22 @@ counter.remove();       // 移除（防泄漏！）
 // 原理：每个 Thread 有 ThreadLocalMap
 // Thread → ThreadLocalMap（key: ThreadLocal, value: 副本）
 ```
+
+@tab Kotlin
+
+```kotlin
+// 每个线程独立的变量副本
+val counter = ThreadLocal<Int>()
+
+counter.set(100)        // 存（当前线程）
+counter.get()           // 取
+counter.remove()        // 移除（防泄漏！）
+
+// 原理：每个 Thread 有 ThreadLocalMap
+// Thread → ThreadLocalMap（key: ThreadLocal, value: 副本）
+```
+
+:::
 
 **内存泄漏**：ThreadLocalMap 的 key 是弱引用，value 是强引用。线程长期存活
 （线程池）时 value 无法回收 → **用完必须 remove()**。
@@ -111,6 +179,10 @@ ReentrantLock / Semaphore / CountDownLatch / ReentrantReadWriteLock 都基于它
 ③ 模板方法：acquire / release（子类实现 tryAcquire / tryRelease）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 自定义一个简单的排他锁
 class SimpleLock extends AbstractQueuedSynchronizer {
@@ -126,6 +198,23 @@ class SimpleLock extends AbstractQueuedSynchronizer {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 自定义一个简单的排他锁
+class SimpleLock : AbstractQueuedSynchronizer() {
+    override fun tryAcquire(arg: Int): Boolean {
+        return compareAndSetState(0, 1)   // CAS 获取
+    }
+    override fun tryRelease(arg: Int): Boolean {
+        setState(0)
+        return true
+    }
+}
+```
+
+:::
+
 ### 5.2 常用并发工具对比
 
 | 工具 | 作用 | 适用场景 |
@@ -137,6 +226,10 @@ class SimpleLock extends AbstractQueuedSynchronizer {
 | Phaser | 分阶段屏障 | 复杂分阶段任务 |
 
 ## 6. 线程池
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // 七大参数
@@ -151,6 +244,24 @@ new ThreadPoolExecutor(
 
 // 执行流程：核心线程 → 队列 → 非核心线程 → 拒绝策略
 ```
+
+@tab Kotlin
+
+```kotlin
+// 七大参数
+ThreadPoolExecutor(
+    2,                  // corePoolSize 核心线程
+    5,                  // maximumPoolSize 最大线程
+    60L, TimeUnit.SECONDS,   // 空闲存活时间
+    LinkedBlockingQueue(100),  // 任务队列
+    Executors.defaultThreadFactory(),
+    ThreadPoolExecutor.AbortPolicy()   // 拒绝策略
+)
+
+// 执行流程：核心线程 → 队列 → 非核心线程 → 拒绝策略
+```
+
+:::
 
 ## 7. 高频面试题
 

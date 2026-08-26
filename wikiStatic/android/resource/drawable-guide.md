@@ -204,6 +204,49 @@ flowchart LR
 
 ## 六、自定义 Drawable
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义 Drawable：渐变圆环进度
+class RingDrawable extends Drawable {
+
+    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final float progress;
+    private final int ringColor;
+
+    RingDrawable(float progress, int ringColor) {
+        this.progress = progress;
+        this.ringColor = ringColor;
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(8.dp());
+        paint.setStrokeCap(Paint.Cap.ROUND);
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        paint.setColor(ringColor);
+        RectF rect = new RectF(getBounds());
+        rect.inset(4f, 4f);
+        // 背景环
+        canvas.drawArc(rect, 0f, 360f, false, paint);
+        // 进度环
+        paint.setColor(Color.WHITE);
+        canvas.drawArc(rect, -90f, 360f * progress, false, paint);
+    }
+
+    @Override
+    public void setAlpha(int alpha) { paint.setAlpha(alpha); }
+    @Override
+    public void setColorFilter(ColorFilter cf) { paint.setColorFilter(cf); }
+    @Override
+    public int getOpacity() { return PixelFormat.TRANSLUCENT; }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 自定义 Drawable：渐变圆环进度
 class RingDrawable(
@@ -232,6 +275,8 @@ class RingDrawable(
     override fun getOpacity(): Int = PixelFormat.TRANSLUCENT
 }
 ```
+
+:::
 
 ## 七、高频面试题
 

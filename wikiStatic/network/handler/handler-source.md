@@ -30,6 +30,10 @@ flowchart LR
 
 ## 二、Looper 源码核心
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 每个线程只能有一个 Looper（ThreadLocal 实现）
 static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<>();
@@ -52,7 +56,37 @@ public static void loop() {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 每个线程只能有一个 Looper（ThreadLocal 实现）
+private val sThreadLocal = ThreadLocal<Looper>()
+
+fun prepare() {
+    if (sThreadLocal.get() != null) {
+        throw RuntimeException("Only one Looper may be created per thread")
+    }
+    sThreadLocal.set(Looper(true))
+}
+
+fun loop() {
+    val me = Looper.myLooper()
+    while (true) {                    // 死循环
+        val msg = queue.next()        // 没有消息时阻塞（epoll）
+        if (msg == null) return
+        msg.target.dispatchMessage(msg) // 分发消息
+        msg.recycleUnchecked()
+    }
+}
+```
+
+:::
+
 ## 三、MessageQueue 的阻塞机制
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 Message next() {
@@ -65,6 +99,21 @@ Message next() {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+fun next(): Message? {
+    while (true) {
+        // 1. 有消息：计算等待时间（按消息时间排序）
+        // 2. 无消息：nativePollOnce(ptr, -1) 进入阻塞
+        // 3. 底层用 epoll 机制，空闲时休眠不耗 CPU
+        nativePollOnce(mPtr, nextPollTimeoutMillis)
+    }
+}
+```
+
+:::
+
 ::: tip 面试点睛
 - `next()` 阻塞时线程挂起，**不消耗 CPU**
 - 主线程死循环由系统设计保证（有消息就处理，没消息就休眠）
@@ -72,6 +121,10 @@ Message next() {
 :::
 
 ## 四、Handler 发送与处理
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // 发送消息
@@ -93,6 +146,30 @@ public void dispatchMessage(Message msg) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 发送消息
+fun sendMessageAtTime(msg: Message, uptimeMillis: Long): Boolean {
+    val queue = mQueue
+    return enqueueMessage(queue, msg, uptimeMillis)
+}
+
+// 处理消息
+fun dispatchMessage(msg: Message) {
+    if (msg.callback != null) {   // 1. Runnable 优先级最高
+        handleCallback(msg)
+    } else {
+        if (mCallback != null) {  // 2. Handler.Callback 其次
+            if (mCallback.handleMessage(msg)) return
+        }
+        handleMessage(msg)        // 3. 子类重写的 handleMessage 最后
+    }
+}
+```
+
+:::
+
 ## 五、ThreadLocal 原理
 
 - 每个线程维护自己的 `ThreadLocalMap`
@@ -101,12 +178,27 @@ public void dispatchMessage(Message msg) {
 
 ## 六、内存泄漏问题
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 错误写法：非静态内部类持有外部 Activity 引用
 Handler handler = new Handler() {
     @Override public void handleMessage(Message msg) { ... }
 };
 ```
+
+@tab Kotlin
+
+```kotlin
+// 错误写法：非静态内部类持有外部 Activity 引用
+val handler = object : Handler() {
+    override fun handleMessage(msg: Message) { ... }
+}
+```
+
+:::
 
 **解决**：使用静态内部类 + `WeakReference`，或在 `onDestroy` 中 `removeCallbacksAndMessages(null)`。
 

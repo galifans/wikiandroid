@@ -21,7 +21,11 @@ Android 接口定义语言，用于跨进程通信的接口定义
 
 ## 2. AIDL 文件语法
 
-```kotlin
+::: code-tabs
+
+@tab:active Java
+
+```java
 // IBookManager.aidl
 package com.example.aidl;
 
@@ -45,7 +49,39 @@ interface IBookManager {
 }
 ```
 
+@tab Kotlin
+
 ```kotlin
+// IBookManager.aidl（AIDL 声明与语言无关，客户端/服务端共用同一文件）
+package com.example.aidl;
+
+// 自定义类型需显式 import
+import com.example.aidl.Book;
+
+interface IBookManager {
+
+    // 基本类型直接使用
+    List<Book> getBookList();
+
+    // 定向 tag：in / out / inout
+    // in   ：客户端 → 服务端（默认，数据单向传入）
+    // out  ：服务端 → 客户端（服务端修改后回传）
+    // inout：双向
+    void addBook(in Book book);
+    void updateBook(inout Book book);
+
+    // oneway：异步调用（不阻塞客户端，单向）
+    oneway void notifyChanged();
+}
+```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
 // 自定义 Parcelable 类型 Book.aidl
 package com.example.aidl;
 parcelable Book;
@@ -53,7 +89,62 @@ parcelable Book;
 // Book.java 实现 Parcelable 接口
 ```
 
+@tab Kotlin
+
+```kotlin
+// 自定义 Parcelable 类型 Book.aidl（AIDL 声明与语言无关，客户端/服务端共用同一文件）
+package com.example.aidl;
+parcelable Book;
+
+// Book.java 实现 Parcelable 接口
+```
+
+:::
+
 ## 3. 服务端实现
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class BookManagerService extends Service {
+
+    private final List<Book> bookList = new ArrayList<>();
+
+    // 内部类继承 Stub，实现接口方法
+    private final IBinder binder = new IBookManager.Stub() {
+
+        @Override
+        public List<Book> getBookList() {
+            return bookList;
+        }
+
+        @Override
+        public void addBook(Book book) {
+            bookList.add(book);
+        }
+
+        @Override
+        public void updateBook(Book book) {
+            // inout 参数：修改会回传给客户端
+            book.price = 999;
+        }
+
+        @Override
+        public void notifyChanged() {
+            // oneway：异步执行
+        }
+    };
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class BookManagerService : Service() {
@@ -85,7 +176,54 @@ class BookManagerService : Service() {
 }
 ```
 
+:::
+
 ## 4. 客户端使用
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MainActivity extends AppCompatActivity {
+
+    private IBookManager bookManager = null;
+
+    private final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            // 通过 asInterface 获取代理对象
+            bookManager = IBookManager.Stub.asInterface(service);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            bookManager = null;
+        }
+    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Intent intent = new Intent(this, BookManagerService.class);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    public void addBook() {
+        if (bookManager != null) {
+            bookManager.addBook(new Book("Android 进阶", 99));
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(connection);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
@@ -120,9 +258,15 @@ class MainActivity : AppCompatActivity() {
 }
 ```
 
+:::
+
 ## 5. Stub 与 Proxy 原理
 
-```kotlin
+::: code-tabs
+
+@tab:active Java
+
+```java
 // AIDL 编译器生成的代码结构
 public interface IBookManager extends IInterface {
 
@@ -179,6 +323,67 @@ public interface IBookManager extends IInterface {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// AIDL 编译器生成的代码结构
+interface IBookManager : IInterface {
+
+    // Stub：服务端基类（Binder 实体）
+    abstract class Stub : Binder(), IBookManager {
+
+        init {
+            attachInterface(this, DESCRIPTOR)
+        }
+
+        // 客户端获取代理：在本进程直接返回 this，跨进程返回 Proxy
+        companion object {
+            @JvmStatic
+            fun asInterface(obj: IBinder?): IBookManager? {
+                if (obj == null) return null
+                val iin = obj.queryLocalInterface(DESCRIPTOR)
+                if (iin != null && iin is IBookManager) {
+                    return iin   // 同进程：直接返回
+                }
+                return Proxy(obj)  // 跨进程：返回代理
+            }
+        }
+
+        // 服务端：Binder.onTransact 分发请求
+        override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
+            if (code == TRANSACTION_addBook) {
+                data.enforceInterface(DESCRIPTOR)
+                val book = Book.CREATOR.createFromParcel(data)
+                addBook(book)
+                reply!!.writeNoException()
+                return true
+            }
+            return super.onTransact(code, data, reply, flags)
+        }
+    }
+
+    // Proxy：客户端代理（包装 Binder 驱动调用）
+    private class Proxy(private val mRemote: IBinder) : IBookManager {
+
+        override fun addBook(book: Book) {
+            val data = Parcel.obtain()
+            val reply = Parcel.obtain()
+            try {
+                data.writeInterfaceToken(DESCRIPTOR)
+                book.writeToParcel(data, 0)      // 序列化参数
+                mRemote.transact(TRANSACTION_addBook, data, reply, 0)  // 跨进程调用
+                reply.readException()
+            } finally {
+                data.recycle()
+                reply.recycle()
+            }
+        }
+    }
+}
+```
+
+:::
+
 **核心流程**：
 
 ```text
@@ -200,6 +405,33 @@ public interface IBookManager extends IInterface {
 ⑤ 跨进程回调：用 RemoteCallbackList 管理（自动处理死亡）
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 服务端跨进程回调
+private final RemoteCallbackList<IOnNewBookArrivedListener> callbacks = new RemoteCallbackList<>();
+
+void register(IOnNewBookArrivedListener listener) {
+    callbacks.register(listener);
+}
+
+// 通知所有客户端（Binder 线程池中执行）
+void notifyNewBook(Book book) {
+    int count = callbacks.beginBroadcast();
+    for (int i = 0; i < count; i++) {
+        IOnNewBookArrivedListener listener = callbacks.getBroadcastItem(i);
+        if (listener != null) {
+            listener.onNewBookArrived(book);
+        }
+    }
+    callbacks.finishBroadcast();
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 服务端跨进程回调
 private val callbacks = RemoteCallbackList<IOnNewBookArrivedListener>()
@@ -217,6 +449,8 @@ fun notifyNewBook(book: Book) {
     callbacks.finishBroadcast()
 }
 ```
+
+:::
 
 ## 7. 高频面试题
 

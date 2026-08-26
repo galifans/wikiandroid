@@ -80,6 +80,28 @@ adb logcat -b events | grep -i anr
 
 ### 3. 主动监控：Choreographer 帧回调
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
+    private long lastFrameTimeNanos = 0L;
+    @Override
+    public void doFrame(long frameTimeNanos) {
+        long diff = (frameTimeNanos - lastFrameTimeNanos) / 1_000_000;
+        if (lastFrameTimeNanos != 0L && diff > 1000) {
+            // 主线程卡顿超过 1s，记录堆栈（上线前可在 debug 环境弹出提示）
+            Log.w("JankMonitor", "Frame blocked " + diff + " ms");
+        }
+        lastFrameTimeNanos = frameTimeNanos;
+        Choreographer.getInstance().postFrameCallback(this);
+    }
+});
+```
+
+@tab Kotlin
+
 ```kotlin
 Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
     var lastFrameTimeNanos = 0L
@@ -95,7 +117,28 @@ Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallba
 })
 ```
 
+:::
+
 ### 4. StrictMode 开发期拦截
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+if (BuildConfig.DEBUG) {
+    StrictMode.setThreadPolicy(
+        new StrictMode.ThreadPolicy.Builder()
+                .detectDiskReads()
+                .detectDiskWrites()
+                .detectNetwork()   // 主线程网络访问直接警告
+                .penaltyLog()
+                .build()
+    );
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 if (BuildConfig.DEBUG) {
@@ -109,6 +152,8 @@ if (BuildConfig.DEBUG) {
     )
 }
 ```
+
+:::
 
 ### 5. 线上监控
 
@@ -129,6 +174,29 @@ if (BuildConfig.DEBUG) {
 | 广播治理 | `onReceive` 只做收尾，耗时逻辑移入 `goAsync()` + 线程池 |
 | Binder 优化 | 高频跨进程读写批量合并，避免逐条同步调用 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 广播耗时处理：goAsync + 线程池
+public class MyReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        final PendingResult pendingResult = goAsync(); // 告知系统稍后结束
+        new Thread(() -> {
+            try {
+                // 耗时逻辑（子线程）
+            } finally {
+                pendingResult.finish(); // 必须调用
+            }
+        }).start();
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 广播耗时处理：goAsync + 线程池
 class MyReceiver : BroadcastReceiver() {
@@ -144,6 +212,8 @@ class MyReceiver : BroadcastReceiver() {
     }
 }
 ```
+
+:::
 
 ## 六、高频面试题
 

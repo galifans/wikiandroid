@@ -15,6 +15,20 @@ description: 显式/隐式 Intent 与 IntentFilter 的 action/category/data 三�
 | 显式 Intent | 指定 `ComponentName`（包名 + 类名） | 确定性高、无匹配开销 | 应用内跳转、服务绑定 |
 | 隐式 Intent | 只声明 `action` / `category` / `data` | 由系统匹配解析，可跨应用 | 系统调用（拍照、拨号）、跨应用跳转 |
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 显式：直接指定目标组件
+Intent intent = new Intent(this, MainActivity.class);
+
+// 隐式：只声明动作与数据，由系统解析
+Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com"));
+```
+
+@tab Kotlin
+
 ```kotlin
 // 显式：直接指定目标组件
 val intent = Intent(this, MainActivity::class.java)
@@ -22,6 +36,8 @@ val intent = Intent(this, MainActivity::class.java)
 // 隐式：只声明动作与数据，由系统解析
 val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com"))
 ```
+
+:::
 
 ::: tip
 `startActivity` 解析隐式 Intent 时，若匹配到**多个**目标，会弹出"选择器"（Resolver）让用户选择；若匹配不到任何目标，则抛出 `ActivityNotFoundException`。
@@ -94,6 +110,21 @@ sequenceDiagram
     end
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 手动解析：判断隐式 Intent 是否有目标可启动
+ResolveInfo resolveInfo = getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+if (resolveInfo == null) {
+    // 无目标：给出引导或降级处理
+    Toast.makeText(this, "未找到可处理的应用", Toast.LENGTH_SHORT).show();
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // 手动解析：判断隐式 Intent 是否有目标可启动
 val resolveInfo = packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
@@ -102,6 +133,8 @@ if (resolveInfo == null) {
     Toast.makeText(this, "未找到可处理的应用", Toast.LENGTH_SHORT).show()
 }
 ```
+
+:::
 
 ## 四、实际应用：系统常见 Intent
 

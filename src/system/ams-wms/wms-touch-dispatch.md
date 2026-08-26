@@ -39,6 +39,10 @@ flowchart LR
     D --> E[队列化<br>putQueue]
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // InputReader 循环(简化)
 // 1. 从 /dev/input/eventX 读原始事件(内核 evdev)
@@ -46,6 +50,18 @@ flowchart LR
 // 3. 放入队列,通知 InputDispatcher 处理
 // 4. 触摸事件 → MotionEvent;按键 → KeyEvent
 ```
+
+@tab Kotlin
+
+```kotlin
+// InputReader 循环(简化)
+// 1. 从 /dev/input/eventX 读原始事件(内核 evdev)
+// 2. 设备 mapper(触摸屏/按键/鼠标)加工为输入事件
+// 3. 放入队列,通知 InputDispatcher 处理
+// 4. 触摸事件 → MotionEvent;按键 → KeyEvent
+```
+
+:::
 
 ## 三、命中测试:找目标窗口
 
@@ -70,6 +86,10 @@ flowchart TD
 | 可触摸 | FLAG_NOT_TOUCHABLE 除外 |
 | 层级 | 最上层(相同区域取 Z-order 最高) |
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // WMS.findWindowForPoint:命中测试核心
 WindowState findWindowForPoint(int x, int y) {
@@ -80,6 +100,21 @@ WindowState findWindowForPoint(int x, int y) {
     // 5. 命中 → 返回窗口并记录 touchableRegion
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// WMS.findWindowForPoint:命中测试核心
+fun findWindowForPoint(x: Int, y: Int): WindowState? {
+    // 1. 遍历窗口列表(按 Z-order 从高到低)
+    // 2. 判断点是否在窗口 frame 内
+    // 3. 处理 FLAG_NOT_TOUCHABLE、FLAG_NOT_TOUCH_MODAL
+    // 4. 子窗口链:Dialog 等附属窗口优先
+    // 5. 命中 → 返回窗口并记录 touchableRegion
+}
+```
+
+:::
 
 ### 3.2 触摸目标窗口优先级
 
@@ -117,6 +152,10 @@ sequenceDiagram
 
 ## 五、事件到达应用
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ViewRootImpl 中的 InputEventReceiver
 // 应用进程通过 InputChannel 接收事件
@@ -133,6 +172,26 @@ final class WindowInputEventReceiver extends InputEventReceiver {
 // → View.dispatchTouchEvent(触摸事件)
 // → 进入熟悉的 dispatch/onIntercept/onTouch 三级分发
 ```
+
+@tab Kotlin
+
+```kotlin
+// ViewRootImpl 中的 InputEventReceiver
+// 应用进程通过 InputChannel 接收事件
+internal class WindowInputEventReceiver : InputEventReceiver() {
+    override fun onInputEvent(event: InputEvent) {
+        // 1. 把事件投递到主线程队列
+        enqueueInputEvent(event, ...)
+    }
+}
+
+// 事件分发到 View 层
+// ViewRootImpl.deliverInputEvent → 派发到 DecorView
+// → View.dispatchTouchEvent(触摸事件)
+// → 进入熟悉的 dispatch/onIntercept/onTouch 三级分发
+```
+
+:::
 
 ```mermaid
 flowchart LR

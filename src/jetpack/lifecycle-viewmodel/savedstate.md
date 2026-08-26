@@ -24,6 +24,28 @@ description: SavedStateHandle 原理、与 Bundle 的区别、ViewModel 中保�
 
 ### 1.2 传统方案的不足
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 传统方案：手动保存到 Bundle，代码分散且容易遗漏
+@Override
+protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    outState.putString("query", queryText);
+}
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    queryText = savedInstanceState != null
+            ? savedInstanceState.getString("query", "") : "";
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 // ✗ 传统方案：手动保存到 Bundle，代码分散且容易遗漏
 override fun onSaveInstanceState(outState: Bundle) {
@@ -37,12 +59,53 @@ override fun onCreate(savedInstanceState: Bundle?) {
 }
 ```
 
+:::
+
 问题：与 UI 层耦合、key 易写错、代码分散。
 
 ## 2. SavedStateHandle 是什么
 
 `SavedStateHandle` 是 ViewModel 的**状态保存容器**，配合 `SavedStateViewModelFactory`
 自动在进程死亡后恢复数据。
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class SearchViewModel extends ViewModel {
+    private static final String KEY_QUERY = "query";
+    private static final String KEY_RESULTS = "results";
+
+    private final SavedStateHandle savedStateHandle;   // 构造注入
+
+    public SearchViewModel(SavedStateHandle savedStateHandle) {
+        this.savedStateHandle = savedStateHandle;
+    }
+
+    // 保存：直接写入
+    public String getQuery() {
+        return savedStateHandle.get(KEY_QUERY, "");
+    }
+
+    public void setQuery(String value) {
+        savedStateHandle.set(KEY_QUERY, value);
+    }
+
+    // 或使用状态化 API（推荐）：返回 LiveData/StateFlow
+    public LiveData<List<String>> getResults() {
+        return savedStateHandle.getLiveData(KEY_RESULTS);
+    }
+
+    public void search() {
+        // 对应 Kotlin 的 viewModelScope.launch：Java 中可配合回调 / 线程池执行
+        List<String> data = repo.search(getQuery());
+        savedStateHandle.set(KEY_RESULTS, data);
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class SearchViewModel(
@@ -72,9 +135,27 @@ class SearchViewModel(
 }
 ```
 
+:::
+
 ## 3. 获取 SavedStateHandle 的方式
 
 ### 3.1 构造注入（推荐）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MyViewModel extends ViewModel {
+    private final SavedStateHandle savedStateHandle;
+
+    public MyViewModel(SavedStateHandle savedStateHandle) {
+        this.savedStateHandle = savedStateHandle;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class MyViewModel(
@@ -82,9 +163,29 @@ class MyViewModel(
 ) : ViewModel()
 ```
 
+:::
+
 > 配合 `SavedStateViewModelFactory` 自动注入，无需手动创建。
 
 ### 3.2 Hilt 注入
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+@HiltViewModel
+public class MyViewModel extends ViewModel {
+    private final SavedStateHandle savedStateHandle;
+
+    @Inject
+    public MyViewModel(SavedStateHandle savedStateHandle) {
+        this.savedStateHandle = savedStateHandle;
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 @HiltViewModel
@@ -93,7 +194,26 @@ class MyViewModel @Inject constructor(
 ) : ViewModel()
 ```
 
+:::
+
 ### 3.3 获取 Activity 的 Intent 参数
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class DetailViewModel extends ViewModel {
+    public final String userId;
+
+    public DetailViewModel(SavedStateHandle savedStateHandle) {
+        // 自动读取 Intent extra 中的 "id"
+        this.userId = Objects.requireNonNull(savedStateHandle.get("id"));
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class DetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
@@ -101,6 +221,8 @@ class DetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     val userId: String = checkNotNull(savedStateHandle["id"])
 }
 ```
+
+:::
 
 ## 4. 原理分析
 

@@ -24,6 +24,17 @@ description: mutableStateOf/remember/rememberSaveable、状态提升、ViewModel
 
 ### 2.1 mutableStateOf：可观察状态
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 可观察状态对应 View 体系：LiveData / MutableLiveData + Observer
+```
+
+@tab Kotlin
+
 ```kotlin
 // 创建可观察状态
 var count by remember { mutableStateOf(0) }
@@ -35,7 +46,20 @@ Text("Count: $count")
 Button(onClick = { count++ }) { Text("+1") }
 ```
 
+:::
+
 ### 2.2 remember / rememberSaveable
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// remember 对应 View 体系：Activity/ViewModel 字段；rememberSaveable 对应 onSaveInstanceState / SavedStateHandle
+```
+
+@tab Kotlin
 
 ```kotlin
 // remember：重组间保留（进程死亡不保留）
@@ -50,7 +74,20 @@ var user by rememberSaveable(stateSaver = UserSaver) {
 }
 ```
 
+:::
+
 ### 2.3 derivedStateOf：派生状态
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 派生状态对应 View 体系：滚动监听回调中按需更新 UI，或 MediatorLiveData 派生
+```
+
+@tab Kotlin
 
 ```kotlin
 // 列表很大时，避免每次滚动都全量重组
@@ -61,7 +98,20 @@ val isVisible by remember {
 // derivedStateOf：只在"计算结果"变化时触发重组
 ```
 
+:::
+
 ## 3. 状态提升（Hoisting）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
+// 状态提升对应 View 体系：自定义 View 用回调接口上抛事件，状态由父容器持有
+```
+
+@tab Kotlin
 
 ```kotlin
 // 无状态组件（stateless）：状态由外部传入
@@ -79,9 +129,35 @@ fun Screen() {
 }
 ```
 
+:::
+
 **规则**：尽可能无状态；状态提升到最近的公共父级。
 
 ## 4. ViewModel 集成（官方推荐）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ViewModel 部分：Java 中常用 LiveData 承载可观察状态
+public class CounterViewModel extends ViewModel {
+    // ① 状态暴露为 LiveData
+    private final MutableLiveData<Integer> _count = new MutableLiveData<>(0);
+    public LiveData<Integer> getCount() {
+        return _count;
+    }
+
+    public void increment() {
+        _count.setValue(_count.getValue() + 1);
+    }
+}
+
+// @Composable 的 UI 部分仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：observe(getViewLifecycleOwner(), ...) 收到变化后手动更新控件
+```
+
+@tab Kotlin
 
 ```kotlin
 class CounterViewModel : ViewModel() {
@@ -107,6 +183,8 @@ fun CounterScreen(viewModel: CounterViewModel = viewModel()) {
 }
 ```
 
+:::
+
 **原则**：
 
 - ViewModel 持有状态（跨配置变化存活）。
@@ -114,6 +192,26 @@ fun CounterScreen(viewModel: CounterViewModel = viewModel()) {
 - 不在 ViewModel 中使用 `remember`/`LaunchedEffect`。
 
 ## 5. 协程与 Flow 收集
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ViewModel 部分：Java 中常用 LiveData 承载数据流结果
+public class UserViewModel extends ViewModel {
+    // 业务数据：数据源返回后 setValue 更新
+    private final MutableLiveData<User> userLiveData = new MutableLiveData<>();
+    public LiveData<User> getUserLiveData() {
+        return userLiveData;
+    }
+}
+
+// @Composable 的 UI 部分仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：observe() 回调中更新控件；一次性事件在 onClick 回调中触发
+```
+
+@tab Kotlin
 
 ```kotlin
 class UserViewModel : ViewModel() {
@@ -144,7 +242,53 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 }
 ```
 
+:::
+
 ## 6. 状态容器模式（StateHolder）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// data class 对应 Java 普通类 + getter + copy() 方法
+public final class SearchUiState {
+    private final String query;
+    private final List<Result> results;
+    private final boolean isLoading;
+
+    public SearchUiState(String query, List<Result> results, boolean isLoading) {
+        this.query = query;
+        this.results = results;
+        this.isLoading = isLoading;
+    }
+
+    public SearchUiState copy(String query, List<Result> results, boolean isLoading) {
+        return new SearchUiState(query, results, isLoading);
+    }
+
+    public String getQuery() { return query; }
+    public List<Result> getResults() { return results; }
+    public boolean isLoading() { return isLoading; }
+}
+
+// 状态容器：Java 中可用 LiveData 承载 UI 状态
+public class SearchStateHolder {
+    private final MutableLiveData<SearchUiState> uiState =
+            new MutableLiveData<>(new SearchUiState("", Collections.emptyList(), false));
+
+    public LiveData<SearchUiState> getUiState() { return uiState; }
+
+    public void onQueryChange(String query) {
+        SearchUiState cur = uiState.getValue();
+        uiState.setValue(cur.copy(query, cur.getResults(), cur.isLoading()));
+    }
+}
+
+// rememberSearchStateHolder 对应 View 体系：由 Activity/Fragment 持有 SearchStateHolder 实例
+```
+
+@tab Kotlin
 
 ```kotlin
 // 复杂 UI 状态 → 抽取 StateHolder 类（支持单元测试）
@@ -167,6 +311,8 @@ class SearchStateHolder {
 fun rememberSearchStateHolder(): SearchStateHolder =
     remember { SearchStateHolder() }
 ```
+
+:::
 
 ## 7. 状态管理决策树
 

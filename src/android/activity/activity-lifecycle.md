@@ -105,6 +105,29 @@ sequenceDiagram
 3. 屏幕旋转等配置变更
 4. 内存不足杀进程前
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+@Override
+protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    // 保存轻量 UI 状态
+    outState.putString("input", binding.editInput.getText().toString());
+    outState.putInt("scroll_position", binding.recyclerView.computeVerticalScrollOffset());
+}
+
+@Override
+protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+    // onStart 之后调用，此时视图已可用
+    binding.editInput.setText(savedInstanceState.getString("input"));
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
@@ -120,6 +143,8 @@ override fun onRestoreInstanceState(savedInstanceState: Bundle) {
 }
 ```
 
+:::
+
 ::: tip 常见误区
 - **`onSaveInstanceState` 不一定在 `onPause` 之后调用**（Android 12 起在 `onStop` 之后、`onStart` 之前调用）；切勿依赖调用顺序，只需保证在 `onStop` 前完成状态保存。
 - **不要在 `onSaveInstanceState` 中保存大量数据**——Bundle 跨进程传输有 1MB 左右的 Binder 事务上限（Android 8.0 前约 500KB），超限抛 `TransactionTooLargeException`。大数据用 `ViewModel` 或本地持久化。
@@ -129,6 +154,42 @@ override fun onRestoreInstanceState(savedInstanceState: Bundle) {
 ### 4.3 用 ViewModel 跨配置保留数据（推荐）
 
 `onSaveInstanceState` 适合保存"轻量 UI 状态"，但业务数据应放 `ViewModel`——它**跨配置变更存活**（旋转不销毁），且不受 Binder 大小限制：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class ProfileViewModel extends ViewModel {
+    private final MutableStateFlow<User> _user = new MutableStateFlow<>(null);
+    private final StateFlow<User> user = _user.asStateFlow();
+
+    void loadUser(String id) {
+        viewModelScope.launch(() -> _user.setValue(repository.fetchUser(id)));
+    }
+}
+
+class ProfileActivity extends AppCompatActivity {
+    private final ProfileViewModel viewModel =
+            new ViewModelProvider(this).get(ProfileViewModel.class);
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState == null) {
+            viewModel.loadUser(getIntent().getStringExtra("id"));
+        }
+        // 旋转后 viewModel.user 仍在，无需重新加载
+        lifecycleScope.launch(() -> {
+            repeatOnLifecycle(Lifecycle.State.STARTED, () -> {
+                viewModel.user.collect(user -> renderUser(user));
+            });
+        });
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class ProfileViewModel : ViewModel() {
@@ -160,9 +221,41 @@ class ProfileActivity : AppCompatActivity() {
 }
 ```
 
+:::
+
 ### 4.4 SavedStateHandle：两者结合的官方方案
 
 `SavedStateHandle` 由 `ViewModel` 构造器注入，既能跨配置存活，又能在**进程被系统杀死**后通过 `onSaveInstanceState` 机制恢复：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+class ProfileViewModel extends ViewModel {
+    private final SavedStateHandle savedStateHandle;
+    // 读取：进程被杀重建后自动恢复
+    private final String userId;
+
+    ProfileViewModel(SavedStateHandle savedStateHandle) {
+        this.savedStateHandle = savedStateHandle;
+        Object saved = savedStateHandle.get("userId");
+        this.userId = saved != null ? (String) saved : "default";
+    }
+
+    void saveUserId(String id) {
+        savedStateHandle.set("userId", id);   // 自动触发保存
+    }
+}
+
+class ProfileActivity extends AppCompatActivity {
+    private final ProfileViewModel viewModel =
+            new ViewModelProvider(this).get(ProfileViewModel.class);
+    // 无需手动调用 onSaveInstanceState，SavedStateHandle 自动工作
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 class ProfileViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
@@ -179,6 +272,8 @@ class ProfileActivity : AppCompatActivity() {
     // 无需手动调用 onSaveInstanceState，SavedStateHandle 自动工作
 }
 ```
+
+:::
 
 > 依赖注入：`ViewModelProvider.Factory` 通过 `SavedStateViewModelFactory` 自动注入 `SavedStateHandle`，用 `by viewModels()` 即可，无需手动创建。
 
@@ -218,6 +313,23 @@ flowchart LR
 - **栈顶已是该实例** → 复用并回调 `onNewIntent`；
 - 不在栈顶 → 行为同 `standard`（创建新实例）。
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+class NotificationDetailActivity extends AppCompatActivity {
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);              // 更新 intent，后续 getIntent() 返回新值
+        refreshContent(intent.getStringExtra("id"));
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class NotificationDetailActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
@@ -227,6 +339,8 @@ class NotificationDetailActivity : AppCompatActivity() {
     }
 }
 ```
+
+:::
 
 **典型场景**：通知栏连续点击跳转、搜索页重复提交——避免栈中堆积大量相同页面。
 
@@ -276,6 +390,20 @@ flowchart TD
 
 Flags 在运行时动态指定，**优先级高于 Manifest 配置**：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Intent intent = new Intent(this, DetailActivity.class);
+intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+        Intent.FLAG_ACTIVITY_CLEAR_TOP |
+        Intent.FLAG_ACTIVITY_SINGLE_TOP);
+startActivity(intent);
+```
+
+@tab Kotlin
+
 ```kotlin
 val intent = Intent(this, DetailActivity::class.java).apply {
     flags = Intent.FLAG_ACTIVITY_NEW_TASK or
@@ -284,6 +412,8 @@ val intent = Intent(this, DetailActivity::class.java).apply {
 }
 startActivity(intent)
 ```
+
+:::
 
 | Flag | 作用 | 等价关系 |
 |------|------|----------|
@@ -299,6 +429,19 @@ startActivity(intent)
 
 **经典组合：退出登录清空栈**
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+Intent intent = new Intent(this, LoginActivity.class);
+intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+startActivity(intent);
+// 旧栈全部销毁，登录页成为新栈根，按返回键直接退出 App
+```
+
+@tab Kotlin
+
 ```kotlin
 val intent = Intent(this, LoginActivity::class.java).apply {
     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -307,9 +450,48 @@ startActivity(intent)
 // 旧栈全部销毁，登录页成为新栈根，按返回键直接退出 App
 ```
 
+:::
+
 ## 八、现代生命周期实践：Lifecycle 组件
 
 从 AndroidX 开始，官方推荐用 **Lifecycle 感知组件**替代手工管理生命周期，避免 `onResume/onPause` 中遗漏注册/注销：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 1. 生命周期感知的观察者
+class MyObserver implements DefaultLifecycleObserver {
+    private final Runnable callback;
+
+    MyObserver(Runnable callback) {
+        this.callback = callback;
+    }
+
+    @Override
+    public void onStart(LifecycleOwner owner) {
+        super.onStart(owner);
+        callback.run();  // 注册资源
+    }
+
+    @Override
+    public void onStop(LifecycleOwner owner) {
+        super.onStop(owner);
+        // 注销资源
+    }
+}
+lifecycle.addObserver(new MyObserver(() -> startSensor()));
+
+// 2. lifecycleScope + repeatOnLifecycle：UI 状态收集的官方推荐写法
+lifecycleScope.launch(() -> {
+    repeatOnLifecycle(Lifecycle.State.STARTED, () -> {
+        viewModel.uiState.collect(state -> render(state));   // 只在 STARTED 之后收集，自动停止
+    });
+});
+```
+
+@tab Kotlin
 
 ```kotlin
 // 1. 生命周期感知的观察者
@@ -332,6 +514,8 @@ lifecycleScope.launch {
     }
 }
 ```
+
+:::
 
 | 写法 | 行为 |
 |------|------|

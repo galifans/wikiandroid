@@ -11,6 +11,34 @@ description: 泛型基础、协变与逆变、星投影、reified 实化类型�
 
 ## 1. 泛型基础
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 泛型类
+class Box<T> {
+    private final T value;
+    Box(T value) { this.value = value; }
+    T getValue() { return value; }
+}
+
+// 泛型函数
+static <T> T identity(T value) { return value; }
+
+// 泛型接口
+interface Repository<T> {
+    T get(String id);
+    void save(T item);
+}
+
+// 使用
+Box<Integer> box = new Box<>(10);              // 类型推断
+Box<String> box2 = new Box<>("hello");
+```
+
+@tab Kotlin
+
 ```kotlin
 // 泛型类
 class Box<T>(val value: T)
@@ -29,7 +57,30 @@ val box = Box(10)                 // 类型推断
 val box2 = Box<String>("hello")
 ```
 
+:::
+
 ## 2. 泛型约束
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 上界约束
+static <T extends Comparable<T>> T maxOf(T a, T b) {
+    return a.compareTo(b) > 0 ? a : b;
+}
+
+// 多个上界（Java 用 & 连接）
+static <T extends CharSequence & Comparable<T>> void process(T item) {
+    System.out.println(item.length());
+}
+
+// 可空类型约束（Java 引用类型默认可空，无此约束）
+static <T> void notNull(T value) { }    // Java 中 T 可为 null
+```
+
+@tab Kotlin
 
 ```kotlin
 // 上界约束（extends 的 Kotlin 版）
@@ -46,9 +97,26 @@ fun <T> process(item: T) where T : CharSequence, T : Comparable<T> {
 fun <T : Any> notNull(value: T) { }    // T 不能为空
 ```
 
+:::
+
 ## 3. 协变与逆变（型变）
 
 ### 3.1 为什么需要型变
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Java 中泛型默认不可变（invariant）
+// List<String> 不是 List<Object> 的子类型
+
+// Java 的解决办法：通配符（PECS）
+// ? extends T（生产者，读）：协变
+// ? super T   （消费者，写）：逆变
+```
+
+@tab Kotlin
 
 ```kotlin
 // Java 中泛型默认不可变（invariant）
@@ -59,7 +127,31 @@ fun <T : Any> notNull(value: T) { }    // T 不能为空
 // ? super T   （消费者，写）：逆变
 ```
 
+:::
+
 ### 3.2 Kotlin 的声明处型变
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Java 无声明处型变：在调用处用通配符实现型变
+interface Source<T> {
+    T next();                        // T 只能出现在返回位置
+    // void set(T t);                // ✗ 不能有 T 作为参数
+}
+
+interface Sink<T> {
+    void accept(T item);             // T 只能出现在参数位置
+}
+
+// 使用：? extends 协变（读），? super 逆变（写）
+Source<String> strSource = ...;
+Source<? extends Object> source = strSource;   // ✓ 协变：Source<String> 是 Source<? extends Object> 的子类型
+```
+
+@tab Kotlin
 
 ```kotlin
 // 协变（covariant）：out，只能"输出"（读）
@@ -80,6 +172,8 @@ val source: Source<Any> = ...
 val strSource: Source<String> = source    // ✓ 协变：Source<String> 是 Source<Any> 的子类型
 ```
 
+:::
+
 **型变规则记忆**：
 
 ```text
@@ -92,6 +186,22 @@ in T ：消费者（Consumer），只写，T 在参数类型
 
 ### 3.3 使用处型变（类型投影）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 等价写法：Java 使用处通配符
+static void copy(Object[] from, Object[] to) { }
+// from 只能是"生产者"（协变），防止误写：可传子类型数组
+static <T> void copy2(List<? extends T> from, List<T> to) { }
+
+static void addAll(List<? super String> items) { }
+// items 只能是"消费者"（逆变），可写 String
+```
+
+@tab Kotlin
+
 ```kotlin
 // 不想在声明处修改，可在使用时投影
 fun copy(from: Array<out Any>, to: Array<Any>) { }
@@ -101,7 +211,25 @@ fun addAll(items: MutableList<in String>) { }
 // items 只能是"消费者"（in 投影），可写 String
 ```
 
+:::
+
 ## 4. 星投影（Star Projection）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 星投影等价写法：List<?> 未知元素类型，只能读 Object
+static void printSize(List<?> list) {
+    System.out.println(list.size());
+}
+
+// 使用场景：只关心集合的操作，不关心具体类型
+static <T> T firstOrNullSafe(List<T> list) { return ...; }
+```
+
+@tab Kotlin
 
 ```kotlin
 // 星投影：不知道具体类型，但类型安全
@@ -115,7 +243,34 @@ fun printSize(list: List<*>) {
 fun <T> List<T>.firstOrNullSafe(): T? = ...
 ```
 
+:::
+
 ## 5. reified 实化类型
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// JVM 泛型会擦除（erasure），运行时拿不到类型
+// Java 需显式传入 Class 参数实现类似效果
+
+static <T> List<T> filterIsInstance(List<?> list, Class<T> clazz) {
+    List<T> result = new ArrayList<>();
+    for (Object item : list) {
+        if (clazz.isInstance(item)) {     // ✓ 等价于 is T
+            result.add(clazz.cast(item));
+        }
+    }
+    return result;
+}
+
+// 使用
+List<?> numbers = Arrays.asList(1, "two", 3.0);
+List<Integer> ints = filterIsInstance(numbers, Integer.class);   // [1]
+```
+
+@tab Kotlin
 
 ```kotlin
 // JVM 泛型会擦除（erasure），运行时拿不到类型
@@ -130,6 +285,8 @@ val numbers = listOf(1, "two", 3.0)
 val ints: List<Int> = numbers.filterIsInstance()   // [1]
 ```
 
+:::
+
 **限制**：
 
 - 必须 `inline`。
@@ -137,6 +294,38 @@ val ints: List<Int> = numbers.filterIsInstance()   // [1]
 - 不能访问 reified 类型的构造器（需要 Class 引用时用 `T::class`）。
 
 ## 6. 泛型与协程/集合的实战
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 泛型工具方法等价写法
+static <T> List<List<T>> chunkedBy(List<T> list, Predicate<T> predicate) { ... }
+
+// 类型别名等价写法：Java 无 typealias，直接使用类型
+// typealias UserList = List<User> → 直接用 List<User>
+
+// 泛型 + 惰性初始化等价写法
+class LazyBox<T> {
+    private final Supplier<T> initializer;
+    private T value;
+    LazyBox(Supplier<T> initializer) { this.initializer = initializer; }
+    T getValue() {
+        if (value == null) value = initializer.get();
+        return value;
+    }
+}
+
+// 泛型函数等价写法
+static <T, R> List<R> map(List<T> list, Function<T, R> transform) {
+    List<R> result = new ArrayList<>();
+    for (T item : list) result.add(transform.apply(item));
+    return result;
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 泛型 + 扩展函数
@@ -158,7 +347,13 @@ fun <T, R> List<T>.map(transform: (T) -> R): List<R> {
 }
 ```
 
+:::
+
 ## 7. Java 互操作
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // Java 中的 ? extends T 在 Kotlin 中变为 out T
@@ -166,6 +361,17 @@ fun <T, R> List<T>.map(transform: (T) -> R): List<R> {
 
 // Java 的原始类型（raw type）在 Kotlin 中视为 out Any?
 ```
+
+@tab Kotlin
+
+```kotlin
+// Java 中的 ? extends T 在 Kotlin 中变为 out T
+// Java 中的 ? super T 在 Kotlin 中变为 in T
+
+// Java 的原始类型（raw type）在 Kotlin 中视为 out Any?
+```
+
+:::
 
 ## 8. 高频面试题
 

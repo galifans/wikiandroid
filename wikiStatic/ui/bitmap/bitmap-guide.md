@@ -42,6 +42,10 @@ $$内存大小 = 宽 \times 高 \times 单位像素字节数$$
 
 ### 裁剪、缩放、旋转、移动
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 Matrix matrix = new Matrix();
 matrix.postScale(0.8f, 0.9f);   // 缩放
@@ -51,7 +55,24 @@ Bitmap bitmap = Bitmap.createBitmap(source, 0, 0,
         source.getWidth(), source.getHeight(), matrix, true);
 ```
 
+@tab Kotlin
+
+```kotlin
+val matrix = Matrix()
+matrix.postScale(0.8f, 0.9f)   // 缩放
+matrix.postRotate(-45)          // 旋转，参数为正则向右旋
+matrix.postTranslate(100, 80)   // 平移，在上一次修改的基础上再次修改
+val bitmap = Bitmap.createBitmap(source, 0, 0,
+        source.width, source.height, matrix, true)
+```
+
+:::
+
 ### Bitmap 与 Drawable 转换
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // Drawable -> Bitmap
@@ -72,7 +93,35 @@ public static Drawable bitmapToDrawable(Resources resources, Bitmap bm) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// Drawable -> Bitmap
+fun drawableToBitmap(drawable: Drawable): Bitmap {
+    val bitmap = Bitmap.createBitmap(
+            drawable.intrinsicWidth,
+            drawable.intrinsicHeight,
+            if (drawable.opacity != PixelFormat.OPAQUE)
+                Bitmap.Config.ARGB_8888 else Bitmap.Config.RGB_565)
+    val canvas = Canvas(bitmap)
+    drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
+    drawable.draw(canvas)
+    return bitmap
+}
+
+// Bitmap -> Drawable
+fun bitmapToDrawable(resources: Resources, bm: Bitmap): Drawable {
+    return BitmapDrawable(resources, bm)
+}
+```
+
+:::
+
 ### 保存与释放
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
@@ -88,6 +137,25 @@ try {
 // 释放 bitmap 的资源，这是一个不可逆转的操作
 bitmap.recycle();
 ```
+
+@tab Kotlin
+
+```kotlin
+val bitmap = BitmapFactory.decodeResource(resources, R.drawable.test)
+val file = File(filesDir, "test.jpg")
+try {
+    val outputStream = FileOutputStream(file)
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+    outputStream.flush()
+    outputStream.close()
+} catch (e: IOException) {
+    e.printStackTrace()
+}
+// 释放 bitmap 的资源，这是一个不可逆转的操作
+bitmap.recycle()
+```
+
+:::
 
 ## 三、BitmapFactory 与 Options
 
@@ -105,6 +173,10 @@ bitmap.recycle();
 | `inPurgeable` | 内存不足时存储 Pixel 的内存空间是否可被回收 |
 
 ### 采样压缩（防 OOM 核心）
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public Bitmap decodeSampledBitmap(String filePath, int reqWidth, int reqHeight) {
@@ -125,7 +197,34 @@ public Bitmap decodeSampledBitmap(String filePath, int reqWidth, int reqHeight) 
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+fun decodeSampledBitmap(filePath: String, reqWidth: Int, reqHeight: Int): Bitmap {
+    val options = BitmapFactory.Options()
+    options.inJustDecodeBounds = true // 只测量宽高，不分配内存
+    BitmapFactory.decodeFile(filePath, options)
+
+    var inSampleSize = 1
+    if (options.outHeight > reqHeight || options.outWidth > reqWidth) {
+        inSampleSize = if (options.outWidth > options.outHeight)
+            Math.round(options.outHeight.toFloat() / reqHeight)
+        else Math.round(options.outWidth.toFloat() / reqWidth)
+    }
+
+    options.inJustDecodeBounds = false
+    options.inSampleSize = inSampleSize
+    return BitmapFactory.decodeFile(filePath, options)
+}
+```
+
+:::
+
 ## 四、内存回收
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 if (bitmap != null && !bitmap.isRecycled()) {
@@ -133,6 +232,17 @@ if (bitmap != null && !bitmap.isRecycled()) {
     bitmap = null;
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+if (bitmap != null && !bitmap.isRecycled) {
+    bitmap.recycle() // 回收并且置为 null
+    bitmap = null
+}
+```
+
+:::
 
 Bitmap 类的构造方法都是私有的，只能通过 BitmapFactory 的静态方法实例化。生成 Bitmap 最终都是通过 JNI 调用实现的，所以 Bitmap 包含两部分内存：
 

@@ -13,6 +13,20 @@ description: NavHost、NavController、类型安全导航、返回栈管理、De
 
 传统 Fragment 导航的问题：
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ✗ 手写事务：样板代码多、易出错、返回栈难管理
+supportFragmentManager.beginTransaction()
+        .add(R.id.container, new DetailFragment(), "detail")
+        .addToBackStack("detail")
+        .commit();
+```
+
+@tab Kotlin
+
 ```kotlin
 // ✗ 手写事务：样板代码多、易出错、返回栈难管理
 supportFragmentManager.commit {
@@ -20,6 +34,8 @@ supportFragmentManager.commit {
     addToBackStack("detail")
 }
 ```
+
+:::
 
 Navigation 解决：
 
@@ -71,15 +87,47 @@ XML 方式：
     app:navGraph="@navigation/nav_graph" />
 ```
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 获取控制器
+NavController navController = ((NavHostFragment) supportFragmentManager
+        .findFragmentById(R.id.nav_host)).getNavController();
+```
+
+@tab Kotlin
+
 ```kotlin
 // 获取控制器
 val navController = (supportFragmentManager
     .findFragmentById(R.id.nav_host) as NavHostFragment).navController
 ```
 
+:::
+
 ## 3. 导航跳转
 
 ### 3.1 传统方式
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 跳转（带参数）
+binding.button.setOnClickListener(v -> {
+    Bundle args = new Bundle();
+    args.putInt("userId", 42);
+    findNavController().navigate(R.id.action_home_to_detail, args);
+});
+
+// 接收参数
+int userId = getArguments() != null ? getArguments().getInt("userId") : 0;
+```
+
+@tab Kotlin
 
 ```kotlin
 // 跳转（带参数）
@@ -94,7 +142,20 @@ binding.button.setOnClickListener {
 val userId = arguments?.getInt("userId")
 ```
 
+:::
+
 ### 3.2 类型安全导航（推荐，2.8+）
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Compose 类型安全导航仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：XML 导航图 + safe-args 插件生成 Directions/Args 类，实现编译期参数校验
+```
+
+@tab Kotlin
 
 ```kotlin
 // 1. 定义路由
@@ -128,9 +189,38 @@ fun AppNavHost() {
 }
 ```
 
+:::
+
 > 类型安全导航在编译期校验路由与参数，杜绝 `bundleOf("userId" to "42")` 类型错误。
 
 ## 4. 返回栈管理
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 返回上一页
+navController.navigateUp();
+
+// 返回指定目的地
+navController.popBackStack(R.id.homeFragment, false);
+
+// 清除返回栈跳转（登录后进入主页）
+NavOptions options = new NavOptions.Builder()
+        .setPopUpTo(R.id.loginFragment, true)
+        .build();
+navController.navigate(R.id.mainFragment, options);
+
+// 避免重复创建（tab 切换场景）
+NavOptions tabOptions = new NavOptions.Builder()
+        .setLaunchSingleTop(true)
+        .setRestoreState(true)
+        .build();
+navController.navigate(R.id.tabFragment, tabOptions);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 返回上一页
@@ -151,6 +241,8 @@ navController.navigate(R.id.tabFragment) {
 }
 ```
 
+:::
+
 ## 5. DeepLink 深链
 
 ```xml
@@ -160,6 +252,17 @@ navController.navigate(R.id.tabFragment) {
     <deepLink app:uri="https://example.com/share/{message}" />
 </fragment>
 ```
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 代码方式声明深链（composable + navDeepLink）仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：在导航图 XML 中用 <deepLink app:uri="https://example.com/share/{message}" /> 声明
+```
+
+@tab Kotlin
 
 ```kotlin
 // 代码方式声明（动态参数）
@@ -172,7 +275,22 @@ composable<Share>(
 )
 ```
 
+:::
+
 收到深链：
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// Activity 中
+Uri deepLinkUri = getIntent().getData();  // https://example.com/share/hello
+NavController navController = ...;
+navController.handleDeepLink(getIntent());
+```
+
+@tab Kotlin
 
 ```kotlin
 // Activity 中
@@ -181,7 +299,20 @@ val navController = ...
 navController.handleDeepLink(intent)
 ```
 
+:::
+
 ## 6. 与 Hilt / ViewModel 集成
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// @Composable 部分仅支持 Kotlin DSL，无 Java 等价写法；
+// 对应 View 体系：ViewModelProvider(backStackEntry).get(DetailViewModel.class)，以 NavBackStackEntry 为作用域
+```
+
+@tab Kotlin
 
 ```kotlin
 // NavBackStackEntry 作为 ViewModelStoreOwner
@@ -196,6 +327,8 @@ fun DetailScreen(userId: Int) {
     val vm: DetailViewModel = hiltViewModel(backStackEntry)
 }
 ```
+
+:::
 
 > 每个 `NavBackStackEntry` 都是独立的 `ViewModelStoreOwner`，返回栈中的页面
 > ViewModel 互不干扰，pop 后自动清除。

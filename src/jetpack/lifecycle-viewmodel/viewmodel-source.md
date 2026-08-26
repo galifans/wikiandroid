@@ -34,6 +34,10 @@ flowchart TD
     B --> E[AndroidViewModelFactory<br>默认工厂]
 ```
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 1. ViewModelStore:简单的 HashMap 容器
 public class ViewModelStore {
@@ -53,6 +57,33 @@ public class ViewModelStore {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 1. ViewModelStore:简单的 HashMap 容器
+class ViewModelStore {
+    private val mMap = HashMap<String, ViewModel>()
+
+    internal fun put(key: String, viewModel: ViewModel) {
+        val oldViewModel = mMap.put(key, viewModel)
+        if (oldViewModel != null) oldViewModel.onCleared()  // 替换时清旧
+    }
+
+    internal fun get(key: String): ViewModel? = mMap[key]
+
+    fun clear() {
+        for (vm in mMap.values) vm.onCleared()  // 全部清理
+        mMap.clear()
+    }
+}
+```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 2. ViewModelProvider.get 核心逻辑(简化)
 public <T extends ViewModel> T get(String key, Class<T> modelClass) {
@@ -66,7 +97,28 @@ public <T extends ViewModel> T get(String key, Class<T> modelClass) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 2. ViewModelProvider.get 核心逻辑(简化)
+fun <T : ViewModel> get(key: String, modelClass: Class<T>): T {
+    val viewModel = mViewModelStore.get(key)
+    if (modelClass.isInstance(viewModel)) {
+        return viewModel as T          // 已有实例直接复用
+    }
+    val newViewModel = mFactory.create(modelClass)  // 工厂创建
+    mViewModelStore.put(key, newViewModel)
+    return newViewModel as T
+}
+```
+
+:::
+
 ### 2.2 为什么旋转不销毁
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // ComponentActivity / Activity
@@ -84,6 +136,26 @@ protected void onCreate(Bundle savedInstanceState) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ComponentActivity / Activity
+// ViewModelStore 由 NonConfigurationInstances 持有
+// —— Activity 重建时通过 retainNonConfigurationInstance 传递!
+fun onRetainNonConfigurationInstance(): Any? {
+    // 保存 ViewModelStore 等状态
+    return NonConfigurationInstances(mViewModelStore, ...)
+}
+
+protected fun onCreate(savedInstanceState: Bundle?) {
+    // 重建时从上一实例恢复 ViewModelStore
+    val nci = lastNonConfigurationInstance
+    if (nci != null) mViewModelStore = nci.viewModelStore
+}
+```
+
+:::
+
 ```mermaid
 sequenceDiagram
     participant A1 as Activity(旧)
@@ -98,6 +170,10 @@ sequenceDiagram
 
 ## 三、onCleared 调用时机
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // ComponentActivity 销毁逻辑
 public void onDestroy() {
@@ -108,12 +184,53 @@ public void onDestroy() {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// ComponentActivity 销毁逻辑
+override fun onDestroy() {
+    super.onDestroy()
+    if (!isChangingConfigurations) {  // 关键判断!
+        viewModelStore.clear()        // 非配置变化销毁 → 清理 ViewModel
+    }
+}
+```
+
+:::
+
 | 场景 | isChangingConfigurations | onCleared |
 |------|------------------------|-----------|
 | 旋转屏幕/切换深色模式 | true | ✗ 不调用 |
 | 用户按返回键 finish() | false | ✓ 调用 |
 | 任务被移除 | false | ✓ 调用 |
 | 进程被杀(无 onDestroy) | — | ✗ 不调用(进程直接没了) |
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// onCleared 常见用途
+public class TimerViewModel extends ViewModel {
+    // 对应 Kotlin 的 SupervisorJob()：Java 侧可引入 kotlinx.coroutines 或改用线程池句柄
+    private final Job job = SupervisorJob();
+
+    public TimerViewModel() {
+        // 启动一个后台任务（对应 viewModelScope.launch，Java 中可用线程池 + Handler）
+        // viewModelScope.launch { /* ... */ }
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        job.cancel();             // 取消协程
+        player.release();         // 释放播放器
+        // 移除监听器、关闭流等
+    }
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // onCleared 常见用途
@@ -134,9 +251,15 @@ class TimerViewModel : ViewModel() {
 }
 ```
 
+:::
+
 >  **坑**:onCleared 不保证在进程被杀时调用(进程死亡无回调),所以关键数据要持久化到 SavedStateHandle/Room/DataStore。
 
 ## 四、Factory 与默认工厂
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // ViewModelProvider 构造
@@ -149,6 +272,61 @@ public static class DefaultFactory extends SavedStateViewModelFactory {
     // 支持 @Inject 构造 / SavedStateHandle / Application 参数
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+// ViewModelProvider 构造
+class ViewModelProvider(owner: ViewModelStoreOwner, factory: Factory) {
+    // 内部使用 owner.getViewModelStore()
+}
+
+// 默认工厂:根据构造参数类型自动提供
+class DefaultFactory : SavedStateViewModelFactory() {
+    // 支持 @Inject 构造 / SavedStateHandle / Application 参数
+}
+```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 自定义 Factory:带参 ViewModel
+public class DetailViewModel extends ViewModel {
+    private final long userId;
+    private final UserRepository repository;
+
+    public DetailViewModel(long userId, UserRepository repository) {
+        this.userId = userId;
+        this.repository = repository;
+    }
+}
+
+public class DetailViewModelFactory implements ViewModelProvider.Factory {
+    private final long userId;
+    private final UserRepository repository;
+
+    public DetailViewModelFactory(long userId, UserRepository repository) {
+        this.userId = userId;
+        this.repository = repository;
+    }
+
+    @NonNull
+    @Override
+    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
+        return (T) new DetailViewModel(userId, repository);
+    }
+}
+
+// 使用
+new ViewModelProvider(this, new DetailViewModelFactory(userId, repo))
+        .get(DetailViewModel.class);
+```
+
+@tab Kotlin
 
 ```kotlin
 // 自定义 Factory:带参 ViewModel
@@ -170,7 +348,27 @@ class DetailViewModelFactory(
 viewModels { DetailViewModelFactory(userId, repo) }
 ```
 
+:::
+
 ## 五、viewModelScope 原理
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 源码:ViewModel 的 viewModelScope 扩展属性（Java 侧编译为静态方法）
+public static CoroutineScope getViewModelScope(ViewModel viewModel) {
+    CloseableCoroutineScope scope =
+            (CloseableCoroutineScope) viewModel.getTag(JOB_KEY);
+    if (scope != null) return scope;
+    return viewModel.setTagIfAbsent(JOB_KEY,
+            new CloseableCoroutineScope(
+                    SupervisorJob() + Dispatchers.Main.INSTANCE.getImmediate()));
+}
+```
+
+@tab Kotlin
 
 ```kotlin
 // 源码:ViewModel 扩展属性
@@ -184,6 +382,12 @@ public val ViewModel.viewModelScope: CoroutineScope
     }
 ```
 
+:::
+
+::: code-tabs
+
+@tab:active Java
+
 ```java
 // 关键:ViewModel 销毁时关闭 scope
 public void clear() {
@@ -193,9 +397,26 @@ public void clear() {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// 关键:ViewModel 销毁时关闭 scope
+fun clear() {
+    // ...
+    val closeable = mBagOfTags.remove(JOB_KEY)
+    closeable?.close()   // 取消 viewModelScope
+}
+```
+
+:::
+
 > `viewModelScope` 使用 `SupervisorJob + Main.immediate`。ViewModel 清除时自动取消,无需手动管理协程生命周期。注意:网络请求放 viewModelScope 会在离开页面时自动取消(合理),但**轮询/下载**等需特殊处理。
 
 ## 六、SavedStateHandle 原理
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 // SavedStateHandle:进程死亡恢复的核心
@@ -213,6 +434,52 @@ public final class SavedStateHandle {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+// SavedStateHandle:进程死亡恢复的核心
+class SavedStateHandle {
+    private val mRegular: Map<String, Any?>    // 普通值
+    private val mSavedStateProvider: SavedStateRegistry.SavedStateProvider
+
+    // getLiveData:把值包装成 LiveData
+    fun <T> getLiveData(key: String): MutableLiveData<T> {
+        // 存在则复用,否则创建并注册 SavedStateProvider
+    }
+
+    // 进程恢复流程
+    // onSaveInstanceState → 保存 mRegular → 重建时恢复
+}
+```
+
+:::
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+public class MainViewModel extends ViewModel {
+    private final SavedStateHandle savedStateHandle;
+    // 初始化读取(进程死亡恢复)
+    private final MutableLiveData<Integer> count;
+
+    public MainViewModel(SavedStateHandle savedStateHandle) {
+        this.savedStateHandle = savedStateHandle;
+        this.count = savedStateHandle.getLiveData("count");
+    }
+
+    public MutableLiveData<Integer> getCount() { return count; }
+
+    public void addCount() {
+        Integer cur = count.getValue();
+        count.setValue((cur != null ? cur : 0) + 1);
+    }
+}
+```
+
+@tab Kotlin
+
 ```kotlin
 class MainViewModel(
     private val savedStateHandle: SavedStateHandle
@@ -226,6 +493,8 @@ class MainViewModel(
     }
 }
 ```
+
+:::
 
 ```mermaid
 sequenceDiagram

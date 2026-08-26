@@ -34,6 +34,10 @@ title: 排序算法
 
 ### 代码实现
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 public static void bubbleSort(int[] arr) {
     if (arr == null || arr.length == 0) return;
@@ -53,6 +57,29 @@ public static void swap(int[] arr, int i, int j) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+fun bubbleSort(arr: IntArray?) {
+    if (arr == null || arr.isEmpty()) return
+    for (i in 0 until arr.size - 1) {
+        for (j in arr.size - 1 downTo i + 1) {
+            if (arr[j] < arr[j - 1]) {
+                swap(arr, j - 1, j)
+            }
+        }
+    }
+}
+
+fun swap(arr: IntArray, i: Int, j: Int) {
+    val temp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = temp
+}
+```
+
+:::
+
 时间复杂度 O(n²)，稳定。
 
 ## 三、选择排序
@@ -64,6 +91,10 @@ public static void swap(int[] arr, int i, int j) {
 以 5, 3, 8, 6, 4 为例：选择 3 与 5 交换 → 3, 5, 8, 6, 4，对剩余序列依次选择和交换。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public static void selectSort(int[] arr) {
@@ -82,6 +113,27 @@ public static void selectSort(int[] arr) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+fun selectSort(arr: IntArray?) {
+    if (arr == null || arr.isEmpty()) return
+    for (i in 0 until arr.size - 1) { // 只需比较 n-1 次
+        var minIndex = i
+        for (j in i + 1 until arr.size) {
+            if (arr[j] < arr[minIndex]) {
+                minIndex = j
+            }
+        }
+        if (minIndex != i) { // 找到了更小的值，交换
+            swap(arr, i, minIndex)
+        }
+    }
+}
+```
+
+:::
+
 时间复杂度 O(n²)，不稳定。
 
 ## 四、插入排序
@@ -93,6 +145,10 @@ public static void selectSort(int[] arr) {
 以 5, 3, 8, 6, 4 为例：3 插到 5 前面（5 后移）→ 3, 5, 8, 6, 4；8 不动；6 插在 8 前面 → 3, 5, 6, 8, 4；4 从 5 开始都后移一位插入。注意插入一个数时要保证它前面的数已经有序。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public static void insertSort(int[] arr) {
@@ -110,6 +166,27 @@ public static void insertSort(int[] arr) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+fun insertSort(arr: IntArray?) {
+    if (arr == null || arr.isEmpty()) return
+    for (i in 1 until arr.size) { // 假设第一个数位置正确
+        var j = i
+        val target = arr[i] // 待插入的数
+        // 后移
+        while (j > 0 && target < arr[j - 1]) {
+            arr[j] = arr[j - 1]
+            j--
+        }
+        // 插入
+        arr[j] = target
+    }
+}
+```
+
+:::
 
 时间复杂度 O(n²)，稳定。对于基本有序的序列，插入排序效率很高。
 
@@ -132,6 +209,10 @@ public static void insertSort(int[] arr) {
 **为什么 j 指针先动？** 取决于基准数的位置。一般选第一个数为基准（在左边），最后相遇的数要与基准交换，相遇的数必须比基准小，所以 j 先移动才能先找到比基准小的数。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public int dividerAndChange(int[] args, int start, int end) {
@@ -163,6 +244,42 @@ public void sort(int[] args, int start, int end) {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+fun dividerAndChange(args: IntArray, start: Int, end: Int): Int {
+    var start = start
+    var end = end
+    val pivot = args[start] // 基准值
+    while (start < end) {
+        // 从右向左找比基准小的
+        while (start < end && args[end] >= pivot) end--
+        if (start < end) {
+            swap(args, start, end)
+            start++
+        }
+        // 从左向右找比基准大的
+        while (start < end && args[start] < pivot) start++
+        if (start < end) {
+            swap(args, end, start)
+            end--
+        }
+    }
+    args[start] = pivot
+    return start
+}
+
+fun sort(args: IntArray, start: Int, end: Int) {
+    if (end - start > 1) { // 分治元素大于 1 个才有意义
+        val mid = dividerAndChange(args, start, end)
+        sort(args, start, mid)      // 左部分排序
+        sort(args, mid + 1, end)    // 右部分排序
+    }
+}
+```
+
+:::
+
 平均时间复杂度 O(nlogn)，最坏 O(n²)（如已有序序列），不稳定。
 
 ## 六、归并排序
@@ -178,6 +295,10 @@ public void sort(int[] args, int start, int end) {
 5. 将另一序列剩下的所有元素直接复制到合并序列尾。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 public void mergeSort(int[] ints, int[] merge, int start, int end) {
@@ -208,6 +329,40 @@ private void merge(int[] a, int[] merge, int start, int end, int mid) {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+fun mergeSort(ints: IntArray, merge: IntArray, start: Int, end: Int) {
+    if (start >= end) return
+    val mid = (end + start) shr 1
+    mergeSort(ints, merge, start, mid)
+    mergeSort(ints, merge, mid + 1, end)
+    merge(ints, merge, start, end, mid)
+}
+
+private fun merge(a: IntArray, merge: IntArray, start: Int, end: Int, mid: Int) {
+    var i = start
+    var j = mid + 1
+    var pos = start
+    while (i <= mid || j <= end) {
+        if (i > mid) {
+            while (j <= end) merge[pos++] = a[j++]
+            break
+        }
+        if (j > end) {
+            while (i <= mid) merge[pos++] = a[i++]
+            break
+        }
+        merge[pos++] = if (a[i] >= a[j]) a[j++] else a[i++]
+    }
+    for (p in start..end) {
+        a[p] = merge[p]
+    }
+}
+```
+
+:::
 
 时间复杂度 O(nlogn)（最坏也是 O(nlogn)），空间复杂度 O(n)，稳定。
 

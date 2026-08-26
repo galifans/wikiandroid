@@ -24,6 +24,27 @@ description: 音视频技术栈全景：采集、编码、播放、渲染、推�
 
 ## 2. 播放：Media3 ExoPlayer（推荐）
 
+::: code-tabs
+
+@tab:active Java
+
+```java
+// 依赖
+// implementation("androidx.media3:media3-exoplayer:1.4.1")
+// implementation("androidx.media3:media3-ui:1.4.1")
+
+// 使用
+ExoPlayer player = new ExoPlayer.Builder(context).build();
+player.setMediaItem(MediaItem.fromUri(videoUrl));
+player.prepare();
+
+// 绑定 UI
+playerView.setPlayer(player);
+player.setPlayWhenReady(true);
+```
+
+@tab Kotlin
+
 ```kotlin
 // 依赖
 // implementation("androidx.media3:media3-exoplayer:1.4.1")
@@ -39,6 +60,8 @@ playerView.player = player
 player.playWhenReady = true
 ```
 
+:::
+
 ```text
 ExoPlayer 优势：
 - 模块化（Source/Decoder/Renderer 可插拔）
@@ -48,6 +71,39 @@ ExoPlayer 优势：
 ```
 
 ## 3. 采集与硬编：Camera + MediaCodec
+
+::: code-tabs
+
+@tab:active Java
+
+```java
+// ① 预览
+cameraProvider.bindToLifecycle(
+    lifecycleOwner,
+    cameraSelector,
+    preview,      // PreviewView 显示
+    recorder      // 录制
+);
+
+// ② 硬编码（MediaCodec）
+MediaFormat format = MediaFormat.createVideoFormat(
+        MediaFormat.MIMETYPE_VIDEO_AVC,  // H.264
+        width, height);
+format.setInteger(MediaFormat.KEY_BIT_RATE, 2_000_000);  // 2Mbps
+format.setInteger(MediaFormat.KEY_FRAME_RATE, 30);        // 30fps
+format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);   // 关键帧间隔 1s
+format.setInteger(MediaFormat.KEY_COLOR_FORMAT,
+        MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+
+MediaCodec encoder = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC);
+encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+// 输入用 Surface（Camera 预览直通编码器）
+Surface camera2Surface = encoder.createInputSurface();
+// Camera 输出到该 Surface
+encoder.start();
+```
+
+@tab Kotlin
 
 ```kotlin
 // ① 预览
@@ -77,6 +133,8 @@ encoder.createInputSurface().let { camera2Surface ->
 }
 encoder.start()
 ```
+
+:::
 
 ## 4. 音视频编辑：FFmpeg
 

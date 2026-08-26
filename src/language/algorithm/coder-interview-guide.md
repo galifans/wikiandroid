@@ -28,6 +28,10 @@ title: 程序员代码面试指南精选题
 
 ### 代码实现
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 import java.util.Stack;
 
@@ -64,6 +68,41 @@ public class GetMinStack {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+import java.util.Stack
+
+class GetMinStack {
+
+    class MyStack {
+        private val stackData = Stack<Int>()
+        private val stackMin = Stack<Int>()
+
+        fun push(value: Int) {
+            if (stackMin.isEmpty() || value <= getmin()) {
+                stackMin.push(value)
+            }
+            stackData.push(value)
+        }
+
+        fun pop(): Int {
+            val num = stackData.pop()
+            if (num == getmin()) {
+                stackMin.pop() // 同步弹出最小值
+            }
+            return num
+        }
+
+        fun getmin(): Int {
+            return stackMin.peek()
+        }
+    }
+}
+```
+
+:::
+
 ### 要点
 
 - 空间换时间：用额外栈记录历史最小值，使 getMin 达到 O(1)。
@@ -88,6 +127,10 @@ public class GetMinStack {
 2. stack2 不为空时，stack1 绝不能向 stack2 压入数据（否则顺序会乱）。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 import java.util.Stack;
@@ -143,6 +186,62 @@ public class TwoStacksQueue {
 }
 ```
 
+@tab Kotlin
+
+```kotlin
+import java.util.Stack
+
+class TwoStacksQueue {
+
+    class MyQueue {
+        private val stack1 = Stack<Int>()
+        private val stack2 = Stack<Int>()
+
+        // add 只负责往 stack1 添加数据
+        fun add(newNum: Int) {
+            stack1.push(newNum)
+        }
+
+        fun poll(): Int {
+            if (stack1.isEmpty() && stack2.isEmpty()) {
+                throw RuntimeException("Queue is Empty")
+            } else if (stack2.isEmpty()) {
+                while (!stack1.isEmpty()) {
+                    stack2.push(stack1.pop())
+                }
+            }
+            return stack2.pop()
+        }
+
+        fun peek(): Int {
+            if (stack1.isEmpty() && stack2.isEmpty()) {
+                throw RuntimeException("Queue is Empty")
+            } else if (stack2.isEmpty()) {
+                while (!stack1.isEmpty()) {
+                    stack2.push(stack1.pop())
+                }
+            }
+            return stack2.peek()
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun main(args: Array<String>) {
+            val queue = MyQueue()
+            queue.add(1)
+            queue.add(2)
+            queue.add(3)
+            println(queue.poll()) // 1
+            println(queue.poll()) // 2
+            println(queue.poll()) // 3
+        }
+    }
+}
+```
+
+:::
+
 ### 要点
 
 - 栈是 LIFO，队列是 FIFO，两栈颠倒两次即恢复 FIFO 顺序。
@@ -162,6 +261,10 @@ public class TwoStacksQueue {
 2. **reverse：** 先取出栈底元素，递归逆序剩余元素，最后把栈底元素压回栈顶，实现整体逆序。
 
 ### 代码实现
+
+::: code-tabs
+
+@tab:active Java
 
 ```java
 import java.util.Stack;
@@ -203,6 +306,56 @@ public class ReverseStack {
     }
 }
 ```
+
+@tab Kotlin
+
+```kotlin
+import java.util.Stack
+
+class ReverseStack {
+
+    companion object {
+        @JvmStatic
+        fun reverse(stack: Stack<Int>) {
+            if (stack.isEmpty()) {
+                return
+            }
+            val i = getAndRemoveLastElement(stack)
+            reverse(stack)
+            stack.push(i)
+        }
+
+        // 删除栈底元素并返回该元素
+        @JvmStatic
+        fun getAndRemoveLastElement(stack: Stack<Int>): Int {
+            val result = stack.pop()
+            if (stack.isEmpty()) {
+                return result
+            } else {
+                val last = getAndRemoveLastElement(stack)
+                stack.push(result)
+                return last
+            }
+        }
+
+        @JvmStatic
+        fun main(args: Array<String>) {
+            val test = Stack<Int>()
+            test.push(1)
+            test.push(2)
+            test.push(3)
+            test.push(4)
+            test.push(5)
+            reverse(test)
+            while (!test.isEmpty()) {
+                println(test.pop()) // 1 2 3 4 5
+            }
+        }
+    }
+}
+```
+
+:::
 
 ### 要点
 

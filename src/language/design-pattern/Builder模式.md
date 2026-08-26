@@ -19,6 +19,10 @@ title: Builder 建造者模式
 
 ## Android 中的实现：AlertDialog.Builder
 
+::: code-tabs
+
+@tab:active Java
+
 ```java
 AlertDialog.Builder builder = new AlertDialog.Builder(context);
 builder.setIcon(R.drawable.icon);
@@ -28,6 +32,20 @@ builder.setPositiveButton("确定", listener);
 builder.setNegativeButton("取消", listener);
 builder.create().show();
 ```
+
+@tab Kotlin
+
+```kotlin
+val builder = AlertDialog.Builder(context)
+builder.setIcon(R.drawable.icon)
+builder.setTitle("Title")
+builder.setMessage("Message")
+builder.setPositiveButton("确定", listener)
+builder.setNegativeButton("取消", listener)
+builder.create().show()
+```
+
+:::
 
 `AlertDialog.Builder` 内部通过 `AlertController.AlertParams` 暂存参数，`create()` 时统一应用到新构建的 `AlertDialog`。
 
