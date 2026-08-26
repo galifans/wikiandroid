@@ -250,4 +250,4 @@ A：`startActivity` 找不到任何匹配组件时抛 `ActivityNotFoundException
 - **匹配流程**：PMS 缓存表 → 粗筛 action → 细筛 category/data → 安全过滤 → 候选列表
 - **工程实践**：Deep Link 用 `scheme + host + pathPrefix`；文件打开用 `mimeType`；应用内跳转用显式 Intent 最安全
 
-> 📖 进阶阅读：[Intent 详解：显式与隐式](/android/intent/intent-basics.md) | [Activity 启动流程源码分析](/android/activity/activity-launch-process.md) | [Binder 跨进程通信](/system/binder/binder-mechanism.md)
+> 进阶阅读：[Intent 详解：显式与隐式](/android/intent/intent-basics.md) | [Activity 启动流程源码分析](/android/activity/activity-launch-process.md) | [Binder 跨进程通信](/system/binder/binder-mechanism.md)

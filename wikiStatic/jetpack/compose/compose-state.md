@@ -4,9 +4,9 @@ title: Compose 状态管理
 description: mutableStateOf/remember/rememberSaveable、状态提升、ViewModel 集成、Flow 收集与状态容器最佳实践
 ---
 
-# 🧩 Compose 状态管理
+# Compose 状态管理
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 状态管理是 Compose 开发的核心，直接决定代码质量与性能。
 
 ## 1. 状态的三要素

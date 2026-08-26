@@ -4,9 +4,9 @@ title: Kotlin 扩展函数与作用域函数
 description: 扩展函数原理与实战、作用域函数 let/run/with/apply/also 对比、标准库常用函数
 ---
 
-# 🔶 Kotlin 扩展函数与作用域函数
+# Kotlin 扩展函数与作用域函数
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 扩展函数是 Kotlin 最优雅的特性之一，作用域函数是日常开发高频 API。
 
 ## 1. 扩展函数（Extension Function）

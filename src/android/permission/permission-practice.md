@@ -12,10 +12,10 @@ description: 运行时权限申请的工程实践——批量申请、时机选�
 
 | 时机 | 场景 | 评价 |
 |------|------|------|
-| 冷启动立即申请 | 无明确业务上下文 | ❌ 通过率低，用户反感 |
-| **使用时申请** | 用户点击"拍照"再申请相机 | ✅ 上下文明确，通过率最高 |
-| 功能入口前申请 | 进入需要权限的页面时 | ✅ 用户有预期 |
-| 引导页一次性申请 | 注册流程强制 | ⚠️ 谨慎，部分应用被投诉 |
+| 冷启动立即申请 | 无明确业务上下文 | ✗ 通过率低，用户反感 |
+| **使用时申请** | 用户点击"拍照"再申请相机 | ✓ 上下文明确，通过率最高 |
+| 功能入口前申请 | 进入需要权限的页面时 | ✓ 用户有预期 |
+| 引导页一次性申请 | 注册流程强制 |  谨慎，部分应用被投诉 |
 
 **黄金法则：在用户真正需要该能力的那一刻申请**——"我要用，才向你借"。
 
@@ -178,4 +178,4 @@ A：`targetSdk` 决定应用声明的"适配目标版本"，系统按它执行�
 - **健壮性**：try-catch 兜底、降级处理、兼容厂商 ROM
 - **合规**：最小权限、隐私政策、按需申请、紧跟 targetSdk
 
-> 📖 进阶阅读：[权限机制与运行时权限详解](/android/permission/permission-basics.md) | [Manifest 清单文件详解](/android/app/manifest-guide.md) | [通知权限与渠道](/android/notification/notification-basics.md)
+> 进阶阅读：[权限机制与运行时权限详解](/android/permission/permission-basics.md) | [Manifest 清单文件详解](/android/app/manifest-guide.md) | [通知权限与渠道](/android/notification/notification-basics.md)

@@ -7,7 +7,7 @@ dir:
   order: 1
 ---
 
-# 📦 Gradle 构建
+# Gradle 构建
 
 Android 构建系统的核心：Gradle + AGP。
 

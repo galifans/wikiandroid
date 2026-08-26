@@ -7,7 +7,7 @@ dir:
   order: 3
 ---
 
-# 📄 Paging / Navigation
+# Paging / Navigation
 
 分页加载与导航组件。
 

@@ -4,9 +4,9 @@ title: 协程 Flow 进阶
 description: 冷流与热流、StateFlow/SharedFlow、背压处理、扁平化操作符、错误处理与测试
 ---
 
-# 🌊 协程 Flow 进阶
+# 协程 Flow 进阶
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > Flow 是 Kotlin 响应式编程的核心，StateFlow 已成为 Android 状态管理的事实标准。
 
 ## 1. 冷流与热流
@@ -129,21 +129,21 @@ flow { ... }.collectLatest {
 ```kotlin
 // 场景：每个 item 触发一个请求
 flowOf(1, 2, 3)
-    .map { id -> api.fetch(id) }   // ❌ 错误：map 是同步的，不能返回 Flow
+    .map { id -> api.fetch(id) }   // ✗ 错误：map 是同步的，不能返回 Flow
 
-// ✅ flatMapConcat：串行
+// ✓ flatMapConcat：串行
 flowOf(1, 2, 3)
     .flatMapConcat { id -> api.fetchAsFlow(id) }   // 一个一个来
 
-// ✅ flatMapMerge：并发（顺序不定）
+// ✓ flatMapMerge：并发（顺序不定）
 flowOf(1, 2, 3)
     .flatMapMerge { id -> api.fetchAsFlow(id) }    // 并发执行
 
-// ✅ flatMapLatest：取最新
+// ✓ flatMapLatest：取最新
 flowOf(1, 2, 3)
     .flatMapLatest { id -> api.fetchAsFlow(id) }   // 新 item 取消旧的
 
-// ✅ 常用组合：filter + map + catch
+// ✓ 常用组合：filter + map + catch
 flow.filter { it.isValid }
     .map { transform(it) }
     .catch { e -> emit(fallback) }   // 捕获上游异常，发射兜底值

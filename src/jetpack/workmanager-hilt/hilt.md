@@ -4,15 +4,15 @@ title: Hilt 依赖注入详解
 description: Hilt 注解体系、作用域、模块定义、与 Dagger 关系、ViewModel 注入实战
 ---
 
-# 💉 Hilt 依赖注入详解
+# Hilt 依赖注入详解
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 依赖注入（DI）是大型项目标配，Hilt 是 Android 官方 DI 框架。
 
 ## 1. 为什么需要依赖注入
 
 ```kotlin
-// ❌ 手动创建依赖：耦合、难测试
+// ✗ 手动创建依赖：耦合、难测试
 class UserViewModel {
     private val api = ApiService(OkHttpClient())   // 硬编码依赖
     private val dao = UserDao(AppDatabase.getInstance(this))

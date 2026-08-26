@@ -4,9 +4,9 @@ title: 事件分发机制完全解析
 description: dispatchTouchEvent/onInterceptTouchEvent/onTouchEvent 三大方法、分发顺序、消费链与滑动冲突根源
 ---
 
-# 👆 事件分发机制完全解析
+# 事件分发机制完全解析
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 事件分发是 Android 面试必考难点，本文从源码角度彻底讲透。
 
 ## 1. 三个核心方法

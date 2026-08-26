@@ -7,7 +7,7 @@ dir:
   order: 4
 ---
 
-# ⏰ WorkManager / Hilt
+# WorkManager / Hilt
 
 后台任务调度与依赖注入。
 

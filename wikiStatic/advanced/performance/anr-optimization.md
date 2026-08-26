@@ -183,4 +183,4 @@ class MyReceiver : BroadcastReceiver() {
 - 定位链路：traces.txt → Logcat → StrictMode（开发）→ Choreographer / WatchDog / ApplicationExitInfo（线上）
 - 预防核心：**主线程只做 UI**，IO/网络/DB 全部异步化，配合布局、内存、锁策略优化
 
-> 📖 进阶阅读：[卡顿优化与掉帧分析](jank-optimization.md) | [内存优化与泄漏排查](memory-optimization.md) | [同步屏障与异步消息](/network/handler/sync-barrier.md) | [APM 监控体系](/advanced/stability/apm-monitoring.md)
+> 进阶阅读：[卡顿优化与掉帧分析](jank-optimization.md) | [内存优化与泄漏排查](memory-optimization.md) | [同步屏障与异步消息](/network/handler/sync-barrier.md) | [APM 监控体系](/advanced/stability/apm-monitoring.md)

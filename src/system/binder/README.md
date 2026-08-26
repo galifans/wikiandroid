@@ -7,7 +7,7 @@ dir:
   order: 1
 ---
 
-# 🔗 Binder 机制
+# Binder 机制
 
 Binder 是 Android 跨进程通信的核心，也是源码面试的"深水区"。
 

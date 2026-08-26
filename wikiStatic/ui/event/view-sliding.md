@@ -201,4 +201,4 @@ Android 3.0 之前的 View 动画只改变绘制位置不改变实际布局位�
 - 滑动三件套：`scrollTo/scrollBy`（内容滚动）、动画（平移）、LayoutParams（真实移动）
 - 弹性滑动核心是 **Scroller 时间插值 + computeScroll 循环重绘**，动画与 postDelayed 是替代实现
 
-> 📖 进阶阅读：[事件分发机制完全解析](event-dispatch.md) | [滑动冲突解决方案](conflict-solution.md) | [自定义 View 分类与实战](../custom-view/custom-view-guide.md)
+> 进阶阅读：[事件分发机制完全解析](event-dispatch.md) | [滑动冲突解决方案](conflict-solution.md) | [自定义 View 分类与实战](../custom-view/custom-view-guide.md)

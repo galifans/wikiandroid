@@ -4,9 +4,9 @@ title: Navigation 组件详解
 description: NavHost、NavController、类型安全导航、返回栈管理、DeepLink 与实战
 ---
 
-# 🧭 Navigation 组件详解
+# Navigation 组件详解
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > Navigation 是官方推荐的导航方案，取代手写 FragmentManager 事务。
 
 ## 1. 为什么用 Navigation
@@ -14,7 +14,7 @@ description: NavHost、NavController、类型安全导航、返回栈管理、De
 传统 Fragment 导航的问题：
 
 ```kotlin
-// ❌ 手写事务：样板代码多、易出错、返回栈难管理
+// ✗ 手写事务：样板代码多、易出错、返回栈难管理
 supportFragmentManager.commit {
     add(R.id.container, DetailFragment(), "detail")
     addToBackStack("detail")

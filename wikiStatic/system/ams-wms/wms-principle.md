@@ -4,9 +4,9 @@ title: WMS 窗口管理原理
 description: WMS 职责、Window/WindowManager/WindowManagerService 关系、窗口层级 Z-order、SurfaceFlinger 合成、输入事件分发
 ---
 
-# 🪟 WMS 窗口管理原理
+# WMS 窗口管理原理
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > WMS 是窗口系统的核心，理解 Window 到 Surface 的链路是关键。
 
 ## 1. WMS 是什么

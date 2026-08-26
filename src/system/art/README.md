@@ -7,7 +7,7 @@ dir:
   order: 5
 ---
 
-# 🧠 ART / DEX / 类加载
+# ART / DEX / 类加载
 
 Android 运行时与字节码机制。
 

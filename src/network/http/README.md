@@ -7,7 +7,7 @@ dir:
   order: 1
 ---
 
-# 🌐 HTTP 网络层
+# HTTP 网络层
 
 Android 网络请求栈的完整解析。
 
@@ -19,6 +19,7 @@ Android 网络请求栈的完整解析。
 - [OkHttp 源码解析](okhttp-source.md)
 - [Retrofit 源码解析](retrofit-source.md)
 - [网络请求设计与缓存策略](network-cache.md)
+- [WebSocket 原理与 OkHttp 实现](websocket.md)
 
 ## 核心要点
 
@@ -40,3 +41,4 @@ Android 网络请求栈的完整解析。
 - TCP 三次握手 / 四次挥手
 - HTTPS 与 TLS 握手
 - HTTP/1.1 vs HTTP/2 vs HTTP/3
+- WebSocket 全双工长连接：握手 / 帧格式 / 心跳保活

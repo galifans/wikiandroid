@@ -4,9 +4,9 @@ title: Activity 任务栈与返回栈
 description: 深入理解 Android Task 与 Back Stack 机制、启动模式如何影响任务栈、以及常用的栈操作 API
 ---
 
-# 📚 Activity 任务栈与返回栈
+# Activity 任务栈与返回栈
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 掌握任务栈是理解 `launchMode`、`onNewIntent`、`FLAG_ACTIVITY_*` 系列标志的前提。
 
 ## 1. 什么是 Task（任务）

@@ -47,4 +47,4 @@ title: 算法刷题指南
 - [代码随想录](https://programmercarl.com/)
 - 牛客网：Android 岗位算法题汇总
 
-> 💡 面试前建议集中刷完 HOT 100 与 剑指 Offer。
+> 面试前建议集中刷完 HOT 100 与 剑指 Offer。

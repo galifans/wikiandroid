@@ -330,6 +330,6 @@ A：现代 Android（8.0+）下传统保活手段（双进程守护、1px Activi
 - `onStartCommand` 三种返回值决定"被杀后是否重建、如何重建"。
 - 8.0+ 后台限制 → 前台服务 + WorkManager 是唯一正道。
 
-> 📖 进阶阅读：[前台服务与通知](foreground-service.md) | [AIDL 跨进程通信](aidl.md) | [Android 进程与保活](/android/process/process-lifecycle.md)
+> 进阶阅读：[前台服务与通知](foreground-service.md) | [AIDL 跨进程通信](aidl.md) | [Android 进程与保活](/android/process/process-lifecycle.md)
 
-> 📖 进阶阅读：[AIDL 跨进程通信](aidl.md) | [Binder 机制详解](/system/binder/binder-mechanism.md)
+> 进阶阅读：[AIDL 跨进程通信](aidl.md) | [Binder 机制详解](/system/binder/binder-mechanism.md)

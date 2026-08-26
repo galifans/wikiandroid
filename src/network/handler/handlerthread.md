@@ -4,9 +4,9 @@ title: HandlerThread 使用详解
 description: HandlerThread 原理、与普通线程区别、SerialExecutor 实现、应用场景与源码解析
 ---
 
-# 🧵 HandlerThread 使用详解
+# HandlerThread 使用详解
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > HandlerThread = Thread + Looper，面试常考它与普通 Thread 的区别和源码。
 
 ## 1. 是什么
@@ -107,8 +107,8 @@ public class HandlerThread extends Thread {
 | 维度 | Thread | HandlerThread |
 | --- | --- | --- |
 | 生命周期 | run() 结束即退出 | Looper 循环，直到 quit() |
-| 复用性 | ❌ 一任务一线程 | ✅ 一个线程处理多个任务 |
-| 任务队列 | ❌ 无 | ✅ MessageQueue 串行队列 |
+| 复用性 | ✗ 一任务一线程 | ✓ 一个线程处理多个任务 |
+| 任务队列 | ✗ 无 | ✓ MessageQueue 串行队列 |
 | 线程切换 | 需手动 | Handler 天然支持 |
 | 使用场景 | 单次任务 | 串行队列、长时间存活 |
 

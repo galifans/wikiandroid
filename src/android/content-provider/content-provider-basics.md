@@ -4,9 +4,9 @@ title: ContentProvider 详解
 description: ContentProvider 四大组件之一，跨进程数据共享的标准方案：URI、CRUD、ContentObserver 与典型场景
 ---
 
-# 🗃️ ContentProvider 详解
+# ContentProvider 详解
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 理解 ContentProvider 是理解"跨应用数据共享"和系统数据源（联系人、相册）的关键。
 
 ## 1. 什么是 ContentProvider
@@ -265,10 +265,10 @@ sequenceDiagram
 
 | 方案 | 跨进程 | 类型安全 | 数据变化通知 | 适用场景 |
 | --- | --- | --- | --- | --- |
-| ContentProvider | ✅ | 一般（Cursor） | ✅（ContentObserver） | 跨应用数据共享 |
-| AIDL/Service | ✅ | ✅ | 需自实现 | 跨进程方法调用 |
-| 文件/SharedPreferences | 需自处理 | ❌ | ❌ | 简单数据 |
-| Room（应用内） | ❌ | ✅ | ✅（Flow） | 应用内数据库 |
+| ContentProvider | ✓ | 一般（Cursor） | ✓（ContentObserver） | 跨应用数据共享 |
+| AIDL/Service | ✓ | ✓ | 需自实现 | 跨进程方法调用 |
+| 文件/SharedPreferences | 需自处理 | ✗ | ✗ | 简单数据 |
+| Room（应用内） | ✗ | ✓ | ✓（Flow） | 应用内数据库 |
 
 ## 7. 高频面试题
 

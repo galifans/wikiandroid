@@ -4,7 +4,7 @@ title: RecyclerView 源码解析
 description: RecyclerView 缓存复用机制、五级缓存、回收与复用流程、性能优化源码级解析
 ---
 
-# ♻️ RecyclerView 源码解析
+# RecyclerView 源码解析
 
 > RecyclerView 为什么能支撑千级列表丝滑滚动？答案在它的**缓存复用机制**。本文深入源码剖析五级缓存、`onBindViewHolder` 触发时机、预取机制与性能优化要点。
 
@@ -116,7 +116,7 @@ void fill(Recycler recycler, LayoutState layoutState) {
 }
 ```
 
-> 💡 **核心思想**：LayoutManager 只关心"把 View 摆放到正确位置"，View 从哪来（新建还是复用）完全由 Recycler 决定。
+> **核心思想**：LayoutManager 只关心"把 View 摆放到正确位置"，View 从哪来（新建还是复用）完全由 Recycler 决定。
 
 ## 五、预取机制（Prefetch）
 
@@ -150,10 +150,10 @@ recyclerView.isNestedScrollingEnabled = false   // 嵌套滚动场景注意
 ### 6.1 局部刷新 vs 全量刷新
 
 ```kotlin
-// ❌ 全量刷新：全部条目重绘 + 闪烁
+// ✗ 全量刷新：全部条目重绘 + 闪烁
 adapter.notifyDataSetChanged()
 
-// ✅ 局部刷新：精确更新
+// ✓ 局部刷新：精确更新
 adapter.notifyItemChanged(3)          // 更新单个
 adapter.notifyItemInserted(5)         // 插入
 adapter.notifyItemRemoved(2)          // 删除
@@ -176,7 +176,7 @@ val diffResult = DiffUtil.calculateDiff(UserDiffCallback(), false)
 diffResult.dispatchUpdatesTo(adapter)   // 精确执行增删改移动画
 ```
 
-> 💡 列表数据频繁变化（聊天、feed 流）用 **ListAdapter + DiffUtil**（内部子线程计算差异），配合 RecyclerView 增删移动画，性能与体验最佳。
+> 列表数据频繁变化（聊天、feed 流）用 **ListAdapter + DiffUtil**（内部子线程计算差异），配合 RecyclerView 增删移动画，性能与体验最佳。
 
 ## 七、性能优化清单
 
@@ -227,4 +227,4 @@ diffResult.dispatchUpdatesTo(adapter)   // 精确执行增删改移动画
 - 局部刷新 + DiffUtil 是列表更新的最佳实践
 - setHasFixedSize、缓存调优、图片懒加载是常见优化手段
 
-> 📖 进阶阅读：[View 与 ViewGroup 的关系](/ui/view/view-viewgroup.md) | [MeasureSpec 完全解析](/ui/view/measurespec.md) | [Paging 3 分页加载](/jetpack/paging-navigation/paging3.md)
+> 进阶阅读：[View 与 ViewGroup 的关系](/ui/view/view-viewgroup.md) | [MeasureSpec 完全解析](/ui/view/measurespec.md) | [Paging 3 分页加载](/jetpack/paging-navigation/paging3.md)

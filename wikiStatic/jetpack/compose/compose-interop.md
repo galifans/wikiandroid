@@ -4,7 +4,7 @@ title: Compose 与 View 互操作
 description: AndroidView/ComposeView 嵌入、生命周期桥接、共享 ViewModel、Compose 中的传统控件与 WebView/Map 集成
 ---
 
-# 🔄 Compose 与 View 互操作
+# Compose 与 View 互操作
 
 > 实际项目中 Compose 与 View 体系长期共存:老代码库渐进迁移、复用成熟三方控件(WebView/Map/视频)、以及 Compose 中需要 View 生态能力。本文详解双向互操作。
 
@@ -187,7 +187,7 @@ fun HybridScreen(viewModel: MyViewModel = viewModel()) {
 }
 ```
 
-> 💡 View 体系与 Compose 共享 ViewModel 的关键:`viewModel()` 与 `ViewModelProvider` 使用同一 ViewModelStoreOwner(Activity/Fragment),实现状态统一。
+> View 体系与 Compose 共享 ViewModel 的关键:`viewModel()` 与 `ViewModelProvider` 使用同一 ViewModelStoreOwner(Activity/Fragment),实现状态统一。
 
 ## 五、渐进式迁移策略
 
@@ -251,4 +251,4 @@ factory:第一次进入组合时创建 View(只调用一次);update:每次重组
 - 渐进式迁移:试点 → 混合 → 提取 → 收尾
 - 注意 WebView 销毁与组合释放防泄漏
 
-> 📖 进阶阅读：[Compose 核心概念](/jetpack/compose/compose-basics.md) | [Compose 状态管理](/jetpack/compose/compose-state.md) | [WebView 使用与优化](/ui/view/webview-guide.md)
+> 进阶阅读：[Compose 核心概念](/jetpack/compose/compose-basics.md) | [Compose 状态管理](/jetpack/compose/compose-state.md) | [WebView 使用与优化](/ui/view/webview-guide.md)

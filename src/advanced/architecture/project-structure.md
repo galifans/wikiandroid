@@ -173,4 +173,4 @@ val entity = intent.getParcelableExtra<WeatherEntity>("entity")
 - Activity 模板化：`initVariables → initViews → loadData` 三方法约定
 - 实体化编程：JSON 解析为强类型实体、页面传参走 Intent、杜绝全局变量
 
-> 📖 进阶阅读：[MVC → MVP → MVVM → MVI 演进](architecture-evolution.md) | [Clean Architecture 实践](clean-architecture.md) | [数据层设计：Repository 模式](repository-pattern.md)
+> 进阶阅读：[MVC → MVP → MVVM → MVI 演进](architecture-evolution.md) | [Clean Architecture 实践](clean-architecture.md) | [数据层设计：Repository 模式](repository-pattern.md)

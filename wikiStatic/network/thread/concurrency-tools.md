@@ -4,9 +4,9 @@ title: Java 并发工具类
 description: CountDownLatch、CyclicBarrier、Semaphore、Atomic、ConcurrentHashMap 详解与实战
 ---
 
-# 🧰 Java 并发工具类
+# Java 并发工具类
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > JUC（java.util.concurrent）工具类是与线程池并列的高频面试考点。
 
 ## 1. CountDownLatch：倒计时门闩
@@ -59,7 +59,7 @@ repeat(3) { index ->
 | 维度 | CountDownLatch | CyclicBarrier |
 | --- | --- | --- |
 | 语义 | 等待计数归零 | 线程互相等待 |
-| 复用 | ❌ 一次性 | ✅ 可循环使用（reset） |
+| 复用 | ✗ 一次性 | ✓ 可循环使用（reset） |
 | 参与者 | 计数与线程解耦 | 参与者固定（构造函数） |
 | 使用 | 主线程等待子任务 | 线程间互相等待 |
 
@@ -91,11 +91,11 @@ repeat(5) { index ->
 **场景**：无锁线程安全计数。
 
 ```kotlin
-// ❌ 非原子：多线程下 i++ 会丢数据
+// ✗ 非原子：多线程下 i++ 会丢数据
 var count = 0
 repeat(1000) { Thread { count++ } }  // 结果 < 1000
 
-// ✅ AtomicInteger：CAS 实现无锁原子操作
+// ✓ AtomicInteger：CAS 实现无锁原子操作
 val atomicCount = AtomicInteger(0)
 repeat(1000) { Thread { atomicCount.incrementAndGet() } }
 println(atomicCount.get())           // 1000
@@ -116,10 +116,10 @@ atomicCount.updateAndGet { it * 2 }   // 函数式更新
 **场景**：线程安全的 HashMap（高并发读）。
 
 ```kotlin
-// ❌ HashMap 多线程会丢数据/死循环（JDK7 扩容头插法）
-// ⚠️ Hashtable 全表锁，并发低
+// ✗ HashMap 多线程会丢数据/死循环（JDK7 扩容头插法）
+//  Hashtable 全表锁，并发低
 
-// ✅ ConcurrentHashMap：分段锁（JDK7）/ CAS+synchronized（JDK8）
+// ✓ ConcurrentHashMap：分段锁（JDK7）/ CAS+synchronized（JDK8）
 val map = ConcurrentHashMap<String, Int>()
 map["a"] = 1
 map.computeIfAbsent("b") { 2 }   // 原子操作
@@ -162,10 +162,10 @@ fun increment() { count++ }
 
 | 关键字 | 可见性 | 原子性 | 使用场景 |
 | --- | --- | --- | --- |
-| `volatile` | ✅ | ❌ | 状态标志、单例双重检查 |
-| `synchronized` | ✅ | ✅ | 临界区保护 |
-| `Atomic*` | ✅ | ✅（CAS） | 计数器、累加器 |
-| `Lock`（ReentrantLock） | ✅ | ✅ | 需超时/公平/条件变量 |
+| `volatile` | ✓ | ✗ | 状态标志、单例双重检查 |
+| `synchronized` | ✓ | ✓ | 临界区保护 |
+| `Atomic*` | ✓ | ✓（CAS） | 计数器、累加器 |
+| `Lock`（ReentrantLock） | ✓ | ✓ | 需超时/公平/条件变量 |
 
 ## 7. 高频面试题
 

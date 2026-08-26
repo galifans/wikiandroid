@@ -4,9 +4,9 @@ title: 数据层设计：Repository 模式
 description: Repository 模式原理、单一数据源、缓存策略、网络与本地数据结合、Flow 数据流
 ---
 
-# 🏗️ 数据层设计：Repository 模式
+# 数据层设计：Repository 模式
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > Repository 是官方推荐架构的核心，数据层的"门面"。
 
 ## 1. 什么是 Repository

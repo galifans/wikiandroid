@@ -1,10 +1,10 @@
 import { navbar } from "vuepress-theme-hope";
 
 export default navbar([
-  { text: "🏠 首页", link: "/" },
-  { text: "🗺️ 学习路线", link: "/roadmap/" },
+  { text: "首页", link: "/" },
+  { text: "学习路线", link: "/roadmap/" },
   {
-    text: "☕ 语言基础",
+    text: "语言基础",
     children: [
       { text: "Kotlin", link: "/language/kotlin/" },
       { text: "Java", link: "/language/java/" },
@@ -14,7 +14,7 @@ export default navbar([
     ],
   },
   {
-    text: "🧱 Android 核心",
+    text: "Android 核心",
     children: [
       { text: "Activity", link: "/android/activity/" },
       { text: "Service", link: "/android/service/" },
@@ -32,7 +32,7 @@ export default navbar([
     ],
   },
   {
-    text: "🎨 UI 与渲染",
+    text: "UI 与渲染",
     children: [
       { text: "View 体系", link: "/ui/view/" },
       { text: "事件分发机制", link: "/ui/event/" },
@@ -45,7 +45,7 @@ export default navbar([
     ],
   },
   {
-    text: "🧩 Jetpack",
+    text: "Jetpack",
     children: [
       { text: "Jetpack Compose", link: "/jetpack/compose/" },
       { text: "Lifecycle / ViewModel", link: "/jetpack/lifecycle-viewmodel/" },
@@ -55,7 +55,7 @@ export default navbar([
     ],
   },
   {
-    text: "🌐 网络与异步",
+    text: "网络与异步",
     children: [
       { text: "网络与协议", link: "/network/http/" },
       { text: "Handler 消息机制", link: "/network/handler/" },
@@ -67,7 +67,7 @@ export default navbar([
     ],
   },
   {
-    text: "🚀 进阶实战",
+    text: "进阶实战",
     children: [
       { text: "架构设计", link: "/advanced/architecture/" },
       { text: "组件化与模块化", link: "/advanced/modular/" },
@@ -79,7 +79,7 @@ export default navbar([
     ],
   },
   {
-    text: "⚙️ 系统原理",
+    text: "系统原理",
     children: [
       { text: "Binder 机制", link: "/system/binder/" },
       { text: "AMS / WMS", link: "/system/ams-wms/" },
@@ -90,7 +90,7 @@ export default navbar([
     ],
   },
   {
-    text: "🛠️ 工程实践",
+    text: "工程实践",
     children: [
       { text: "Gradle 构建", link: "/engineering/gradle/" },
       { text: "Git 与版本管理", link: "/engineering/git/" },
@@ -98,9 +98,9 @@ export default navbar([
       { text: "测试体系", link: "/engineering/testing/" },
     ],
   },
-  { text: "💼 面试指南", link: "/interview/" },
-  { text: "🤖 实战项目", link: "/projects/" },
-  { text: "📚 书籍资源", link: "/books/" },
+  { text: "面试指南", link: "/interview/" },
+  { text: "实战项目", link: "/projects/" },
+  { text: "书籍资源", link: "/books/" },
   {
     text: "GitHub",
     link: "https://github.com/galifans/wikiandroid",

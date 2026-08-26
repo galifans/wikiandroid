@@ -7,7 +7,7 @@ dir:
   order: 3
 ---
 
-# 🎨 自定义 View
+# 自定义 View
 
 自定义 View 是 Android UI 进阶的必备技能。
 

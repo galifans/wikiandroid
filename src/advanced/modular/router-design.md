@@ -4,7 +4,7 @@ title: 路由框架设计
 description: 路由表、APT 注解处理器、ARouter 原理、路由降级与拦截器、组件化解耦
 ---
 
-# 🧭 路由框架设计
+# 路由框架设计
 
 > 组件化之后,页面跳转不能再硬编码 `Intent`,而是通过**路由框架**解耦:统一管理路径、参数、拦截器与降级。本文剖析路由框架的核心设计与 ARouter 原理。
 
@@ -14,7 +14,7 @@ description: 路由表、APT 注解处理器、ARouter 原理、路由降级与�
 flowchart TD
     A[组件 A<br>home] -->|需要跳转| B[组件 B<br>user]
     B -->|需要跳转| C[组件 C<br>order]
-    A -.直接依赖 B/C.-> X[❌ 强耦合]
+    A -.直接依赖 B/C.-> X[✗ 强耦合]
     A -->|路由路径| R[Router 中心]
     R -->|path=/user/profile| B
     R -->|path=/order/list| C
@@ -237,4 +237,4 @@ flowchart LR
 - ARouter 是事实标准,可参考其设计自研轻量路由
 - 服务暴露(SPI)让跨模块能力调用同样解耦
 
-> 📖 进阶阅读：[组件化架构实践](/advanced/modular/modularization-practice.md) | [架构设计演进](/advanced/architecture/architecture-evolution.md) | [Hook 技术详解](/advanced/plugin/hook-tech.md)
+> 进阶阅读：[组件化架构实践](/advanced/modular/modularization-practice.md) | [架构设计演进](/advanced/architecture/architecture-evolution.md) | [Hook 技术详解](/advanced/plugin/hook-tech.md)

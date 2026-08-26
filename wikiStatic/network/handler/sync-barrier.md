@@ -4,7 +4,7 @@ title: 消息同步屏障与 IdleHandler
 description: 同步屏障消息、异步消息、IdleHandler 空闲回调、VSYNC 对齐与 Android 消息机制进阶
 ---
 
-# 🧱 消息同步屏障与 IdleHandler
+# 消息同步屏障与 IdleHandler
 
 > Handler 消息机制除了 Looper/MessageQueue/Handler 三件套,还有三个进阶神器:**同步屏障(SyncBarrier)、异步消息、IdleHandler**。它们是帧刷新、空闲优化、vsync 对齐的底层支撑。
 
@@ -88,7 +88,7 @@ sequenceDiagram
     Note over Q: 帧处理完移除屏障<br>同步消息继续执行
 ```
 
-> 💡 **核心用途**:UI 线程在帧刷新前插入同步屏障,保证**绘制相关的异步消息优先执行**,避免被业务消息阻塞导致掉帧。这就是"帧消息与业务消息隔离"的关键机制。
+> **核心用途**:UI 线程在帧刷新前插入同步屏障,保证**绘制相关的异步消息优先执行**,避免被业务消息阻塞导致掉帧。这就是"帧消息与业务消息隔离"的关键机制。
 
 ## 三、系统哪里用到了屏障
 
@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity() {
 | 场景 | 预加载、懒初始化、非紧急统计 |
 | 风险 | 耗时操作会阻塞队列(延迟后续消息) |
 
-> ⚠️ **注意**:IdleHandler 执行时主线程仍被占用,不能做耗时操作,否则反而拖慢界面;不执行不代表"卡死",队列非空时不触发。
+>  **注意**:IdleHandler 执行时主线程仍被占用,不能做耗时操作,否则反而拖慢界面;不执行不代表"卡死",队列非空时不触发。
 
 ## 五、MessageQueue 阻塞与唤醒
 
@@ -214,4 +214,4 @@ IdleHandler 是 MessageQueue 的空闲回调:队列没有消息可执行(即将�
 - 空闲时 epoll 阻塞,入队 nativeWake 唤醒,不占 CPU
 - 进阶用法:启动优化(IdleHandler)、帧率保障(屏障)
 
-> 📖 进阶阅读：[Handler 消息机制源码解析](/network/handler/handler-source.md) | [HandlerThread 详解](/network/handler/handlerthread.md) | [渲染原理与硬件加速](/ui/render/render-principle.md)
+> 进阶阅读：[Handler 消息机制源码解析](/network/handler/handler-source.md) | [HandlerThread 详解](/network/handler/handlerthread.md) | [渲染原理与硬件加速](/ui/render/render-principle.md)

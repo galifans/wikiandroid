@@ -7,7 +7,7 @@ dir:
   order: 2
 ---
 
-# 🏢 AMS / WMS
+# AMS / WMS
 
 系统核心服务：ActivityManagerService 与 WindowManagerService。
 

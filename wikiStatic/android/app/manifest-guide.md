@@ -249,4 +249,4 @@ A：将 Provider 的 `android:exported="false"`（仅同应用进程可访问）
 - **多进程用 process 划分**：注意 Application 每个进程初始化一次
 - **排查有据**：安装失败/运行异常优先查 Manifest 声明与权限
 
-> 📖 进阶阅读：[运行时权限机制详解](/android/permission/permission-basics.md) | [IntentFilter 匹配规则](/android/intent/intent-filter.md) | [Application 详解](/android/app/application-basics.md)
+> 进阶阅读：[运行时权限机制详解](/android/permission/permission-basics.md) | [IntentFilter 匹配规则](/android/intent/intent-filter.md) | [Application 详解](/android/app/application-basics.md)

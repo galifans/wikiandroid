@@ -4,9 +4,9 @@ title: AIDL 深入解析
 description: AIDL 接口定义、in/out/inout 定向、oneway、Binder 代理与 Stub 原理、线程模型与实战
 ---
 
-# 🔗 AIDL 深入解析
+# AIDL 深入解析
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > AIDL 是 Binder 机制的应用层封装，理解 Stub/Proxy 结构才算真正掌握 IPC。
 
 ## 1. AIDL 是什么

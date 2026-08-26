@@ -3,7 +3,7 @@ icon: rocket
 title: 从零搭建完整 App
 ---
 
-# 🚀 从零搭建一个完整的 App
+# 从零搭建一个完整的 App
 
 > 手把手带你从空项目搭建一个生产级架构的 App（资讯类），完整走一遍工程化流程。
 
@@ -96,4 +96,4 @@ class HomeViewModel @Inject constructor(
 - 性能优化（列表性能、启动优化）
 - 数据埋点与崩溃监控
 
-> 📖 配套知识：[架构设计](/advanced/architecture/) | [组件化](/advanced/modular/) | [CI/CD](/engineering/cicd/)
+> 配套知识：[架构设计](/advanced/architecture/) | [组件化](/advanced/modular/) | [CI/CD](/engineering/cicd/)

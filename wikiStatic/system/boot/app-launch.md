@@ -4,9 +4,9 @@ title: 应用启动流程详解
 description: 冷启动完整链路、ActivityThread/main、Application 创建、首帧渲染、启动耗时统计与优化实践
 ---
 
-# 🚀 应用启动流程详解
+# 应用启动流程详解
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 应用启动是性能优化的第一战场，理解完整链路才能精准优化。
 
 ## 1. 启动的三种情况
@@ -125,14 +125,14 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // ❌ 所有 SDK 同步初始化（阻塞启动）
-        // ✅ 延迟/异步初始化
+        // ✗ 所有 SDK 同步初始化（阻塞启动）
+        // ✓ 延迟/异步初始化
         Thread {
             sdkA.init()      // 非关键路径异步
             sdkB.init()
         }.start()
 
-        // ✅ 关键路径精简：只初始化真正需要的
+        // ✓ 关键路径精简：只初始化真正需要的
         CrashHandler.init(this)
         // 其他放到首帧后（IdleHandler）
         Looper.myLooper()?.setMessageLogging {

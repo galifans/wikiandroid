@@ -4,7 +4,7 @@ title: 日志系统与线上问题排查
 description: 日志采集设计、分级与过滤、文件回捞、日志分析、问题复现、线上排查方法论
 ---
 
-# 📝 日志系统与线上问题排查
+# 日志系统与线上问题排查
 
 > 线上问题无法像本地一样随意断点调试,唯一的武器就是**日志**。一套好的日志系统:采集全面、分级清晰、可回捞、可分析,是稳定性保障的地基。
 
@@ -109,7 +109,7 @@ class CrashHandler : Thread.UncaughtExceptionHandler {
 }
 ```
 
-> 💡 **最佳实践**:崩溃上报自动附带日志上下文,命中率远高于事后回捞;回捞用于疑难杂症(偶现问题、环境问题)。
+> **最佳实践**:崩溃上报自动附带日志上下文,命中率远高于事后回捞;回捞用于疑难杂症(偶现问题、环境问题)。
 
 ## 五、日志分析定位
 
@@ -217,4 +217,4 @@ class RequestIdInterceptor : Interceptor {
 - 好日志有上下文(业务 ID + 参数 + 结果)
 - 排查方法论:收集现场 → 时间线还原 → 假设验证
 
-> 📖 进阶阅读：[APM 监控体系建设](/advanced/stability/apm-monitoring.md) | [崩溃监控方案](/advanced/stability/crash-monitoring.md) | [ANR 治理指南](/advanced/stability/anr-guide.md)
+> 进阶阅读：[APM 监控体系建设](/advanced/stability/apm-monitoring.md) | [崩溃监控方案](/advanced/stability/crash-monitoring.md) | [ANR 治理指南](/advanced/stability/anr-guide.md)

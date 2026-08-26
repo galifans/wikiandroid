@@ -4,9 +4,9 @@ title: Version Catalog 依赖管理
 description: Version Catalog 原理、libs.versions.toml 配置、依赖引用、版本统一与迁移
 ---
 
-# 📦 Version Catalog 依赖管理
+# Version Catalog 依赖管理
 
-> 面试高频指数：⭐⭐⭐
+> 面试高频指数：中
 > Version Catalog 是 AGP 7.0+ 官方推荐的依赖管理方式，取代 buildSrc。
 
 ## 1. 为什么需要统一依赖管理

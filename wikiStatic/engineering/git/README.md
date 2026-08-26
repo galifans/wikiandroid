@@ -7,7 +7,7 @@ dir:
   order: 2
 ---
 
-# 🔀 Git 与版本管理
+# Git 与版本管理
 
 团队协作与版本管理的最佳实践。
 
@@ -16,6 +16,7 @@ dir:
 - [Git 工作流实践](git-workflow.md)
 - [Git 高级操作与工作流](git-rebase-workflow.md)
 - [Git 常用命令速查](git-cheatsheet.md)
+- [Git 分支模型与工作流](git-branch-model.md)
 
 ## 核心要点
 

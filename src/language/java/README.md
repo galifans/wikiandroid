@@ -7,7 +7,7 @@ dir:
   order: 2
 ---
 
-# ☕ Java
+# Java
 
 面向 Android 开发者的 Java 核心知识回顾。
 

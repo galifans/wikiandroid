@@ -4,9 +4,9 @@ title: Retrofit + OkHttp 架构解析
 description: Retrofit 动态代理原理、OkHttp 请求链路、连接池、协程支持完整解析
 ---
 
-# 🌐 Retrofit + OkHttp 架构解析
+# Retrofit + OkHttp 架构解析
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 网络请求是 App 的核心，Retrofit + OkHttp 是 Android 事实标准的网络栈。
 
 ## 1. 整体架构

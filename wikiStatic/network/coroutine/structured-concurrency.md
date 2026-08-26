@@ -4,7 +4,7 @@ title: 结构化并发与作用域
 description: CoroutineScope 生命周期、Job 层级、SupervisorJob、取消传播、async/await 组合并发、最佳实践
 ---
 
-# 🕸️ 结构化并发与作用域
+# 结构化并发与作用域
 
 > 协程最强大的特性不是"轻量",而是**结构化并发**:协程的生命周期、取消、异常遵循代码结构自动管理。本文深入 Scope/Job/取消传播与并发组合的最佳实践。
 
@@ -116,7 +116,7 @@ scope.launch {
 }
 scope.launch {
     delay(100)
-    println("任务 B 正常执行")               // ✅ 不受影响
+    println("任务 B 正常执行")               // ✓ 不受影响
 }
 
 // 对比:普通 Job 下,任务 A 失败会取消整个作用域
@@ -125,10 +125,10 @@ scope.launch {
 
 | 场景 | 用 Job | 用 SupervisorJob |
 |------|--------|-----------------|
-| 任务组必须全部成功 | ✅ | |
-| 独立任务(互不影响) | | ✅ |
-| ViewModel 多任务 | | ✅(官方默认) |
-| 并发请求(一个失败全部取消) | ✅ | |
+| 任务组必须全部成功 | ✓ | |
+| 独立任务(互不影响) | | ✓ |
+| ViewModel 多任务 | | ✓(官方默认) |
+| 并发请求(一个失败全部取消) | ✓ | |
 
 ## 五、async/await 组合并发
 
@@ -262,4 +262,4 @@ async 启动协程并返回 Deferred,通过 await() 挂起获取结果,适合"�
 - 顶层异常用 CoroutineExceptionHandler 兜底
 - 绑定生命周期 + 检查 isActive 防泄漏
 
-> 📖 进阶阅读：[协程原理深入](/network/coroutine/coroutine-principle.md) | [协程 Flow 进阶](/network/coroutine/flow-advanced.md) | [ViewModel 源码解析](/jetpack/lifecycle-viewmodel/viewmodel-source.md)
+> 进阶阅读：[协程原理深入](/network/coroutine/coroutine-principle.md) | [协程 Flow 进阶](/network/coroutine/flow-advanced.md) | [ViewModel 源码解析](/jetpack/lifecycle-viewmodel/viewmodel-source.md)

@@ -19,7 +19,7 @@
 | 部署方式 | Cloudflare Pages：`git push main` 自动触发构建部署 |
 | 构建命令 | `npm run build` → 输出目录 `src/.vuepress/dist` |
 | 本地预览 | `npm run dev` → http://localhost:8080 |
-| 版权署名 | Copyright © 2026 WikiAndroid（MIT License） |
+| 版权署名 | Copyright  2026 WikiAndroid（MIT License） |
 | 品牌色 | Android 绿渐变 `#3DDC84 → #0B7A3B`，图标为白色 W 字母 |
 
 ---
@@ -31,41 +31,41 @@ galifans_vibe_coding/
 ├── architecture.md              # 本文档（站点结构权威索引）
 ├── PROGRESS.md                  # 项目进展与记忆（进展时间线 / 文章记录 / 踩坑经验）
 ├── agent.md                     # Agent 行为约束
-├── README.md                    # 🏠 GitHub 首页（与 wikiandroid.com 同源：内容板块 + 书籍索引 + wikiStatic 目录树）
+├── README.md                    # GitHub 首页（与 wikiandroid.com 同源：内容板块 + 书籍索引 + wikiStatic 目录树）
 ├── package.json                 # 依赖与脚本（dev / build / clean / sync:static）
 ├── .gitignore                   # 忽略 node_modules / .cache / .temp / dist
 ├── scripts/
 │   ├── gen-icons.ps1            # 图标生成脚本（favicon.svg 同款设计 → PNG）
 │   ├── prepare-public.mjs      # 构建前复制 wikiStatic/books/ → src/.vuepress/public/books/（网站直链下载）
 │   └── sync-wikistatic.mjs     # wikiStatic 同步脚本（md 同步 + README 目录树自动刷新，跨平台 Node）
-├── wikiStatic/                  # 📦 静态资料库（GitHub 直接浏览/下载，内容与 src/ 同源，详见第 8 节）
+├── wikiStatic/                  # 静态资料库（GitHub 直接浏览/下载，内容与 src/ 同源，详见第 8 节）
 │   ├── README.md                # wikiStatic 总索引（含自动生成的目录树）
-│   ├── books/                   # 📚 书籍资源（PDF 点击直接下载；来源 TIM168/technical_books）
+│   ├── books/                   # 书籍资源（PDF 点击直接下载；来源 TIM168/technical_books）
 │   │   ├── README.md            # 书籍索引（算法 / Java / 网络 / 数据库 …）
 │   │   ├── algorithm/ java/ network/ database/              # 已收录 PDF
 │   │   └── android/ architecture/ language/ system/         # 目录已建，PDF 待补充
 │   └── <模块目录>/              # 各知识模块 md 镜像（roadmap / language / android / ui / jetpack / network / advanced / system / engineering / interview / projects / about）
 └── src/                         # 站点源码根（VuePress docsDir）
-    ├── README.md                # 🏠 首页（hero + 12 张功能卡片 + 精选文章）
+    ├── README.md                # 首页（hero + 12 张功能卡片 + 精选文章）
     ├── .vuepress/               # 站点配置目录
     │   ├── config.ts            # 站点基础配置（title/description/head/favicon）
     │   ├── theme.ts             # 主题配置（author/footer/copyright/plugins）
     │   ├── navbar.ts            # 顶部导航栏（唯一手工维护的导航源）
     │   ├── sidebar.ts           # 侧边栏（全部模块用 "structure" 自动生成）
     │   └── public/              # 静态资源（logo.svg / favicon.svg / 图标 PNG）
-    ├── roadmap/                 # 🗺️ 学习路线
-    ├── language/                # ☕ 语言基础（kotlin / java / algorithm）
-    ├── android/                 # 🧱 Android 核心（四大组件 + Fragment + Intent + 应用启动 + 资源/权限/通知 + 存储）
-    ├── ui/                      # 🎨 UI 与渲染（view / event / custom-view / animation / layout / compose）
-    ├── jetpack/                 # 🧩 Jetpack（lifecycle-viewmodel / room-datastore / paging-navigation / workmanager-hilt）
-    ├── network/                 # 🌐 网络与异步（http / handler / coroutine / thread）
-    ├── advanced/                # 🚀 进阶实战（architecture / modular / plugin / performance / stability / multimedia）
-    ├── system/                  # ⚙️ 系统原理（binder / ams-wms / boot / apk / art）
-    ├── engineering/             # 🛠️ 工程实践（gradle / git / cicd / testing）
-    ├── interview/               # 💼 面试指南（7 篇平铺文章）
-    ├── projects/                # 🤖 实战项目
-    ├── books/                   # 📚 书籍资源板块页（PDF 实体存 wikiStatic/books/，双通道：网站直链 + GitHub）
-    └── about/                   # 📎 关于本站（intro / contribution-guideline / faq）
+    ├── roadmap/                 # 学习路线
+    ├── language/                # 语言基础（kotlin / java / algorithm）
+    ├── android/                 # Android 核心（四大组件 + Fragment + Intent + 应用启动 + 资源/权限/通知 + 存储）
+    ├── ui/                      # UI 与渲染（view / event / custom-view / animation / layout / render）
+    ├── jetpack/                 # Jetpack（lifecycle-viewmodel / room-datastore / paging-navigation / workmanager-hilt / compose）
+    ├── network/                 # 网络与异步（http / handler / coroutine / thread）
+    ├── advanced/                # 进阶实战（architecture / modular / plugin / performance / stability / multimedia / cross-platform）
+    ├── system/                  # 系统原理（binder / ams-wms / boot / apk / art / os）
+    ├── engineering/             # 工程实践（gradle / git / cicd / testing）
+    ├── interview/               # 面试指南（7 篇平铺文章）
+    ├── projects/                # 实战项目
+    ├── books/                   # 书籍资源板块页（PDF 实体存 wikiStatic/books/，双通道：网站直链 + GitHub）
+    └── about/                   # 关于本站（intro / contribution-guideline / faq）
 ```
 
 **关键约定**：每个模块目录下都有一个 `README.md`，既是该模块的**索引页**（列出文章列表），
@@ -79,22 +79,22 @@ galifans_vibe_coding/
 
 | # | 导航文案 | 路径 | 子项 | 说明 |
 | --- | --- | --- | --- | --- |
-| 1 | 🏠 首页 | `/` | — | 首页 |
-| 2 | 🗺️ 学习路线 | `/roadmap/` | — | 3 条学习路线 |
-| 3 | ☕ 语言基础 | — | Kotlin / Java / C++ 知识点 / 设计模式 / 数据结构与算法 | 下拉菜单 |
-| 4 | 🧱 Android 核心 | — | Activity / Service / BroadcastReceiver / ContentProvider / Fragment / Intent / Application / 资源系统 / 权限系统 / 通知机制 / Context / 进程 / 数据存储 | 下拉菜单 |
-| 5 | 🎨 UI 与渲染 | — | View 体系 / 事件分发机制 / 自定义 View / Bitmap / Window / 动画机制 / 布局优化 / 渲染原理 | 下拉菜单 |
-| 6 | 🧩 Jetpack | — | Jetpack Compose / Lifecycle/ViewModel / Room/DataStore / Paging/Navigation / WorkManager/Hilt | 下拉菜单 |
-| 7 | 🌐 网络与异步 | — | 网络与协议 / Handler 消息机制 / 协程 Flow/RxJava / 线程池与并发 / 计算机网络体系 / Socket 编程基础 / TCP 与 UDP 详解 | 下拉菜单 |
-| 8 | 🚀 进阶实战 | — | 架构设计 / 组件化与模块化 / 插件化与热修复 / 性能优化 / 稳定性保障 / 音视频开发 / 跨端方案 | 下拉菜单 |
-| 9 | ⚙️ 系统原理 | — | Binder 机制 / AMS/WMS / 系统与应用启动流程 / APK 打包与签名 / ART/DEX/类加载 / 操作系统 | 下拉菜单 |
-| 10 | 🛠️ 工程实践 | — | Gradle 构建 / Git 与版本管理 / CI/CD / 测试体系 | 下拉菜单 |
-| 11 | 💼 面试指南 | `/interview/` | — | 平铺 7 篇文章 |
-| 12 | 🤖 实战项目 | `/projects/` | — | 平铺文章 |
-| 13 | 📚 书籍资源 | `/books/` | — | 分类索引 + 直链下载（PDF 实体存 `wikiStatic/books/`） |
+| 1 | 首页 | `/` | — | 首页 |
+| 2 | 学习路线 | `/roadmap/` | — | 4 条学习路线 |
+| 3 | 语言基础 | — | Kotlin / Java / C++ 知识点 / 设计模式 / 数据结构与算法 | 下拉菜单 |
+| 4 | Android 核心 | — | Activity / Service / BroadcastReceiver / ContentProvider / Fragment / Intent / Application / 资源系统 / 权限系统 / 通知机制 / Context / 进程 / 数据存储 | 下拉菜单 |
+| 5 | UI 与渲染 | — | View 体系 / 事件分发机制 / 自定义 View / Bitmap / Window / 动画机制 / 布局优化 / 渲染原理 | 下拉菜单 |
+| 6 | Jetpack | — | Jetpack Compose / Lifecycle/ViewModel / Room/DataStore / Paging/Navigation / WorkManager/Hilt | 下拉菜单 |
+| 7 | 网络与异步 | — | 网络与协议 / Handler 消息机制 / 协程 Flow/RxJava / 线程池与并发 / 计算机网络体系 / Socket 编程基础 / TCP 与 UDP 详解 | 下拉菜单 |
+| 8 | 进阶实战 | — | 架构设计 / 组件化与模块化 / 插件化与热修复 / 性能优化 / 稳定性保障 / 音视频开发 / 跨端方案 | 下拉菜单 |
+| 9 | 系统原理 | — | Binder 机制 / AMS/WMS / 系统与应用启动流程 / APK 打包与签名 / ART/DEX/类加载 / 操作系统 | 下拉菜单 |
+| 10 | 工程实践 | — | Gradle 构建 / Git 与版本管理 / CI/CD / 测试体系 | 下拉菜单 |
+| 11 | 面试指南 | `/interview/` | — | 平铺 8 篇文章 |
+| 12 | 实战项目 | `/projects/` | — | 平铺文章 |
+| 13 | 书籍资源 | `/books/` | — | 分类索引 + 直链下载（PDF 实体存 `wikiStatic/books/`） |
 | 14 | GitHub | https://github.com/galifans/wikiandroid | — | 外链 |
 
-> 注：`/about/` 不在导航栏中，通过首页「📎 关于本站」功能卡片与链接访问。
+> 注：`/about/` 不在导航栏中，通过首页「关于本站」功能卡片与链接访问。
 
 ---
 
@@ -125,7 +125,7 @@ galifans_vibe_coding/
 > 侧边栏样式（`src/.vuepress/styles/index.scss`）规则：
 > - **箭头仅限有内容**：子级链接右侧的 `›` 小箭头（仿 Android 官方文档 chevron）只在 `:has(> ul)`（链接内嵌更深内容）时显示；叶子链接无箭头。站内更深内容实际是 `li > section` 嵌套分组（非 `a > ul`），自带主题 `.vp-arrow` chevron 作为展开指示
 > - **层级区分**：大类（顶层分组标题）17px + `font-weight: 600` 加粗；嵌套子分组（如 Java 下的 Java 并发/集合）与子级链接同为 14px + 400 常规；**子级选中（active）后加粗 600**（`.vp-sidebar-link.active, .vp-sidebar-header.active`）
->   - ⚠️ 嵌套子分组字号规则**必须无条件固定 14px**（不能写 `:not(.active)`），否则选中后规则失效、字号回退到主题继承值 0.94rem≈15.04px 会"变大"；选中态用嵌套 `&.active { font-weight: 600 }` 只加粗、字号不变
+>   -  嵌套子分组字号规则**必须无条件固定 14px**（不能写 `:not(.active)`），否则选中后规则失效、字号回退到主题继承值 0.94rem≈15.04px 会"变大"；选中态用嵌套 `&.active { font-weight: 600 }` 只加粗、字号不变
 > - **文字颜色**：默认 `var(--vp-c-text)`（亮色 #3c3c43 偏灰黑，暗色自动切换浅色）——不写死色值以适配暗色模式
 > - **焦点规则**：`.vp-sidebar-header:focus:not(.active)` → 非当前板块点击有绿色反馈（accent 色 + accent-soft 背景），子级分组点击**不加粗**（加粗留给选中态）；当前板块按钮（路由类 `.active`）点击不叠绿，避免与子级 active 链接双重高亮——**任意场景仅当前页条目一个绿色**
 > - **悬挂缩进**：`padding-left: calc(8px + 1em + 4px); text-indent: calc(-1em - 4px)` 保证长标题换行与图标对齐
@@ -150,15 +150,16 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 
 ## 6. 内容模块与文章状态
 
-> ✅ = 已完成文章　⏳ = 待更新文章（README 中标记「（待更新）」，链接暂为死链，构建时仅产生 warning，不阻塞）
+> ✓ = 已完成文章　待更新 = 待更新文章（README 中标记「（待更新）」，链接暂为死链，构建时仅产生 warning，不阻塞）
 
-### 🗺️ 学习路线 `/roadmap/`
-- ✅ android-roadmap.md（Android 学习路线 2026）
-- ✅ kotlin-roadmap.md（Kotlin 学习路线）
-- ✅ compose-roadmap.md（Jetpack Compose 学习路线）
+### 学习路线 `/roadmap/`
+- ✓ android-roadmap.md（Android 学习路线 2026）
+- ✓ kotlin-roadmap.md（Kotlin 学习路线）
+- ✓ compose-roadmap.md（Jetpack Compose 学习路线）
+- ✓ android-version-history.md（Android 版本演进与特性）
 
-### ☕ 语言基础 `/language/`
-| 子模块 | ✅ 已完成 |
+### 语言基础 `/language/`
+| 子模块 | ✓ 已完成 |
 | --- | --- |
 | kotlin/ | kotlin-basics.md、kotlin-coroutines.md、kotlin-generics.md、kotlin-extensions.md、kotlin-functional.md、kotlin-delegation.md |
 | java/ | java-basics.md、java-collections.md、java-concurrency.md（含 basics/ collections/ concurrent/ jvm/ 分组；jvm/ 含内存区域、类加载、垃圾回收、泛型、Java 内存模型与线程） |
@@ -166,37 +167,37 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 | design-pattern/ | 设计模式汇总 + 11 篇精讲（单例/代理/观察者/策略/责任链/适配器等） |
 | algorithm/ | algorithm-guide.md、leetcode-top100.md、sort-algorithm.md、search-algorithm.md、binary-tree-traversal.md、high-frequency-algorithms.md、data-structure.md、coder-interview-guide.md、offer-classic.md 等 |
 
-### 🧱 Android 核心 `/android/`
-| 子模块 | ✅ 已完成 |
+### Android 核心 `/android/`
+| 子模块 | ✓ 已完成 |
 | --- | --- |
-| activity/ | activity-lifecycle.md、intent-filter.md、task-stack.md、activity-launch-process.md |
-| service/ | service-basics.md、foreground-service.md、aidl.md |
+| activity/ | activity-lifecycle.md、intent-filter.md、task-stack.md、activity-launch-process.md、activity-result-api.md、activity-config-changes.md |
+| service/ | service-basics.md、foreground-service.md、aidl.md、service-threading.md |
 | broadcast/ | broadcast-basics.md、register-comparison.md |
-| content-provider/ | content-provider-basics.md |
-| fragment/ | fragment-basics.md、fragment-pitfalls.md |
+| content-provider/ | content-provider-basics.md、fileprovider.md、contentobserver.md |
+| fragment/ | fragment-basics.md、fragment-pitfalls.md、fragment-communication.md |
 | intent/ | intent-basics.md、intent-filter.md |
 | app/ | application-basics.md、app-launch-process.md、manifest-guide.md |
-| resource/ | resource-basics.md、resource-qualifiers.md |
+| resource/ | resource-basics.md、resource-qualifiers.md、theme-style.md、drawable-guide.md |
 | permission/ | permission-basics.md、permission-practice.md |
 | notification/ | notification-basics.md、pendingintent.md |
-| storage/ | storage-comparison.md、sharedpreferences-deep.md、sp-vs-datastore.md |
-| process/ | process-lifecycle.md |
+| storage/ | storage-comparison.md、sharedpreferences-deep.md、sp-vs-datastore.md、sqlite-guide.md、scoped-storage.md |
+| process/ | process-lifecycle.md、multi-process.md |
 | context/ | context-overview.md |
 
-### 🎨 UI 与渲染 `/ui/`
-| 子模块 | ✅ 已完成 |
+### UI 与渲染 `/ui/`
+| 子模块 | ✓ 已完成 |
 | --- | --- |
-| view/ | view-draw-process.md、view-viewgroup.md、measurespec.md、recyclerview-guide.md、recyclerview-source.md、webview-guide.md |
-| event/ | event-dispatch.md、view-sliding.md、conflict-solution.md、input-system.md |
-| custom-view/ | custom-view-guide.md、custom-viewgroup.md、canvas-path.md、touch-helper.md |
-| animation/ | property-animation.md、tween-animation.md、scene-transition.md |
-| layout/ | layout-optimization.md、screen-adaptation.md |
-| window/ | window-mechanism.md、windowmanager-deep.md |
-| bitmap/ | bitmap-guide.md、glide-source.md |
-| render/ | render-principle.md |
+| view/ | view-draw-process.md、view-viewgroup.md、measurespec.md、recyclerview-guide.md、recyclerview-source.md、webview-guide.md、viewpager2-guide.md |
+| event/ | event-dispatch.md、view-sliding.md、conflict-solution.md、input-system.md、coordinate-system.md、multitouch.md |
+| custom-view/ | custom-view-guide.md、custom-viewgroup.md、canvas-path.md、touch-helper.md、custom-attributes.md |
+| animation/ | property-animation.md、tween-animation.md、scene-transition.md、interpolator-evaluator.md |
+| layout/ | layout-optimization.md、screen-adaptation.md、constraintlayout-guide.md、layout-selection.md |
+| window/ | window-mechanism.md、windowmanager-deep.md、systembar-adaptation.md、dialog-toast-popup.md |
+| bitmap/ | bitmap-guide.md、glide-source.md、bitmap-compress.md |
+| render/ | render-principle.md、choreographer.md、hardware-acceleration.md、surfaceview-textureview.md |
 
-### 🧩 Jetpack `/jetpack/`
-| 子模块 | ✅ 已完成 |
+### Jetpack `/jetpack/`
+| 子模块 | ✓ 已完成 |
 | --- | --- |
 | compose/ | compose-basics.md、compose-state.md、compose-performance.md、compose-layout.md、compose-animation.md、compose-interop.md |
 | lifecycle-viewmodel/ | viewmodel-livedata.md、savedstate.md、lifecycle.md、viewmodel-source.md |
@@ -204,60 +205,61 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 | paging-navigation/ | paging3.md、navigation.md、navigation-advanced.md |
 | workmanager-hilt/ | workmanager.md、hilt.md、hilt-advanced.md |
 
-### 🌐 网络与异步 `/network/`
-| 子模块 | ✅ 已完成 |
+### 网络与异步 `/network/`
+| 子模块 | ✓ 已完成 |
 | --- | --- |
-| http/ | retrofit-okhttp.md、okhttp-interceptor.md、http-protocol.md、okhttp-source.md、retrofit-source.md、network-cache.md |
+| http/ | retrofit-okhttp.md、okhttp-interceptor.md、http-protocol.md、okhttp-source.md、retrofit-source.md、network-cache.md、websocket.md |
 | handler/ | handler-source.md、handlerthread.md、sync-barrier.md |
 | coroutine/ | flow-advanced.md、rxjava-operators.md、coroutine-principle.md、structured-concurrency.md |
 | thread/ | thread-pool.md、locks.md、concurrency-tools.md、asynctask-intentservice.md、concurrency-practice.md |
 | 根级 | osi-tcpip.md、socket.md、tcp-udp.md（基础协议） |
 
-### 🚀 进阶实战 `/advanced/`
-| 子模块 | ✅ 已完成 |
+### 进阶实战 `/advanced/`
+| 子模块 | ✓ 已完成 |
 | --- | --- |
 | architecture/ | architecture-evolution.md、clean-architecture.md、repository-pattern.md、eventbus-analysis.md、project-structure.md |
 | modular/ | modularization-practice.md、router-design.md |
 | plugin/ | plugin-principle.md、hotfix-comparison.md、hook-tech.md |
 | performance/ | startup-optimization.md、memory-optimization.md、jank-optimization.md、anr-optimization.md、apk-size-optimization.md、leakcanary-analysis.md、network-optimization.md、battery-optimization.md |
 | stability/ | crash-monitoring.md、anr-guide.md、apm-monitoring.md、log-system.md |
-| multimedia/ | multimedia-basics.md、exoplayer-deep.md、mediacodec-ffmpeg.md |
+| multimedia/ | multimedia-basics.md、exoplayer-deep.md、mediacodec-ffmpeg.md、camera-capture.md |
 | cross-platform/ | cross-platform-overview.md |
 
-### ⚙️ 系统原理 `/system/`
-| 子模块 | ✅ 已完成 |
+### 系统原理 `/system/`
+| 子模块 | ✓ 已完成 |
 | --- | --- |
 | binder/ | binder-mechanism.md、binder-driver.md、aidl-deep.md、ipc-comparison.md、parcelable.md |
 | ams-wms/ | ams-activity-launch.md、wms-principle.md、pms-package-manager.md、wms-touch-dispatch.md |
 | boot/ | system-boot.md、app-launch.md、zygote-deep.md |
-| apk/ | apk-build-process.md、multi-channel.md、signature-verify.md |
+| apk/ | apk-build-process.md、multi-channel.md、signature-verify.md、apk-install-process.md、apk-reinforcement.md |
 | art/ | art-runtime.md、art-compilation.md、art-gc.md、dex-format.md、classloader.md |
 | os/ | os-core.md、linux-memory.md、thread-sync-ipc.md |
 
-### 🛠️ 工程实践 `/engineering/`
-| 子模块 | ✅ 已完成 |
+### 工程实践 `/engineering/`
+| 子模块 | ✓ 已完成 |
 | --- | --- |
 | gradle/ | gradle-basics.md、dependency-config.md、version-catalog.md、proguard-guide.md、custom-gradle-plugin.md |
-| git/ | git-workflow.md、git-rebase-workflow.md、git-cheatsheet.md |
+| git/ | git-workflow.md、git-rebase-workflow.md、git-cheatsheet.md、git-branch-model.md |
 | cicd/ | github-actions.md、jenkins-pipeline.md、gray-release.md |
 | testing/ | unit-testing.md、mockk-testing.md、ui-testing.md、test-pyramid.md |
 
-### 💼 面试指南 `/interview/`（平铺）
-- ✅ android-knowledge-summary.md（Android 知识点汇总：19 大主题回顾清单，链接全部详细文章）
-- ✅ basics.md（基础篇）✅ advanced.md（进阶篇）✅ source-code.md（源码篇）
-- ✅ interview-plan.md（面试准备计划）✅ resume-guide.md（简历建议）✅ company-experience.md（大厂面经实录）
+### 面试指南 `/interview/`（平铺）
+- ✓ android-knowledge-summary.md（Android 知识点汇总：19 大主题回顾清单，链接全部详细文章）
+- ✓ basics.md（基础篇）✓ advanced.md（进阶篇）✓ source-code.md（源码篇）
+- ✓ interview-plan.md（面试准备计划）✓ resume-guide.md（简历建议）✓ company-experience.md（大厂面经实录）
+- ✓ behavior-questions.md（行为面试题与回答套路：STAR 法则 / 自我介绍 / 项目难点 / 离职原因 / 薪资谈判）
 
-### 🤖 实战项目 `/projects/`
-- ✅ from-scratch.md（从零搭建 App）
-- ✅ open-source-analysis.md（开源项目源码解析）
+### 实战项目 `/projects/`
+- ✓ from-scratch.md（从零搭建 App）
+- ✓ open-source-analysis.md（开源项目源码解析）
 
 ### � 书籍资源 `/books/`
-- ✅ src/books/README.md（网站板块页：分类索引 + 直链下载；PDF 实体存 `wikiStatic/books/`，来源 TIM168/technical_books）
+- ✓ src/books/README.md（网站板块页：分类索引 + 直链下载；PDF 实体存 `wikiStatic/books/`，来源 TIM168/technical_books）
 
-### 📎 关于本站 `/about/`
-- ✅ intro.md　✅ contribution-guideline.md　✅ faq.md
+### 关于本站 `/about/`
+- ✓ intro.md　✓ contribution-guideline.md　✓ faq.md
 
-**现状统计**：✅ 全部文章已完成（231 篇文章 + 80 个模块 README，构建 305 页面），无「（待更新）」占位文章，构建无 broken-link warning。
+**现状统计**：✓ 全部文章已完成（265 篇文章 + 80 个模块 README，构建 336 页面），无「（待更新）」占位文章，构建无 broken-link warning。
 
 ---
 
@@ -266,7 +268,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 7.1 新增一篇普通文章
 1. 在对应模块目录创建 `xxx.md`，frontmatter 写 `icon` + `title`（+ `description`）。
 2. 更新该模块 `README.md` 的「文章列表」，去掉「（待更新）」或新增条目。
-3. 若文章值得推荐，同步更新首页 `src/README.md` 的「📌 精选文章」对应小节。
+3. 若文章值得推荐，同步更新首页 `src/README.md` 的「 精选文章」对应小节。
 4. 侧边栏无需改动（structure 自动生成）。
 5. **运行 `npm run sync:static`**，同步 md 到 `wikiStatic/` 并刷新根 README 与 wikiStatic README 的目录树。
 
@@ -290,7 +292,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 - 删除导航项不影响对应页面仍可通过链接/侧边栏访问。
 
 ### 7.5 修改品牌 / 版权 / 页脚
-- 版权行：`theme.ts` 的 `author.name`（theme-hope 据此自动生成 `Copyright © <year> <name>`）；`copyright.author` 同步改。
+- 版权行：`theme.ts` 的 `author.name`（theme-hope 据此自动生成 `Copyright  <year> <name>`）；`copyright.author` 同步改。
 - 页脚：`theme.ts` 的 `footer`（当前为 `GitHub | MIT License`）。
 - 站点标题：`config.ts` 的 `title`。
 - 图标：替换 `public/logo.svg` / `public/favicon.svg`（用 `scripts/gen-icons.ps1` 重新生成 PNG）。
@@ -351,6 +353,6 @@ git push origin main # 3. 推送 main → Cloudflare Pages 自动构建部署
 
 ## 10. 已知问题与警告
 
-- ✅ 所有占位文章已补齐，「待更新」死链 warning 已消除。
+- ✓ 所有占位文章已补齐，「待更新」死链 warning 已消除。
 - `theme.ts` 中 `iconAssets: "iconify"` 有弃用提示（新写法为 `plugins.icon.assets`），暂不影响功能。
 - 终端偶发 PATH 丢失（PowerShell 5.1），运行 npm 前先刷新 PATH。

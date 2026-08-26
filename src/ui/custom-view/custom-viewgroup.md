@@ -4,9 +4,9 @@ title: 自定义 ViewGroup 实战
 description: ViewGroup 测量与布局原理、onMeasure/onLayout 实战、自定义流式布局完整示例与性能优化
 ---
 
-# 🧱 自定义 ViewGroup 实战
+# 自定义 ViewGroup 实战
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 自定义 ViewGroup 是解决复杂布局问题的终极武器（如流式标签、九宫格、瀑布流）。
 
 ## 1. ViewGroup 的核心职责

@@ -4,7 +4,7 @@ title: ViewModel 源码解析
 description: ViewModel 为什么配置变化不销毁、ViewModelStore 与 ViewModelProvider 原理、onCleared 时机、SavedStateHandle 源码
 ---
 
-# 🔄 ViewModel 源码解析
+# ViewModel 源码解析
 
 > ViewModel 为什么旋转屏幕不销毁?onCleared 到底什么时候调用?SavedStateHandle 如何做到进程死亡恢复?本文从源码彻底搞懂 ViewModel 机制。
 
@@ -94,7 +94,7 @@ sequenceDiagram
     A2->>A2: 同一个 ViewModel 实例继续使用
 ```
 
-> 💡 **关键**:ViewModelStore 不挂在 Activity 实例上,而是通过 `NonConfigurationInstances` 在重建时**原样传递**,所以 ViewModel 不销毁。**只有 `finish()`(用户主动关闭)才会真正 clear**。
+> **关键**:ViewModelStore 不挂在 Activity 实例上,而是通过 `NonConfigurationInstances` 在重建时**原样传递**,所以 ViewModel 不销毁。**只有 `finish()`(用户主动关闭)才会真正 clear**。
 
 ## 三、onCleared 调用时机
 
@@ -110,10 +110,10 @@ public void onDestroy() {
 
 | 场景 | isChangingConfigurations | onCleared |
 |------|------------------------|-----------|
-| 旋转屏幕/切换深色模式 | true | ❌ 不调用 |
-| 用户按返回键 finish() | false | ✅ 调用 |
-| 任务被移除 | false | ✅ 调用 |
-| 进程被杀(无 onDestroy) | — | ❌ 不调用(进程直接没了) |
+| 旋转屏幕/切换深色模式 | true | ✗ 不调用 |
+| 用户按返回键 finish() | false | ✓ 调用 |
+| 任务被移除 | false | ✓ 调用 |
+| 进程被杀(无 onDestroy) | — | ✗ 不调用(进程直接没了) |
 
 ```kotlin
 // onCleared 常见用途
@@ -134,7 +134,7 @@ class TimerViewModel : ViewModel() {
 }
 ```
 
-> ⚠️ **坑**:onCleared 不保证在进程被杀时调用(进程死亡无回调),所以关键数据要持久化到 SavedStateHandle/Room/DataStore。
+>  **坑**:onCleared 不保证在进程被杀时调用(进程死亡无回调),所以关键数据要持久化到 SavedStateHandle/Room/DataStore。
 
 ## 四、Factory 与默认工厂
 
@@ -193,7 +193,7 @@ public void clear() {
 }
 ```
 
-> 💡 `viewModelScope` 使用 `SupervisorJob + Main.immediate`。ViewModel 清除时自动取消,无需手动管理协程生命周期。注意:网络请求放 viewModelScope 会在离开页面时自动取消(合理),但**轮询/下载**等需特殊处理。
+> `viewModelScope` 使用 `SupervisorJob + Main.immediate`。ViewModel 清除时自动取消,无需手动管理协程生命周期。注意:网络请求放 viewModelScope 会在离开页面时自动取消(合理),但**轮询/下载**等需特殊处理。
 
 ## 六、SavedStateHandle 原理
 
@@ -275,4 +275,4 @@ SavedStateHandle 内部维护一个普通 Map(mRegular)并注册为 SavedStateRe
 - viewModelScope = SupervisorJob + Main,clear 时自动取消
 - SavedStateHandle 通过 SavedStateRegistry 桥接系统状态保存
 
-> 📖 进阶阅读：[ViewModel + LiveData](/jetpack/lifecycle-viewmodel/viewmodel-livedata.md) | [SavedStateHandle 状态保存](/jetpack/lifecycle-viewmodel/savedstate.md) | [Lifecycle 组件详解](/jetpack/lifecycle-viewmodel/lifecycle.md)
+> 进阶阅读：[ViewModel + LiveData](/jetpack/lifecycle-viewmodel/viewmodel-livedata.md) | [SavedStateHandle 状态保存](/jetpack/lifecycle-viewmodel/savedstate.md) | [Lifecycle 组件详解](/jetpack/lifecycle-viewmodel/lifecycle.md)

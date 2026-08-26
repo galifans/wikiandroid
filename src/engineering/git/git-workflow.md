@@ -4,9 +4,9 @@ title: Git 工作流实践
 description: Git Flow/GitHub Flow/Trunk Based 对比、分支模型、提交规范、PR 协作与 Code Review
 ---
 
-# 🔀 Git 工作流实践
+# Git 工作流实践
 
-> 面试高频指数：⭐⭐⭐
+> 面试高频指数：中
 > 规范的工作流决定团队协作效率，也是工程素养的体现。
 
 ## 1. 常见工作流对比

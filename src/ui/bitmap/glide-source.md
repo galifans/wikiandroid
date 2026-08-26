@@ -4,7 +4,7 @@ title: Glide 图片加载源码分析
 description: Glide 加载流程、三级缓存（内存/磁盘/网络）、生命周期绑定与图片变换源码解析
 ---
 
-# 🖼️ Glide 图片加载源码分析
+# Glide 图片加载源码分析
 
 > Glide 是 Android 最流行的图片加载库。它为什么这么快？缓存如何设计？为什么能感知生命周期？本文从 `load()` 到 `into()` 拆解 Glide 4.x 的完整加载链路。
 
@@ -50,14 +50,14 @@ flowchart LR
     F --> G[RequestManager 暂停/恢复/清理请求]
 ```
 
-> 💡 关键技巧：**Glide 在目标 Activity 中插入一个透明的 SupportRequestManagerFragment**，通过 Fragment 的生命周期回调驱动请求管理，从而感知页面销毁并自动取消加载、释放资源——避免图片加载导致的内存泄漏。
+> 关键技巧：**Glide 在目标 Activity 中插入一个透明的 SupportRequestManagerFragment**，通过 Fragment 的生命周期回调驱动请求管理，从而感知页面销毁并自动取消加载、释放资源——避免图片加载导致的内存泄漏。
 
 ### 2.3 绑定 Application 的后果
 
 ```kotlin
 // 若 Context 不是 Activity/Fragment（如自定义 View 传入 Application）
 // → 无法感知生命周期，图片加载不会随页面销毁取消
-Glide.with(applicationContext)   // ⚠️ 不推荐，除非确实全局
+Glide.with(applicationContext)   //  不推荐，除非确实全局
 ```
 
 ## 三、load()：模型到数据源
@@ -115,7 +115,7 @@ data class EngineKey(
 )
 ```
 
-> 💡 同一个 URL，**不同尺寸/裁剪策略 = 不同 Key = 不同缓存条目**，这也是为什么 `override()` 改变后图片会重新加载。
+> 同一个 URL，**不同尺寸/裁剪策略 = 不同 Key = 不同缓存条目**，这也是为什么 `override()` 改变后图片会重新加载。
 
 ## 五、缓存体系
 
@@ -155,7 +155,7 @@ Glide.with(this)
     .into(imageView)
 ```
 
-> 💡 **RESOURCE 策略**适合"同一图多种尺寸"场景（各尺寸缓存一份）；**DATA 策略**适合"一张图只显示一次"或需要原图的场景。
+> **RESOURCE 策略**适合"同一图多种尺寸"场景（各尺寸缓存一份）；**DATA 策略**适合"一张图只显示一次"或需要原图的场景。
 
 ## 六、图片变换（Transformations）
 
@@ -193,7 +193,7 @@ class GrayscaleTransform : BitmapTransformation() {
 }
 ```
 
-> ⚠️ 变换会改变 EngineKey（transformations 参与 Key 计算），因此不同变换使用独立缓存。
+>  变换会改变 EngineKey（transformations 参与 Key 计算），因此不同变换使用独立缓存。
 
 ## 七、生命周期与内存
 
@@ -254,4 +254,4 @@ Picasso 体积小、API 简洁，但缓存策略简单、无 Bitmap 池、生命
 - 变换参与 Key 计算，自定义变换继承 BitmapTransformation
 - 列表复用需 clear，大图必须降采样
 
-> 📖 进阶阅读：[Bitmap 详解与图片压缩](/ui/bitmap/bitmap-guide.md) | [LeakCanary 源码分析](/advanced/performance/leakcanary-analysis.md) | [内存优化与内存泄漏排查](/advanced/performance/memory-optimization.md)
+> 进阶阅读：[Bitmap 详解与图片压缩](/ui/bitmap/bitmap-guide.md) | [LeakCanary 源码分析](/advanced/performance/leakcanary-analysis.md) | [内存优化与内存泄漏排查](/advanced/performance/memory-optimization.md)

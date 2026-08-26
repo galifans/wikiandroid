@@ -4,9 +4,9 @@ title: UI 测试与 Espresso
 description: UI 测试分层、Espresso 使用、Compose UI Test、测试环境配置、稳定性与 CI 集成
 ---
 
-# 🧪 UI 测试与 Espresso
+# UI 测试与 Espresso
 
-> 面试高频指数：⭐⭐⭐
+> 面试高频指数：中
 > UI 测试保障核心流程质量，Espresso 与 Compose UI Test 是两大主流。
 
 ## 1. UI 测试的定位

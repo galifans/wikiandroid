@@ -4,9 +4,9 @@ title: SharedPreferences 与 DataStore 对比
 description: 从 API 设计、异步模型、一致性、类型安全四个维度深度对比 SP 与 DataStore
 ---
 
-# ⚡ SharedPreferences 与 DataStore 对比
+# SharedPreferences 与 DataStore 对比
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 这是面试官最爱问的"新旧技术对比"类问题，也是从旧项目迁移到新架构的必经之路。
 
 ## 1. 一句话总结
@@ -26,7 +26,7 @@ val sp = getSharedPreferences("user_config", Context.MODE_PRIVATE)
 sp.edit().putString("nickname", "Tom").apply()    // 异步：内存立即生效，磁盘异步写
 sp.edit().putString("nickname", "Tom").commit()   // 同步：写盘完成后返回，可能卡线程
 
-// 读取（⚠️ 可能阻塞）
+// 读取（ 可能阻塞）
 val nickname = sp.getString("nickname", "default")
 ```
 
@@ -76,9 +76,9 @@ lifecycleScope.launch {
 | 数据模型 | 键值对（无类型） | 键值对 / Proto（类型安全） |
 | 读取方式 | 同步（可能阻塞主线程） | 异步 Flow |
 | 写入一致性 | apply 无回调、失败静默 | 事务性，失败抛异常可重试 |
-| 是否响应式 | ❌ 需手动监听 | ✅ 天然 Flow |
-| 跨进程安全 | ❌（MODE_MULTI_PROCESS 已废弃） | 单进程单实例 |
-| 生命周期集成 | ❌ | ✅ 协程+生命周期感知 |
+| 是否响应式 | ✗ 需手动监听 | ✓ 天然 Flow |
+| 跨进程安全 | ✗（MODE_MULTI_PROCESS 已废弃） | 单进程单实例 |
+| 生命周期集成 | ✗ | ✓ 协程+生命周期感知 |
 
 ## 4. 深挖原理：为什么 SP 会卡
 

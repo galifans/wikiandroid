@@ -4,7 +4,7 @@ title: APM 监控体系建设
 description: 性能监控平台、卡顿监控、ANR 监控、网络监控、埋点体系、监控指标与告警
 ---
 
-# 📊 APM 监控体系建设
+# APM 监控体系建设
 
 > APM(Application Performance Monitoring)是 App 线上质量的"眼睛":崩溃、卡顿、ANR、网络、页面性能全部可观测、可告警、可定位。本文从零设计一套 APM 体系。
 
@@ -213,4 +213,4 @@ APM(应用性能监控)是对 App 线上运行质量的全方位观测体系。�
 - 上报:批量 + 压缩 + 采样控制 + 动态开关
 - 告警:分级通知,问题先于用户发现
 
-> 📖 进阶阅读：[崩溃监控方案](/advanced/stability/crash-monitoring.md) | [ANR 治理指南](/advanced/stability/anr-guide.md) | [网络优化实战](/advanced/performance/network-optimization.md)
+> 进阶阅读：[崩溃监控方案](/advanced/stability/crash-monitoring.md) | [ANR 治理指南](/advanced/stability/anr-guide.md) | [网络优化实战](/advanced/performance/network-optimization.md)

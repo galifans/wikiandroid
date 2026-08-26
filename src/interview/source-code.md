@@ -3,7 +3,7 @@ icon: source
 title: 面试源码篇
 ---
 
-# 📕 面试高频题：源码篇
+# 面试高频题：源码篇
 
 > 源码理解是面试的分水岭，以下是最常被追问的源码主题。
 
@@ -58,4 +58,4 @@ startActivity → Instrumentation → AMS
 ### 11. R8 与混淆？
 - 代码压缩、混淆、资源裁剪、优化
 
-> 💡 建议配合[面试准备计划](/interview/interview-plan.md)系统复习。
+> 建议配合[面试准备计划](/interview/interview-plan.md)系统复习。

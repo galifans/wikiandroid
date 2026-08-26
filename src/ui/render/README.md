@@ -7,7 +7,7 @@ dir:
   order: 8
 ---
 
-# 🖥️ 渲染原理
+# 渲染原理
 
 从 VSYNC 到屏幕像素：Android 渲染管线、Choreographer、硬件加速与性能指标。
 

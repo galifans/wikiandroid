@@ -4,7 +4,7 @@ title: Compose 动画
 description: Compose 动画体系、animate*AsState、AnimatedVisibility、AnimatedContent、Animatable、关键帧与弹簧
 ---
 
-# ✨ Compose 动画
+# Compose 动画
 
 > Compose 把动画变成**状态变化**:值变化 → 动画过渡。告别 XML 动画资源,用几十行 Kotlin 实现弹性、关键帧、转场。本文覆盖完整动画体系。
 
@@ -235,13 +235,13 @@ fun AnimatedBox() {
 | 可打断优先 | 手势动画用 Animatable 支持打断 |
 
 ```kotlin
-// ✅ 推荐:graphicsLayer 做位移动画(GPU 合成)
+// ✓ 推荐:graphicsLayer 做位移动画(GPU 合成)
 Modifier.graphicsLayer {
     translationX = animatedOffset.value
     rotationZ = animatedRotation.value
     scaleX = animatedScale.value
 }
-// ❌ 避免:offset 触发布局重排
+// ✗ 避免:offset 触发布局重排
 Modifier.offset { IntOffset(x, 0) }
 ```
 
@@ -281,4 +281,4 @@ animate*AsState:声明式便捷 API,适合"目标值驱动的简单动画",内�
 - spring/tween/keyframes 三种核心 spec 满足不同节奏
 - graphicsLayer 动画是性能关键
 
-> 📖 进阶阅读：[Compose 核心概念](/jetpack/compose/compose-basics.md) | [Compose 布局系统](/jetpack/compose/compose-layout.md) | [属性动画机制](/ui/animation/property-animation.md)
+> 进阶阅读：[Compose 核心概念](/jetpack/compose/compose-basics.md) | [Compose 布局系统](/jetpack/compose/compose-layout.md) | [属性动画机制](/ui/animation/property-animation.md)

@@ -4,7 +4,7 @@ title: 自定义 Gradle 插件
 description: 插件类型、Project API、Transform/ASM、发布与调试、实战案例
 ---
 
-# 🔧 自定义 Gradle 插件
+# 自定义 Gradle 插件
 
 > 当构建逻辑开始重复(多渠道、埋点、资源注入、字节码插桩),就该把逻辑封装成 **Gradle 插件**。本文从三类插件写法到字节码插桩实战全覆盖。
 
@@ -226,4 +226,4 @@ Transform 是 AGP 提供的**字节码转换 API**:让插件在 class 编译后�
 - Transform + ASM 实现字节码插桩(埋点/统计)
 - 发布到 Maven 仓库,pluginManagement 统一管理
 
-> 📖 进阶阅读：[Gradle 基础与构建优化](/engineering/gradle/gradle-basics.md) | [Version Catalog 依赖管理](/engineering/gradle/version-catalog.md) | [AGP 与构建流程](/engineering/gradle/gradle-basics.md)
+> 进阶阅读：[Gradle 基础与构建优化](/engineering/gradle/gradle-basics.md) | [Version Catalog 依赖管理](/engineering/gradle/version-catalog.md) | [AGP 与构建流程](/engineering/gradle/gradle-basics.md)

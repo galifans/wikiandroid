@@ -4,7 +4,7 @@ title: PMS 包管理机制
 description: PackageManagerService 架构、APK 扫描解析、安装流程、权限管理、解析器缓存
 ---
 
-# 📦 PMS 包管理机制
+# PMS 包管理机制
 
 > PMS(PackageManagerService)是 Android 的"应用管家":扫描 APK、解析 Manifest、管理安装卸载、分配权限。理解 PMS 才能理解 APK 如何被系统识别与运行。
 
@@ -121,7 +121,7 @@ class Package {
 }
 ```
 
-> 💡 **组件注册的意义**:四大组件必须注册才能被系统识别。AMS 启动组件时通过 PMS 查询组件信息;Intent 隐式匹配也依赖 PMS 解析的 IntentFilter。
+> **组件注册的意义**:四大组件必须注册才能被系统识别。AMS 启动组件时通过 PMS 查询组件信息;Intent 隐式匹配也依赖 PMS 解析的 IntentFilter。
 
 ## 五、权限管理
 
@@ -200,4 +200,4 @@ PMS 启动时要扫描几百上千个 APK 并解析,是开机慢的原因之一�
 - 权限分 normal/dangerous/signature,运行时授权走 PMS
 - 查询缓存与增量扫描是 PMS 性能关键
 
-> 📖 进阶阅读：[APK 打包流程与签名机制](/system/apk/apk-build-process.md) | [系统启动流程](/system/boot/system-boot.md) | [AMS 与 Activity 启动](/system/ams-wms/ams-activity-launch.md)
+> 进阶阅读：[APK 打包流程与签名机制](/system/apk/apk-build-process.md) | [系统启动流程](/system/boot/system-boot.md) | [AMS 与 Activity 启动](/system/ams-wms/ams-activity-launch.md)

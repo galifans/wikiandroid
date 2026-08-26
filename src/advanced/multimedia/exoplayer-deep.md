@@ -4,7 +4,7 @@ title: Media3 ExoPlayer 播放器深入
 description: ExoPlayer 架构、MediaSource 数据管线、渲染器、自适应码率、DRM、播放器最佳实践
 ---
 
-# 🎬 Media3 ExoPlayer 播放器深入
+# Media3 ExoPlayer 播放器深入
 
 > ExoPlayer 是 Android 官方(Media3)的媒体播放器,灵活可扩展,支持 HLS/DASH/SS 自适应流、DRM、自定义渲染。理解它的架构是音视频进阶的关键。
 
@@ -235,4 +235,4 @@ ABR(Adaptive Bitrate):根据网络带宽动态切换视频码率,保证流畅度
 - 最佳实践:生命周期管理、播放器池、预加载、埋点
 - 卡顿排查:网络 → 服务器 → 码率 → 解码 → 缓冲
 
-> 📖 进阶阅读：[音视频开发入门](/advanced/multimedia/multimedia-basics.md) | [MediaCodec 与 FFmpeg 深入](/advanced/multimedia/mediacodec-ffmpeg.md) | [网络优化实战](/advanced/performance/network-optimization.md)
+> 进阶阅读：[音视频开发入门](/advanced/multimedia/multimedia-basics.md) | [MediaCodec 与 FFmpeg 深入](/advanced/multimedia/mediacodec-ffmpeg.md) | [网络优化实战](/advanced/performance/network-optimization.md)

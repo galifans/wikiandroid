@@ -4,9 +4,9 @@ title: ANR 原理与治理
 description: ANR 定义与触发条件、ANR 类型、定位方法、traces 分析、ANR 治理实践
 ---
 
-# 🛡️ ANR 原理与治理
+# ANR 原理与治理
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > ANR 是稳定性面试的必考点，理解触发条件与定位手段是关键。
 
 ## 1. 什么是 ANR
@@ -131,10 +131,10 @@ traces 主线程堆栈：
 ```kotlin
 // 正确的做法示例
 fun onLoginClick() {
-    // ❌ 主线程网络（会 ANR）
+    // ✗ 主线程网络（会 ANR）
     // val user = api.login(name, pwd)
 
-    // ✅ 协程异步
+    // ✓ 协程异步
     lifecycleScope.launch {
         val user = withContext(Dispatchers.IO) {
             api.login(name, pwd)

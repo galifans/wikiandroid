@@ -4,7 +4,7 @@ title: 转场动画与共享元素
 description: Activity/Fragment 转场动画、Scene 场景切换、共享元素 Transition 与 Compose 动画概览
 ---
 
-# 🎬 转场动画与共享元素
+# 转场动画与共享元素
 
 > 从页面 A 跳转到页面 B，如何让过渡丝滑自然？本文详解 Activity/Fragment 转场动画、Transition 场景切换、共享元素（ShareElement）原理，以及 Compose 时代的动画方案。
 
@@ -62,7 +62,7 @@ startActivity(Intent(this, DetailActivity::class.java), options)
 <ImageView android:id="@+id/big_image" android:transitionName="shared_image" />
 ```
 
-> 💡 匹配规则：**两个页面上 transitionName 相同的 View** 组成共享元素对，系统自动插值生成"从 A 的位置大小变到 B 的位置大小"的动画。
+> 匹配规则：**两个页面上 transitionName 相同的 View** 组成共享元素对，系统自动插值生成"从 A 的位置大小变到 B 的位置大小"的动画。
 
 ## 三、Transition 框架详解
 
@@ -153,7 +153,7 @@ sequenceDiagram
     A->>T: 动画完成，场景切换完毕
 ```
 
-> 💡 **原理本质**：Transition 记录 View 树"之前"与"之后"的状态快照，为每个发生变化的属性创建 Animator，插值过渡。共享元素只是"两个场景中都存在、需要跟随动画"的特殊 View。
+> **原理本质**：Transition 记录 View 树"之前"与"之后"的状态快照，为每个发生变化的属性创建 Animator，插值过渡。共享元素只是"两个场景中都存在、需要跟随动画"的特殊 View。
 
 ## 六、转场动画与性能
 
@@ -237,4 +237,4 @@ Compose 用 `AnimatedContent` 实现内容/页面切换转场，transitionSpec �
 - Compose：AnimatedContent + SharedTransitionLayout 承担转场职责
 - 性能：控制共享元素数量、避免动画中重布局
 
-> 📖 进阶阅读：[补间动画与插值器](/ui/animation/tween-animation.md) | [属性动画机制](/ui/animation/property-animation.md) | [Jetpack Compose 核心概念](/jetpack/compose/compose-basics.md)
+> 进阶阅读：[补间动画与插值器](/ui/animation/tween-animation.md) | [属性动画机制](/ui/animation/property-animation.md) | [Jetpack Compose 核心概念](/jetpack/compose/compose-basics.md)

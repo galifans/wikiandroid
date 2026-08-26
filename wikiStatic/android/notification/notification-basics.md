@@ -246,4 +246,4 @@ A：前台服务必须调用 `startForeground(id, notification)` 展示常驻通
 - **前台服务**：后台任务用前台服务 + 常驻通知
 - **安全**：PendingIntent 用 FLAG_IMMUTABLE 防注入
 
-> 📖 进阶阅读：[PendingIntent 详解](/android/notification/pendingintent.md) | [Service 详解](/android/service/service-basics.md) | [权限系统](/android/permission/permission-basics.md)
+> 进阶阅读：[PendingIntent 详解](/android/notification/pendingintent.md) | [Service 详解](/android/service/service-basics.md) | [权限系统](/android/permission/permission-basics.md)

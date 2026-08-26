@@ -4,7 +4,7 @@ title: 面试指南
 index: false
 ---
 
-# 💼 面试指南
+# 面试指南
 
 Android 面试八股文与准备策略，助你拿下心仪 Offer。
 
@@ -30,7 +30,7 @@ Android 面试八股文与准备策略，助你拿下心仪 Offer。
 → 模拟面试（持续）→ 投递面试
 ```
 
-## 📑 全部文章导航
+## 全部文章导航
 
 - [Android 知识点汇总](/interview/android-knowledge-summary.md)：19 大主题系统回顾清单，面试前查漏补缺
 - [面试基础篇](/interview/basics.md)：Java/Kotlin、四大组件、View
@@ -39,3 +39,4 @@ Android 面试八股文与准备策略，助你拿下心仪 Offer。
 - [面试准备计划](/interview/interview-plan.md)：分阶段复习节奏
 - [简历与项目经验建议](/interview/resume-guide.md)：简历写法 / 项目亮点
 - [大厂面试经验实录](/interview/company-experience.md)：阿里 / 美团 / 网易 / 豌豆荚 / 蜻蜓FM 真实面经
+- [行为面试题与回答套路](/interview/behavior-questions.md)：STAR 法则、自我介绍、项目难点、离职原因、薪资谈判

@@ -4,9 +4,9 @@ title: AMS 与 Activity 启动流程
 description: AMS 职责、Activity 启动完整链路、进程与任务栈管理、进程优先级 OOM Adj、冷启动优化入口
 ---
 
-# 🏢 AMS 与 Activity 启动流程
+# AMS 与 Activity 启动流程
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > Activity 启动流程是 Android 源码面试的"必考大题"。
 
 ## 1. AMS 是什么

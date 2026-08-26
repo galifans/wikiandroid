@@ -7,7 +7,7 @@ dir:
   order: 1
 ---
 
-# ☕ Kotlin
+# Kotlin
 
 Kotlin 是 Android 官方推荐的一级开发语言，语法简洁、空安全、函数式特性强大。
 

@@ -4,9 +4,9 @@ title: Android 系统启动流程
 description: 从电源键到 Launcher 的完整启动链路、Boot ROM/内核/init/Zygote/SystemServer 各阶段详解
 ---
 
-# 🚀 Android 系统启动流程
+# Android 系统启动流程
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 系统启动流程是理解 Android 架构的基石，也是源码面试的高频考点。
 
 ## 1. 启动总览

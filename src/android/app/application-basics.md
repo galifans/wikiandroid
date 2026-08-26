@@ -69,7 +69,7 @@ class WikiApplication : Application() {
 
 ## 三、onCreate 全局初始化的正确姿势
 
-### ❌ 反面教材：全部同步初始化
+### ✗ 反面教材：全部同步初始化
 
 ```kotlin
 override fun onCreate() {
@@ -84,7 +84,7 @@ override fun onCreate() {
 }
 ```
 
-### ✅ 最佳实践：按需 + 异步 + 启动器
+### ✓ 最佳实践：按需 + 异步 + 启动器
 
 ```kotlin
 class WikiApplication : Application() {
@@ -208,4 +208,4 @@ A：① 只保留必须同步的初始化；② 其余全部线程化或懒加�
 - **初始化策略**：同步最小集 + 异步批量 + 懒加载兜底，App Startup 统一管理
 - **Context 使用**：全局单例持 Application，界面操作持 Activity，注意泄漏
 
-> 📖 进阶阅读：[App 启动流程：从点击图标到首帧](/android/app/app-launch-process.md) | [Context 详解](/android/context/context-overview.md) | [进程与线程模型](/android/process/process-lifecycle.md)
+> 进阶阅读：[App 启动流程：从点击图标到首帧](/android/app/app-launch-process.md) | [Context 详解](/android/context/context-overview.md) | [进程与线程模型](/android/process/process-lifecycle.md)

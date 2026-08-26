@@ -4,9 +4,9 @@ title: Paging 3 分页加载详解
 description: PagingSource、PagingData、RemoteMediator、LoadState 完整架构与实战
 ---
 
-# 📄 Paging 3 分页加载详解
+# Paging 3 分页加载详解
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 列表分页加载是 App 标配功能，Paging 3 是官方标准方案。
 
 ## 1. Paging 3 架构总览

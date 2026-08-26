@@ -3,7 +3,7 @@ icon: compose
 title: Jetpack Compose 学习路线
 ---
 
-# 🎨 Jetpack Compose 学习路线
+# Jetpack Compose 学习路线
 
 > Jetpack Compose 是 Android 现代 UI 开发的官方声明式框架，正在逐步取代传统 View 体系。
 
@@ -32,4 +32,4 @@ title: Jetpack Compose 学习路线
 - Compose 性能优化：稳定性（Stability）、`@Stable`、键值（Keys）
 - 无障碍与测试
 
-> 📖 相关文章：[Compose 入门到进阶](/jetpack/compose/)
+> 相关文章：[Compose 入门到进阶](/jetpack/compose/)

@@ -4,9 +4,9 @@ title: MeasureSpec 完全解析
 description: MeasureSpec 三种模式、EXACTLY/AT_MOST/UNSPECIFIED、getChildMeasureSpec 逻辑与实战
 ---
 
-# 📏 MeasureSpec 完全解析
+# MeasureSpec 完全解析
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > MeasureSpec 是 View 测量机制的核心，理解了它才算真正理解 onMeasure。
 
 ## 1. 什么是 MeasureSpec
@@ -130,7 +130,7 @@ public static int getChildMeasureSpec(int spec, int padding, int childDimension)
 ## 4. onMeasure 的正确写法
 
 ```kotlin
-// ❌ 常见错误：wrap_content 失效（等于 match_parent）
+// ✗ 常见错误：wrap_content 失效（等于 match_parent）
 override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
     setMeasuredDimension(
         MeasureSpec.getSize(widthMeasureSpec),
@@ -138,7 +138,7 @@ override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
     )
 }
 
-// ✅ 正确处理 wrap_content
+// ✓ 正确处理 wrap_content
 override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
     // 内容默认尺寸（如 100dp x 100dp）
     val defaultWidth = dp2px(100f)

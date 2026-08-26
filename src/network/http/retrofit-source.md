@@ -4,7 +4,7 @@ title: Retrofit 动态代理原理
 description: Retrofit 接口如何变成网络请求、动态代理、CallAdapter 与 Converter 扩展机制源码解析
 ---
 
-# 🪄 Retrofit 动态代理原理
+# Retrofit 动态代理原理
 
 > 为什么定义一个接口加几个注解,Retrofit 就能自动发请求?答案在 Java 动态代理 + 注解解析 + 适配器模式。本文彻底拆解 Retrofit 的核心魔法。
 
@@ -170,7 +170,7 @@ flowchart TD
     I --> J[CallAdapter 适配<br>Call/suspend/Flow]
 ```
 
-> 💡 **设计精髓**:Retrofit 本身不发网络请求——它把"接口声明"翻译成 OkHttp 的 Request,执行交给 OkHttp;返回类型和响应格式通过 CallAdapter/Converter 插件化扩展,天然支持协程/RxJava/任意序列化。
+> **设计精髓**:Retrofit 本身不发网络请求——它把"接口声明"翻译成 OkHttp 的 Request,执行交给 OkHttp;返回类型和响应格式通过 CallAdapter/Converter 插件化扩展,天然支持协程/RxJava/任意序列化。
 
 ## 七、高频面试题
 
@@ -208,4 +208,4 @@ Retrofit 把接口方法解析成 OkHttp 的 Request(方法/URL/参数/头),用 
 - Retrofit 专注声明,OkHttp 专注执行,各司其职
 - 两套 Factory 机制让生态无限扩展
 
-> 📖 进阶阅读：[Retrofit + OkHttp 详解](/network/http/retrofit-okhttp.md) | [OkHttp 源码解析](/network/http/okhttp-source.md) | [协程原理深入](/network/coroutine/coroutine-principle.md)
+> 进阶阅读：[Retrofit + OkHttp 详解](/network/http/retrofit-okhttp.md) | [OkHttp 源码解析](/network/http/okhttp-source.md) | [协程原理深入](/network/coroutine/coroutine-principle.md)

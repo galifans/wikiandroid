@@ -210,4 +210,4 @@ A：多限定符目录（如 `values-zh-rCN-land-night`）要求**全部限定�
 - **多屏幕**：密度限定符管图片、sw600dp 管平板、dp/sp 管尺寸
 - **工程原则**：资源全部资源化、默认目录保底、限定符精简克制
 
-> 📖 进阶阅读：[资源系统详解](/android/resource/resource-basics.md) | [深色模式适配](/ui/layout/screen-adaptation.md) | [屏幕适配与 dp 体系](/ui/layout/screen-adaptation.md)
+> 进阶阅读：[资源系统详解](/android/resource/resource-basics.md) | [深色模式适配](/ui/layout/screen-adaptation.md) | [屏幕适配与 dp 体系](/ui/layout/screen-adaptation.md)

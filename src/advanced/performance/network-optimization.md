@@ -4,7 +4,7 @@ title: 网络优化实战
 description: DNS 优化、连接复用、弱网适配、流量优化、网络监控、HTTP/2 与 HTTP/3
 ---
 
-# 📡 网络优化实战
+# 网络优化实战
 
 > 网络是移动应用体验的关键短板:弱网、高延迟、流量消耗直接影响用户留存。本文覆盖网络优化的完整链路——DNS、连接、传输、弱网、流量与监控。
 
@@ -72,7 +72,7 @@ val client = OkHttpClient.Builder()
     .build()
 ```
 
-> 💡 大厂实践:自建 HTTPDNS(腾讯、阿里、字节都有 SDK),配合 IP 直连 + 失败回退,能显著降低解析耗时与劫持风险。
+> 大厂实践:自建 HTTPDNS(腾讯、阿里、字节都有 SDK),配合 IP 直连 + 失败回退,能显著降低解析耗时与劫持风险。
 
 ## 三、连接优化
 
@@ -252,4 +252,4 @@ HTTP/1.1 队头阻塞:一个连接同时只能一个请求,或需要多个连接
 - 监控:全链路埋点,成功率与耗时分位告警
 - 大厂经验:网络优化是持续迭代的过程,先建监控再优化
 
-> 📖 进阶阅读：[OkHttp 源码解析](/network/http/okhttp-source.md) | [HTTP 协议详解](/network/http/http-protocol.md) | [TCP 与 UDP 详解](/network/tcp-udp.md)
+> 进阶阅读：[OkHttp 源码解析](/network/http/okhttp-source.md) | [HTTP 协议详解](/network/http/http-protocol.md) | [TCP 与 UDP 详解](/network/tcp-udp.md)

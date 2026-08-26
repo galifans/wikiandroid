@@ -4,7 +4,7 @@ title: Binder 驱动层深入
 description: Binder 内核驱动、mmap 内存映射、binder_proc/binder_thread、一次拷贝原理、驱动工作流程
 ---
 
-# 🔧 Binder 驱动层深入
+# Binder 驱动层深入
 
 > 前面理解了 Binder 的应用层(AIDL/代理),本文深入**内核驱动层**:binder_proc、mmap 内存映射、一次拷贝、binder_thread 与驱动工作流程,搞懂 Binder 为什么快。
 
@@ -52,7 +52,7 @@ sequenceDiagram
     Note over K: 通过 mmap 共享<br>同一物理内存页
 ```
 
-> 💡 **核心原理**:Server 进程通过 mmap 把内核缓冲区映射到自己的用户空间,驱动把 Client 数据拷贝到该内核缓冲区,Server 用户空间直接可见——**只需一次拷贝**。
+> **核心原理**:Server 进程通过 mmap 把内核缓冲区映射到自己的用户空间,驱动把 Client 数据拷贝到该内核缓冲区,Server 用户空间直接可见——**只需一次拷贝**。
 
 ```c
 // 驱动中 mmap 的核心逻辑(简化)
@@ -178,7 +178,7 @@ sequenceDiagram
 | 性能 | 高 | 低 |
 | 安全性 | 内核校验 UID/PID | 无身份校验 |
 
-> 💡 Binder 的三大优势:**① 一次拷贝性能高;② 内核校验安全(UUID/PID 附带);③ 支持双向调用(引用传递)**。
+> Binder 的三大优势:**① 一次拷贝性能高;② 内核校验安全(UUID/PID 附带);③ 支持双向调用(引用传递)**。
 
 ## 七、高频面试题
 
@@ -216,4 +216,4 @@ ServiceManager 是 Binder 的"DNS":① 系统服务启动时向 ServiceManager �
 - ServiceManager 是服务注册与查询中心
 - 应用层 AIDL 只是 Binder 的语法糖
 
-> 📖 进阶阅读：[Binder 跨进程通信机制详解](/system/binder/binder-mechanism.md) | [AIDL 深入解析](/system/binder/aidl-deep.md) | [IPC 方式对比](/system/binder/ipc-comparison.md)
+> 进阶阅读：[Binder 跨进程通信机制详解](/system/binder/binder-mechanism.md) | [AIDL 深入解析](/system/binder/aidl-deep.md) | [IPC 方式对比](/system/binder/ipc-comparison.md)

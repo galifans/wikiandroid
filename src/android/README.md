@@ -4,9 +4,9 @@ title: Android 核心
 index: false
 ---
 
-# 🧱 Android 核心
+# Android 核心
 
-Android 应用开发的核心基石：四大组件、Fragment、数据存储、进程与 Context，以及 Intent 组件通信、应用启动流程、资源系统、权限系统与通知机制。本板块共 **27 篇原创文章**，从应用层基础到源码级原理全覆盖，每篇均包含源码分析、对比表格与高频面试题精讲。
+Android 应用开发的核心基石：四大组件、Fragment、数据存储、进程与 Context，以及 Intent 组件通信、应用启动流程、资源系统、权限系统与通知机制。本板块共 **39 篇原创文章**，从应用层基础到源码级原理全覆盖，每篇均包含源码分析、对比表格与高频面试题精讲。
 
 ## 四大组件
 
@@ -29,62 +29,68 @@ Android 应用开发的核心基石：四大组件、Fragment、数据存储、�
 - [进程](/android/process/)：进程生命周期与保活
 - [Context](/android/context/)：系统服务访问封装
 
-## 📑 全部文章导航
+## 全部文章导航
 
-### 🎬 Activity
+### Activity
 - [Activity 生命周期与启动模式](/android/activity/activity-lifecycle.md)：生命周期全景图、典型场景回调顺序、四种启动模式、状态保存与恢复、Intent Flags
 - [Activity 启动流程源码分析](/android/activity/activity-launch-process.md)：从 `startActivity` 到 `onResume` 的完整源码链路、冷启动耗时拆解
 - [Activity 任务栈与返回栈](/android/activity/task-stack.md)：Task / Back Stack 原理、`allowTaskReparenting`、多窗口模式适配
+- [Activity Result API 与回调通信](/android/activity/activity-result-api.md)：registerForActivityResult 新 API、ActivityResultContract 契约、onActivityResult 迁移
+- [配置变更与状态保存](/android/activity/activity-config-changes.md)：屏幕旋转重建流程、onSaveInstanceState / ViewModel 状态保存、configChanges 适配
 
-### ⚙️ Service
+### Service
 - [Service 详解：启动方式与绑定方式](/android/service/service-basics.md)：`startService` / `bindService` 生命周期、Binder/Messenger 通信、后台限制与协程配合
 - [前台服务与通知](/android/service/foreground-service.md)：前台服务类型总表、Android 14/15 适配、通知渠道与启动限制
 - [AIDL 跨进程通信](/android/service/aidl.md)：接口定义、Stub/Proxy 生成、`@Parcelize` 现代写法与线程安全
+- [Service 与多线程](/android/service/service-threading.md)：Service 主线程限制、线程池选择、协程与前台服务结合
 
-### 📡 BroadcastReceiver
+### BroadcastReceiver
 - [BroadcastReceiver 详解](/android/broadcast/broadcast-basics.md)：普通广播 / 有序广播 / 粘性广播、AMS 底层分发流程、超时机制与安全实践
 - [动态注册与静态注册对比](/android/broadcast/register-comparison.md)：注册方式、版本适配、静态注册替代方案与进程优先级影响
 
-### 🗃️ ContentProvider
+### ContentProvider
 - [ContentProvider 详解](/android/content-provider/content-provider-basics.md)：增删改查、权限机制、跨进程数据共享、批量操作与启动源码时机
+- [FileProvider 文件共享](/android/content-provider/fileprovider.md)：content:// URI 共享、配置与 paths、FileUriExposedException 适配
+- [ContentObserver 数据观察](/android/content-provider/contentobserver.md)：数据库/媒体库变化监听、registerContentObserver 与协程封装
 
-### 🧩 Fragment
+### Fragment
 - [Fragment 生命周期与通信](/android/fragment/fragment-basics.md)：生命周期与 View 生命周期分离、事务机制、四种通信方式、单 Activity 架构
 - [Fragment 常见坑点总结](/android/fragment/fragment-pitfalls.md)：状态丢失、重叠问题、`viewLifecycleOwner` 时序等 12 个实战踩坑
+- [Fragment 通信方式全解](/android/fragment/fragment-communication.md)：接口回调 / ViewModel / 事件总线对比、result API 传值、安全实践
 
-### 💾 数据存储
-- [数据存储方案对比](/android/storage/storage-comparison.md)：SharedPreferences / Room / DataStore / 文件全对比选型、分区存储适配
-- [SharedPreferences 深度剖析](/android/storage/sharedpreferences-deep.md)：源码级原理、`apply`/`commit` 区别、ANR 根因与 DataStore 替代
-- [SharedPreferences 与 DataStore 对比](/android/storage/sp-vs-datastore.md)：六大维度差异分析、深挖原理与迁移方案
-
-### � Intent 与组件通信
+### Intent 与组件通信
 - [Intent 详解：显式与隐式](/android/intent/intent-basics.md)：Intent 结构、显式/隐式跳转、Flags 与任务栈、Extras 传递、安全最佳实践
 - [IntentFilter 匹配规则](/android/intent/intent-filter.md)：action/category/data 三大匹配规则、源码解析流程、Deep Link 实战
 
-### 🚀 Application 与启动流程
+### Application 与启动流程
 - [Application 详解与全局初始化](/android/app/application-basics.md)：创建链路、onCreate 初始化最佳实践、多进程陷阱、Context 关系
 - [App 启动流程：从点击图标到首帧](/android/app/app-launch-process.md)：冷/温/热启动、Zygote fork 全链路、启动耗时测量与优化清单
 - [Manifest 清单文件详解](/android/app/manifest-guide.md)：组件声明、权限体系、exported 规则、多进程配置与常见错误排查
 
-### 💾 数据存储
+### 数据存储
 - [数据存储方案对比](/android/storage/storage-comparison.md)：SharedPreferences / Room / DataStore / 文件全对比选型、分区存储适配
 - [SharedPreferences 深度剖析](/android/storage/sharedpreferences-deep.md)：源码级原理、`apply`/`commit` 区别、ANR 根因与 DataStore 替代
 - [SharedPreferences 与 DataStore 对比](/android/storage/sp-vs-datastore.md)：六大维度差异分析、深挖原理与迁移方案
+- [SQLite 深入指南](/android/storage/sqlite-guide.md)：SQLiteOpenHelper、事务与 WAL、索引优化、Room 底层关系
+- [分区存储适配实战](/android/storage/scoped-storage.md)：MediaStore / SAF 访问、targetSdk 29+ 行为变更、兼容方案
 
-### 🎨 资源系统
+### 资源系统
 - [资源系统详解：R 文件、类型与加载](/android/resource/resource-basics.md)：AAPT 编译流程、资源 ID 结构、Resources/AssetManager 加载、主题与样式
 - [资源限定符与多语言适配](/android/resource/resource-qualifiers.md)：限定符体系、最佳匹配算法、多语言 i18n 全流程、多屏幕适配
+- [主题与样式机制](/android/resource/theme-style.md)：Theme / Style / Attribute 关系、继承与覆盖、Material 主题适配
+- [Drawable 全面指南](/android/resource/drawable-guide.md)：Shape / Layer / StateList 等类型、矢量图 VectorDrawable、代码创建与内存注意
 
-### 🛡️ 权限系统
+### 权限系统
 - [权限机制与运行时权限详解](/android/permission/permission-basics.md)：沙箱模型、保护级别、权限组、申请机制、版本演进与底层校验
 - [权限申请最佳实践与常见问题](/android/permission/permission-practice.md)：申请时机、批量申请、解释弹窗、特殊权限、合规建议
 
-### 🔔 通知机制
+### 通知机制
 - [通知机制详解：渠道、构建与样式](/android/notification/notification-basics.md)：Channel 机制、Builder 构建、样式类型、通知权限、前台服务通知
 - [PendingIntent 详解](/android/notification/pendingintent.md)：与 Intent 区别、三种创建方式、FLAG 更新规则、安全最佳实践
 
-### 🔄 进程与 Context
+### 进程与 Context
 - [Android 进程与保活](/android/process/process-lifecycle.md)：五级进程优先级、OOM_ADJ 机制、多进程问题与保活方案演进
+- [多进程实践与原理](/android/process/multi-process.md)：remote 进程、进程间数据隔离、MemoryFile 大文件共享、Binder 通信选择
 - [Context 详解](/android/context/context-overview.md)：继承体系、ContextWrapper 代理机制、类型对比、内存泄漏案例与 getSystemService 原理
 
 ## 核心知识图谱

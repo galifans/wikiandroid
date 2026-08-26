@@ -4,7 +4,7 @@ title: Compose 布局系统
 description: Compose 布局原理、Row/Column/Box/ConstraintLayout、自定义 Layout、测量约束与 Intrinsic 尺寸
 ---
 
-# 📐 Compose 布局系统
+# Compose 布局系统
 
 > Compose 摆脱了 XML + measure/layout 的繁琐,用声明式布局组合构建 UI。本文深入布局原理(一次布局两次遍历)、常用布局容器、ConstraintLayout 与自定义 Layout。
 
@@ -27,7 +27,7 @@ sequenceDiagram
 | 测量 | `MeasureScope.measure(constraints)` | 在约束内确定尺寸 |
 | 摆放 | `Placeable.placeRelative(x, y)` | 确定子节点位置 |
 
-> 💡 与 View 的 measure/layout 相比:Compose 没有 MeasureSpec,而是统一的 Constraints(约束范围),语义更清晰且强制支持"测量两次"(Intrinsic)模式。
+> 与 View 的 measure/layout 相比:Compose 没有 MeasureSpec,而是统一的 Constraints(约束范围),语义更清晰且强制支持"测量两次"(Intrinsic)模式。
 
 ## 二、基础布局容器
 
@@ -172,7 +172,7 @@ Row(
 }
 ```
 
-> 💡 Intrinsic 尺寸允许父布局在"知道子项内容大小"之前约束子项,解决"两列高度需一致"等难题。代价是二次测量成本,仅在必要时使用。
+> Intrinsic 尺寸允许父布局在"知道子项内容大小"之前约束子项,解决"两列高度需一致"等难题。代价是二次测量成本,仅在必要时使用。
 
 ## 六、Modifier 布局链
 
@@ -233,4 +233,4 @@ IntrinsicSize 让父布局在测量时先查询子项的"固有尺寸"(Intrinsic
 - Intrinsic 二次测量解决等高难题,慎用保性能
 - Modifier 链是布局的声明式"布局参数"
 
-> 📖 进阶阅读：[Compose 核心概念](/jetpack/compose/compose-basics.md) | [Compose 状态管理](/jetpack/compose/compose-state.md) | [Compose 动画](/jetpack/compose/compose-animation.md)
+> 进阶阅读：[Compose 核心概念](/jetpack/compose/compose-basics.md) | [Compose 状态管理](/jetpack/compose/compose-state.md) | [Compose 动画](/jetpack/compose/compose-animation.md)

@@ -132,4 +132,4 @@ observer.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
 `onWindowFocusChanged` 简单但触发频繁；`post` 最简洁；`ViewTreeObserver` 精确但需注意移除监听（API 16 后用 `removeOnGlobalLayoutListener`）。
 :::
 
-> 📖 进阶阅读：[MeasureSpec 完全解析](measurespec.md) | [布局优化](/ui/layout/) | [自定义 View](/ui/custom-view/)
+> 进阶阅读：[MeasureSpec 完全解析](measurespec.md) | [布局优化](/ui/layout/) | [自定义 View](/ui/custom-view/)

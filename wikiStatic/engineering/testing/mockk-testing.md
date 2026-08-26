@@ -4,7 +4,7 @@ title: MockK 单元测试实战
 description: MockK 基础用法、验证、协程测试、插桩、与 Mockito 对比、最佳实践
 ---
 
-# 🎭 MockK 单元测试实战
+# MockK 单元测试实战
 
 > MockK 是 Kotlin 生态的 Mock 框架:天然支持协程、object、扩展函数、final 类。用 MockK 写干净的单元测试,让依赖可控、逻辑可验。
 
@@ -131,7 +131,7 @@ mockkStatic("com.example.Utils")
 every { Utils.formatTime(any()) } returns "00:00"
 ```
 
-> ⚠️ 注意:mockkStatic/mockkObject 会影响全局,测试后记得 `unmockkAll()` 清理。
+>  注意:mockkStatic/mockkObject 会影响全局,测试后记得 `unmockkAll()` 清理。
 
 ## 六、Android 环境测试
 
@@ -222,4 +222,4 @@ every 用于普通函数打桩;coEvery 用于 suspend 函数打桩(内部处理 
 - object/静态用 mockkObject/mockkStatic,记得清理
 - 最佳实践:独立测试、少 mock、行为断言、unmockkAll
 
-> 📖 进阶阅读：[单元测试实践](/engineering/testing/unit-testing.md) | [测试金字塔与策略](/engineering/testing/test-pyramid.md) | [协程结构化并发](/network/coroutine/structured-concurrency.md)
+> 进阶阅读：[单元测试实践](/engineering/testing/unit-testing.md) | [测试金字塔与策略](/engineering/testing/test-pyramid.md) | [协程结构化并发](/network/coroutine/structured-concurrency.md)

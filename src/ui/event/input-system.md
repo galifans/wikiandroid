@@ -4,7 +4,7 @@ title: 输入系统与触摸事件分发
 description: 从触摸屏到 onTouchEvent 的完整链路、InputReader/InputDispatcher、事件分发三大方法源码解析
 ---
 
-# 🖱️ 输入系统与触摸事件分发
+# 输入系统与触摸事件分发
 
 > 手指按下到 `onTouchEvent` 被调用，中间经历了什么？本文打通"系统输入子系统（InputReader/InputDispatcher）→ Window → View 树分发"的完整链路，彻底理解 `dispatchTouchEvent` 三大方法。
 
@@ -63,7 +63,7 @@ sequenceDiagram
 - **派发线程**：InputDispatcher 线程按窗口的 `inputDispatcher` 队列逐个投递
 - **ANR**：应用 5 秒内未处理完输入事件 → 触发输入 ANR
 
-> 💡 这也是"点击无响应 5 秒 ANR"的来源之一（Input dispatching timed out）。
+> 这也是"点击无响应 5 秒 ANR"的来源之一（Input dispatching timed out）。
 
 ## 三、应用侧：ViewRootImpl 接收事件
 
@@ -145,7 +145,7 @@ flowchart LR
     B --> C[ACTION_UP<br>抬起 / ACTION_CANCEL<br>取消]
 ```
 
-> 💡 **关键规则**：事件序列从 DOWN 开始，到 UP/CANCEL 结束。**DOWN 事件决定了整个序列的目标**——DOWN 被谁消费，后续 MOVE/UP 就发给谁（mFirstTouchTarget 在 DOWN 时确定）。
+> **关键规则**：事件序列从 DOWN 开始，到 UP/CANCEL 结束。**DOWN 事件决定了整个序列的目标**——DOWN 被谁消费，后续 MOVE/UP 就发给谁（mFirstTouchTarget 在 DOWN 时确定）。
 
 ### 5.2 ACTION_CANCEL 什么时候出现
 
@@ -178,7 +178,7 @@ Activity.dispatchTouchEvent
                  └→ ... 层层向下（后添加的子 View 优先）
 ```
 
-> 💡 子 View 遍历顺序：**从后往前（绘制顺序的逆序）**，即最后 add 的 View 先收到事件（z 轴最上层优先）。
+> 子 View 遍历顺序：**从后往前（绘制顺序的逆序）**，即最后 add 的 View 先收到事件（z 轴最上层优先）。
 
 ### 6.2 优先级链条（同一 View 内）
 
@@ -188,7 +188,7 @@ flowchart LR
     B --> C[onClick<br>setOnClickListener]
 ```
 
-> 💡 `OnTouchListener` 优先级高于 `onTouchEvent`；**只有 onTouchEvent 返回 true（消费了 UP）才可能触发 onClick**。
+> `OnTouchListener` 优先级高于 `onTouchEvent`；**只有 onTouchEvent 返回 true（消费了 UP）才可能触发 onClick**。
 
 ## 七、高频面试题
 
@@ -226,4 +226,4 @@ DOWN 事件确定 mFirstTouchTarget：DOWN 被谁消费，MOVE/UP 就只发给�
 - 分发顺序：Activity → DecorView → 外层 ViewGroup → ... → 目标 View
 - OnTouchListener 优先于 onTouchEvent，消费 UP 才触发 onClick
 
-> 📖 进阶阅读：[事件分发机制详解](/ui/event/event-dispatch.md) | [事件冲突解决方案](/ui/event/conflict-solution.md) | [WMS 窗口管理](/system/ams-wms/wms-principle.md)
+> 进阶阅读：[事件分发机制详解](/ui/event/event-dispatch.md) | [事件冲突解决方案](/ui/event/conflict-solution.md) | [WMS 窗口管理](/system/ams-wms/wms-principle.md)

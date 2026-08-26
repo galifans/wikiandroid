@@ -4,7 +4,7 @@ title: 电量优化实战
 description: 电量分析工具、耗电组件排查、Doze 模式适配、WakeLock、WorkManager 调度
 ---
 
-# 🔋 电量优化实战
+# 电量优化实战
 
 > 手机续航是用户核心体验之一。电量优化不是"少用功能",而是**让耗电变得可解释、可控、可调度**:分析耗电组件、适配 Doze、合理使用 WakeLock 与 WorkManager。
 
@@ -118,7 +118,7 @@ try {
 | 后台频繁获取 | 系统判定耗电应用 |
 | 用 CPU 锁做网络任务 | 应改用网络锁 |
 
-> ⚠️ **最佳实践**:能用 WorkManager/JobScheduler 就不要自己拿 WakeLock;拿锁必须 try-finally 释放并带超时。
+>  **最佳实践**:能用 WorkManager/JobScheduler 就不要自己拿 WakeLock;拿锁必须 try-finally 释放并带超时。
 
 ## 四、定位与传感器优化
 
@@ -214,4 +214,4 @@ WorkManager 基于 JobScheduler(API 23+),系统统一调度:① 自动适配 Doz
 - 网络同步:批量 + 充电/WiFi 时机 + 系统推送
 - 验证闭环:改前改后 Battery Historian 对比
 
-> 📖 进阶阅读：[WorkManager / Hilt 深入](/jetpack/workmanager-hilt/) | [网络优化实战](/advanced/performance/network-optimization.md) | [后台任务与进程](/android/process/)
+> 进阶阅读：[WorkManager / Hilt 深入](/jetpack/workmanager-hilt/) | [网络优化实战](/advanced/performance/network-optimization.md) | [后台任务与进程](/android/process/)

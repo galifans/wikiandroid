@@ -4,7 +4,7 @@ title: OkHttp 源码解析
 description: OkHttp 请求执行链路、Dispatcher 线程调度、连接池复用、拦截器责任链源码级剖析
 ---
 
-# 🕸️ OkHttp 源码解析
+# OkHttp 源码解析
 
 > OkHttp 是 Android 网络请求的事实标准。从 `client.newCall(request).execute()` 到拿到 Response,中间经过 Dispatcher 调度、拦截器责任链、连接池复用。本文源码级拆解 OkHttp 核心设计。
 
@@ -98,7 +98,7 @@ public final class Dispatcher {
 }
 ```
 
-> 💡 **关键设计**:Dispatcher 用两个队列(等待/执行)+ 两个上限(64 总并发、5 每主机)控制并发,避免主机被打爆。
+> **关键设计**:Dispatcher 用两个队列(等待/执行)+ 两个上限(64 总并发、5 每主机)控制并发,避免主机被打爆。
 
 ## 四、拦截器责任链
 
@@ -144,7 +144,7 @@ sequenceDiagram
     Retry-->>App: Response
 ```
 
-> 💡 **责任链本质**:每个拦截器在 `proceed()` 前后做处理(前置逻辑 → 调用下一个 → 后置逻辑),像洋葱一样层层包裹。
+> **责任链本质**:每个拦截器在 `proceed()` 前后做处理(前置逻辑 → 调用下一个 → 后置逻辑),像洋葱一样层层包裹。
 
 ### 4.3 各拦截器职责
 
@@ -178,7 +178,7 @@ public final class ConnectionPool {
 }
 ```
 
-> 💡 **连接池价值**:HTTP 建连成本高(TCP 握手 + TLS 握手),复用连接(Keep-Alive)大幅降低延迟。默认保活 5 分钟、最多 5 个空闲连接,空闲连接由后台线程清理。
+> **连接池价值**:HTTP 建连成本高(TCP 握手 + TLS 握手),复用连接(Keep-Alive)大幅降低延迟。默认保活 5 分钟、最多 5 个空闲连接,空闲连接由后台线程清理。
 
 ## 六、OkHttp 版本演进
 
@@ -224,4 +224,4 @@ RetryAndFollowUpInterceptor 在 proceed 抛出 IOException 时判断是否可重
 - 缓存基于 HTTP 缓存头 + DiskLruCache
 - 重试/重定向/鉴权都在责任链中统一处理
 
-> 📖 进阶阅读：[OkHttp 拦截器深入](/network/http/okhttp-interceptor.md) | [Retrofit + OkHttp 详解](/network/http/retrofit-okhttp.md) | [Retrofit 动态代理原理](/network/http/retrofit-source.md)
+> 进阶阅读：[OkHttp 拦截器深入](/network/http/okhttp-interceptor.md) | [Retrofit + OkHttp 详解](/network/http/retrofit-okhttp.md) | [Retrofit 动态代理原理](/network/http/retrofit-source.md)

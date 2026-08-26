@@ -308,4 +308,4 @@ A：根因是 Activity 重建（旋转/进程回收）后 `onCreate` 中再次�
 - 嵌套 Fragment 用 `childFragmentManager`；`add` vs `replace` 按场景选。
 - 现代架构：单 Activity + Navigation + ViewModel。
 
-> 📖 进阶阅读：[Fragment 常见坑点总结](fragment-pitfalls.md) | [Paging / Navigation](/jetpack/paging-navigation/) | [Lifecycle / ViewModel](/jetpack/lifecycle-viewmodel/)
+> 进阶阅读：[Fragment 常见坑点总结](fragment-pitfalls.md) | [Paging / Navigation](/jetpack/paging-navigation/) | [Lifecycle / ViewModel](/jetpack/lifecycle-viewmodel/)

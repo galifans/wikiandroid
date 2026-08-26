@@ -4,9 +4,9 @@ title: 锁机制详解
 description: synchronized 与 ReentrantLock、volatile、CAS、死锁、Java 内存模型完整解析
 ---
 
-# 🔒 锁机制详解
+# 锁机制详解
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 锁是并发面试的核心，从 synchronized 到 JMM 再到死锁，一条线讲透。
 
 ## 1. synchronized 详解
@@ -65,9 +65,9 @@ fun work() {
 | 维度 | synchronized | ReentrantLock |
 | --- | --- | --- |
 | 锁获取 | 自动 | 手动（必须 unlock） |
-| 可中断 | ❌ | ✅ `lockInterruptibly()` |
-| 超时 | ❌ | ✅ `tryLock(1, TimeUnit.SECONDS)` |
-| 公平锁 | ❌（非公平） | ✅ 可配置公平 |
+| 可中断 | ✗ | ✓ `lockInterruptibly()` |
+| 超时 | ✗ | ✓ `tryLock(1, TimeUnit.SECONDS)` |
+| 公平锁 | ✗（非公平） | ✓ 可配置公平 |
 | 条件变量 | `wait/notify` | `Condition.await/signal` |
 | 性能 | 已优化（差不大） | 略灵活 |
 

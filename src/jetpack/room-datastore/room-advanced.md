@@ -4,7 +4,7 @@ title: Room 高级进阶
 description: Room 实体关系、TypeConverter、数据库迁移、事务与 Flow、KSP 编译期检查、多表查询
 ---
 
-# 🗄️ Room 高级进阶
+# Room 高级进阶
 
 > 从"能用 Room"到"用好 Room":实体关系建模、复杂类型转换、安全迁移、事务与 Flow 响应式查询,以及性能陷阱。本文是 Room 的中高级完全指南。
 
@@ -104,7 +104,7 @@ abstract class AppDatabase : RoomDatabase() {
 | 枚举 | String/Int |
 | 自定义对象 | 平铺为多个字段或 JSON |
 
-> ⚠️ TypeConverter 常见坑:查询条件也要转换(如 `WHERE date = :date` 传 Date 对象);转换在 Java/Kotlin 层进行,大数据量时注意性能。
+>  TypeConverter 常见坑:查询条件也要转换(如 `WHERE date = :date` 传 Date 对象);转换在 Java/Kotlin 层进行,大数据量时注意性能。
 
 ## 三、数据库迁移
 
@@ -175,18 +175,18 @@ interface UserDao {
 
 | 场景 | 是否用事务 |
 |------|-----------|
-| 单条写操作 | ❌ 不需要 |
-| 多条写操作 | ✅ 必须(原子性) |
-| 一对多关系查询 | ✅ @Transaction 避免中间态 |
-| 批量插入 | ✅ 提升性能(单事务) |
+| 单条写操作 | ✗ 不需要 |
+| 多条写操作 | ✓ 必须(原子性) |
+| 一对多关系查询 | ✓ @Transaction 避免中间态 |
+| 批量插入 | ✓ 提升性能(单事务) |
 
 ### 4.2 批量操作性能
 
 ```kotlin
-// ❌ 循环单条插入(每条一个事务,慢)
+// ✗ 循环单条插入(每条一个事务,慢)
 users.forEach { dao.insert(it) }
 
-// ✅ 批量插入(单事务,快 10-50 倍)
+// ✓ 批量插入(单事务,快 10-50 倍)
 dao.insertAll(users)
 
 @Dao
@@ -217,7 +217,7 @@ class UserViewModel(private val dao: UserDao) : ViewModel() {
 }
 ```
 
-> 💡 Flow 查询的优势:任何 `@Insert/@Update/@Delete` 变更都会**自动触发重新查询**,UI 自动刷新,无需手动 notify。
+> Flow 查询的优势:任何 `@Insert/@Update/@Delete` 变更都会**自动触发重新查询**,UI 自动刷新,无需手动 notify。
 
 ## 六、性能优化清单
 
@@ -268,4 +268,4 @@ Room 对 Flow 查询建立 InvalidationTracker:当数据库有任何写操作(In
 - Flow 查询自动响应数据库变更,UI 无需手动刷新
 - 索引/批量/只查所需列是三大性能基石
 
-> 📖 进阶阅读：[Room 数据库详解](/jetpack/room-datastore/room-guide.md) | [DataStore 使用指南](/jetpack/room-datastore/datastore-guide.md) | [Paging 3 分页加载](/jetpack/paging-navigation/paging3.md)
+> 进阶阅读：[Room 数据库详解](/jetpack/room-datastore/room-guide.md) | [DataStore 使用指南](/jetpack/room-datastore/datastore-guide.md) | [Paging 3 分页加载](/jetpack/paging-navigation/paging3.md)

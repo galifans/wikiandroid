@@ -76,4 +76,4 @@ StartupInitializer.initialize(context, listOf(
 4. 启动器框架（Android Startup）如何保证依赖顺序？
 5. Baseline Profile 是什么？如何生成？
 
-> 📖 进阶阅读：[内存优化与泄漏排查](memory-optimization.md) | [布局优化](/ui/layout/) | [工程实践：CI/CD](/engineering/cicd/)
+> 进阶阅读：[内存优化与泄漏排查](memory-optimization.md) | [布局优化](/ui/layout/) | [工程实践：CI/CD](/engineering/cicd/)

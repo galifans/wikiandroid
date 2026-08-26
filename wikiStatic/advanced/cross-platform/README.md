@@ -7,7 +7,7 @@ dir:
   order: 7
 ---
 
-# 🌉 跨端方案
+# 跨端方案
 
 Flutter、React Native、Compose Multiplatform 等跨平台技术全景。
 

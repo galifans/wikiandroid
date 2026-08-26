@@ -4,7 +4,7 @@ title: Canvas 与 Path 绘制艺术
 description: Canvas 核心 API、Path 贝塞尔曲线、自定义绘制进阶（渐变/阴影/文字）与性能优化
 ---
 
-# 🖌️ Canvas 与 Path 绘制艺术
+# Canvas 与 Path 绘制艺术
 
 > 自定义 View 的精髓在 Canvas。掌握 Canvas 变换、Path 曲线、Paint 效果，才能画出雷达图、仪表盘、图表等复杂 UI。本文是自定义绘制的进阶实战手册。
 
@@ -101,7 +101,7 @@ flowchart LR
     H --> I[三阶曲线<br>cubicTo]
 ```
 
-> 💡 贝塞尔曲线是**图形动画（QQ 气泡、拖拽返回）、图表（折线平滑）**的基石。
+> 贝塞尔曲线是**图形动画（QQ 气泡、拖拽返回）、图表（折线平滑）**的基石。
 
 ### 3.3 Path 常用方法
 
@@ -156,7 +156,7 @@ flowchart LR
     D --> E[画布还原<br>后续绘制不受影响]
 ```
 
-> 💡 **save/restore 必须成对使用**（可用 `saveLayer` 做图层混合），漏 restore 会导致后续绘制全部错乱。
+> **save/restore 必须成对使用**（可用 `saveLayer` 做图层混合），漏 restore 会导致后续绘制全部错乱。
 
 ## 五、高级效果
 
@@ -289,4 +289,4 @@ drawText 的 y 参数是**基线 baseline**，不是文字中心。垂直居中�
 - onDraw 禁止创建对象，对象复用 + 局部刷新是性能关键
 - 文字绘制基于基线，垂直居中需 fontMetrics 计算
 
-> 📖 进阶阅读：[自定义 View 实战](/ui/custom-view/custom-view-guide.md) | [自定义 ViewGroup](/ui/custom-view/custom-viewgroup.md) | [View 绘制流程详解](/ui/view/view-draw-process.md)
+> 进阶阅读：[自定义 View 实战](/ui/custom-view/custom-view-guide.md) | [自定义 ViewGroup](/ui/custom-view/custom-viewgroup.md) | [View 绘制流程详解](/ui/view/view-draw-process.md)

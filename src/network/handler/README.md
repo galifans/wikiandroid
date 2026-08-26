@@ -7,7 +7,7 @@ dir:
   order: 2
 ---
 
-# 🔄 Handler 消息机制
+# Handler 消息机制
 
 Handler 是 Android 线程通信的核心机制，面试必考源码题。
 

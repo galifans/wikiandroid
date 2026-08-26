@@ -4,9 +4,9 @@ title: 线程池详解
 description: ThreadPoolExecutor 七大参数、四种拒绝策略、Executors 工厂、线程池选择与源码解析
 ---
 
-# 🧵 线程池详解
+# 线程池详解
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 线程池是并发编程的核心，七大参数 + 拒绝策略是面试必考题。
 
 ## 1. 为什么用线程池
@@ -90,7 +90,7 @@ val scheduled = Executors.newScheduledThreadPool(2)
 scheduled.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS)
 ```
 
-> ⚠️ **Android 开发警告**：`Executors` 的工厂方法有隐患（无界队列、线程数无上限）。
+>  **Android 开发警告**：`Executors` 的工厂方法有隐患（无界队列、线程数无上限）。
 > 推荐**手动配置 ThreadPoolExecutor**，或使用三方库（协程 Dispatchers）。
 
 ## 4. Android 中的线程池

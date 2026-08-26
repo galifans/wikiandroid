@@ -4,9 +4,9 @@ title: SavedStateHandle 状态保存
 description: SavedStateHandle 原理、与 Bundle 的区别、ViewModel 中保存和恢复 UI 状态的最佳实践
 ---
 
-# 💾 SavedStateHandle 状态保存
+# SavedStateHandle 状态保存
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 进程被杀后如何恢复状态？`SavedStateHandle` 是官方推荐的 ViewModel 状态持久方案。
 
 ## 1. 问题背景
@@ -15,9 +15,9 @@ description: SavedStateHandle 原理、与 Bundle 的区别、ViewModel 中保�
 
 | 场景 | 内存是否被清空 | ViewModel 是否存活 | 需要持久化 |
 | --- | --- | --- | --- |
-| 旋转屏幕 | ❌ 否 | ✅ 存活 | ❌ 不需要 |
-| 内存不足回收 | ✅ 是 | ❌ 销毁 | ✅ 需要 |
-| 用户主动划掉 | ✅ 是 | ❌ 销毁 | ✅ 看需求 |
+| 旋转屏幕 | ✗ 否 | ✓ 存活 | ✗ 不需要 |
+| 内存不足回收 | ✓ 是 | ✗ 销毁 | ✓ 需要 |
+| 用户主动划掉 | ✓ 是 | ✗ 销毁 | ✓ 看需求 |
 
 > ViewModel 只在**配置变更**时存活；**进程死亡**时整个进程没了，状态需要靠
 > `SavedStateHandle` / `onSaveInstanceState` 保存。
@@ -25,7 +25,7 @@ description: SavedStateHandle 原理、与 Bundle 的区别、ViewModel 中保�
 ### 1.2 传统方案的不足
 
 ```kotlin
-// ❌ 传统方案：手动保存到 Bundle，代码分散且容易遗漏
+// ✗ 传统方案：手动保存到 Bundle，代码分散且容易遗漏
 override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
     outState.putString("query", queryText)
@@ -135,10 +135,10 @@ Activity 创建
 | 维度 | onSaveInstanceState | ViewModel | SavedStateHandle |
 | --- | --- | --- | --- |
 | 旋转屏幕 | 不调用（API 28+ 默认不调） | 存活 | 存活 |
-| 进程死亡 | ✅ 恢复 | ❌ 丢失 | ✅ 恢复 |
+| 进程死亡 | ✓ 恢复 | ✗ 丢失 | ✓ 恢复 |
 | 数据类型 | Bundle（可序列化） | 任意对象 | Bundle 兼容类型 |
-| 与 UI 解耦 | ❌ 耦合 | ✅ 解耦 | ✅ 解耦 |
-| 可观察 | ❌ | ✅ LiveData/Flow | ✅ LiveData/Flow |
+| 与 UI 解耦 | ✗ 耦合 | ✓ 解耦 | ✓ 解耦 |
+| 可观察 | ✗ | ✓ LiveData/Flow | ✓ LiveData/Flow |
 
 > **最佳实践组合**：临时数据（列表对象）放 ViewModel；需要跨进程恢复的关键状态
 > （筛选条件、页码、输入内容）放 SavedStateHandle。

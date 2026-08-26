@@ -4,7 +4,7 @@ title: 协程原理深入
 description: 协程挂起与恢复、CPS 变换、状态机、调度器、非阻塞本质、suspend 函数实现原理
 ---
 
-# ⚛️ 协程原理深入
+# 协程原理深入
 
 > 为什么协程"看起来同步、跑起来异步"?挂起函数到底做了什么?本文从编译原理(CPS/状态机)、运行时(调度器/上下文)深入协程本质。
 
@@ -70,7 +70,7 @@ flowchart TD
     C -->|恢复回调 invokeSuspend| B
 ```
 
-> 💡 **挂起的本质**:函数执行到挂起点,**不是阻塞等待**,而是**立即返回 COROUTINE_SUSPENDED**,把"剩余代码"封装成 Continuation 存起来;异步任务完成后调用 continuation.resume() 恢复执行。线程在此期间可以干别的——这就是"非阻塞"。
+> **挂起的本质**:函数执行到挂起点,**不是阻塞等待**,而是**立即返回 COROUTINE_SUSPENDED**,把"剩余代码"封装成 Continuation 存起来;异步任务完成后调用 continuation.resume() 恢复执行。线程在此期间可以干别的——这就是"非阻塞"。
 
 ### 2.2 挂起 vs 阻塞
 
@@ -215,4 +215,4 @@ withContext:挂起函数,切换上下文执行一段代码并**返回结果**,�
 - 取消在挂起点生效,需 isActive/ensureActive 配合
 - 协程底层仍是线程池,只是把"等"变成了"让"
 
-> 📖 进阶阅读：[协程 Flow 进阶](/network/coroutine/flow-advanced.md) | [结构化并发与作用域](/network/coroutine/structured-concurrency.md) | [Retrofit 动态代理原理](/network/http/retrofit-source.md)
+> 进阶阅读：[协程 Flow 进阶](/network/coroutine/flow-advanced.md) | [结构化并发与作用域](/network/coroutine/structured-concurrency.md) | [Retrofit 动态代理原理](/network/http/retrofit-source.md)

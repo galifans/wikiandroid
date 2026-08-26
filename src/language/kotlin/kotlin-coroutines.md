@@ -95,4 +95,4 @@ scope.launch {
 3. **线程切换**：用 `withContext` 而非多次 `launch`
 4. **背压**：高频数据流使用 `conflate` 或 `collectLatest`
 
-> 📖 进阶阅读：[协程 Flow 与 RxJava](/network/coroutine/) | [线程池与并发](/network/thread/)
+> 进阶阅读：[协程 Flow 与 RxJava](/network/coroutine/) | [线程池与并发](/network/thread/)

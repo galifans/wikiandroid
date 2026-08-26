@@ -4,20 +4,20 @@ title: 数据存储方案对比
 description: SharedPreferences、DataStore、Room、文件、SQLite 五大存储方案对比与选型指南
 ---
 
-# 💾 数据存储方案对比
+# 数据存储方案对比
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 数据存储选型是面试高频题，也是实际项目架构决策的关键。
 
 ## 1. 五大存储方案总览
 
 | 方案 | 数据类型 | 跨进程 | 异步支持 | 类型安全 | 适用场景 |
 | --- | --- | --- | --- | --- | --- |
-| SharedPreferences | 键值对 | ⚠️ 不推荐 | ❌（apply 为异步写） | ❌ | 简单配置（已逐渐被替代） |
-| DataStore | 键值对/Proto | ⚠️ | ✅（Flow） | ✅（Proto） | 配置类数据（推荐） |
-| SQLite / Room | 结构化数据 | ⚠️ 需 ContentProvider | ✅ | ✅ | 大量结构化数据 |
-| 文件（File） | 任意字节 | ❌ | ✅ | ❌ | 图片、日志、下载文件 |
-| 网络存储（远程） | 任意 | ✅ | ✅ | - | 需要跨设备同步的数据 |
+| SharedPreferences | 键值对 |  不推荐 | ✗（apply 为异步写） | ✗ | 简单配置（已逐渐被替代） |
+| DataStore | 键值对/Proto |  | ✓（Flow） | ✓（Proto） | 配置类数据（推荐） |
+| SQLite / Room | 结构化数据 |  需 ContentProvider | ✓ | ✓ | 大量结构化数据 |
+| 文件（File） | 任意字节 | ✗ | ✓ | ✗ | 图片、日志、下载文件 |
+| 网络存储（远程） | 任意 | ✓ | ✓ | - | 需要跨设备同步的数据 |
 
 ## 2. SharedPreferences 的问题
 

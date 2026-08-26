@@ -4,9 +4,9 @@ title: OkHttp 拦截器机制详解
 description: 责任链模式、五大内置拦截器、自定义拦截器实战、缓存与重试机制
 ---
 
-# ⛓️ OkHttp 拦截器机制详解
+# OkHttp 拦截器机制详解
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 拦截器链是 OkHttp 的灵魂，责任链模式是 Android 面试的经典设计模式题。
 
 ## 1. 责任链模式
@@ -164,13 +164,13 @@ class AuthInterceptor(private val tokenProvider: () -> String?) : Interceptor {
 class LoggingInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        Log.d("OkHttp", "➡️ ${request.method} ${request.url}")
+        Log.d("OkHttp", "--> ${request.method} ${request.url}")
 
         val t1 = System.nanoTime()
         val response = chain.proceed(request)
         val ms = (System.nanoTime() - t1) / 1_000_000
 
-        Log.d("OkHttp", "⬅️ ${response.code} 耗时 ${ms}ms")
+        Log.d("OkHttp", "<-- ${response.code} 耗时 ${ms}ms")
         return response
     }
 }

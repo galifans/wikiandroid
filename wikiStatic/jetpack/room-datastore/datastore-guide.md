@@ -4,17 +4,17 @@ title: DataStore 使用详解
 description: Preferences DataStore 与 Proto DataStore 完整使用、迁移 SP、异常处理与最佳实践
 ---
 
-# 🧊 DataStore 使用详解
+# DataStore 使用详解
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > SharedPreferences 的官方替代品，配合 Flow 与协程实现完全异步的键值存储。
 
 ## 1. 两种 DataStore
 
 | 类型 | 存储内容 | 类型安全 | 依赖 |
 | --- | --- | --- | --- |
-| Preferences DataStore | 键值对 | ❌（key 为字符串） | `datastore-preferences` |
-| Proto DataStore | 自定义对象 | ✅（生成的类） | `datastore` + protobuf |
+| Preferences DataStore | 键值对 | ✗（key 为字符串） | `datastore-preferences` |
+| Proto DataStore | 自定义对象 | ✓（生成的类） | `datastore` + protobuf |
 
 ## 2. Preferences DataStore
 

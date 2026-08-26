@@ -3,7 +3,7 @@ icon: layer-group
 title: Java 集合
 ---
 
-# 📦 Java 集合
+# Java 集合
 
 > Java 集合框架精讲：从总览到各实现类源码剖析，掌握数据结构与性能差异。
 

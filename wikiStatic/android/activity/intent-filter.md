@@ -155,4 +155,4 @@ if (resolveInfo == null) {
 - 解析入口是 `resolveActivity`，命中多个弹选择器、命中零个抛异常
 - 跨应用调用系统能力前先判空，避免低版本崩溃
 
-> 📖 进阶阅读：[Activity 启动流程源码分析](activity-launch-process.md) | [Activity 任务栈与返回栈](task-stack.md)
+> 进阶阅读：[Activity 启动流程源码分析](activity-launch-process.md) | [Activity 任务栈与返回栈](task-stack.md)

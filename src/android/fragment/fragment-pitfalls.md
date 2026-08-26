@@ -4,9 +4,9 @@ title: Fragment 常见坑点总结
 description: Fragment 状态丢失、重叠问题、commit 时机、懒加载、FragmentManager 生命周期等高频踩坑指南
 ---
 
-# 🕳️ Fragment 常见坑点总结
+# Fragment 常见坑点总结
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > Fragment 的坑几乎人人踩过，本文汇总最高频的 10 个问题与解决方案。
 
 ## 1. 坑点一：commit 时机错误（StateLossException）
@@ -14,7 +14,7 @@ description: Fragment 状态丢失、重叠问题、commit 时机、懒加载、
 ### 问题
 
 ```kotlin
-// ❌ 错误：在 onSaveInstanceState 之后提交事务
+// ✗ 错误：在 onSaveInstanceState 之后提交事务
 override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
     supportFragmentManager.commit {
@@ -48,7 +48,7 @@ Activity 被系统重建（旋转屏幕、内存回收）后，`onCreate` 中再
 ```kotlin
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    // ✅ 先判断 savedInstanceState 是否为 null
+    // ✓ 先判断 savedInstanceState 是否为 null
     if (savedInstanceState == null) {
         supportFragmentManager.commit {
             add(R.id.container, MainFragment())
@@ -64,7 +64,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 ### 问题
 
 ```kotlin
-// ❌ 错误：commit 之后再 setArguments
+// ✗ 错误：commit 之后再 setArguments
 val fragment = MyFragment()
 supportFragmentManager.commit { add(R.id.container, fragment) }
 fragment.arguments = bundle   // 无效！
@@ -73,7 +73,7 @@ fragment.arguments = bundle   // 无效！
 ### 解决
 
 ```kotlin
-// ✅ 正确：先 setArguments 再提交
+// ✓ 正确：先 setArguments 再提交
 val fragment = MyFragment().apply { arguments = bundle }
 supportFragmentManager.commit { add(R.id.container, fragment) }
 ```
@@ -125,7 +125,7 @@ class MyFragment : Fragment() {
 // 回调中使用安全访问
 lifecycleScope.launch {
     val data = repository.fetchData()
-    // ✅ 用 lifecycle 感知协程，自动在销毁时取消
+    // ✓ 用 lifecycle 感知协程，自动在销毁时取消
     textView.text = data   // 协程已被自动取消，不会执行到这里
 }
 
@@ -141,7 +141,7 @@ if (isAdded) { /* 安全使用 activity */ }
 ### 问题
 
 ```kotlin
-// ❌ 错误：onCreateView 中创建的 View 持有异步引用
+// ✗ 错误：onCreateView 中创建的 View 持有异步引用
 override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     someCallback = { textView.text = "update" }  // textView 来自 onCreateView
@@ -276,7 +276,7 @@ viewLifecycleOwner.lifecycleScope.launch {
 ### 问题
 
 ```kotlin
-// ❌ 错误：在 onCreateView 之前使用 viewLifecycleOwner
+// ✗ 错误：在 onCreateView 之前使用 viewLifecycleOwner
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     // viewLifecycleOwner 此时还不可用！可能拿到旧的
@@ -291,7 +291,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 ### 解决
 
 ```kotlin
-// ✅ 正确：在 onViewCreated 之后访问
+// ✓ 正确：在 onViewCreated 之后访问
 override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
     viewLifecycleOwner.lifecycleScope.launch { ... }

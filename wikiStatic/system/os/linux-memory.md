@@ -4,7 +4,7 @@ title: Linux 内存管理深入
 description: 虚拟内存、分页机制、内存回收、OOM 机制、Android 的 oom_adj 与 LMK
 ---
 
-# 🧠 Linux 内存管理深入
+# Linux 内存管理深入
 
 > Android 基于 Linux 内核,内存管理决定应用的生死:**虚拟内存隔离进程,分页按需加载,内存不足时按 oom_adj 优先级回收进程**。
 
@@ -93,7 +93,7 @@ flowchart LR
 // 内存不足时:lmkd 从高 oom_adj(最不重要)开始杀
 ```
 
-> 💡 **为什么后台 Activity 比 Service 先被杀**:缓存进程(9+)先于服务进程(5)被杀,服务又先于前台。这就是"进程优先级"决定"被杀顺序"。
+> **为什么后台 Activity 比 Service 先被杀**:缓存进程(9+)先于服务进程(5)被杀,服务又先于前台。这就是"进程优先级"决定"被杀顺序"。
 
 ## 五、LMKD 内存压力管理
 
@@ -162,4 +162,4 @@ LMKD(Low Memory Killer Daemon)是 Android 的内存压力守护进程:① 传统
 - LMKD + PSI:提前感知内存压力,智能回收
 - 开发者要防内存泄漏,监控 PSS 与堆内存
 
-> 📖 进阶阅读：[操作系统核心知识](/system/os/os-core.md) | [线程同步与进程间通信](/system/os/thread-sync-ipc.md) | [ART 运行时与 GC](/system/art/art-gc.md)
+> 进阶阅读：[操作系统核心知识](/system/os/os-core.md) | [线程同步与进程间通信](/system/os/thread-sync-ipc.md) | [ART 运行时与 GC](/system/art/art-gc.md)

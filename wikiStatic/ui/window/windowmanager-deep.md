@@ -4,7 +4,7 @@ title: WindowManager 深入与悬浮窗
 description: WindowManager 添加/更新/移除 Window、窗口类型与权限、悬浮窗实现与适配
 ---
 
-# 🪟 WindowManager 深入与悬浮窗
+# WindowManager 深入与悬浮窗
 
 > WindowManager 是连接 View 与 Window 的桥梁。理解 Window 类型、`addView` 流程与悬浮窗（TYPE_APPLICATION_OVERLAY）实现，是高级 UI 开发与系统级功能（悬浮球、录屏、来电显示）的必修课。
 
@@ -26,7 +26,7 @@ flowchart TD
 | **ViewRootImpl** | Window 与 View 树之间的桥梁（内部持有 WindowSession） |
 | **WMS** | 系统侧窗口管理服务，真正管理窗口层级 |
 
-> 💡 一句话理解：**WindowManager.addView(view, params) 把 View 装进一个 Window，通过 Binder 通知 WMS 在屏幕上开一个窗口**。
+> 一句话理解：**WindowManager.addView(view, params) 把 View 装进一个 Window，通过 Binder 通知 WMS 在屏幕上开一个窗口**。
 
 ## 二、WindowManager 核心方法
 
@@ -60,7 +60,7 @@ sequenceDiagram
     R->>R: performTraversals 首次布局绘制
 ```
 
-> 📖 深入可参考：[WMS 窗口管理](/system/ams-wms/wms-principle.md)（系统原理板块）
+> 深入可参考：[WMS 窗口管理](/system/ams-wms/wms-principle.md)（系统原理板块）
 
 ## 三、Window 类型与层级
 
@@ -77,7 +77,7 @@ flowchart TD
 | 子窗口 | 1000-1999 | 依附于父窗口（PopupWindow、Dialog 内部） |
 | 系统窗口 | 2000-2999 | 状态栏、来电、悬浮窗等 |
 
-> ⚠️ **type 值越大层级越高**（越靠上层）。z-order 由 type 决定，同 type 按添加顺序。
+>  **type 值越大层级越高**（越靠上层）。z-order 由 type 决定，同 type 按添加顺序。
 
 ## 四、悬浮窗实现（TYPE_APPLICATION_OVERLAY）
 
@@ -183,7 +183,7 @@ floatView?.setOnTouchListener { v, event ->
 | Android 11 (API 30) | 部分设备需应用在"正在运行"才能创建 |
 | Android 13 (API 33) | 通知权限与悬浮窗权限分离 |
 
-> ⚠️ **悬浮窗是高风险功能**：各大应用市场对悬浮窗审核严格，滥用会被下架。真实场景多用于"视频小窗、来电提醒、全局球"等刚需功能。
+>  **悬浮窗是高风险功能**：各大应用市场对悬浮窗审核严格，滥用会被下架。真实场景多用于"视频小窗、来电提醒、全局球"等刚需功能。
 
 ## 六、悬浮窗 vs 其他窗口技术
 
@@ -230,4 +230,4 @@ Android 8.0 (API 26) 起，`TYPE_PHONE` 等"普通系统窗口"类型不允许�
 - 悬浮窗：TYPE_APPLICATION_OVERLAY + SYSTEM_ALERT_WINDOW 权限 + 动态拖动
 - 版本适配注意 8.0 类型变更、10.0 后台限制、13.0 权限拆分
 
-> 📖 进阶阅读：[WMS 窗口管理](/system/ams-wms/wms-principle.md) | [渲染原理与硬件加速](/ui/render/render-principle.md) | [View 绘制流程详解](/ui/view/view-draw-process.md)
+> 进阶阅读：[WMS 窗口管理](/system/ams-wms/wms-principle.md) | [渲染原理与硬件加速](/ui/render/render-principle.md) | [View 绘制流程详解](/ui/view/view-draw-process.md)

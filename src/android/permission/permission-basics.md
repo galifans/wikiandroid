@@ -196,4 +196,4 @@ A：应用调用敏感 API → 系统通过 `ActivityManager.checkPermission`（
 - **版本演进**：6.0 运行时权限 → 11 单次授权 → 13 通知+媒体细分 → 14 部分照片
 - **工程要点**：逐个权限独立检查、`registerForActivityResult` 现代化申请、合理引导设置页
 
-> 📖 进阶阅读：[权限申请最佳实践与常见问题](/android/permission/permission-practice.md) | [Manifest 清单文件详解](/android/app/manifest-guide.md) | [通知机制详解](/android/notification/notification-basics.md)
+> 进阶阅读：[权限申请最佳实践与常见问题](/android/permission/permission-practice.md) | [Manifest 清单文件详解](/android/app/manifest-guide.md) | [通知机制详解](/android/notification/notification-basics.md)

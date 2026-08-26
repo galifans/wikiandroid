@@ -4,9 +4,9 @@ title: Room 数据库完全指南
 description: Room 三要素、DAO 设计、Flow 响应式查询、Migration 升级、与原生 SQLite 对比
 ---
 
-# 🗄️ Room 数据库完全指南
+# Room 数据库完全指南
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > Room 是 Android 官方 ORM，面试必问，实际项目几乎必用。
 
 ## 1. Room 是什么

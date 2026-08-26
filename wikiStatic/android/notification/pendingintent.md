@@ -173,8 +173,8 @@ alarmManager.setExactAndAllowWhileIdle(
 // 1. 一律 FLAG_IMMUTABLE
 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
 // 2. 敏感数据不要放 extras（改为 ID，目标页面再查）
-intent.putExtra("id", 42L)   // ✅ 只传 ID
-// intent.putExtra("token", secretToken)  // ❌ 不传敏感数据
+intent.putExtra("id", 42L)   // ✓ 只传 ID
+// intent.putExtra("token", secretToken)  // ✗ 不传敏感数据
 ```
 
 ## 六、高频面试题精讲
@@ -205,4 +205,4 @@ A：① 创建时用相同参数调用 `getXxx` 并加 `FLAG_CANCEL_CURRENT` 覆
 - **场景**：通知点击、操作按钮、桌面小部件、AlarmManager 闹钟
 - **安全**：FLAG_IMMUTABLE 防注入、extras 不传敏感数据
 
-> 📖 进阶阅读：[通知机制详解](/android/notification/notification-basics.md) | [Intent 详解](/android/intent/intent-basics.md) | [Service 与前台服务](/android/service/foreground-service.md)
+> 进阶阅读：[通知机制详解](/android/notification/notification-basics.md) | [Intent 详解](/android/intent/intent-basics.md) | [Service 与前台服务](/android/service/foreground-service.md)

@@ -7,7 +7,7 @@ dir:
   order: 1
 ---
 
-# 🧩 Jetpack Compose
+# Jetpack Compose
 
 Android 现代声明式 UI 框架。
 

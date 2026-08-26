@@ -263,4 +263,4 @@ Intent 是 Android 组件通信的基石：
 - **数据**：基本类型直接传，复杂对象用 Parcelable，注意 Binder 缓冲区 1MB 上限
 - **安全**：`exported` 显式声明、`setPackage` 限包、接收方校验来源
 
-> 📖 进阶阅读：[IntentFilter 匹配规则](/android/intent/intent-filter.md) | [Activity 任务栈与返回栈](/android/activity/task-stack.md) | [PendingIntent 详解](/android/notification/pendingintent.md)
+> 进阶阅读：[IntentFilter 匹配规则](/android/intent/intent-filter.md) | [Activity 任务栈与返回栈](/android/activity/task-stack.md) | [PendingIntent 详解](/android/notification/pendingintent.md)

@@ -4,7 +4,7 @@ title: 跨端开发方案全景
 description: Flutter、React Native、Compose Multiplatform 对比、渲染原理、选型决策、KMP 共享
 ---
 
-# 🌉 跨端开发方案全景
+# 跨端开发方案全景
 
 > 跨端开发的目标:**一套业务逻辑、多端运行**。Flutter、React Native、Compose Multiplatform 是当前三大主流方案,本文从渲染原理、性能、生态、选型多维度剖析。
 
@@ -88,8 +88,8 @@ flowchart LR
 |------|---------|--------------|----------------------|
 | 渲染方式 | 自绘引擎 | 原生组件 | 自绘引擎 |
 | 语言 | Dart | JS/TS | Kotlin |
-| 性能 | ★★★★ | ★★★ | ★★★★ |
-| 生态成熟度 | ★★★★ | ★★★★ | ★★★ |
+| 性能 | 高 | 中 | 高 |
+| 生态成熟度 | 高 | 高 | 中 |
 | 热更新 | 支持(需配置) | 支持 | 一般 |
 | 原生交互 | Platform Channel | Bridge/JSI | expect/actual |
 | Android 团队上手 | 需学 Dart | 需学 JS | 零门槛 |
@@ -119,7 +119,7 @@ actual fun platformName(): String = "iOS"
 | 业务逻辑 | ViewModel / UseCase |
 | 状态管理 | StateFlow / Compose 状态 |
 
-> 💡 **趋势判断**:Kotlin Multiplatform 是 JetBrains/Google 共同推动的方向,Android 团队可以"先用 KMP 共享逻辑,再上 Compose Multiplatform 共享 UI",渐进式跨端。
+> **趋势判断**:Kotlin Multiplatform 是 JetBrains/Google 共同推动的方向,Android 团队可以"先用 KMP 共享逻辑,再上 Compose Multiplatform 共享 UI",渐进式跨端。
 
 ## 五、选型决策框架
 
@@ -189,4 +189,4 @@ Flutter:Platform Channel——Dart 通过 MethodChannel 发消息,原生端(Main
 - 跨端不取代原生,按场景混合选型
 - 质量保障:共享层测试 + 分层架构 + APM 监控
 
-> 📖 进阶阅读：[Jetpack Compose 布局系统](/jetpack/compose/compose-layout.md) | [架构设计演进](/advanced/architecture/architecture-evolution.md) | [Kotlin 协程原理](/network/coroutine/coroutine-principle.md)
+> 进阶阅读：[Jetpack Compose 布局系统](/jetpack/compose/compose-layout.md) | [架构设计演进](/advanced/architecture/architecture-evolution.md) | [Kotlin 协程原理](/network/coroutine/coroutine-principle.md)

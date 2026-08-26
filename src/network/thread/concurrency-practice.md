@@ -4,7 +4,7 @@ title: 并发编程实战与线程中断
 description: 线程中断机制、ThreadLocal、并发容器、生产者消费者、Android 并发实战场景
 ---
 
-# 🧵 并发编程实战与线程中断
+# 并发编程实战与线程中断
 
 > 锁与线程池是基础,实战中更常遇到:线程中断、ThreadLocal 隔离、并发容器选型、生产者消费者、Android 特有的并发场景。本文是并发编程实战指南。
 
@@ -41,11 +41,11 @@ thread.interrupt();   // 设置中断标志,线程自己决定何时退出
 
 | 方式 | 机制 | 安全 |
 |------|------|------|
-| `Thread.stop()` | 强制终止(已废弃) | ❌ 可能破坏数据一致性 |
-| `interrupt()` | 协作式信号 | ✅ 线程自主响应 |
-| 标志位 | 自定义 volatile flag | ✅ 灵活 |
+| `Thread.stop()` | 强制终止(已废弃) | ✗ 可能破坏数据一致性 |
+| `interrupt()` | 协作式信号 | ✓ 线程自主响应 |
+| 标志位 | 自定义 volatile flag | ✓ 灵活 |
 
-> ⚠️ **关键**:`Thread.stop()` 被废弃,因为它在任意位置终止线程,可能导致锁未释放、数据不一致。正确方式是 interrupt + 线程内检查。
+>  **关键**:`Thread.stop()` 被废弃,因为它在任意位置终止线程,可能导致锁未释放、数据不一致。正确方式是 interrupt + 线程内检查。
 
 ## 二、ThreadLocal 线程隔离
 
@@ -83,7 +83,7 @@ flowchart TD
 | 内存泄漏 | Entry 的 key 是弱引用,需 remove() |
 | 场景 | 请求上下文、连接管理、线程安全工具 |
 
-> ⚠️ **ThreadLocal 泄漏**:线程池中线程常驻,若不 remove(),ThreadLocal 值无法回收(Thread 强引用 ThreadLocalMap)。用完必须 `remove()`。
+>  **ThreadLocal 泄漏**:线程池中线程常驻,若不 remove(),ThreadLocal 值无法回收(Thread 强引用 ThreadLocalMap)。用完必须 `remove()`。
 
 ## 三、并发容器选型
 
@@ -191,8 +191,8 @@ val threadPool = ThreadPoolExecutor(
 
 ```java
 // 死锁示例与解决
-// ❌ 两个线程互相持有对方需要的锁
-// ✅ 方案:所有线程按同一顺序获取锁(A → B)
+// ✗ 两个线程互相持有对方需要的锁
+// ✓ 方案:所有线程按同一顺序获取锁(A → B)
 public void transfer(Account from, Account to, int amount) {
     synchronized (from) {
         synchronized (to) {   // 若其它线程先锁 to 再锁 from → 死锁
@@ -239,4 +239,4 @@ ConcurrentHashMap(JDK8)用 CAS + synchronized:桶数组无冲突时 CAS 插入,�
 - Android 首选协程,线程池用于特定场景
 - 死锁/可见性/竞态是并发三大坑,锁顺序与原子性要严谨
 
-> 📖 进阶阅读：[线程池详解](/network/thread/thread-pool.md) | [锁机制详解](/network/thread/locks.md) | [Java 并发工具类](/network/thread/concurrency-tools.md)
+> 进阶阅读：[线程池详解](/network/thread/thread-pool.md) | [锁机制详解](/network/thread/locks.md) | [Java 并发工具类](/network/thread/concurrency-tools.md)

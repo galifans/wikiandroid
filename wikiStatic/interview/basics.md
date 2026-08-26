@@ -3,7 +3,7 @@ icon: basics
 title: 面试基础篇
 ---
 
-# 📘 面试高频题：基础篇
+# 面试高频题：基础篇
 
 > 覆盖 Java/Kotlin、四大组件、View 体系等基础高频考点。
 
@@ -58,4 +58,4 @@ title: 面试基础篇
 ### 12. 主线程为什么不能做耗时操作？
 - 主线程负责 UI 渲染与输入响应，耗时操作导致卡顿/ANR
 
-> 📖 进阶阅读：[面试进阶篇](/interview/advanced.md) | [面试源码篇](/interview/source-code.md)
+> 进阶阅读：[面试进阶篇](/interview/advanced.md) | [面试源码篇](/interview/source-code.md)

@@ -4,9 +4,9 @@ title: GitHub Actions 实战
 description: CI/CD 概念、GitHub Actions 工作流结构、Android 构建流水线、产物上传与通知
 ---
 
-# 🤖 GitHub Actions 实战
+# GitHub Actions 实战
 
-> 面试高频指数：⭐⭐⭐
+> 面试高频指数：中
 > CI/CD 是现代工程标配，GitHub Actions 是最主流的自动化平台之一。
 
 ## 1. CI/CD 是什么

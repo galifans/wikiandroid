@@ -4,7 +4,7 @@ title: 关于本站
 index: false
 ---
 
-# 📎 关于本站
+# 关于本站
 
 WikiAndroid 相关介绍与说明。
 

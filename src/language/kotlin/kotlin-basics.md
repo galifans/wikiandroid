@@ -90,4 +90,4 @@ fun String.isEmail(): Boolean = this.contains("@") && this.contains(".")
 val result = "user@example.com".isEmail() // true
 ```
 
-> 📖 进阶阅读：[Kotlin 协程从入门到进阶](kotlin-coroutines.md) | [Kotlin 学习路线](/roadmap/kotlin-roadmap.md)
+> 进阶阅读：[Kotlin 协程从入门到进阶](kotlin-coroutines.md) | [Kotlin 学习路线](/roadmap/kotlin-roadmap.md)

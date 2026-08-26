@@ -7,7 +7,7 @@ dir:
   order: 3
 ---
 
-# 📡 BroadcastReceiver
+# BroadcastReceiver
 
 BroadcastReceiver 用于接收系统或应用发出的全局广播消息。
 

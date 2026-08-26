@@ -4,7 +4,7 @@ title: Zygote 进程深入
 description: Zygote 启动流程、fork 进程孵化、预加载资源、Socket 通信、应用进程创建
 ---
 
-# 🥚 Zygote 进程深入
+# Zygote 进程深入
 
 > Zygote 是 Android 应用进程的"孵化器":所有应用进程都由它 fork 而来,共享预加载的类与资源,从而**快速启动 + 节省内存**。
 
@@ -79,7 +79,7 @@ static void preload() {
 | 字体 | 系统字体族 |
 | ICU/文本 | 国际化文本布局 |
 
-> 💡 **COW(写时复制)**:fork 后子进程与 Zygote 共享只读物理页,只有写入时才复制。所以预加载内容越多,内存共享越多(但启动时间略长)。**这就是为什么所有应用都带一套系统框架内存的底层原因**。
+> **COW(写时复制)**:fork 后子进程与 Zygote 共享只读物理页,只有写入时才复制。所以预加载内容越多,内存共享越多(但启动时间略长)。**这就是为什么所有应用都带一套系统框架内存的底层原因**。
 
 ## 四、fork 创建应用进程
 
@@ -174,4 +174,4 @@ AMS 启动应用(如 startActivity 时进程不存在)→ 通过 Socket 向 Zygo
 - 子进程执行 ActivityThread.main() 进入应用生命周期
 - 多进程应用:每进程一次 Zygote fork
 
-> 📖 进阶阅读：[Android 系统启动流程](/system/boot/system-boot.md) | [应用启动流程详解](/system/boot/app-launch.md) | [AMS 与 Activity 启动](/system/ams-wms/ams-activity-launch.md)
+> 进阶阅读：[Android 系统启动流程](/system/boot/system-boot.md) | [应用启动流程详解](/system/boot/app-launch.md) | [AMS 与 Activity 启动](/system/ams-wms/ams-activity-launch.md)

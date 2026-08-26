@@ -4,9 +4,9 @@ title: Activity 启动流程源码分析
 description: 从 startActivity 到 onResume 的完整调用链，深入理解 ActivityTaskManager、ActivityTaskManagerService、ActivityThread 与 Instrumentation 的协作
 ---
 
-# 🔍 Activity 启动流程源码分析
+# Activity 启动流程源码分析
 
-> 面试高频指数：⭐⭐⭐⭐⭐（大厂必问）
+> 面试高频指数：极高（大厂必问）
 > 本篇文章基于 Android 13（API 33）分析 `startActivity` 到 `onResume` 的完整链路。
 
 ## 1. 总体架构

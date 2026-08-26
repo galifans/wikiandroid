@@ -3,7 +3,7 @@ icon: advanced
 title: 面试进阶篇
 ---
 
-# 📗 面试高频题：进阶篇
+# 面试高频题：进阶篇
 
 > 覆盖性能优化、架构、组件化、Jetpack 等进阶考点。
 
@@ -60,4 +60,4 @@ title: 面试进阶篇
 ### 14. 如何做屏幕适配？
 - dp 适配、ConstraintLayout、`smallestWidth` 限定符、AutoSize
 
-> 📖 进阶阅读：[面试源码篇](/interview/source-code.md) | [面试准备计划](/interview/interview-plan.md)
+> 进阶阅读：[面试源码篇](/interview/source-code.md) | [面试准备计划](/interview/interview-plan.md)

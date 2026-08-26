@@ -4,7 +4,7 @@ title: Hilt 依赖注入进阶
 description: Hilt 多模块化、自定义组件与限定符、与协程/测试结合、@HiltViewModel、常见错误排查
 ---
 
-# ⚓ Hilt 依赖注入进阶
+# Hilt 依赖注入进阶
 
 > 从"会用 @Inject/@Module"到"设计好依赖图":多模块组织、自定义 Qualifier/Component、与协程结合、测试替身注入。本文是 Hilt 进阶完全指南。
 
@@ -282,4 +282,4 @@ Hilt 组件层级:SingletonComponent(Application) → ActivityRetainedComponent 
 - @HiltViewModel 无缝桥接 Compose/ViewModel
 - @TestInstallIn 实现依赖图级测试替身
 
-> 📖 进阶阅读：[Hilt 依赖注入](/jetpack/workmanager-hilt/hilt.md) | [WorkManager 后台任务](/jetpack/workmanager-hilt/workmanager.md) | [ViewModel 源码解析](/jetpack/lifecycle-viewmodel/viewmodel-source.md)
+> 进阶阅读：[Hilt 依赖注入](/jetpack/workmanager-hilt/hilt.md) | [WorkManager 后台任务](/jetpack/workmanager-hilt/workmanager.md) | [ViewModel 源码解析](/jetpack/lifecycle-viewmodel/viewmodel-source.md)

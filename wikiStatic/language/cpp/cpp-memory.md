@@ -4,7 +4,7 @@ title: C++ 内存管理与智能指针
 description: C++ 堆栈内存、RAII 思想、智能指针（unique_ptr/shared_ptr/weak_ptr）与 Android NDK 实践
 ---
 
-# 💾 C++ 内存管理与智能指针
+# C++ 内存管理与智能指针
 
 > C++ 的威力与痛苦都源于手动内存管理。理解栈/堆分配、RAII 资源管理，掌握三种智能指针的语义与选型，是写出无泄漏、无悬垂的 NDK 代码的前提。
 
@@ -45,7 +45,7 @@ void func() {
 | 对比项 | `new`/`delete` | `malloc`/`free` |
 |--------|----------------|-----------------|
 | 语言 | C++ 操作符 | C 库函数 |
-| 调用构造/析构 | ✅ 会调用 | ❌ 不会 |
+| 调用构造/析构 | ✓ 会调用 | ✗ 不会 |
 | 返回类型 | 类型安全（`T*`） | `void*` 需强转 |
 | 失败行为 | 抛 `bad_alloc` | 返回 `nullptr` |
 | 初始化 | 可带初值 `new int(5)` | 不初始化 |
@@ -58,7 +58,7 @@ int* arr = new int[10];   // 数组
 delete[] arr;             // 数组释放必须用 delete[]
 ```
 
-> ⚠️ **new/delete 与 malloc/free 不可混用**：`new` 出来的用 `delete`，`malloc` 出来的用 `free`，`new[]` 用 `delete[]`，否则 UB（未定义行为）。
+>  **new/delete 与 malloc/free 不可混用**：`new` 出来的用 `delete`，`malloc` 出来的用 `free`，`new[]` 用 `delete[]`，否则 UB（未定义行为）。
 
 ## 三、RAII：资源管理核心思想
 
@@ -113,7 +113,7 @@ C++11 标准库提供了三种智能指针，都是 RAII 的封装：
 
 std::unique_ptr<int> p = std::make_unique<int>(42);
 // 不能拷贝（独占）
-// std::unique_ptr<int> p2 = p;  // ❌ 编译错误
+// std::unique_ptr<int> p2 = p;  // ✗ 编译错误
 // 可以移动
 std::unique_ptr<int> p2 = std::move(p);   // p 变为 nullptr
 ```
@@ -169,7 +169,7 @@ std::shared_ptr<Widget> p1(new Widget());        // 对象 + 控制块两次分�
 std::shared_ptr<Widget> p2 = std::make_shared<Widget>();  // 一次分配，更优
 ```
 
-> 💡 **优先用 `make_shared`**：① 只做一次内存分配，减少内存碎片；② 异常安全（`f(shared_ptr<A>(new A), shared_ptr<B>(new B))` 在 C++17 前的求值顺序可能泄漏）。
+> **优先用 `make_shared`**：① 只做一次内存分配，减少内存碎片；② 异常安全（`f(shared_ptr<A>(new A), shared_ptr<B>(new B))` 在 C++17 前的求值顺序可能泄漏）。
 
 ## 七、weak_ptr：打破循环引用
 
@@ -183,7 +183,7 @@ struct Node {
 // 循环引用 → 泄漏
 struct BadNode {
     std::shared_ptr<BadNode> next;
-    std::shared_ptr<BadNode> prev;   // ❌ 互相持有 shared_ptr → 计数永不归零
+    std::shared_ptr<BadNode> prev;   // ✗ 互相持有 shared_ptr → 计数永不归零
 };
 
 int main() {
@@ -225,7 +225,7 @@ if (auto locked = wptr.lock()) {
 }
 ```
 
-> ⚠️ **weak_ptr 不能直接解引用**，必须 `lock()` 提升为 shared_ptr 才能使用，这正是为了检查对象是否还存活。
+>  **weak_ptr 不能直接解引用**，必须 `lock()` 提升为 shared_ptr 才能使用，这正是为了检查对象是否还存活。
 
 ## 八、Android NDK 中的实践
 
@@ -313,4 +313,4 @@ RAII 是"资源获取即初始化"：在构造函数中获取资源、析构函�
 - `make_shared` 一次分配更优；优先智能指针而非裸指针
 - NDK 开发注意 JNI 局部/全局引用与 Native 资源双重管理
 
-> 📖 进阶阅读：[C++ 核心知识点](/language/cpp/cpp-basics.md) | [JNI 与 NDK 开发](/language/cpp/jni-ndk.md)
+> 进阶阅读：[C++ 核心知识点](/language/cpp/cpp-basics.md) | [JNI 与 NDK 开发](/language/cpp/jni-ndk.md)

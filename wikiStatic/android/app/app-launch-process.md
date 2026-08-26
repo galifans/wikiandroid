@@ -216,4 +216,4 @@ A：点击图标后、首帧绘制完成前，系统展示的是主题的 `windo
 - **测量先行**：`am start -W` + 分段埋点 + `reportFullyDrawn` 量化改进
 - **本质目标**：减少首帧前主线程的每毫秒工作量
 
-> 📖 进阶阅读：[Application 详解与全局初始化](/android/app/application-basics.md) | [Activity 启动流程源码分析](/android/activity/activity-launch-process.md) | [Android 进程模型](/android/process/process-lifecycle.md)
+> 进阶阅读：[Application 详解与全局初始化](/android/app/application-basics.md) | [Activity 启动流程源码分析](/android/activity/activity-launch-process.md) | [Android 进程模型](/android/process/process-lifecycle.md)

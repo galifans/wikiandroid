@@ -4,9 +4,9 @@ title: Compose 核心概念
 description: 声明式 UI、可组合函数、重组原理、Modifier 链、Compose 与 View 互操作入门
 ---
 
-# 🧩 Compose 核心概念
+# Compose 核心概念
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > Compose 是 Android 现代 UI 开发的方向，理解声明式思维是第一步。
 
 ## 1. 声明式 UI vs 命令式 UI

@@ -4,7 +4,7 @@ title: ART 编译优化深入
 description: AOT/JIT/JIT Cache、Profile 引导编译、dex2oat、解释器、字节码与机器码
 ---
 
-# ⚙️ ART 编译优化深入
+# ART 编译优化深入
 
 > Android 5.0 起 ART 取代 Dalvik,核心是**编译策略的演进**:AOT 全量预编译 → JIT 运行时编译 + Profile 引导。理解编译模式才能理解启动速度与包体积的权衡。
 
@@ -75,7 +75,7 @@ flowchart LR
 | 云端 Profile | 大量用户统计 | 新安装用户加速 |
 | 基线 Profile | 开发者构建时 | 出厂优化(启动路径) |
 
-> 💡 **开发者可用的基线 Profile**:通过 `Baseline Profile`(androidx.profileinstaller)在构建时生成启动热点方法列表,新用户安装后立即优化启动路径——这是现代 Android 启动优化的利器。
+> **开发者可用的基线 Profile**:通过 `Baseline Profile`(androidx.profileinstaller)在构建时生成启动热点方法列表,新用户安装后立即优化启动路径——这是现代 Android 启动优化的利器。
 
 ## 四、dex2oat 编译流程
 
@@ -157,4 +157,4 @@ Baseline Profile 是开发者在构建时提供的关键路径(如启动)热点�
 - dex2oat:离线编译器,安装/空闲时触发
 - 权衡三角:启动速度、包体积、磁盘占用
 
-> 📖 进阶阅读：[ART 运行时与 GC](/system/art/art-runtime.md) | [ART 垃圾回收机制](/system/art/art-gc.md) | [类加载器与双亲委托](/system/art/classloader.md)
+> 进阶阅读：[ART 运行时与 GC](/system/art/art-runtime.md) | [ART 垃圾回收机制](/system/art/art-gc.md) | [类加载器与双亲委托](/system/art/classloader.md)

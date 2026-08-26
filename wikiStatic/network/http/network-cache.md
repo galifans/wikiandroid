@@ -226,4 +226,4 @@ AsyncTask 内部线程池不可控（无法调整核心线程数、队列策略�
 - 缓存只做 GET：URL 排序 key + Expires 过期 + forceUpdate 强制更新
 - 登录安全：不存明文密码，Cookie/Token 会话机制实现自动登录
 
-> 📖 进阶阅读：[OkHttp 拦截器机制（缓存拦截器）](okhttp-interceptor.md) | [HTTP/HTTPS 协议详解（Cookie 与 Session）](http-protocol.md) | [OkHttp 源码解析（Cache 实现）](okhttp-source.md)
+> 进阶阅读：[OkHttp 拦截器机制（缓存拦截器）](okhttp-interceptor.md) | [HTTP/HTTPS 协议详解（Cookie 与 Session）](http-protocol.md) | [OkHttp 源码解析（Cache 实现）](okhttp-source.md)

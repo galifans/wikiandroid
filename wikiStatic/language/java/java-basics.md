@@ -101,4 +101,4 @@ method.invoke(obj, "Android");
 - static 字段：所有对象**共享一份空间**；非 static 字段每个对象各有一份
 - static 方法：无需创建对象即可调用（`main()` 入口即依赖此特性）
 
-> 📖 进阶阅读：[Java 集合框架详解](java-collections.md) | [线程池与并发](/network/thread/) | [JVM 内存区域与内存溢出](jvm/JVM内存区域与内存溢出.md)
+> 进阶阅读：[Java 集合框架详解](java-collections.md) | [线程池与并发](/network/thread/) | [JVM 内存区域与内存溢出](jvm/JVM内存区域与内存溢出.md)

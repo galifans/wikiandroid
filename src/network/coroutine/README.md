@@ -7,7 +7,7 @@ dir:
   order: 3
 ---
 
-# 🌊 协程 Flow / RxJava
+# 协程 Flow / RxJava
 
 响应式编程与异步数据流。
 

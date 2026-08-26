@@ -4,9 +4,9 @@ title: AIDL 跨进程通信
 description: AIDL 语法、in/out/inout 方向、oneway、Binder 工作原理、以及跨进程回调的实现完整指南
 ---
 
-# 🔗 AIDL 跨进程通信
+# AIDL 跨进程通信
 
-> 面试高频指数：⭐⭐⭐⭐⭐（Binder 相关必考）
+> 面试高频指数：极高（Binder 相关必考）
 > 本文从 AIDL 使用到其背后的 Binder 机制，逐层拆解。
 
 ## 1. 什么是 AIDL

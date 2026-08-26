@@ -4,9 +4,9 @@ title: Kotlin 泛型详解
 description: 泛型基础、协变与逆变、星投影、reified 实化类型、泛型约束与型变实战
 ---
 
-# 🔶 Kotlin 泛型详解
+# Kotlin 泛型详解
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 泛型是 Kotlin 类型系统的精髓，协变/逆变是理解泛型的关键。
 
 ## 1. 泛型基础
@@ -66,7 +66,7 @@ fun <T : Any> notNull(value: T) { }    // T 不能为空
 // 相当于 Java 的 ? extends T
 interface Source<out T> {
     fun next(): T        // T 只能出现在返回位置
-    // fun set(t: T)     // ❌ 不能有 T 作为参数
+    // fun set(t: T)     // ✗ 不能有 T 作为参数
 }
 
 // 逆变（contravariant）：in，只能"输入"（写）
@@ -77,7 +77,7 @@ interface Sink<in T> {
 
 // 使用
 val source: Source<Any> = ...
-val strSource: Source<String> = source    // ✅ 协变：Source<String> 是 Source<Any> 的子类型
+val strSource: Source<String> = source    // ✓ 协变：Source<String> 是 Source<Any> 的子类型
 ```
 
 **型变规则记忆**：
@@ -122,7 +122,7 @@ fun <T> List<T>.firstOrNullSafe(): T? = ...
 // reified 让内联函数的泛型在运行时可见
 
 inline fun <reified T> List<*>.filterIsInstance(): List<T> {
-    return this.filter { it is T }    // ✅ 可以使用 is T
+    return this.filter { it is T }    // ✓ 可以使用 is T
 }
 
 // 使用

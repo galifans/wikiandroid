@@ -62,9 +62,9 @@ data.observe(this) { value ->
 
 | 对比项 | LiveData | StateFlow |
 |--------|----------|-----------|
-| 生命周期感知 | ✅ 内置 | ❌ 需 `repeatOnLifecycle` |
-| 协程支持 | 一般 | ✅ 原生 |
-| Compose 支持 | 需转换 | ✅ `collectAsState()` |
+| 生命周期感知 | ✓ 内置 | ✗ 需 `repeatOnLifecycle` |
+| 协程支持 | 一般 | ✓ 原生 |
+| Compose 支持 | 需转换 | ✓ `collectAsState()` |
 | 多线程 | 主线程 setValue | 任意线程 |
 
 ::: tip 建议
@@ -79,4 +79,4 @@ data.observe(this) { value ->
 4. `viewModelScope` 的线程模型（默认 Main）？
 5. 两个 Fragment 如何共享 ViewModel（`activityViewModels`）？
 
-> 📖 进阶阅读：[Lifecycle 原理与使用](lifecycle.md) | [协程 Flow](/network/coroutine/)
+> 进阶阅读：[Lifecycle 原理与使用](lifecycle.md) | [协程 Flow](/network/coroutine/)

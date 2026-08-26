@@ -4,7 +4,7 @@ title: 补间动画与插值器
 description: 补间动画（Tween）、帧动画与属性动画对比、插值器 Interpolator 与估值器 TypeEvaluator 深度解析
 ---
 
-# 🎞️ 补间动画与插值器
+# 补间动画与插值器
 
 > 动画是 Android UI 的灵魂。掌握帧动画、补间动画、属性动画三大体系的差异，理解插值器（Interpolator）与估值器（Evaluator）如何协同计算，才能写出流畅自然的动画。
 
@@ -24,10 +24,10 @@ flowchart TD
 
 | 动画类型 | 机制 | 改变属性？ | 推荐度 |
 |---------|------|-----------|--------|
-| 帧动画 | 逐帧换图 | 否 | ⭐ 简单场景 |
-| 补间动画 | 外观变换（Matrix） | ❌ 不改变真实位置 | ⭐⭐ |
-| 属性动画 | 直接改属性值 | ✅ 真实改变 | ⭐⭐⭐⭐⭐ |
-| 转场动画 | 场景切换 | ✅ | ⭐⭐⭐⭐ |
+| 帧动画 | 逐帧换图 | 否 | 低（简单场景） |
+| 补间动画 | 外观变换（Matrix） | ✗ 不改变真实位置 | 较低 |
+| 属性动画 | 直接改属性值 | ✓ 真实改变 | 极高 |
+| 转场动画 | 场景切换 | ✓ | 高 |
 
 ## 二、帧动画（Frame Animation）
 
@@ -53,7 +53,7 @@ anim.start()
 | 适合加载动画 | 不适合复杂/长动画 |
 | 兼容性好 | 无法交互控制 |
 
-> 💡 优化：帧动画图片用 WebP 动画替代，或改用 Lottie（矢量动画）。
+> 优化：帧动画图片用 WebP 动画替代，或改用 Lottie（矢量动画）。
 
 ## 三、补间动画（Tween Animation）
 
@@ -105,7 +105,7 @@ view.startAnimation(anim)
 ### 3.3 补间动画的致命缺陷
 
 ```kotlin
-// ⚠️ 问题：动画结束后，view 的实际位置/大小没变！
+//  问题：动画结束后，view 的实际位置/大小没变！
 view.startAnimation(TranslateAnimation(0f, 300f, 0f, 0f))
 
 // 点击事件仍在原位置：
@@ -120,7 +120,7 @@ view.startAnimation(TranslateAnimation(0f, 300f, 0f, 0f))
 | 无法获得动画后的真实位置 | `getLeft()` 等不变 |
 | 有限的能力 | 只有 4 种变换 |
 
-> 💡 这正是**属性动画**诞生的原因：直接操作属性，真实改变状态。
+> 这正是**属性动画**诞生的原因：直接操作属性，真实改变状态。
 
 ## 四、属性动画（Property Animation）
 
@@ -251,7 +251,7 @@ sequenceDiagram
     A->>V: setXxx(当前值) / 通知监听器
 ```
 
-> 💡 属性动画依赖 Choreographer 的每帧回调计算属性值，所以动画与 VSYNC 同步，掉帧时动画自动"跳过"耗时帧，保持流畅。
+> 属性动画依赖 Choreographer 的每帧回调计算属性值，所以动画与 VSYNC 同步，掉帧时动画自动"跳过"耗时帧，保持流畅。
 
 ### setter 找不到怎么办？
 
@@ -319,4 +319,4 @@ AnimatorSet 通过 playTogether（同时）、playSequentially（顺序）、wit
 - 属性动画由 Choreographer 驱动，与 VSYNC 同步
 - 自定义动画 = 自定义插值器（速度）+ 自定义估值器（值）+ 动画监听
 
-> 📖 进阶阅读：[属性动画机制](/ui/animation/property-animation.md) | [转场动画与共享元素](/ui/animation/scene-transition.md) | [渲染原理与硬件加速](/ui/render/render-principle.md)
+> 进阶阅读：[属性动画机制](/ui/animation/property-animation.md) | [转场动画与共享元素](/ui/animation/scene-transition.md) | [渲染原理与硬件加速](/ui/render/render-principle.md)

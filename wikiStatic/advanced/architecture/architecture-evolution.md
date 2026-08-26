@@ -4,9 +4,9 @@ title: MVC → MVP → MVVM → MVI 演进
 description: Android 架构模式演进史：MVC/MVP/MVVM/MVI 对比、优缺点、适用场景与代码示例
 ---
 
-# 🏗️ MVC → MVP → MVVM → MVI 演进
+# MVC → MVP → MVVM → MVI 演进
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 架构模式是面试必问，理解演进逻辑比背概念更重要。
 
 ## 1. 为什么要架构

@@ -4,9 +4,9 @@ title: Java 集合框架详解
 description: List/Set/Map 体系、ArrayList vs LinkedList、HashMap 原理、ConcurrentHashMap、集合选择与源码解析
 ---
 
-# 📚 Java 集合框架详解
+# Java 集合框架详解
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 集合是 Java 面试必考题，HashMap 源码几乎是每场面试的标配。
 
 ## 1. 集合框架总览

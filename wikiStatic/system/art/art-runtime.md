@@ -4,9 +4,9 @@ title: ART 运行时与 JIT/AOT
 description: ART vs Dalvik、JIT/AOT 混合编译、解释执行与编译执行、GC 机制、ART 优化对启动与性能的影响
 ---
 
-# 🧠 ART 运行时与 JIT/AOT
+# ART 运行时与 JIT/AOT
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > ART 是 Android 5.0+ 的默认运行时，混合编译模式是性能的关键。
 
 ## 1. ART vs Dalvik

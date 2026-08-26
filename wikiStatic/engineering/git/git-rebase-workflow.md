@@ -4,7 +4,7 @@ title: Git 高级操作与工作流
 description: Rebase 深入、Cherry-Pick、Stash、历史改写、分支模型、冲突解决、Git 原理
 ---
 
-# 🔀 Git 高级操作与工作流
+# Git 高级操作与工作流
 
 > 学会 commit/push 只是入门。真正的工程能力在于:**优雅地改写历史、解决冲突、设计分支模型**,让协作高效且历史清晰。
 
@@ -43,7 +43,7 @@ git merge feature        # 生成合并提交
 
 ### 1.2 Rebase 的黄金法则
 
-> ⚠️ **不要 rebase 已经推送到共享分支的提交**——会改写历史,导致协作者冲突。只对**自己的、未推送**的分支使用。
+>  **不要 rebase 已经推送到共享分支的提交**——会改写历史,导致协作者冲突。只对**自己的、未推送**的分支使用。
 
 ## 二、交互式 Rebase:改写历史
 
@@ -73,7 +73,7 @@ edit  0c1d2e  feat: 新增设置           # 修改内容
 git push --force-with-lease origin feature
 ```
 
-> 💡 使用 `--force-with-lease` 而非 `--force`:前者会检查远端是否被他人更新,更安全。
+> 使用 `--force-with-lease` 而非 `--force`:前者会检查远端是否被他人更新,更安全。
 
 ## 三、Cherry-Pick 与 Stash
 
@@ -193,4 +193,4 @@ cherry-pick 把**某个具体提交**复制到当前分支(重新生成新提交
 - 冲突是常态,小步提交 + 频繁同步减少冲突
 - 黄金法则:共享分支不可 rebase,force push 用 --force-with-lease
 
-> 📖 进阶阅读：[Git 工作流实践](/engineering/git/git-workflow.md) | [Git 常用命令速查](/engineering/git/git-cheatsheet.md) | [GitHub Actions CI/CD](/engineering/cicd/github-actions.md)
+> 进阶阅读：[Git 工作流实践](/engineering/git/git-workflow.md) | [Git 常用命令速查](/engineering/git/git-cheatsheet.md) | [GitHub Actions CI/CD](/engineering/cicd/github-actions.md)

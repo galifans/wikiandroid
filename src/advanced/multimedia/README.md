@@ -7,7 +7,7 @@ dir:
   order: 6
 ---
 
-# 🎬 音视频开发
+# 音视频开发
 
 音视频技术栈：采集、编码、传输、播放。
 
@@ -16,6 +16,7 @@ dir:
 - [音视频开发入门](multimedia-basics.md)
 - [Media3 ExoPlayer 播放器深入](exoplayer-deep.md)
 - [MediaCodec 与 FFmpeg 音视频处理](mediacodec-ffmpeg.md)
+- [Camera2 拍照流程与原理](camera-capture.md)
 
 ## 核心要点
 

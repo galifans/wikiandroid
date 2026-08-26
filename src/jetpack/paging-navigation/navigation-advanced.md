@@ -4,7 +4,7 @@ title: Navigation 高级进阶
 description: Navigation 类型安全导航、Deep Link、返回栈管理、嵌套图与 Compose Navigation 集成
 ---
 
-# 🧭 Navigation 高级进阶
+# Navigation 高级进阶
 
 > 从"搭个导航图"到"掌控导航架构":类型安全导航、Deep Link、返回栈精细控制、嵌套导航图与 Compose Navigation 深度集成。
 
@@ -193,7 +193,7 @@ navController.navigate(MainTab2Route) {
 }
 ```
 
-> 💡 嵌套图的优势:每个 Tab 有自己的返回栈,切换 Tab 不丢状态;导航图可复用、可模块化(配合 Hilt 多模块)。
+> 嵌套图的优势:每个 Tab 有自己的返回栈,切换 Tab 不丢状态;导航图可复用、可模块化(配合 Hilt 多模块)。
 
 ## 六、与 ViewModel 集成
 
@@ -250,4 +250,4 @@ composable<HomeRoute> { entry ->
 - 嵌套图支撑底部导航与模块化
 - 每目的地 ViewModel 自动绑定返回栈生命周期
 
-> 📖 进阶阅读：[Navigation 导航组件](/jetpack/paging-navigation/navigation.md) | [Paging 3 分页加载](/jetpack/paging-navigation/paging3.md) | [Hilt 依赖注入进阶](/jetpack/workmanager-hilt/hilt-advanced.md)
+> 进阶阅读：[Navigation 导航组件](/jetpack/paging-navigation/navigation.md) | [Paging 3 分页加载](/jetpack/paging-navigation/paging3.md) | [Hilt 依赖注入进阶](/jetpack/workmanager-hilt/hilt-advanced.md)

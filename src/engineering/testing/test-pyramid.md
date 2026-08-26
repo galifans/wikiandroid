@@ -4,7 +4,7 @@ title: 测试金字塔与测试策略
 description: 测试金字塔、测试分层、覆盖率、测试驱动开发、质量门禁、Android 测试策略
 ---
 
-# 🏔️ 测试金字塔与测试策略
+# 测试金字塔与测试策略
 
 > 测试不是越多越好,而是**分层合理**:底层大量快速单测、中层适量集成测试、顶层少量 UI 测试。理解测试金字塔才能设计出"快、稳、省"的测试体系。
 
@@ -22,7 +22,7 @@ flowchart TD
 | 集成测试 | 中 | 中 | 中 | 中 |
 | 单元测试 | 多 | 快(毫秒级) | 低 | 高 |
 
-> 🏗️ **核心思想**:测试成本自下而上递增。把大量逻辑验证放在最快最稳的单测层,UI 只验证关键用户流程——这就是"金字塔"形状的由来。
+> **核心思想**:测试成本自下而上递增。把大量逻辑验证放在最快最稳的单测层,UI 只验证关键用户流程——这就是"金字塔"形状的由来。
 
 ## 二、为什么是金字塔而不是冰淇淋
 
@@ -128,7 +128,7 @@ flowchart LR
 | Green | 写最小代码让测试通过 |
 | Refactor | 重构代码保持测试通过 |
 
-> 💡 TDD 的价值:测试即设计文档;强制从"使用者视角"思考 API;保障回归安全。
+> TDD 的价值:测试即设计文档;强制从"使用者视角"思考 API;保障回归安全。
 
 ## 六、高频面试题
 
@@ -166,4 +166,4 @@ TDD(测试驱动开发):红绿循环——先写失败测试(Red)定义期望行
 - TDD:红绿循环,测试即设计
 - 团队实践:分层规模、CI 集成、评审要求、定期维护
 
-> 📖 进阶阅读：[MockK 单元测试实战](/engineering/testing/mockk-testing.md) | [UI 测试与 Espresso](/engineering/testing/ui-testing.md) | [单元测试实践](/engineering/testing/unit-testing.md)
+> 进阶阅读：[MockK 单元测试实战](/engineering/testing/mockk-testing.md) | [UI 测试与 Espresso](/engineering/testing/ui-testing.md) | [单元测试实践](/engineering/testing/unit-testing.md)

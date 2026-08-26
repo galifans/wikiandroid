@@ -4,9 +4,9 @@ title: 属性动画完全解析
 description: ValueAnimator/ObjectAnimator/AnimatorSet、插值器与估值器、PropertyValuesHolder、Compose 动画对比
 ---
 
-# ✨ 属性动画完全解析
+# 属性动画完全解析
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 属性动画是 Android 动画体系的核心，理解估值器与插值器才能写出流畅动画。
 
 ## 1. 动画体系演进

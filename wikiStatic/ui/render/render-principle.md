@@ -4,7 +4,7 @@ title: 渲染原理与硬件加速
 description: Android 渲染管线、VSYNC 与 Choreographer、硬件加速原理、卡顿指标全解析
 ---
 
-# 🖥️ 渲染原理与硬件加速
+# 渲染原理与硬件加速
 
 > 面试必问的"一帧画面如何渲染到屏幕"。从 VSYNC 信号、Choreographer 编排到 CPU/GPU 分工，再到 16.6ms 掉帧指标，本文一次讲透 Android 渲染管线。
 
@@ -27,7 +27,7 @@ flowchart TD
 | 光栅化 | GPU（RenderThread） | 把指令变成像素（三角形/纹理） |
 | 合成 | SurfaceFlinger | 合并所有窗口的图层，交给屏幕 |
 
-> 💡 关键点：**UI 线程只负责"生成绘制指令"，真正的像素绘制在 RenderThread/GPU 上异步执行**。这也是为什么 View 的 `onDraw` 不能做耗时操作——它阻塞的是指令生成。
+> 关键点：**UI 线程只负责"生成绘制指令"，真正的像素绘制在 RenderThread/GPU 上异步执行**。这也是为什么 View 的 `onDraw` 不能做耗时操作——它阻塞的是指令生成。
 
 ## 二、VSYNC：渲染的节拍器
 
@@ -100,7 +100,7 @@ Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallba
 })
 ```
 
-> 📖 这也是 BlockCanary、Matrix、Profiler 等卡顿监控工具的底层原理。
+> 这也是 BlockCanary、Matrix、Profiler 等卡顿监控工具的底层原理。
 
 ## 四、硬件加速（Hardware Acceleration）
 
@@ -128,7 +128,7 @@ flowchart TD
     E --> F
 ```
 
-> 💡 这解释了为什么复杂页面滚动流畅：**大部分 View 的绘制指令被缓存，滚动只是图层平移/合成**。
+> 这解释了为什么复杂页面滚动流畅：**大部分 View 的绘制指令被缓存，滚动只是图层平移/合成**。
 
 ### 4.3 硬件加速检测与开关
 
@@ -144,7 +144,7 @@ flowchart TD
 val isAccelerated = view.isHardwareAccelerated
 ```
 
-> ⚠️ 硬件加速下不支持的自定义 View API（如 `drawText` 的某些参数组合）会静默降级或抛异常，自绘 View 需注意兼容。
+>  硬件加速下不支持的自定义 View API（如 `drawText` 的某些参数组合）会静默降级或抛异常，自绘 View 需注意兼容。
 
 ## 五、渲染性能指标
 
@@ -167,7 +167,7 @@ flowchart LR
     A --> F[合成显示 ~1.6ms]
 ```
 
-> 💡 **优化思路**：任何阶段超支都会掉帧——布局嵌套深减测量时间、动画用属性动画减重绘、自绘 View 减指令数量、位图减 GPU 内存压力。
+> **优化思路**：任何阶段超支都会掉帧——布局嵌套深减测量时间、动画用属性动画减重绘、自绘 View 减指令数量、位图减 GPU 内存压力。
 
 ## 六、Profiler 工具
 
@@ -220,4 +220,4 @@ Choreographer 是渲染的编排者：① 通过 `postCallback` 注册帧回调�
 - 掉帧 = 任一阶段超时，监控工具围绕 Choreographer 帧时间差
 - 过度绘制、布局层级、位图内存是渲染优化三大主战场
 
-> 📖 进阶阅读：[View 绘制流程详解](/ui/view/view-draw-process.md) | [MeasureSpec 完全解析](/ui/view/measurespec.md) | [卡顿优化实战](/advanced/performance/jank-optimization.md)
+> 进阶阅读：[View 绘制流程详解](/ui/view/view-draw-process.md) | [MeasureSpec 完全解析](/ui/view/measurespec.md) | [卡顿优化实战](/advanced/performance/jank-optimization.md)

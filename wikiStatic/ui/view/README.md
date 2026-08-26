@@ -7,7 +7,7 @@ dir:
   order: 1
 ---
 
-# 🖼️ View 体系
+# View 体系
 
 View 是 Android UI 的基本单元，理解绘制流程是进阶的必修课。
 

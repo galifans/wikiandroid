@@ -7,7 +7,7 @@ dir:
   order: 6
 ---
 
-# 📨 Intent 与组件通信
+# Intent 与组件通信
 
 Intent 是 Android 四大组件之间通信的"邮递员"——它携带动作、数据与目标信息，驱动 Activity / Service / BroadcastReceiver 三大组件完成页面跳转、服务启动与广播发送。理解 Intent 的解析机制是掌握组件间通信的钥匙。
 

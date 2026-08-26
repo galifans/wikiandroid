@@ -3,7 +3,7 @@ icon: road
 title: Android 学习路线
 ---
 
-# 🗺️ Android 学习路线（2026 最新版）
+# Android 学习路线（2026 最新版）
 
 > 本文为 Android 开发者提供一条从零到进阶的系统学习路径。
 
@@ -40,4 +40,4 @@ title: Android 学习路线
 - 打造 1-2 个有深度的实战项目
 - 阅读优秀开源项目源码（如 Now in Android、Sunflower）
 
-> 💡 配合[面试指南](/interview/)与[实战项目](/projects/)效果更佳。
+> 配合[面试指南](/interview/)与[实战项目](/projects/)效果更佳。

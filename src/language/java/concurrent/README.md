@@ -3,7 +3,7 @@ icon: code-branch
 title: Java 并发
 ---
 
-# ⚙️ Java 并发
+# Java 并发
 
 > Java 多线程并发知识精讲：线程基础、同步机制、线程间通信与经典并发问题。
 

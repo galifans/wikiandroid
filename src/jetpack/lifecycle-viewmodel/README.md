@@ -7,7 +7,7 @@ dir:
   order: 1
 ---
 
-# 🔄 Lifecycle / ViewModel / LiveData
+# Lifecycle / ViewModel / LiveData
 
 Jetpack 生命周期组件，解决组件生命周期管理难题。
 

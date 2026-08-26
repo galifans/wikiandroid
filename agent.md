@@ -23,7 +23,7 @@
 
 - 站点名恒为 **WikiAndroid**；**严禁**出现 "AndroidStuff" 或其他旧名。
 - 品牌色：Android 绿渐变 `#3DDC84 → #0B7A3B`，图标为白色 W 字母。
-- 版权署名：`Copyright © 2026 WikiAndroid`（如用户未明确要求，不得更改）。
+- 版权署名：`Copyright  2026 WikiAndroid`（如用户未明确要求，不得更改）。
 - 页脚固定内容：`GitHub | MIT License`（指向 https://github.com/galifans/wikiandroid）。
 
 ## 4. 结构变更规范

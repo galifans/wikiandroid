@@ -381,4 +381,4 @@ A：默认是。可通过 `android:configChanges="orientation|screenSize"` 让 A
 - 启动模式四兄弟，重点掌握 `singleTask` 的"清栈 + onNewIntent"行为与 Flags 的优先级。
 - 现代开发用 Lifecycle 组件替代手工生命周期管理。
 
-> 📖 进阶阅读：[Activity 任务栈与返回栈](task-stack.md) | [Activity 启动流程源码分析](activity-launch-process.md) | [Fragment 生命周期与通信](/android/fragment/fragment-basics.md)
+> 进阶阅读：[Activity 任务栈与返回栈](task-stack.md) | [Activity 启动流程源码分析](activity-launch-process.md) | [Fragment 生命周期与通信](/android/fragment/fragment-basics.md)

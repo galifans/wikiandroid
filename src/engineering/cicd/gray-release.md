@@ -4,7 +4,7 @@ title: 灰度发布与发布策略
 description: 灰度发布流程、用户分组、灰度策略、回滚机制、A/B 测试、功能开关
 ---
 
-# 🚦 灰度发布与发布策略
+# 灰度发布与发布策略
 
 > 全量发布风险高:一个 bug 影响所有用户。**灰度发布**让新版本先给小部分用户,验证稳定后再逐步放量,是移动端发布的标准姿势。
 
@@ -139,7 +139,7 @@ if (flagManager.isEnabled("new_home")) {
 | 权限开关 | 特定用户可见 |
 | 熔断开关 | 出问题时关闭 |
 
-> ⚠️ 功能开关注意事项:① 开关代码要能安全移除(避免技术债);② 开关配置需版本兼容;③ 及时清理过期开关;④ 开关下发要有缓存与降级。
+>  功能开关注意事项:① 开关代码要能安全移除(避免技术债);② 开关配置需版本兼容;③ 及时清理过期开关;④ 开关下发要有缓存与降级。
 
 ## 六、A/B 测试与灰度区别
 
@@ -186,4 +186,4 @@ if (flagManager.isEnabled("new_home")) {
 - 灰度发布保稳定,A/B 测试验效果,两者互补
 - 回滚预案提前准备:下架 / 关开关 / 引导升级
 
-> 📖 进阶阅读：[Jenkins 流水线实战](/engineering/cicd/jenkins-pipeline.md) | [GitHub Actions CI/CD](/engineering/cicd/github-actions.md) | [APM 监控体系](/advanced/stability/apm-monitoring.md)
+> 进阶阅读：[Jenkins 流水线实战](/engineering/cicd/jenkins-pipeline.md) | [GitHub Actions CI/CD](/engineering/cicd/github-actions.md) | [APM 监控体系](/advanced/stability/apm-monitoring.md)

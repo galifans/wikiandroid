@@ -63,10 +63,10 @@ JMM 是**抽象模型**，对应到实际硬件：主内存 ≈ 物理内存，�
 2. 变量**不与其他状态变量共同参与不变约束**
 
 ```kotlin
-// ✅ 安全：只有单线程写
+// ✓ 安全：只有单线程写
 @Volatile var ready = false
 
-// ❌ 不安全：复合操作依赖当前值
+// ✗ 不安全：复合操作依赖当前值
 @Volatile var count = 0
 count++ // 读-改-写三步，非原子
 ```
@@ -186,4 +186,4 @@ JMM 规范允许虚拟机将非 volatile 的 64 位读写拆分为两次 32 位�
 - volatile 保证可见性与有序性，**不保证原子性**，使用需满足两个安全条件
 - 线程状态：New → Runnable ⇄ (Blocked / Waiting / Timed Waiting) → Terminated
 
-> 📖 进阶阅读：[JVM 内存区域与内存溢出](JVM内存区域与内存溢出.md) | [Java 并发基础](/language/java/java-concurrency.md) | [线程池与并发](/network/thread/)
+> 进阶阅读：[JVM 内存区域与内存溢出](JVM内存区域与内存溢出.md) | [Java 并发基础](/language/java/java-concurrency.md) | [线程池与并发](/network/thread/)

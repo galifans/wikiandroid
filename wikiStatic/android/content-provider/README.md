@@ -7,7 +7,7 @@ dir:
   order: 4
 ---
 
-# 🗃️ ContentProvider
+# ContentProvider
 
 ContentProvider 是 Android 四大组件之一，用于跨进程共享数据。
 

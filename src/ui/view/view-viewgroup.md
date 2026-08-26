@@ -4,9 +4,9 @@ title: View 与 ViewGroup 的关系
 description: View/ViewGroup 职责划分、View 树结构、LayoutParams、三大流程协作与自定义 ViewGroup 基础
 ---
 
-# 🖼️ View 与 ViewGroup 的关系
+# View 与 ViewGroup 的关系
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 理解 View 与 ViewGroup 的关系是理解 Android UI 体系的基石。
 
 ## 1. 基本概念
@@ -52,10 +52,10 @@ PhoneWindow（窗口）
 
 | 职责 | View | ViewGroup |
 | --- | --- | --- |
-| 测量自己 | ✅ `onMeasure` | ✅ 递归测量子 View |
-| 摆放自己 | ✅ `onLayout` | ✅ 递归摆放子 View |
-| 绘制自己 | ✅ `onDraw` | ✅ 先绘制自己再绘制子 View |
-| 管理子 View | ❌ | ✅ add/remove |
+| 测量自己 | ✓ `onMeasure` | ✓ 递归测量子 View |
+| 摆放自己 | ✓ `onLayout` | ✓ 递归摆放子 View |
+| 绘制自己 | ✓ `onDraw` | ✓ 先绘制自己再绘制子 View |
+| 管理子 View | ✗ | ✓ add/remove |
 | 事件分发 | 处理事件 | 拦截 + 分发 |
 
 ```kotlin

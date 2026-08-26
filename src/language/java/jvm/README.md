@@ -3,7 +3,7 @@ icon: microchip
 title: JVM
 ---
 
-# 🖥️ JVM
+# JVM
 
 > Java 虚拟机核心知识：内存区域、类加载机制、垃圾回收与泛型擦除。
 

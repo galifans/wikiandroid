@@ -7,7 +7,7 @@ dir:
   order: 1
 ---
 
-# 🧩 Activity
+# Activity
 
 Activity 是 Android 四大组件之首，承载用户交互界面。
 

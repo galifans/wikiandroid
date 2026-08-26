@@ -6,7 +6,7 @@ description: 进程概念、五级生命周期与 ADJ 机制、多进程模式�
 
 # Android 进程与保活
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 进程管理是 Android 资源调度的核心。本文梳理进程概念、五级生命周期、OOM_ADJ 机制、多进程注意事项、保活方案演进，以及"进程与线程"这个经典面试题。
 
 ## 一、进程概念
@@ -147,13 +147,13 @@ class MyApplication : Application() {
 
 | 方案 | 原理 | 现状 |
 |------|------|------|
-| 一个像素 Activity | 透明 Activity 提升前台优先级 | ❌ 已被系统检测限制（8.0+） |
-| 前台服务 | `startForeground` 提升为可感知进程（Adj=2） | ✅ 合法，但 8.0+ 需通知；Android 13 需权限 |
-| 双进程守护 | 两个进程互拉（A 被杀 B 拉起 A） | ❌ 8.0+ 后台启动限制下失效 |
-| JobScheduler 唤醒 | 系统调度周期任务 | ✅ 合法但间隔受系统控制 |
-| START_STICKY | 服务被杀后系统自动重启 | ✅ 仅限系统非强制杀 |
-| 与系统服务捆绑 | 绑定系统组件提高优先级 | ⚠️ 属于 hack，不推荐 |
-| 静默前台服务 | 隐藏通知 | ❌ Android 8.0+ 必须显示通知，否则崩溃 |
+| 一个像素 Activity | 透明 Activity 提升前台优先级 | ✗ 已被系统检测限制（8.0+） |
+| 前台服务 | `startForeground` 提升为可感知进程（Adj=2） | ✓ 合法，但 8.0+ 需通知；Android 13 需权限 |
+| 双进程守护 | 两个进程互拉（A 被杀 B 拉起 A） | ✗ 8.0+ 后台启动限制下失效 |
+| JobScheduler 唤醒 | 系统调度周期任务 | ✓ 合法但间隔受系统控制 |
+| START_STICKY | 服务被杀后系统自动重启 | ✓ 仅限系统非强制杀 |
+| 与系统服务捆绑 | 绑定系统组件提高优先级 |  属于 hack，不推荐 |
+| 静默前台服务 | 隐藏通知 | ✗ Android 8.0+ 必须显示通知，否则崩溃 |
 
 ### 5.2 Android 8.0+ 的现实
 
@@ -212,4 +212,4 @@ A：8.0+ 后台启动限制下，自启动手段被系统拦截，还可能被�
 - 保活方案随版本演进不断收紧，现代正确姿势是前台服务 + 白名单 + WorkManager。
 - 面试核心：五级优先级、ADJ、多进程问题、保活方案演进、进程 vs 线程。
 
-> 📖 进阶阅读：[AMS 与 WMS](/system/ams-wms/) | [Binder 机制](/system/binder/) | [Service 详解](/android/service/service-basics.md)
+> 进阶阅读：[AMS 与 WMS](/system/ams-wms/) | [Binder 机制](/system/binder/) | [Service 详解](/android/service/service-basics.md)

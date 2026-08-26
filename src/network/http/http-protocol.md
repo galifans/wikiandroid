@@ -4,9 +4,9 @@ title: HTTP/HTTPS 协议详解
 description: TCP 三次握手、HTTP 报文、HTTPS 与 TLS 握手、HTTP/2 与 HTTP/3 完整解析
 ---
 
-# 🔒 HTTP/HTTPS 协议详解
+# HTTP/HTTPS 协议详解
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 网络协议是面试必考，从 TCP 到 HTTPS 到 HTTP/3 一条线讲透。
 
 ## 1. TCP 三次握手与四次挥手
@@ -147,8 +147,8 @@ val client = OkHttpClient.Builder()
 | 特性 | HTTP/1.1 | HTTP/2 | HTTP/3 |
 | --- | --- | --- | --- |
 | 传输层 | TCP | TCP（TLS 内置） | **UDP（QUIC）** |
-| 多路复用 | ❌ 队头阻塞 | ✅ 单连接多请求 | ✅ 多路复用 |
-| 头部压缩 | ❌ | ✅ HPACK | ✅ QPACK |
+| 多路复用 | ✗ 队头阻塞 | ✓ 单连接多请求 | ✓ 多路复用 |
+| 头部压缩 | ✗ | ✓ HPACK | ✓ QPACK |
 | 连接建立 | 慢（多次握手） | 快（TLS 合并） | 更快（0-RTT） |
 | 队头阻塞 | 有（应用层） | 有（TCP 层） | **无**（UDP 层解决） |
 

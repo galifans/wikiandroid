@@ -6,7 +6,7 @@ description: Context 继承体系、ContextImpl 与 ContextWrapper 代理机制�
 
 # Context 详解
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > Context 是 Android 中最容易被忽视却无处不在的抽象——四大组件、资源加载、系统服务调用全都依赖它。理解 Context 的**继承体系、代理机制、类型区别与泄漏陷阱**是 Android 基本功。
 
 ## 一、Context 是什么
@@ -84,10 +84,10 @@ protected void attachBaseContext(Context newBase) {
 |--------|--------------------|------------------|
 | 生命周期 | 进程级（长） | Activity 级（短） |
 | 主题 | 无主题（默认） | 有主题（ContextThemeWrapper） |
-| Dialog | ❌ 无 token 不可用 | ✅ 可用 |
-| Toast | ✅ | ✅ |
-| startActivity | 需 `FLAG_ACTIVITY_NEW_TASK` | ✅ 直接启动 |
-| inflate 布局 | 无主题属性（可能错） | ✅ 正确应用主题 |
+| Dialog | ✗ 无 token 不可用 | ✓ 可用 |
+| Toast | ✓ | ✓ |
+| startActivity | 需 `FLAG_ACTIVITY_NEW_TASK` | ✓ 直接启动 |
+| inflate 布局 | 无主题属性（可能错） | ✓ 正确应用主题 |
 
 ## 三、Context 数量问题
 
@@ -107,12 +107,12 @@ protected void attachBaseContext(Context newBase) {
 ### 4.1 内存泄漏案例
 
 ```kotlin
-// ❌ 泄漏：单例持有 Activity Context
+// ✗ 泄漏：单例持有 Activity Context
 object UserManager {
     lateinit var context: Context   // 持有的是 Activity → Activity 无法回收
 }
 
-// ✅ 正确：用 Application Context
+// ✓ 正确：用 Application Context
 object UserManager {
     val context: Context = MyApp.instance   // 进程级，不泄漏
 }
@@ -121,13 +121,13 @@ object UserManager {
 **泄漏链条**：单例 → Activity Context → Activity 持有 Window/DecorView → 整个 Activity 无法 GC。**LeakCanary 检测到的泄漏绝大多数是这类。**
 
 ```kotlin
-// ❌ 泄漏：静态 View 引用（View 内部持 Activity）
+// ✗ 泄漏：静态 View 引用（View 内部持 Activity）
 companion object {
     var sView: View? = null
 }
 
-// ❌ 泄漏：内部类 Handler 持有 Activity
-// ✅ 解决：静态内部类 + WeakReference，或 lifecycleScope
+// ✗ 泄漏：内部类 Handler 持有 Activity
+// ✓ 解决：静态内部类 + WeakReference，或 lifecycleScope
 ```
 
 ### 4.2 使用规则清单
@@ -228,4 +228,4 @@ A：`context === context.applicationContext` 返回 true 即为 Application Cont
 - getSystemService 是注册表单例查找 + Binder 代理，主线程安全。
 - 多进程：Application.onCreate 多次执行，按进程名分支初始化。
 
-> 📖 进阶阅读：[Activity 详解](/android/activity/activity-lifecycle.md) | [进程与保活](/android/process/process-lifecycle.md) | [Binder 机制](/system/binder/)
+> 进阶阅读：[Activity 详解](/android/activity/activity-lifecycle.md) | [进程与保活](/android/process/process-lifecycle.md) | [Binder 机制](/system/binder/)

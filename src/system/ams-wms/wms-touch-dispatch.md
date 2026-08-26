@@ -4,7 +4,7 @@ title: WMS 触摸事件分发深入
 description: InputManagerService、InputDispatcher、命中测试、事件注入、触摸到应用的完整链路
 ---
 
-# 👆 WMS 触摸事件分发深入
+# WMS 触摸事件分发深入
 
 > 手指触摸屏幕到应用 onTouchEvent,中间经过:硬件 → InputManager → WMS 命中测试 → InputDispatcher → 应用窗口。本文拆解完整链路与关键源码。
 
@@ -113,7 +113,7 @@ sequenceDiagram
 | 超时处理 | 未消费事件 → 找下一个目标 |
 | 拦截 | 手势导航/系统手势优先 |
 
-> ⚠️ **输入 ANR**:应用窗口 5 秒内未处理完输入事件(主线程卡死),系统弹 ANR 对话框。
+>  **输入 ANR**:应用窗口 5 秒内未处理完输入事件(主线程卡死),系统弹 ANR 对话框。
 
 ## 五、事件到达应用
 
@@ -192,4 +192,4 @@ InputChannel 是系统与应用之间的输入事件通道,底层是 socketpair(
 - 应用内:dispatchTouchEvent → onInterceptTouchEvent → onTouchEvent
 - 触摸事件的核心是"找窗口 + 保序 + 逐级分发"
 
-> 📖 进阶阅读：[WMS 窗口管理原理](/system/ams-wms/wms-principle.md) | [输入系统与触摸事件分发](/ui/event/input-system.md) | [事件分发机制详解](/ui/event/)
+> 进阶阅读：[WMS 窗口管理原理](/system/ams-wms/wms-principle.md) | [输入系统与触摸事件分发](/ui/event/input-system.md) | [事件分发机制详解](/ui/event/)

@@ -7,7 +7,7 @@ dir:
   order: 2
 ---
 
-# ⚙️ Service
+# Service
 
 Service 用于在后台执行长时间运行的任务。
 

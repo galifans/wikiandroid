@@ -4,7 +4,7 @@ title: Jenkins 流水线实战
 description: Jenkins 架构、Pipeline 语法、Android 构建、多分支流水线、分布式构建、与 GitHub Actions 对比
 ---
 
-# 🤖 Jenkins 流水线实战
+# Jenkins 流水线实战
 
 > Jenkins 是经典的 CI/CD 服务器:自建、可扩展、Pipeline 即代码。虽然云原生 CI(GitHub Actions/GitLab CI)流行,但 Jenkins 在**企业内网、私有化部署**场景仍是主力。
 
@@ -158,7 +158,7 @@ pipeline {
 | 成本 | 服务器成本 | 免费额度/付费 |
 | 适用 | 企业内网/定制 | 开源/云端项目 |
 
-> 💡 **选型建议**:代码在 GitHub + 云构建 → GitHub Actions;企业内网、需要私有化、复杂插件生态 → Jenkins(或 GitLab CI)。
+> **选型建议**:代码在 GitHub + 云构建 → GitHub Actions;企业内网、需要私有化、复杂插件生态 → Jenkins(或 GitLab CI)。
 
 ## 七、高频面试题
 
@@ -196,4 +196,4 @@ Master:管理配置、调度任务、提供 Web UI,自身不执行构建;Agent:�
 - 多分支流水线自动适配分支策略
 - 企业内网选 Jenkins,云端项目选 GitHub Actions
 
-> 📖 进阶阅读：[GitHub Actions CI/CD](/engineering/cicd/github-actions.md) | [灰度发布方案](/engineering/cicd/gray-release.md) | [Git 工作流实践](/engineering/git/git-workflow.md)
+> 进阶阅读：[GitHub Actions CI/CD](/engineering/cicd/github-actions.md) | [灰度发布方案](/engineering/cicd/gray-release.md) | [Git 工作流实践](/engineering/git/git-workflow.md)

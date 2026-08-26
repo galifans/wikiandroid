@@ -4,9 +4,9 @@ title: Lifecycle 原理与使用
 description: Lifecycle 观察者模式原理、LifecycleOwner、状态机流转、常见使用场景
 ---
 
-# 🔄 Lifecycle 原理与使用
+# Lifecycle 原理与使用
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > Lifecycle 是 Jetpack 的基石组件，ViewModel、LiveData、协程都建立在它之上。
 
 ## 1. 为什么需要 Lifecycle
@@ -14,7 +14,7 @@ description: Lifecycle 观察者模式原理、LifecycleOwner、状态机流转�
 传统方式管理生命周期的问题：
 
 ```kotlin
-// ❌ 传统方式：手动管理，容易遗漏
+// ✗ 传统方式：手动管理，容易遗漏
 class MainActivity : AppCompatActivity() {
 
     private var locationListener: LocationListener? = null

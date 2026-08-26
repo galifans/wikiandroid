@@ -4,7 +4,7 @@ title: 实战项目
 index: false
 ---
 
-# 🤖 实战项目
+# 实战项目
 
 通过实战巩固知识，打造面试亮点项目。
 
@@ -30,7 +30,7 @@ index: false
 2. 项目要有**技术亮点**（性能优化、架构设计、自研工具）
 3. 配套技术博客记录决策过程，面试加分
 
-## 📑 全部文章导航
+## 全部文章导航
 
 - [从零搭建完整 App](/projects/from-scratch.md)：Kotlin + Compose + MVVM 全流程拆解
 - [开源项目源码解析](/projects/open-source-analysis.md)：架构分析 / 亮点提炼 / 面试讲法

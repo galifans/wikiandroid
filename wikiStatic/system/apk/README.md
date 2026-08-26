@@ -7,7 +7,7 @@ dir:
   order: 4
 ---
 
-# 📦 APK 打包与签名
+# APK 打包与签名
 
 从源码到 APK 的构建流程与签名机制。
 
@@ -16,6 +16,8 @@ dir:
 - [APK 打包流程与签名机制](apk-build-process.md)
 - [APK 签名与校验机制](signature-verify.md)
 - [多渠道打包方案](multi-channel.md)
+- [APK 安装流程与原理](apk-install-process.md)
+- [APK 加固与安全防护](apk-reinforcement.md)
 
 ## 核心要点
 

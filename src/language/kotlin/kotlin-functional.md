@@ -4,7 +4,7 @@ title: Kotlin 函数式编程
 description: Kotlin 高阶函数、Lambda、集合操作符与函数式编程范式深度解析
 ---
 
-# 🧮 Kotlin 函数式编程与高阶函数
+# Kotlin 函数式编程与高阶函数
 
 > Kotlin 是一门融合了面向对象与函数式编程的语言。掌握高阶函数、Lambda 与集合操作符，是写出简洁、优雅、不易出错代码的关键，也是现代 Android 开发（Compose、协程、Flow）的地基。
 
@@ -88,7 +88,7 @@ listOf("a", "b").myForEach { println(it) }
 val f = fun(x: Int): Int = x * 2   // 匿名函数，可显式声明返回类型
 ```
 
-> 💡 与 Lambda 的区别：匿名函数可以显式指定返回类型；Lambda 的 `return` 返回外层函数（见下文"非局部返回"）。
+> 与 Lambda 的区别：匿名函数可以显式指定返回类型；Lambda 的 `return` 返回外层函数（见下文"非局部返回"）。
 
 ## 三、集合操作符全家桶
 
@@ -163,9 +163,9 @@ listOf(1, 2, ..., 1000000)
 
 | 场景 | 集合操作符 | Sequence |
 |------|-----------|----------|
-| 数据量小 | ✅ 简单直观 | 不必要 |
-| 数据量大 | ❌ 中间集合浪费内存 | ✅ 惰性省内存 |
-| 需要短路 | ❌ 全量处理 | ✅ `take(3)` 提前终止 |
+| 数据量小 | ✓ 简单直观 | 不必要 |
+| 数据量大 | ✗ 中间集合浪费内存 | ✓ 惰性省内存 |
+| 需要短路 | ✗ 全量处理 | ✓ `take(3)` 提前终止 |
 | 多次遍历 | 每次新建 | 单次遍历 |
 
 ## 四、作用域函数
@@ -204,7 +204,7 @@ val result = with(builder) {
 }
 ```
 
-> 📖 进阶阅读：[Kotlin 基础语法详解](/language/kotlin/kotlin-basics.md)、[Kotlin 协程从入门到进阶](/language/kotlin/kotlin-coroutines.md)
+> 进阶阅读：[Kotlin 基础语法详解](/language/kotlin/kotlin-basics.md)、[Kotlin 协程从入门到进阶](/language/kotlin/kotlin-coroutines.md)
 
 ## 五、非局部返回与标签
 
@@ -285,7 +285,7 @@ inline fun <reified T> Gson.fromJson(json: String): T =
 val user: User = gson.fromJson("""{"name":"tom"}""")
 ```
 
-> 💡 Gson/Moshi 的扩展函数、协程的 `launch`、Compose 的 `remember` 都大量使用 reified。
+> Gson/Moshi 的扩展函数、协程的 `launch`、Compose 的 `remember` 都大量使用 reified。
 
 ## 八、高频面试题
 
@@ -332,4 +332,4 @@ Lambda 内的 `return` 默认返回**包含它的外层函数**，这就是非�
 - 五个作用域函数按"接收者 + 返回值"两个维度记忆
 - `inline` 消除 Lambda 开销、支持非局部返回与 `reified` 泛型
 
-> 📖 进阶阅读：[Kotlin 泛型详解](/language/kotlin/kotlin-generics.md) | [Kotlin 扩展函数](/language/kotlin/kotlin-extensions.md) | [Kotlin 委托机制与内联函数](/language/kotlin/kotlin-delegation.md)
+> 进阶阅读：[Kotlin 泛型详解](/language/kotlin/kotlin-generics.md) | [Kotlin 扩展函数](/language/kotlin/kotlin-extensions.md) | [Kotlin 委托机制与内联函数](/language/kotlin/kotlin-delegation.md)

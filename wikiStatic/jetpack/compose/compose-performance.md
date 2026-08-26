@@ -4,9 +4,9 @@ title: Compose 性能优化
 description: 重组优化、稳定性推断、不可变性、LazyColumn 性能、图形层优化与 Profiler 分析实战
 ---
 
-# 🚀 Compose 性能优化
+# Compose 性能优化
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > Compose 性能的核心是"减少不必要的重组与重绘"，本文给出可落地的优化清单。
 
 ## 1. 性能的核心指标
@@ -25,7 +25,7 @@ description: 重组优化、稳定性推断、不可变性、LazyColumn 性能�
 ### 2.1 状态作用域最小化
 
 ```kotlin
-// ❌ 状态读取范围过大：任何变化都重组整个 Column
+// ✗ 状态读取范围过大：任何变化都重组整个 Column
 @Composable
 fun BadCard() {
     var expanded by remember { mutableStateOf(false) }
@@ -37,7 +37,7 @@ fun BadCard() {
     }
 }
 
-// ✅ 状态提升：只有依赖状态的子组件重组
+// ✓ 状态提升：只有依赖状态的子组件重组
 @Composable
 fun GoodCard() {
     var expanded by remember { mutableStateOf(false) }
@@ -169,10 +169,10 @@ fun UserRow(user: User) {
 
 ```kotlin
 // 动画高频变化：用 graphicsLayer 代替 Modifier 布局属性
-// ❌ translationX 直接改布局位置（会触发重新布局）
+// ✗ translationX 直接改布局位置（会触发重新布局）
 Box(Modifier.offset { IntOffset(x, 0) })
 
-// ✅ graphicsLayer：只改绘制层，跳过布局
+// ✓ graphicsLayer：只改绘制层，跳过布局
 Box(Modifier.graphicsLayer {
     translationX = 100f
     alpha = 0.5f

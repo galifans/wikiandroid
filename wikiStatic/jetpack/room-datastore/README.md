@@ -7,7 +7,7 @@ dir:
   order: 2
 ---
 
-# 🗄️ Room / DataStore
+# Room / DataStore
 
 Jetpack 数据持久化方案：Room（关系型）与 DataStore（键值）。
 

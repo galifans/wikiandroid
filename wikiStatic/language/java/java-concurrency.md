@@ -4,9 +4,9 @@ title: Java 并发编程基础
 description: 线程创建方式、线程生命周期、wait/notify、ThreadLocal、AQS 原理与并发工具全景
 ---
 
-# ⚙️ Java 并发编程基础
+# Java 并发编程基础
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 并发是 Java 面试的深水区，本文梳理从线程到 AQS 的完整知识体系。
 
 ## 1. 线程的创建方式

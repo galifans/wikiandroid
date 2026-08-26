@@ -233,4 +233,4 @@ A：它是 APK 内的**二进制资源表**，记录了所有资源的 ID、名�
 - **主题与样式**：Style 管 View，Theme 管全局，`?attr/` 引用支持主题切换
 - **最佳实践**：字符串/颜色/尺寸全部资源化，多语言多适配才有基础
 
-> 📖 进阶阅读：[资源限定符与多语言适配](/android/resource/resource-qualifiers.md) | [启动流程优化](/android/app/app-launch-process.md) | [View 绘制流程](/ui/view/view-draw-process.md)
+> 进阶阅读：[资源限定符与多语言适配](/android/resource/resource-qualifiers.md) | [启动流程优化](/android/app/app-launch-process.md) | [View 绘制流程](/ui/view/view-draw-process.md)

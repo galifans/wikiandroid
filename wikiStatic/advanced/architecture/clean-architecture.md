@@ -4,9 +4,9 @@ title: Clean Architecture 实践
 description: 分层架构思想、依赖规则、Android 落地实践、UseCase、数据流设计与测试
 ---
 
-# 🏗️ Clean Architecture 实践
+# Clean Architecture 实践
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > Clean Architecture 是高级工程师的必修课，面试中常作为架构深挖点。
 
 ## 1. 核心思想

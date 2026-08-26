@@ -4,9 +4,9 @@ title: Android 知识点汇总
 description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、Bitmap、屏幕适配等 19 大主题的系统回顾清单，每节附高频考点与详细文章链接
 ---
 
-# 🗺️ Android 知识点汇总
+# Android 知识点汇总
 
-> 面试高频指数：⭐⭐⭐⭐⭐
+> 面试高频指数：极高
 > 本文是一份**系统化的知识点回顾清单**：涵盖四大组件、View 体系、进程与 IPC、消息机制、线程异步等 19 大主题。
 > 每节列出核心考点与高频追问，并链接到站内详细文章，适合面试前快速扫盲与查漏补缺。
 
@@ -261,4 +261,4 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 | 线程异步 | AsyncTask / HandlerThread / IntentService / 线程池 |
 | Bitmap / 适配 | Config 内存 + 采样压缩 + dp 体系 |
 
-> 📖 配套阅读：[面试基础篇](/interview/basics.md) | [面试进阶篇](/interview/advanced.md) | [面试源码篇](/interview/source-code.md)
+> 配套阅读：[面试基础篇](/interview/basics.md) | [面试进阶篇](/interview/advanced.md) | [面试源码篇](/interview/source-code.md)

@@ -4,9 +4,9 @@ title: Gradle 基础与构建优化
 description: Gradle 与 AGP、构建生命周期、构建变体、缓存与并行、Configuration Cache 构建优化
 ---
 
-# 📦 Gradle 基础与构建优化
+# Gradle 基础与构建优化
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 构建速度直接影响开发效率，Gradle 优化是工程能力的体现。
 
 ## 1. Gradle 与 AGP
@@ -22,7 +22,7 @@ AGP（Android Gradle Plugin）：Gradle 的 Android 插件
 | 8.7 | 8.4/8.5 | 17 |
 | 9.0 | 8.9+ | 17 |
 
-⚠️ 升级必须查兼容矩阵，否则构建失败
+ 升级必须查兼容矩阵，否则构建失败
 ```
 
 ## 2. 构建生命周期

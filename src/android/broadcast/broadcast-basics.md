@@ -4,9 +4,9 @@ title: BroadcastReceiver 详解
 description: 广播的类型、注册方式、Android 8.0+ 限制、LocalBroadcastManager 废弃后的替代方案
 ---
 
-# 📡 BroadcastReceiver 详解
+# BroadcastReceiver 详解
 
-> 面试高频指数：⭐⭐⭐⭐
+> 面试高频指数：高
 > 广播是四大组件中"最轻量"的一个，但版本限制最多、坑点最密集。
 
 ## 1. 什么是 BroadcastReceiver
@@ -224,7 +224,7 @@ lifecycleScope.launch {
 
 ```kotlin
 override fun onReceive(context: Context, intent: Intent) {
-    // ⚠️ 超时限制：前台广播约 10 秒，后台广播更短
+    //  超时限制：前台广播约 10 秒，后台广播更短
     // onReceive 执行在主线程，不能做耗时操作
     // 可以：goAsync() 延长处理，或启动 Service/WorkManager
 }

@@ -4,7 +4,7 @@ title: MediaCodec 与 FFmpeg 音视频处理
 description: 硬编硬解原理、MediaCodec 状态机、音视频编辑管线、FFmpeg 集成、同步与转码
 ---
 
-# 🎛️ MediaCodec 与 FFmpeg 音视频处理
+# MediaCodec 与 FFmpeg 音视频处理
 
 > 音视频编辑、转码、滤镜都离不开解码-处理-编码管线。本文深入 MediaCodec 硬编硬解原理与 FFmpeg 软编方案,掌握音视频处理的完整链路。
 
@@ -28,7 +28,7 @@ flowchart LR
 | 画质 | 一般 | 可精细控制 |
 | 适用 | 录制、播放、实时转码 | 离线转码、特殊格式 |
 
-> 💡 实践结论:**实时场景(录制/直播)用硬编**,离线场景(导入转码)优先硬编、FFmpeg 兜底。
+> 实践结论:**实时场景(录制/直播)用硬编**,离线场景(导入转码)优先硬编、FFmpeg 兜底。
 
 ## 二、MediaCodec 状态机
 
@@ -172,7 +172,7 @@ ffmpeg -i a.mp4 -i b.mp4 -filter_complex "[0:v][1:v]concat" out.mp4  # 拼接
 封装:  MediaMuxer / FFmpeg
 ```
 
-> 💡 这套"FFmpeg 解封装 + 硬编解码 + GPU 处理"是抖音/B站等主流播放器的标准架构。
+> 这套"FFmpeg 解封装 + 硬编解码 + GPU 处理"是抖音/B站等主流播放器的标准架构。
 
 ## 六、性能优化要点
 
@@ -222,4 +222,4 @@ ffmpeg -i a.mp4 -i b.mp4 -filter_complex "[0:v][1:v]concat" out.mp4  # 拼接
 - 大厂方案:FFmpeg 解封装 + 硬编解码 + GPU 特效
 - 优化:缓冲复用、异步回调、背压控制、Surface 输入
 
-> 📖 进阶阅读：[Media3 ExoPlayer 播放器深入](/advanced/multimedia/exoplayer-deep.md) | [音视频开发入门](/advanced/multimedia/multimedia-basics.md) | [OpenGL ES 渲染](/ui/render/render-principle.md)
+> 进阶阅读：[Media3 ExoPlayer 播放器深入](/advanced/multimedia/exoplayer-deep.md) | [音视频开发入门](/advanced/multimedia/multimedia-basics.md) | [OpenGL ES 渲染](/ui/render/render-principle.md)

@@ -7,7 +7,7 @@ dir:
   order: 7
 ---
 
-# 🚀 Application 与启动流程
+# Application 与启动流程
 
 Application 是每个 Android 应用的"根对象"，承载全局初始化；冷启动流程则是从点击图标到首帧渲染的完整链路，直接决定用户体验。理解这一模块，才能写出初始化合理、启动快速的应用。
 

@@ -27,9 +27,9 @@ SP 以 **XML 文件**形式保存在 `/data/data/<packageName>/shared_prefs/` �
 
 | 模式 | 状态 | 说明 |
 |------|------|------|
-| `MODE_PRIVATE` | ✅ 唯一推荐 | 仅本应用可读 |
-| `MODE_WORLD_READABLE` / `MODE_WORLD_WRITEABLE` | ❌ Android N+ 废弃 | 使用抛 `SecurityException` |
-| `MODE_MULTI_PROCESS` | ❌ 不推荐 | 每次 get 检查文件时间戳，性能差且不可靠 |
+| `MODE_PRIVATE` | ✓ 唯一推荐 | 仅本应用可读 |
+| `MODE_WORLD_READABLE` / `MODE_WORLD_WRITEABLE` | ✗ Android N+ 废弃 | 使用抛 `SecurityException` |
+| `MODE_MULTI_PROCESS` | ✗ 不推荐 | 每次 get 检查文件时间戳，性能差且不可靠 |
 
 > **MODE_MULTI_PROCESS 的真相**：它只是每次 `getSharedPreferences` 时比较文件修改时间，变了就**重新从磁盘加载**。它不能保证跨进程读写的**原子性与一致性**，多进程同时写还会丢失数据——官方明确不推荐，后续版本不再支持。
 
@@ -94,12 +94,12 @@ flowchart LR
 ### 4.2 高频写盘优化
 
 ```kotlin
-// ❌ 高频写：每次 edit 都触发一次磁盘写
+// ✗ 高频写：每次 edit 都触发一次磁盘写
 repeat(100) {
     prefs.edit().putInt("key$it", it).apply()
 }
 
-// ✅ 批量写：一次 edit 合并所有修改，只写一次盘
+// ✓ 批量写：一次 edit 合并所有修改，只写一次盘
 val editor = prefs.edit()
 repeat(100) { editor.putInt("key$it", it) }
 editor.apply()
@@ -141,7 +141,7 @@ suspend fun incrementCounter() {
 | 类型安全 | 手动 getString/int | Preferences 仍需手动，Proto 类型安全 |
 | 迁移 | 有 | 内置 `SharedPreferencesMigration` 一键迁移 |
 
-> 📖 对比阅读：[SharedPreferences 与 DataStore 全对比](sp-vs-datastore.md) | [存储方案总览](storage-comparison.md)
+> 对比阅读：[SharedPreferences 与 DataStore 全对比](sp-vs-datastore.md) | [存储方案总览](storage-comparison.md)
 
 ## 七、高频面试题（带详解）
 
@@ -167,4 +167,4 @@ A：apply 在进程被杀（kill -9、系统回收）时未刷盘的数据会丢
 - 多进程不可靠、明文存储、整文件加载是三大天然缺陷。
 - 新项目推荐 DataStore（异步 + 事务 + 迁移支持）。
 
-> 📖 进阶阅读：[存储方案总览](storage-comparison.md) | [SharedPreferences 与 DataStore 全对比](sp-vs-datastore.md) | [Room / DataStore](/jetpack/room-datastore/)
+> 进阶阅读：[存储方案总览](storage-comparison.md) | [SharedPreferences 与 DataStore 全对比](sp-vs-datastore.md) | [Room / DataStore](/jetpack/room-datastore/)

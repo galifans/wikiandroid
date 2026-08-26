@@ -4,7 +4,7 @@ title: Kotlin 委托机制与内联函数
 description: Kotlin by 委托、属性委托、lazy/observable、数据类 componentN 深度解析
 ---
 
-# 🔗 Kotlin 委托机制与内联函数
+# Kotlin 委托机制与内联函数
 
 > 委托（Delegation）是 Kotlin 减少样板代码的利器：类委托、属性委托、`lazy`/`by viewModels()` 等扩展背后都是它。理解委托机制，才能真正读懂 Compose、协程等现代框架的源码。
 
@@ -44,7 +44,7 @@ fun main() {
 | 集合包装 | 继承 `MutableList` 的委托实现 |
 | 接口多实现 | 一个类委托给多个对象分别实现不同接口 |
 
-> 💡 **Kotlin 集合源码**大量使用委托：`List` 实现类内部对 `arrayListOf` 等委托转发。
+> **Kotlin 集合源码**大量使用委托：`List` 实现类内部对 `arrayListOf` 等委托转发。
 
 ## 二、属性委托（Property Delegation）
 
@@ -97,9 +97,9 @@ class MainActivity : AppCompatActivity() {
 
 | `lazy` 模式 | 线程安全 | 场景 |
 |-------------|---------|------|
-| `LazyThreadSafetyMode.SYNCHRONIZED`（默认） | ✅ 加锁 | 多线程并发访问 |
-| `PUBLICATION` | ✅ 无锁 | 允许重复计算 |
-| `NONE` | ❌ | 单线程（如主线程） |
+| `LazyThreadSafetyMode.SYNCHRONIZED`（默认） | ✓ 加锁 | 多线程并发访问 |
+| `PUBLICATION` | ✓ 无锁 | 允许重复计算 |
+| `NONE` | ✗ | 单线程（如主线程） |
 
 ### 3.2 `observable` / `vetoable` 观察属性变化
 
@@ -126,7 +126,7 @@ val cfg = Config(mapOf("name" to "app", "version" to 1))
 println(cfg.name)    // app（从 map 读取）
 ```
 
-> 📖 经典应用：Gson 解析、Bundle/Intent extras 封装、SharedPreferences 封装都可用 `by map` 或自定义委托。
+> 经典应用：Gson 解析、Bundle/Intent extras 封装、SharedPreferences 封装都可用 `by map` 或自定义委托。
 
 ## 四、`by lazy` vs `lateinit`
 
@@ -286,4 +286,4 @@ val inflater: LayoutInflater? = sysService<LayoutInflater>()
 - `by viewModels()`、SharedPreferences 封装都是委托的实际应用
 - `data class` 的 `componentN()` 支撑解构声明
 
-> 📖 进阶阅读：[Kotlin 扩展函数](/language/kotlin/kotlin-extensions.md) | [Kotlin 泛型详解](/language/kotlin/kotlin-generics.md) | [Kotlin 函数式编程与高阶函数](/language/kotlin/kotlin-functional.md)
+> 进阶阅读：[Kotlin 扩展函数](/language/kotlin/kotlin-extensions.md) | [Kotlin 泛型详解](/language/kotlin/kotlin-generics.md) | [Kotlin 函数式编程与高阶函数](/language/kotlin/kotlin-functional.md)
