@@ -4,7 +4,7 @@ title: Lifecycle / ViewModel
 shortTitle: 概览
 dir:
   text: Lifecycle / ViewModel
-  order: 1
+  order: 2
 ---
 
 # Lifecycle / ViewModel / LiveData

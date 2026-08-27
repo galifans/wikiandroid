@@ -15,11 +15,22 @@
 | 域名 | https://wikiandroid.com（备用：https://wikiandroid.pages.dev） |
 | 仓库 | https://github.com/galifans/wikiandroid（分支 main） |
 | 部署方式 | Cloudflare Pages：`git push main` 自动触发构建部署（约 2-4 分钟） |
-| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 336 页面） |
+| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 351 页面） |
 | 本地预览 | `npm run dev` → http://localhost:8080 |
-| 当前状态 | ✓ 内容建设完成（265 篇文章），持续维护中 |
+| 当前状态 | ✓ 内容建设完成（274 篇文章），持续维护中 |
 
 ## 2. 进展时间线
+
+### 2026-08-26（Jetpack 板块对照 androidx 官方库补齐：Activity/AppCompat/Biometric/Collection/Core/Fragment/Compose Runtime）
+- ✓ 用户需求：重新审视 jetpack 板块文章质量，参考 https://github.com/androidx/androidx，充分完善——该新增就新增 Activity、AppCompat、Biometric、Collection、Compose Runtime、Core、DataStore、Fragment、Lifecycle、Navigation、Paging、Room、WorkManager（对照 androidx 官方 13 个核心库全覆盖）
+- ✓ 审视结论：原 19 篇文章（compose 6 / lifecycle-viewmodel 4 / room-datastore 3 / paging-navigation 3 / workmanager-hilt 3）质量良好（code-tabs 双语、面试导向、结构完整），对照 androidx 官方 13 库缺口为 7 个：Activity、AppCompat、Biometric、Collection、Compose Runtime（原理层）、Core、Fragment（库层）；DataStore/Lifecycle/Navigation/Paging/Room/WorkManager 已有覆盖
+- ✓ 新增 6 个子模块（共 11 个）：`activity/`（ActivityResult API 详解、Edge-to-Edge 全面屏适配）、`appcompat/`（AppCompat 兼容原理）、`biometric/`（BiometricPrompt 生物识别）、`collection/`（Collection 集合库详解）、`core/`（Core KTX 扩展库、App Startup 与 SplashScreen）、`fragment/`（FragmentManager 源码解析，库层角度，与 android/fragment 基础篇交叉引用不重复）
+- ✓ compose/ 补充原理层：`compose-runtime.md`（编译器插件与重组机制、快照系统、Slot Table、稳定性推断、remember/derivedStateOf 原理）——补齐 Compose Runtime 库覆盖
+- ✓ 共新增 9 篇文章 + 6 个子模块 README，每篇风格统一：面试高频指数、code-tabs Java 默认/Kotlin 切换、mermaid 图、对比表格、Q1-Q5 面试题（::: details 查看答案）、小结、相关阅读跨板块链接；Java 无等价写法场景（Compose/协程/DataStore Serializer 等）用注释说明并给出语义等价写法
+- ✓ 修复 dir.order 冲突：原 compose=1 与 lifecycle-viewmodel=1 重复，调整为 compose=1、lifecycle-viewmodel=2、room-datastore=3、paging-navigation=4、workmanager-hilt=5、activity=6、appcompat=7、biometric=8、collection=9、core=10、fragment=11（11 个模块 order 全站唯一）
+- ✓ 同步更新：`src/jetpack/README.md`（分类表 5→9 行 + 全部文章导航新增 4 个分类）、`architecture.md`（jetpack 模块表 +6 行）、`navbar.ts`（Jetpack 下拉 5→11 项，与侧边栏顺序一致）、根 `README.md`（Jetpack 分类表 +4 行）、`src/README.md`（hero 卡片组件描述 + 精选文章 +9 行）
+- ✓ `node scripts/validate-tabs.cjs` 全站 **ALL OK**；`npm run build` 构建 351 页面成功（336 → 351）；`npm run sync:static` 已同步 wikiStatic（348 md）；浏览器实测：activity-result.html（code-tabs 6 个 Java/Kotlin 切换正常）、compose-runtime.html（mermaid 10 个 SVG）、fragment-source.html（侧边栏与 navbar 全部 11 项）渲染正常
+-  教训：新增子模块必须全局盘点 dir.order（本次发现 compose/lifecycle-viewmodel 历史冲突）；navbar.ts 是手工维护的，新增子模块后必须同步下拉项；Fragment 板块注意与 android/fragment 基础篇区分定位（库层源码 vs 使用层）
 
 ### 2026-08-26（全站示例代码块支持 Java/Kotlin 切换）
 - ✓ 用户需求：网站所有示例代码块补充 Java/Kotlin 切换功能——默认 Java，代码块右上角有切换按钮；除编程基础或必须使用 C/C++ 的示例外，不要其他语言风格的代码

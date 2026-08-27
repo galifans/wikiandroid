@@ -4,7 +4,7 @@ title: Paging / Navigation
 shortTitle: 概览
 dir:
   text: Paging / Navigation
-  order: 3
+  order: 4
 ---
 
 # Paging / Navigation

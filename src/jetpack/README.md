@@ -17,6 +17,10 @@ Android 官方组件库，助力构建健壮、可维护的应用。
 | 数据持久化 | Room / DataStore | [Room / DataStore](/jetpack/room-datastore/) |
 | 导航与分页 | Paging / Navigation | [Paging / Navigation](/jetpack/paging-navigation/) |
 | 后台与注入 | WorkManager / Hilt | [WorkManager / Hilt](/jetpack/workmanager-hilt/) |
+| Activity 能力 | Activity 库 | [Activity 库](/jetpack/activity/) |
+| 兼容与基础 | AppCompat / Core / Collection | [AppCompat](/jetpack/appcompat/) · [Core](/jetpack/core/) · [Collection](/jetpack/collection/) |
+| 安全认证 | Biometric | [Biometric](/jetpack/biometric/) |
+| Fragment 原理 | Fragment 库 | [Fragment 库](/jetpack/fragment/) |
 
 ## 核心组件关系
 
@@ -41,6 +45,23 @@ ViewModel ──→ LiveData / StateFlow
 - [Compose 布局系统](/jetpack/compose/compose-layout.md)：Row/Column/Box / ConstraintLayout / 自定义 Layout
 - [Compose 动画](/jetpack/compose/compose-animation.md)：animate*AsState / Animatable / 转场
 - [Compose 与 View 互操作](/jetpack/compose/compose-interop.md)：AndroidView / ComposeView / 渐进式迁移
+- [Compose Runtime 原理](/jetpack/compose/compose-runtime.md)：重组机制 / 快照系统 / Slot Table / 稳定性推断
+
+### Activity 能力
+- [ActivityResult API 详解](/jetpack/activity/activity-result.md)：registerForActivityResult / 内置契约 / 生命周期安全
+- [Edge-to-Edge 全面屏适配](/jetpack/activity/activity-edge2edge.md)：enableEdgeToEdge / WindowInsets / 预测性返回
+
+### 兼容与基础
+- [AppCompat 兼容原理](/jetpack/appcompat/appcompat-principle.md)：AppCompatActivity / 委托机制 / DayNight
+- [Core KTX 扩展库](/jetpack/core/core-ktx.md)：bundleOf / viewModelScope / repeatOnLifecycle
+- [App Startup 与 SplashScreen](/jetpack/core/startup-splashscreen.md)：Initializer / 启动画面
+- [Collection 集合库详解](/jetpack/collection/collection-guide.md)：ArrayMap / LruCache / 不可变集合
+
+### 安全认证
+- [BiometricPrompt 生物识别](/jetpack/biometric/biometric-guide.md)：BiometricManager / CryptoObject / 安全等级
+
+### Fragment 原理
+- [FragmentManager 源码解析](/jetpack/fragment/fragment-source.md)：事务机制 / 状态保存 / FragmentFactory / 回退栈
 
 ### 生命周期
 - [Lifecycle 组件详解](/jetpack/lifecycle-viewmodel/lifecycle.md)：LifecycleOwner / 观察者

@@ -4,7 +4,7 @@ title: WorkManager / Hilt
 shortTitle: 概览
 dir:
   text: WorkManager / Hilt
-  order: 4
+  order: 5
 ---
 
 # WorkManager / Hilt

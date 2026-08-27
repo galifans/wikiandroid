@@ -30,7 +30,7 @@ features:
     link: /ui/view/
   - title: Jetpack 全家桶
     icon: boxes
-    details: Jetpack Compose、Lifecycle、ViewModel、Room、DataStore、Paging、Navigation、WorkManager、Hilt
+    details: Compose、Lifecycle、Room、Paging、Navigation、WorkManager、Hilt、ActivityResult、AppCompat、Biometric、Core
     link: /jetpack/compose/
   - title: 网络与异步
     icon: globe
@@ -157,6 +157,7 @@ features:
 - [Jetpack Compose 入门到进阶](/jetpack/compose/compose-basics.md)
 - [Compose 状态管理与重组机制](/jetpack/compose/compose-state.md)
 - [Compose 布局系统：测量与约束](/jetpack/compose/compose-layout.md)
+- [Compose Runtime 原理：重组与快照](/jetpack/compose/compose-runtime.md)
 - [Lifecycle / ViewModel / LiveData](/jetpack/lifecycle-viewmodel/lifecycle.md)
 - [ViewModel 源码解析](/jetpack/lifecycle-viewmodel/viewmodel-source.md)
 - [SavedStateHandle 状态保存](/jetpack/lifecycle-viewmodel/savedstate.md)
@@ -168,6 +169,14 @@ features:
 - [WorkManager 后台任务](/jetpack/workmanager-hilt/workmanager.md)
 - [Hilt 依赖注入](/jetpack/workmanager-hilt/hilt.md)
 - [Hilt 进阶：自定义绑定 / 限定符](/jetpack/workmanager-hilt/hilt-advanced.md)
+- [ActivityResult API 详解](/jetpack/activity/activity-result.md)
+- [Edge-to-Edge 全面屏适配](/jetpack/activity/activity-edge2edge.md)
+- [AppCompat 兼容原理](/jetpack/appcompat/appcompat-principle.md)
+- [BiometricPrompt 生物识别](/jetpack/biometric/biometric-guide.md)
+- [Collection 集合库详解](/jetpack/collection/collection-guide.md)
+- [Core KTX 扩展库](/jetpack/core/core-ktx.md)
+- [App Startup 与 SplashScreen](/jetpack/core/startup-splashscreen.md)
+- [FragmentManager 源码解析](/jetpack/fragment/fragment-source.md)
 
 ### 网络与异步
 - [计算机网络体系（OSI / TCP-IP）](/network/osi-tcpip.md)

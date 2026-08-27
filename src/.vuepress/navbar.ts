@@ -52,6 +52,12 @@ export default navbar([
       { text: "Room / DataStore", link: "/jetpack/room-datastore/" },
       { text: "Paging / Navigation", link: "/jetpack/paging-navigation/" },
       { text: "WorkManager / Hilt", link: "/jetpack/workmanager-hilt/" },
+      { text: "Activity 库", link: "/jetpack/activity/" },
+      { text: "AppCompat 兼容库", link: "/jetpack/appcompat/" },
+      { text: "Biometric 生物识别", link: "/jetpack/biometric/" },
+      { text: "Collection 集合库", link: "/jetpack/collection/" },
+      { text: "Core 核心库", link: "/jetpack/core/" },
+      { text: "Fragment 库原理", link: "/jetpack/fragment/" },
     ],
   },
   {

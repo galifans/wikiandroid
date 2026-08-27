@@ -1,0 +1,6 @@
+﻿feat(jetpack): Jetpack 板块对照 androidx 官方库补齐 Activity/AppCompat/Biometric/Collection/Core/Fragment/Compose Runtime
+
+- 新增 6 个子模块（activity/appcompat/biometric/collection/core/fragment）共 9 篇文章，compose 补原理层 compose-runtime.md
+- 修复子模块 dir.order 冲突（compose 与 lifecycle-viewmodel 原均为 1，现 1-11 全站唯一）
+- 同步更新 jetpack README/architecture.md/navbar.ts/根 README/src README
+- 构建 351 页面成功，validate-tabs ALL OK，wikiStatic 已同步

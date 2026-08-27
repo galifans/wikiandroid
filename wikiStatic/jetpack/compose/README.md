@@ -19,6 +19,7 @@ Android 现代声明式 UI 框架。
 - [Compose 布局系统](compose-layout.md) — Row/Column/Box/ConstraintLayout/自定义 Layout
 - [Compose 动画](compose-animation.md) — animate*AsState/AnimatedVisibility/Animatable
 - [Compose 与 View 互操作](compose-interop.md) — AndroidView/ComposeView/渐进式迁移
+- [Compose Runtime 原理](compose-runtime.md) — 重组机制/快照系统/Slot Table/稳定性推断
 
 ## 核心概念
 

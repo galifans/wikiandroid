@@ -199,11 +199,17 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### Jetpack `/jetpack/`
 | 子模块 | ✓ 已完成 |
 | --- | --- |
-| compose/ | compose-basics.md、compose-state.md、compose-performance.md、compose-layout.md、compose-animation.md、compose-interop.md |
+| compose/ | compose-basics.md、compose-state.md、compose-performance.md、compose-layout.md、compose-animation.md、compose-interop.md、compose-runtime.md |
 | lifecycle-viewmodel/ | viewmodel-livedata.md、savedstate.md、lifecycle.md、viewmodel-source.md |
 | room-datastore/ | room-guide.md、room-advanced.md、datastore-guide.md |
 | paging-navigation/ | paging3.md、navigation.md、navigation-advanced.md |
 | workmanager-hilt/ | workmanager.md、hilt.md、hilt-advanced.md |
+| activity/ | activity-result.md、activity-edge2edge.md |
+| appcompat/ | appcompat-principle.md |
+| biometric/ | biometric-guide.md |
+| collection/ | collection-guide.md |
+| core/ | core-ktx.md、startup-splashscreen.md |
+| fragment/ | fragment-source.md |
 
 ### 网络与异步 `/network/`
 | 子模块 | ✓ 已完成 |

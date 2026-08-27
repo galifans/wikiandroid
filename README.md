@@ -67,6 +67,10 @@
 | 数据持久化 | Room / DataStore | [Room / DataStore](wikiStatic/jetpack/room-datastore/README.md) |
 | 导航与分页 | Paging / Navigation | [Paging / Navigation](wikiStatic/jetpack/paging-navigation/README.md) |
 | 后台与注入 | WorkManager / Hilt | [WorkManager / Hilt](wikiStatic/jetpack/workmanager-hilt/README.md) |
+| Activity 能力 | ActivityResult / Edge-to-Edge | [Activity 库](wikiStatic/jetpack/activity/README.md) |
+| 兼容与基础 | AppCompat / Core / Collection | [AppCompat](wikiStatic/jetpack/appcompat/README.md) · [Core](wikiStatic/jetpack/core/README.md) · [Collection](wikiStatic/jetpack/collection/README.md) |
+| 安全认证 | Biometric | [Biometric](wikiStatic/jetpack/biometric/README.md) |
+| Fragment 原理 | FragmentManager 源码 | [Fragment 库](wikiStatic/jetpack/fragment/README.md) |
 
 ### 网络与异步
 
