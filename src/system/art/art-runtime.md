@@ -11,6 +11,8 @@ description: ART vs Dalvik、JIT/AOT 混合编译、解释执行与编译执行�
 
 ## 1. ART vs Dalvik
 
+ART 与 Dalvik 的对比说明如下：
+
 | 维度 | Dalvik | ART |
 | --- | --- | --- |
 | 首次安装 | 快（无编译） | 慢（AOT 预编译） |

@@ -57,6 +57,8 @@ android {
 </application>
 ```
 
+读取渠道信息的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -128,6 +130,8 @@ vivo
 googleplay
 ```
 
+Walle 读取渠道信息的实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -154,6 +158,8 @@ val channel = WalleChannelReader.getChannel(context)
 ```
 
 ## 4. 方案对比
+
+各多渠道方案的对比说明如下：
 
 | 方案 | 原理 | 速度 | 签名影响 | 适用 |
 | --- | --- | --- | --- | --- |

@@ -10,14 +10,18 @@ description: Zygote 启动流程、fork 进程孵化、预加载资源、Socket 
 
 ## 一、Zygote 是什么
 
+Zygote 孵化应用进程的构成关系如下：
+
 ```mermaid
 flowchart LR
     A[Zygote<br>孵化器] -->|fork| B[应用进程 1]
     A -->|fork| C[应用进程 2]
     A -->|fork| D[应用进程 3]
     A -->|fork| E[SystemServer<br>系统服务]
-    N["📌 预加载框架类与资源<br>fork 时复制内存页<br>(写时复制 COW)"]
+    N["预加载框架类与资源<br>fork 时复制内存页<br>(写时复制 COW)"]
 ```
+
+Zygote 的核心特点说明如下：
 
 | 特点 | 说明 |
 |------|------|
@@ -29,6 +33,8 @@ flowchart LR
 
 ## 二、Zygote 启动流程
 
+Zygote 启动的整体流程如下：
+
 ```mermaid
 flowchart TD
     A[init 进程<br>解析 init.zygote.rc] --> B[启动 app_process<br>/system/bin/app_process]
@@ -38,6 +44,8 @@ flowchart TD
     E --> F[启动 SystemServer<br>fork]
     F --> G[进入 Socket 循环<br>等待 fork 请求]
 ```
+
+ZygoteInit.main 的核心实现如下：
 
 ::: code-tabs
 
@@ -76,6 +84,8 @@ fun main(argv: Array<String>) {
 :::
 
 ## 三、预加载机制
+
+preload 预加载的核心实现如下：
 
 ::: code-tabs
 
@@ -117,6 +127,8 @@ fun preload() {
 
 :::
 
+各预加载内容的说明如下：
+
 | 预加载内容 | 作用 |
 |-----------|------|
 | 框架类 | Activity/Service/View 等核心类 |
@@ -129,6 +141,8 @@ fun preload() {
 
 ## 四、fork 创建应用进程
 
+AMS 通过 Zygote 创建应用进程的完整时序如下：
+
 ```mermaid
 sequenceDiagram
     participant A as AMS
@@ -140,6 +154,8 @@ sequenceDiagram
     P->>P: 创建 Application<br>执行业务
     Note over Z,P: fork 后父子分道:<br>Zygote 继续监听<br>子进程跑应用
 ```
+
+Zygote 处理 fork 请求的核心实现如下：
 
 ::: code-tabs
 
@@ -183,6 +199,8 @@ fun processOneCommand(zygoteServer: ZygoteServer): Runnable? {
 
 ### 为什么用 fork?
 
+fork 与直接启动进程的对比说明如下：
+
 | 方案 | 问题 |
 |------|------|
 | 直接启动新进程 | 每次重新初始化虚拟机,慢 |
@@ -190,6 +208,8 @@ fun processOneCommand(zygoteServer: ZygoteServer): Runnable? {
 | fork + COW | 只读内存共享,启动快 + 省内存 |
 
 ## 五、SystemServer 与 Zygote 的关系
+
+SystemServer 与 Zygote 的关系图如下：
 
 ```mermaid
 flowchart TD
@@ -199,6 +219,8 @@ flowchart TD
     B --> E[PMS]
     C -->|请求创建应用进程| A
 ```
+
+各进程与 Zygote 的关系说明如下：
 
 | 进程 | 关系 |
 |------|------|

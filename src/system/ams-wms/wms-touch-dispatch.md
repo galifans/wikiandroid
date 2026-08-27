@@ -10,6 +10,8 @@ description: InputManagerService、InputDispatcher、命中测试、事件注入
 
 ## 一、触摸事件全景
 
+触摸事件从硬件到应用的完整链路如下：
+
 ```mermaid
 flowchart LR
     A[触摸硬件<br>屏幕/驱动] --> B[InputReader<br>读取原始事件]
@@ -21,6 +23,8 @@ flowchart LR
     F --> G[View 事件分发]
 ```
 
+各输入组件的职责说明如下：
+
 | 组件 | 职责 |
 |------|------|
 | InputManagerService | 管理输入系统(系统服务) |
@@ -31,6 +35,8 @@ flowchart LR
 
 ## 二、事件来源与读取
 
+事件来源与读取的整体流程如下：
+
 ```mermaid
 flowchart LR
     A[触摸屏<br>电容感应] --> B[驱动<br>/dev/input/eventX]
@@ -38,6 +44,8 @@ flowchart LR
     C --> D[加工为<br>MotionEvent]
     D --> E[队列化<br>putQueue]
 ```
+
+InputReader 的核心循环实现如下：
 
 ::: code-tabs
 
@@ -69,6 +77,8 @@ flowchart LR
 
 > 屏幕上可能有多个窗口(Activity、Dialog、Toast、状态栏),触摸点坐标需要确定**谁接收事件**。
 
+WMS 命中测试的完整流程如下：
+
 ```mermaid
 flowchart TD
     A[触摸坐标 x,y] --> B[WMS 窗口层级<br>从上到下]
@@ -79,12 +89,16 @@ flowchart TD
     F --> G[返回 WindowState<br>作为事件目标]
 ```
 
+各命中条件的判定说明如下：
+
 | 命中条件 | 说明 |
 |---------|------|
 | 坐标包含 | 触摸点在窗口边界内 |
 | 可见性 | 窗口可见且不透明拦截 |
 | 可触摸 | FLAG_NOT_TOUCHABLE 除外 |
 | 层级 | 最上层(相同区域取 Z-order 最高) |
+
+命中测试的核心实现如下：
 
 ::: code-tabs
 
@@ -126,6 +140,8 @@ fun findWindowForPoint(x: Int, y: Int): WindowState? {
 
 ### 4.1 分发流程
 
+InputDispatcher 分发的整体时序如下：
+
 ```mermaid
 sequenceDiagram
     participant D as InputDispatcher
@@ -140,6 +156,8 @@ sequenceDiagram
 
 ### 4.2 关键机制
 
+各关键机制的说明如下：
+
 | 机制 | 说明 |
 |------|------|
 | 排队分发 | 事件按时间顺序,避免乱序 |
@@ -151,6 +169,8 @@ sequenceDiagram
 >  **输入 ANR**:应用窗口 5 秒内未处理完输入事件(主线程卡死),系统弹 ANR 对话框。
 
 ## 五、事件到达应用
+
+事件到达应用进程后的处理实现如下：
 
 ::: code-tabs
 
@@ -193,6 +213,8 @@ internal class WindowInputEventReceiver : InputEventReceiver() {
 
 :::
 
+应用内事件分发的整体流程如下：
+
 ```mermaid
 flowchart LR
     A[InputChannel<br>收到事件] --> B[主线程消息队列]
@@ -204,6 +226,8 @@ flowchart LR
 ```
 
 ## 六、触摸链路总结
+
+各环节的关键点说明如下：
 
 | 环节 | 关键点 |
 |------|--------|

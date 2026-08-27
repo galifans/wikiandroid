@@ -11,6 +11,8 @@ description: 冷启动完整链路、ActivityThread/main、Application 创建、
 
 ## 1. 启动的三种情况
 
+冷、温、热三种启动方式的对比说明如下：
+
 | 类型 | 定义 | 耗时 |
 | --- | --- | --- |
 | 冷启动 | 进程不存在，完整创建 | 最长（数百 ms） |
@@ -18,6 +20,8 @@ description: 冷启动完整链路、ActivityThread/main、Application 创建、
 | 热启动 | Activity 在后台，直接恢复 | 最快 |
 
 ## 2. 冷启动完整链路
+
+应用冷启动的完整链路如下：
 
 ```mermaid
 flowchart TD
@@ -49,6 +53,8 @@ flowchart TD
 ```
 
 ## 3. ActivityThread.main 详解
+
+ActivityThread.main 的核心实现如下：
 
 ::: code-tabs
 
@@ -123,6 +129,8 @@ reportFullyDrawn()（AndroidX 提供）
 
 ## 5. 启动耗时统计
 
+常用的启动耗时统计方法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -177,6 +185,8 @@ class MyApp : Application() {
 ## 6. 启动优化清单
 
 ### 6.1 Application 轻量化
+
+Application 轻量化的标准写法如下：
 
 ::: code-tabs
 

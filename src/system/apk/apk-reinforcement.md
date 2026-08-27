@@ -12,6 +12,8 @@ description: 混淆、签名校验、加壳原理、Dex 保护、反调试与常
 
 ### 1.1 APK 面临的风险
 
+APK 面临的主要风险构成如下：
+
 ```mermaid
 flowchart LR
     A[APK 风险] --> B[反编译<br>DEX/JAR 提取]
@@ -21,6 +23,8 @@ flowchart LR
     A --> F[逆向<br>算法提取]
 ```
 
+各安全风险的说明与危害如下：
+
 | 风险 | 说明 | 危害 |
 |------|------|------|
 | 静态反编译 | dex2jar + jadx 还原源码 | 核心逻辑泄露 |
@@ -29,6 +33,8 @@ flowchart LR
 | 内存抓取 | dump 运行时数据 | 密钥泄露 |
 
 ### 1.2 防护层次
+
+APK 的防护层次构成如下：
 
 ```mermaid
 flowchart TD
@@ -56,6 +62,8 @@ android {
 }
 ```
 
+各混淆操作的作用说明如下：
+
 | 混淆操作 | 说明 |
 |----------|------|
 | 重命名 | 类/方法/字段改为 a/b/c |
@@ -64,6 +72,8 @@ android {
 | 资源压缩 | 移除未引用资源 |
 
 ### 2.2 混淆效果对比
+
+混淆前后的代码对比示例如下：
 
 ::: code-tabs
 
@@ -130,6 +140,8 @@ class a {
 
 **签名是 APK 的身份凭证**：防篡改、防重打包。
 
+运行时签名校验的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -174,6 +186,8 @@ private fun getSignatureHash(context: Context): String {
 
 ### 3.2 校验的局限
 
+签名校验的局限性说明如下：
+
 | 局限 | 说明 |
 |------|------|
 | 可被 hook | 动态修改返回值 |
@@ -185,6 +199,8 @@ private fun getSignatureHash(context: Context): String {
 ## 四、加壳（APK 加固）
 
 ### 4.1 加壳原理
+
+加壳的完整原理链路如下：
 
 ```mermaid
 flowchart LR
@@ -198,6 +214,8 @@ flowchart LR
 
 ### 4.2 加壳流程
 
+加壳的整体流程如下：
+
 ```mermaid
 flowchart TD
     A[原 APK] --> B[提取 DEX]
@@ -207,6 +225,8 @@ flowchart TD
 ```
 
 ### 4.3 壳的加载机制
+
+壳程序加载真实代码的核心实现如下：
 
 ::: code-tabs
 
@@ -260,6 +280,8 @@ class ShellClassLoader(dexPath: String, parent: ClassLoader) : DexClassLoader(de
 
 ### 4.4 加壳方案对比
 
+各加壳方案的对比说明如下：
+
 | 方案 | 特点 | 适用 |
 |------|------|------|
 | 免费加固（360/腾讯乐固） | 简单接入 | 常规需求 |
@@ -269,6 +291,8 @@ class ShellClassLoader(dexPath: String, parent: ClassLoader) : DexClassLoader(de
 ## 五、运行时防护
 
 ### 5.1 反调试
+
+反调试检测的示例代码如下：
 
 ::: code-tabs
 
@@ -308,6 +332,8 @@ fun isHooked(): Boolean {
 
 ### 5.2 完整性校验
 
+完整性校验的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -339,6 +365,8 @@ fun verifyIntegrity(context: Context): Boolean {
 :::
 
 ### 5.3 防护建议清单
+
+各防护手段的说明如下：
 
 | 手段 | 说明 |
 |------|------|

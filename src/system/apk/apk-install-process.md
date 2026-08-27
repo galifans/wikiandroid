@@ -12,6 +12,8 @@ description: PackageInstaller 安装链路、PackageManagerService 解析、dex2
 
 ### 1.1 安装方式
 
+各安装方式的特点说明如下：
+
 | 方式 | 特点 |
 |------|------|
 | 应用商店安装 | 系统服务（Session 安装） |
@@ -20,6 +22,8 @@ description: PackageInstaller 安装链路、PackageManagerService 解析、dex2
 | 代码 installPackage | 需系统权限（System/PackageInstaller） |
 
 ### 1.2 主要参与者
+
+安装链路的主要参与者构成如下：
 
 ```mermaid
 flowchart TD
@@ -47,6 +51,8 @@ app.apk (ZIP 格式)
 
 ### APK 编译产物链
 
+APK 编译产物的转化链路如下：
+
 ```mermaid
 flowchart LR
     A[Kotlin/Java 源码] --> B[字节码 class]
@@ -59,6 +65,8 @@ flowchart LR
 ## 三、安装流程详解
 
 ### 3.1 PackageInstaller 阶段
+
+PackageInstaller 安装阶段的完整时序如下：
 
 ```mermaid
 sequenceDiagram
@@ -75,6 +83,8 @@ sequenceDiagram
 
 ### 3.2 核心步骤
 
+安装的核心步骤说明如下：
+
 | 步骤 | 说明 |
 |------|------|
 | 1. 拷贝 APK | 复制到 /data/app 私有目录（加固包壳等） |
@@ -87,12 +97,16 @@ sequenceDiagram
 
 ### 3.3 dex2oat 编译
 
+dex2oat 编译的整体流程如下：
+
 ```mermaid
 flowchart LR
     A[classes.dex<br>字节码] --> B[dex2oat<br>编译器]
     B --> C[OAT 文件<br>含机器码]
     C --> D[运行时直接执行<br>ART]
 ```
+
+各编译模式的特点说明如下：
 
 | 编译模式 | 说明 |
 |----------|------|
@@ -120,12 +134,16 @@ PackageManagerService (Java)
 
 ### 4.2 签名校验
 
+各签名版本的校验范围示意如下：
+
 ```mermaid
 flowchart LR
     A[v1 签名<br>JAR 签名<br>META-INF/*.SF] --> B[覆盖整个 APK<br>低版本兼容]
     C[v2 签名<br>APK Signing Block] --> D[覆盖字节级<br>Android 7.0+]
     E[v3 签名<br>支持密钥轮换] --> F[Android 9.0+]
 ```
+
+各签名版本的覆盖范围对比说明如下：
 
 | 版本 | 覆盖范围 | 特点 |
 |------|----------|------|
@@ -136,6 +154,8 @@ flowchart LR
 ## 五、安装后的变化
 
 ### 5.1 系统状态变化
+
+安装后系统的各状态变化说明如下：
 
 | 变化 | 说明 |
 |------|------|

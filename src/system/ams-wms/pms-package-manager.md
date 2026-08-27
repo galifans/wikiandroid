@@ -10,6 +10,8 @@ description: PackageManagerService 架构、APK 扫描解析、安装流程、�
 
 ## 一、PMS 职责与架构
 
+PMS 的职责与架构关系如下：
+
 ```mermaid
 flowchart LR
     A[应用安装] --> D[PMS]
@@ -20,6 +22,8 @@ flowchart LR
     D --> G[权限管理]
     D --> H[组件解析<br>Intent 匹配]
 ```
+
+PMS 各项职责的说明如下：
 
 | 职责 | 说明 |
 |------|------|
@@ -32,6 +36,8 @@ flowchart LR
 
 ## 二、PMS 启动与扫描
 
+PMS 启动时的扫描流程如下：
+
 ```mermaid
 flowchart TD
     A[SystemServer 启动] --> B[创建 PMS]
@@ -42,6 +48,8 @@ flowchart TD
     F --> G[建立包信息数据库<br>packages.xml]
     G --> H[AMS 启动完成<br>系统就绪]
 ```
+
+PMS 初始化的核心实现如下：
 
 ::: code-tabs
 
@@ -83,6 +91,8 @@ class PackageManagerService(context: Context, installer: Installer) {
 
 :::
 
+各扫描目录的内容说明如下：
+
 | 扫描目录 | 内容 |
 |---------|------|
 | /system/framework | 系统框架(无需注册) |
@@ -93,6 +103,8 @@ class PackageManagerService(context: Context, installer: Installer) {
 ## 三、APK 安装流程
 
 ### 3.1 安装路径
+
+APK 安装的完整时序如下：
 
 ```mermaid
 sequenceDiagram
@@ -110,6 +122,8 @@ sequenceDiagram
 
 ### 3.2 安装要点
 
+安装过程中的各关键步骤说明如下：
+
 | 步骤 | 说明 |
 |------|------|
 | 签名校验 | 与已装版本签名一致性检查 |
@@ -118,6 +132,8 @@ sequenceDiagram
 | 编译优化 | dex2oat(AOT)或 JIT 策略 |
 | 权限分配 | 授予 manifest 声明的权限 |
 | 广播通知 | ACTION_PACKAGE_ADDED 等 |
+
+安装校验的要点总结如下：
 
 ::: code-tabs
 
@@ -144,6 +160,8 @@ sequenceDiagram
 :::
 
 ## 四、Manifest 解析与组件注册
+
+PackageParser 解析的核心产物如下：
 
 ::: code-tabs
 
@@ -192,6 +210,8 @@ class Package {
 
 ### 5.1 权限检查流程
 
+权限检查的整体流程如下：
+
 ```mermaid
 flowchart LR
     A[应用调用<br>需要权限的 API] --> B[Binder 到系统服务]
@@ -199,6 +219,8 @@ flowchart LR
     C -->|有权限| D[执行操作]
     C -->|无权限| E[抛 SecurityException]
 ```
+
+各权限类型的对比说明如下：
 
 | 权限类型 | 授予时机 | 示例 |
 |---------|---------|------|
@@ -208,6 +230,8 @@ flowchart LR
 | signatureOrSystem | 系统应用或同签名 | 系统级能力 |
 
 ### 5.2 运行时权限
+
+运行时权限的申请示例代码如下：
 
 ::: code-tabs
 
@@ -234,6 +258,8 @@ if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION
 :::
 
 ## 六、解析器缓存与查询
+
+隐式 Intent 匹配的核心实现如下：
 
 ::: code-tabs
 

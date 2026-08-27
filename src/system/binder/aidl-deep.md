@@ -21,6 +21,8 @@ Android 接口定义语言，用于跨进程通信的接口定义
 
 ## 2. AIDL 文件语法
 
+AIDL 接口文件的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -77,6 +79,8 @@ interface IBookManager {
 
 :::
 
+自定义 Parcelable 类型的声明如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -102,6 +106,8 @@ parcelable Book;
 :::
 
 ## 3. 服务端实现
+
+服务端的核心实现如下：
 
 ::: code-tabs
 
@@ -179,6 +185,8 @@ class BookManagerService : Service() {
 :::
 
 ## 4. 客户端使用
+
+客户端的核心实现如下：
 
 ::: code-tabs
 
@@ -261,6 +269,8 @@ class MainActivity : AppCompatActivity() {
 :::
 
 ## 5. Stub 与 Proxy 原理
+
+编译器生成的 Stub 与 Proxy 结构如下：
 
 ::: code-tabs
 
@@ -404,6 +414,8 @@ interface IBookManager : IInterface {
 ④ oneway 修饰的方法：客户端不等待返回（异步）
 ⑤ 跨进程回调：用 RemoteCallbackList 管理（自动处理死亡）
 ```
+
+跨进程回调的注册与通知实现如下：
 
 ::: code-tabs
 

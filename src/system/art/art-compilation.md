@@ -10,12 +10,16 @@ description: AOT/JIT/JIT Cache、Profile 引导编译、dex2oat、解释器、�
 
 ## 一、编译演进史
 
+编译模式的演进链路如下：
+
 ```mermaid
 flowchart LR
     A[Dalvik<br>纯解释执行] --> B[ART 5.0-6.0<br>全量 AOT]
     B --> C[ART 7.0+<br>JIT + Profile 引导]
     C --> D[ART 8.0+<br>JIT Cache 基线编译]
 ```
+
+各时代的编译方案对比说明如下：
 
 | 时代 | 方案 | 优点 | 缺点 |
 |------|------|------|------|
@@ -28,11 +32,15 @@ flowchart LR
 
 ### 2.1 模式对比
 
+三种执行模式的对比说明如下：
+
 | 模式 | 时机 | 特点 |
 |------|------|------|
 | 解释执行 | 运行时时 | 最慢,内存占用小 |
 | JIT | 运行时热点代码 | 边跑边编译,快 |
 | AOT | 安装时/后台编译 | 最快,但包大 |
+
+三种执行模式的整体流程如下：
 
 ```mermaid
 flowchart TD
@@ -51,6 +59,8 @@ flowchart TD
 
 ## 三、Profile 引导编译
 
+Profile 引导编译的完整链路如下：
+
 ```mermaid
 flowchart LR
     A[应用运行] --> B[JIT 编译热点]
@@ -59,6 +69,8 @@ flowchart LR
     D --> E[下次启动<br>热点直接机器码]
     E --> B
 ```
+
+Profile 机制的核心要点如下：
 
 ::: code-tabs
 
@@ -86,6 +98,8 @@ flowchart LR
 
 :::
 
+三类 Profile 的对比说明如下：
+
 | Profile 类型 | 来源 | 用途 |
 |-------------|------|------|
 | 本地 Profile | 本机 JIT 统计 | 本机优化 |
@@ -95,6 +109,8 @@ flowchart LR
 > **开发者可用的基线 Profile**:通过 `Baseline Profile`(androidx.profileinstaller)在构建时生成启动热点方法列表,新用户安装后立即优化启动路径——这是现代 Android 启动优化的利器。
 
 ## 四、dex2oat 编译流程
+
+dex2oat 的编译流程如下：
 
 ```mermaid
 flowchart LR
@@ -112,6 +128,8 @@ flowchart LR
 # 通过 ART 的 "编译过滤器" 控制
 ```
 
+dex2oat 的触发时机与对应策略如下：
+
 | 触发时机 | 策略 |
 |---------|------|
 | 安装时 | speed(全量)或按策略 |
@@ -121,6 +139,8 @@ flowchart LR
 
 ## 五、ART 运行时结构
 
+ART 运行时的整体结构如下：
+
 ```mermaid
 flowchart TD
     A[ART 运行时] --> B[类加载<br>ClassLoader]
@@ -129,6 +149,8 @@ flowchart TD
     A --> E[线程管理]
     A --> F[Debug 与分析]
 ```
+
+ART 各核心组件的职责如下：
 
 | 组件 | 职责 |
 |------|------|
