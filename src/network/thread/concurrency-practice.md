@@ -12,6 +12,8 @@ description: 线程中断机制、ThreadLocal、并发容器、生产者消费�
 
 ### 1.1 中断的本质
 
+中断机制的完整示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -56,6 +58,8 @@ thread.interrupt()   // 设置中断标志,线程自己决定何时退出
 
 :::
 
+常用中断 API 的说明如下：
+
 | API | 作用 |
 |-----|------|
 | `interrupt()` | 设置线程的中断标志 |
@@ -64,6 +68,8 @@ thread.interrupt()   // 设置中断标志,线程自己决定何时退出
 | `InterruptedException` | sleep/wait/join 被中断时抛出 |
 
 ### 1.2 中断 vs 停止
+
+中断与停止的对比说明如下：
 
 | 方式 | 机制 | 安全 |
 |------|------|------|
@@ -74,6 +80,8 @@ thread.interrupt()   // 设置中断标志,线程自己决定何时退出
 >  **关键**:`Thread.stop()` 被废弃,因为它在任意位置终止线程,可能导致锁未释放、数据不一致。正确方式是 interrupt + 线程内检查。
 
 ## 二、ThreadLocal 线程隔离
+
+ThreadLocal 的示例代码如下：
 
 ::: code-tabs
 
@@ -119,12 +127,16 @@ fun handleRequest() {
 
 ### 2.1 ThreadLocal 实现原理
 
+ThreadLocal 的存储结构如下：
+
 ```mermaid
 flowchart TD
     A[Thread] --> B[ThreadLocalMap<br>每线程一张表]
     B --> C[Entry 1: key=ThreadLocal<br>value=副本1]
     B --> D[Entry 2: key=ThreadLocal<br>value=副本2]
 ```
+
+ThreadLocal 的核心特性如下：
 
 | 特性 | 说明 |
 |------|------|
@@ -137,6 +149,8 @@ flowchart TD
 
 ## 三、并发容器选型
 
+常用并发容器的选型对比说明如下：
+
 | 容器 | 线程安全机制 | 场景 |
 |------|-------------|------|
 | `ConcurrentHashMap` | 分段锁/CAS | 高并发读写 Map |
@@ -144,6 +158,8 @@ flowchart TD
 | `ConcurrentLinkedQueue` | CAS 无锁 | 高并发队列 |
 | `BlockingQueue` 家族 | 锁+条件 | 生产者消费者 |
 | `SynchronizedList/Map` | 全锁 | 简单低频场景 |
+
+对应的选型判断代码如下：
 
 ::: code-tabs
 
@@ -170,6 +186,8 @@ flowchart TD
 :::
 
 ## 四、生产者消费者模式
+
+基于 BlockingQueue 的实现代码如下：
 
 ::: code-tabs
 
@@ -237,6 +255,8 @@ repeat(4) {
 
 :::
 
+生产者消费者协作的整体流程如下：
+
 ```mermaid
 sequenceDiagram
     participant P as 生产者
@@ -251,6 +271,8 @@ sequenceDiagram
 
 ### 5.1 场景清单
 
+Android 各并发场景的推荐方案如下：
+
 | 场景 | 推荐方案 |
 |------|---------|
 | 网络请求 | 协程 + OkHttp(挂起而非阻塞) |
@@ -262,6 +284,8 @@ sequenceDiagram
 | 数据库操作 | Room 挂起 DAO(自动切 IO) |
 
 ### 5.2 线程池最佳实践
+
+线程池的最佳实践写法如下：
 
 ::: code-tabs
 
@@ -317,6 +341,8 @@ val threadPool = ThreadPoolExecutor(
 
 ## 六、并发实战常见坑
 
+并发实战中的常见坑与解决方式如下：
+
 | 坑 | 原因 | 解决 |
 |----|------|------|
 | 死锁 | 锁顺序不一致 | 统一加锁顺序/超时锁 |
@@ -325,6 +351,8 @@ val threadPool = ThreadPoolExecutor(
 | 内存可见性 | 未用 volatile | volatile/CAS/锁 |
 | 竞态条件 | 检查-执行非原子 | synchronized/原子类 |
 | ThreadLocal 泄漏 | 线程池未 remove | finally 中 remove |
+
+对应的死锁规避示例代码如下：
 
 ::: code-tabs
 

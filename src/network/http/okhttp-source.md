@@ -10,6 +10,8 @@ description: OkHttp 请求执行链路、Dispatcher 线程调度、连接池复�
 
 ## 一、OkHttp 整体架构
 
+OkHttp 的整体架构链路如下：
+
 ```mermaid
 flowchart TD
     A[OkHttpClient<br>全局配置] --> B[Call<br>RealCall]
@@ -23,6 +25,8 @@ flowchart TD
     E --> J[CallServer<br>读写 IO]
 ```
 
+各核心组件的职责说明如下：
+
 | 组件 | 职责 |
 |------|------|
 | OkHttpClient | 全局配置(超时/缓存/拦截器/连接池) |
@@ -34,6 +38,8 @@ flowchart TD
 ## 二、请求执行流程
 
 ### 2.1 同步请求 execute
+
+同步请求的执行流程如下：
 
 ```mermaid
 sequenceDiagram
@@ -51,6 +57,8 @@ sequenceDiagram
 ```
 
 ### 2.2 异步请求 enqueue
+
+异步请求的核心实现如下：
 
 ::: code-tabs
 
@@ -98,6 +106,8 @@ fun enqueue(call: AsyncCall) {
 :::
 
 ## 三、Dispatcher 线程调度
+
+Dispatcher 的线程调度实现如下：
 
 ::: code-tabs
 
@@ -163,6 +173,8 @@ class Dispatcher {
 
 ### 4.1 链的构建
 
+拦截器链的构建实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -209,6 +221,8 @@ fun getResponseWithInterceptorChain(): Response {
 
 ### 4.2 责任链执行模型
 
+责任链的执行模型如下：
+
 ```mermaid
 sequenceDiagram
     participant App as 应用拦截器
@@ -233,6 +247,8 @@ sequenceDiagram
 
 ### 4.3 各拦截器职责
 
+各拦截器的职责说明如下：
+
 | 拦截器 | 职责 |
 |--------|------|
 | 自定义应用拦截器 | 日志/鉴权/加密(只调用一次) |
@@ -244,6 +260,8 @@ sequenceDiagram
 | CallServer | 写请求、读响应、解析 |
 
 ## 五、连接池复用
+
+连接池的核心实现如下：
 
 ::: code-tabs
 
@@ -292,6 +310,8 @@ class ConnectionPool {
 > **连接池价值**:HTTP 建连成本高(TCP 握手 + TLS 握手),复用连接(Keep-Alive)大幅降低延迟。默认保活 5 分钟、最多 5 个空闲连接,空闲连接由后台线程清理。
 
 ## 六、OkHttp 版本演进
+
+各版本的演进对比说明如下：
 
 | 版本 | 变化 |
 |------|------|

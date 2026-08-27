@@ -12,6 +12,8 @@ description: WebSocket 握手协议、帧格式、心跳保活、OkHttp WebSocke
 
 ### 1.1 HTTP 的局限
 
+各场景下 HTTP 方案的痛点对比说明如下：
+
 | 场景 | HTTP 方案 | 痛点 |
 |------|-----------|------|
 | 实时消息 | 轮询 | 延迟高、浪费流量 |
@@ -21,6 +23,8 @@ description: WebSocket 握手协议、帧格式、心跳保活、OkHttp WebSocke
 
 ### 1.2 WebSocket 定位
 
+WebSocket 的定位关系如下：
+
 ```mermaid
 flowchart LR
     A[WebSocket] --> B[基于 TCP]
@@ -28,6 +32,8 @@ flowchart LR
     A --> D[握手复用 HTTP]
     A --> E[帧协议<br>轻量]
 ```
+
+WebSocket 的核心特性说明如下：
 
 | 特性 | 说明 |
 |------|------|
@@ -67,6 +73,8 @@ Accept = base64( SHA1( Key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" ) )
 
 其中 `258EAFA5-E914-47DA-95CA-C5AB0DC85B11` 是协议规定的固定 GUID。
 
+WebSocket 的握手流程如下：
+
 ```mermaid
 sequenceDiagram
     participant C as 客户端
@@ -95,6 +103,8 @@ sequenceDiagram
 +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
 ```
 
+帧结构中各字段的说明如下：
+
 | 字段 | 位数 | 说明 |
 |------|------|------|
 | FIN | 1 | 是否为最后一帧 |
@@ -104,6 +114,8 @@ sequenceDiagram
 | Masking-key | 32 | 掩码密钥（客户端必须） |
 
 ### 3.2 消息与分片
+
+消息分片的流程如下：
 
 ```mermaid
 flowchart LR
@@ -117,6 +129,8 @@ flowchart LR
 ## 四、OkHttp WebSocket 实现
 
 ### 4.1 使用方式
+
+OkHttp WebSocket 的使用方式如下：
 
 ::: code-tabs
 
@@ -216,6 +230,8 @@ val webSocket = client.newWebSocket(request, listener)
 
 ### 4.2 内部实现
 
+OkHttp WebSocket 的内部实现结构如下：
+
 ```mermaid
 flowchart TD
     A[newWebSocket] --> B[RealWebSocket<br>队列管理]
@@ -226,6 +242,8 @@ flowchart TD
     B --> G[Ping 定时器<br>pingInterval]
 ```
 
+各模块的职责说明如下：
+
 | 模块 | 职责 |
 |------|------|
 | RealWebSocket | 状态机 + 消息队列 |
@@ -234,6 +252,8 @@ flowchart TD
 | Ping 机制 | 定时心跳保活 |
 
 ### 4.3 心跳机制
+
+心跳机制的交互流程如下：
 
 ```mermaid
 sequenceDiagram
@@ -252,6 +272,8 @@ sequenceDiagram
 ## 五、断线重连与保活优化
 
 ### 5.1 重连策略
+
+断线重连的示例代码如下：
 
 ::: code-tabs
 
@@ -318,6 +340,8 @@ class ReconnectingWebSocket {
 :::
 
 ### 5.2 保活优化清单
+
+各保活优化手段的说明如下：
 
 | 手段 | 说明 |
 |------|------|

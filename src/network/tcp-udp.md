@@ -9,6 +9,8 @@ title: TCP 与 UDP 详解
 
 ## 一、核心区别
 
+TCP 与 UDP 的核心区别对比说明如下：
+
 | 对比项 | TCP | UDP |
 | --- | --- | --- |
 | 全称 | Transmission Control Protocol（传输控制协议） | User Data Protocol（用户数据包协议） |

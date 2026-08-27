@@ -13,6 +13,8 @@ description: CountDownLatch、CyclicBarrier、Semaphore、Atomic、ConcurrentHas
 
 **场景**：等待 N 个任务全部完成后再继续。
 
+CountDownLatch 的完整示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -73,6 +75,8 @@ latch.await(5, TimeUnit.SECONDS)
 
 **场景**：N 个线程互相等待，全部到达后**同时**继续。
 
+CyclicBarrier 的完整示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -124,6 +128,8 @@ repeat(3) { index ->
 ## 3. Semaphore：信号量
 
 **场景**：控制并发访问数量（限流）。
+
+Semaphore 限流的示例代码如下：
 
 ::: code-tabs
 
@@ -177,6 +183,8 @@ repeat(5) { index ->
 ## 4. Atomic 原子类
 
 **场景**：无锁线程安全计数。
+
+AtomicInteger 的示例代码如下：
 
 ::: code-tabs
 
@@ -233,6 +241,8 @@ atomicCount.updateAndGet { it * 2 }   // 函数式更新
 
 **场景**：线程安全的 HashMap（高并发读）。
 
+ConcurrentHashMap 的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -283,6 +293,8 @@ map.computeIfAbsent("b") { 2 }   // 原子操作
 
 ## 6. volatile 与 synchronized
 
+volatile 与 synchronized 的典型写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -326,6 +338,8 @@ fun increment() { count++ }
 ```
 
 :::
+
+volatile、synchronized、Atomic 与 Lock 的对比说明如下：
 
 | 关键字 | 可见性 | 原子性 | 使用场景 |
 | --- | --- | --- | --- |

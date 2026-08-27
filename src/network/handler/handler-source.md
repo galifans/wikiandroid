@@ -9,6 +9,8 @@ title: Handler 源码解析
 
 ## 一、整体架构
 
+Handler 消息机制的整体架构如下：
+
 ```mermaid
 flowchart LR
     subgraph ThreadA
@@ -29,6 +31,8 @@ flowchart LR
 | `Handler` | 发送消息 + 处理消息 |
 
 ## 二、Looper 源码核心
+
+Looper 的核心源码如下：
 
 ::: code-tabs
 
@@ -84,6 +88,8 @@ fun loop() {
 
 ## 三、MessageQueue 的阻塞机制
 
+MessageQueue 的阻塞机制实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -121,6 +127,8 @@ fun next(): Message? {
 :::
 
 ## 四、Handler 发送与处理
+
+Handler 的发送与处理实现如下：
 
 ::: code-tabs
 
@@ -177,6 +185,8 @@ fun dispatchMessage(msg: Message) {
 - 保证 **主线程 Looper 与子线程 Looper 互不干扰**
 
 ## 六、内存泄漏问题
+
+内存泄漏的典型写法如下：
 
 ::: code-tabs
 

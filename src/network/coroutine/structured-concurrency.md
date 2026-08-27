@@ -12,6 +12,8 @@ description: CoroutineScope 生命周期、Job 层级、SupervisorJob、取消�
 
 **原则**:协程必须在其父作用域中启动,父作用域结束,子协程自动取消。
 
+结构化并发的层级构成关系如下：
+
 ```mermaid
 flowchart TD
     A[CoroutineScope<br>viewModelScope] --> B[Job A]
@@ -21,6 +23,8 @@ flowchart TD
     C --> F[子任务 3]
 ```
 
+结构化并发的好处说明如下：
+
 | 好处 | 说明 |
 |------|------|
 | 自动取消 | 页面销毁 → 协程全部取消,无泄漏 |
@@ -29,6 +33,8 @@ flowchart TD
 | 可观察 | 层级结构清晰,调试方便 |
 
 ## 二、作用域生命周期绑定
+
+作用域生命周期绑定的等价写法如下：
 
 ::: code-tabs
 
@@ -94,6 +100,8 @@ class MyScope {
 
 :::
 
+各作用域的对比说明如下：
+
 | 作用域 | 生命周期 | 用途 |
 |--------|---------|------|
 | `viewModelScope` | ViewModel 清除时 | 业务逻辑/状态加载 |
@@ -104,6 +112,8 @@ class MyScope {
 ## 三、Job 层级与取消传播
 
 ### 3.1 Job 关系
+
+Job 父子关系的等价写法如下：
 
 ::: code-tabs
 
@@ -148,6 +158,8 @@ scope.launch {
 
 ### 3.2 取消传播规则
 
+取消传播规则说明如下：
+
 | 场景 | 行为 |
 |------|------|
 | 父 Job.cancel() | 所有子 Job 递归取消 |
@@ -155,6 +167,8 @@ scope.launch {
 | SupervisorJob 下子异常 | 只取消自己,父与兄弟不受影响 |
 | 子 Job.cancel() | 不影响父与兄弟 |
 | 协程被取消后挂起 | 抛 CancellationException |
+
+取消传播的整体流程如下：
 
 ```mermaid
 flowchart TD
@@ -169,6 +183,8 @@ flowchart TD
 ```
 
 ## 四、SupervisorJob 与异常隔离
+
+SupervisorJob 异常隔离的等价写法如下：
 
 ::: code-tabs
 
@@ -210,6 +226,8 @@ scope.launch {
 
 :::
 
+普通 Job 与 SupervisorJob 的对比说明如下：
+
 | 场景 | 用 Job | 用 SupervisorJob |
 |------|--------|-----------------|
 | 任务组必须全部成功 | ✓ | |
@@ -218,6 +236,8 @@ scope.launch {
 | 并发请求(一个失败全部取消) | ✓ | |
 
 ## 五、async/await 组合并发
+
+async/await 组合并发的等价写法如下：
 
 ::: code-tabs
 
@@ -268,6 +288,8 @@ suspend fun loadDashboard(): Dashboard {
 
 ### 并发 API 对比
 
+各并发 API 的对比说明如下：
+
 | API | 行为 | 场景 |
 |-----|------|------|
 | `async { } + await()` | 并发执行,收集结果 | 并行请求合并 |
@@ -278,6 +300,8 @@ suspend fun loadDashboard(): Dashboard {
 | `awaitAll()` | 批量等待 List 结果 | N 个同构任务 |
 
 ## 六、异常处理最佳实践
+
+异常处理最佳实践的等价写法如下：
 
 ::: code-tabs
 
@@ -345,6 +369,8 @@ suspend fun safeLoad(): Result<Data> = runCatching {
 
 :::
 
+各异常处理方式的适用场景说明如下：
+
 | 异常处理方式 | 适用 |
 |-------------|------|
 | try-catch 局部 | 业务可控异常 |
@@ -355,6 +381,8 @@ suspend fun safeLoad(): Result<Data> = runCatching {
 
 ## 七、常见陷阱
 
+常见陷阱的说明如下：
+
 | 陷阱 | 说明 | 解决 |
 |------|------|------|
 | 协程泄漏 | 协程比页面活得久 | 绑定生命周期作用域 |
@@ -363,6 +391,8 @@ suspend fun safeLoad(): Result<Data> = runCatching {
 | 异常吞掉 | 捕获后无提示 | 记录日志/上报 |
 | 重复启动 | 点击多次启动多次请求 | Job 保存 + cancel 再启动 |
 | 在 finally 中挂起 | 取消后挂起抛异常 | 用 NonCancellable 包裹 |
+
+防重复提交的示例代码如下：
 
 ::: code-tabs
 

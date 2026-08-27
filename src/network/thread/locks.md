@@ -13,6 +13,8 @@ description: synchronized 与 ReentrantLock、volatile、CAS、死锁、Java 内
 
 ### 1.1 三种用法
 
+synchronized 三种用法的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -68,6 +70,8 @@ JDK6 之后 synchronized 经过锁优化：
 
 ## 2. ReentrantLock 详解
 
+ReentrantLock 的基本用法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -104,6 +108,8 @@ fun work() {
 
 ### 2.1 synchronized vs ReentrantLock
 
+两者的对比说明如下：
+
 | 维度 | synchronized | ReentrantLock |
 | --- | --- | --- |
 | 锁获取 | 自动 | 手动（必须 unlock） |
@@ -114,6 +120,8 @@ fun work() {
 | 性能 | 已优化（差不大） | 略灵活 |
 
 ### 2.2 读写锁（ReadWriteLock）
+
+读写锁的示例代码如下：
 
 ::: code-tabs
 
@@ -171,6 +179,8 @@ fun write() {
 ```
 
 ### 3.2 volatile 的两大保证
+
+volatile 经典应用（双重检查单例）的写法如下：
 
 ::: code-tabs
 
@@ -235,6 +245,8 @@ class Singleton private constructor() {
 
 ## 4. CAS 与原子类
 
+手写 CAS 自旋的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -291,12 +303,16 @@ class AtomicCounter {
 
 ### 5.1 死锁四条件
 
+死锁的四个必要条件如下：
+
 | 条件 | 说明 |
 | --- | --- |
 | 互斥 | 资源一次只能一个线程用 |
 | 占有且等待 | 持有一个锁又等另一个 |
 | 不可剥夺 | 已持有的锁不能强抢 |
 | 循环等待 | A 等 B，B 等 A |
+
+对应的死锁示例代码如下：
 
 ::: code-tabs
 

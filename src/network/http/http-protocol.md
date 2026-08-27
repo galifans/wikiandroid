@@ -81,6 +81,8 @@ Cache-Control: max-age=3600
 
 ### 2.3 常见状态码
 
+常见 HTTP 状态码及含义说明如下：
+
 | 状态码 | 含义 | 典型场景 |
 | --- | --- | --- |
 | 200 | 成功 | 查询成功 |
@@ -133,6 +135,8 @@ HTTP 明文传输：可被**窃听**（抓包）、**篡改**（中间人）、*
 
 ### 3.3 Android 中的 HTTPS
 
+Android 中配置 HTTPS 的代码示例如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -160,6 +164,8 @@ val client = OkHttpClient.Builder()
 :::
 
 ## 4. HTTP/1.1 vs HTTP/2 vs HTTP/3
+
+HTTP 三个大版本的特性对比说明如下：
 
 | 特性 | HTTP/1.1 | HTTP/2 | HTTP/3 |
 | --- | --- | --- | --- |

@@ -1,1 +1,5 @@
-﻿chore: remove temp msg.txt
+﻿feat(network): 为 network 板块图表与代码块补充讲解段落
+
+- 22 个内容文件全部完善：mermaid/sequenceDiagram 前补充流程讲解
+- code-tabs 前补充背景与用法说明
+- 表格前补充对比引导句

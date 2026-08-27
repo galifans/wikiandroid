@@ -10,6 +10,8 @@ description: 同步屏障消息、异步消息、IdleHandler 空闲回调、VSYN
 
 ## 一、消息队列的三种消息
 
+三种消息的构成关系如下：
+
 ```mermaid
 flowchart LR
     A[MessageQueue] --> B[同步消息<br>普通消息]
@@ -18,6 +20,8 @@ flowchart LR
     B -.被屏障拦截.-> X[屏障存在时<br>同步消息不执行]
     C -.屏障不拦截.-> Y[异步消息<br>正常执行]
 ```
+
+三种消息的特征对比说明如下：
 
 | 类型 | 特征 | 优先级 |
 |------|------|--------|
@@ -30,6 +34,8 @@ flowchart LR
 ### 2.1 屏障是什么
 
 > 同步屏障是 target 为 null 的特殊 Message。插入屏障后,**队列中的同步消息全部被"冻结"**,只执行异步消息;移除屏障后恢复。
+
+插入屏障的核心源码如下：
 
 ::: code-tabs
 
@@ -91,6 +97,8 @@ fun removeSyncBarrier(token: Int) { ... }
 
 :::
 
+取消息时遇到屏障的核心逻辑如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -135,6 +143,8 @@ fun next(): Message? {
 
 ### 2.2 为什么需要屏障?
 
+VSYNC 驱动下的屏障调度流程如下：
+
 ```mermaid
 sequenceDiagram
     participant V as VSYNC 信号
@@ -151,12 +161,16 @@ sequenceDiagram
 
 ## 三、系统哪里用到了屏障
 
+屏障在系统中的典型应用场景如下：
+
 | 场景 | 说明 |
 |------|------|
 | Choreographer | 帧回调(FrameCallback)用异步消息投递 |
 | View 绘制 | 布局/绘制调度优先于业务消息 |
 | 触摸事件 | Input 事件处理高优先级 |
 | 动画 | Animation 回调保证帧率 |
+
+Choreographer 投递帧回调的实现如下：
 
 ::: code-tabs
 
@@ -191,6 +205,8 @@ private fun postCallbackDelayedInternal(...) {
 ## 四、IdleHandler 空闲回调
 
 ### 4.1 用法
+
+IdleHandler 的标准用法如下：
 
 ::: code-tabs
 
@@ -245,6 +261,8 @@ class MainActivity : AppCompatActivity() {
 
 ### 4.2 IdleHandler 特性
 
+IdleHandler 的核心特性如下：
+
 | 特性 | 说明 |
 |------|------|
 | 触发时机 | 消息队列**无消息可执行**时 |
@@ -256,6 +274,8 @@ class MainActivity : AppCompatActivity() {
 >  **注意**:IdleHandler 执行时主线程仍被占用,不能做耗时操作,否则反而拖慢界面;不执行不代表"卡死",队列非空时不触发。
 
 ## 五、MessageQueue 阻塞与唤醒
+
+阻塞与唤醒的核心源码如下：
 
 ::: code-tabs
 
@@ -302,6 +322,8 @@ fun enqueueMessage(msg: Message, when: Long): Boolean {
 ```
 
 :::
+
+消息获取与阻塞唤醒的整体流程如下：
 
 ```mermaid
 flowchart LR

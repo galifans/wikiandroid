@@ -21,6 +21,8 @@ HandlerThread：Looper 循环等待消息，可反复 post 任务，线程不退
 
 ## 2. 基本使用
 
+HandlerThread 的标准用法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -73,6 +75,8 @@ handlerThread.quitSafely()   // 处理完队列中已有消息后退出
 
 ### 2.1 典型场景：顺序执行耗时任务
 
+顺序执行耗时任务的实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -123,6 +127,8 @@ class ImageLoader {
 :::
 
 ## 3. 源码解析
+
+HandlerThread 的核心源码如下：
 
 ::: code-tabs
 
@@ -205,6 +211,8 @@ class HandlerThread : Thread() {
 
 ## 4. 与普通 Thread 对比
 
+普通 Thread 与 HandlerThread 的对比说明如下：
+
 | 维度 | Thread | HandlerThread |
 | --- | --- | --- |
 | 生命周期 | run() 结束即退出 | Looper 循环，直到 quit() |
@@ -286,6 +294,8 @@ private class SerialExecutor : Executor {
 
 ## 6. 常见应用场景
 
+常见应用场景的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -366,6 +376,8 @@ class SensorCollector {
 :::
 
 ### 6.1 生命周期注意
+
+生命周期收尾的标准写法如下：
 
 ::: code-tabs
 
