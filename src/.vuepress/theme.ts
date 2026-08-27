@@ -53,6 +53,8 @@ export default hopeTheme({
     // 用于全站 Java/Kotlin 示例代码切换（默认激活第一个 tab，即 Java）
     codeTabs: true,
     tabs: true,
+    // Mermaid 图表：```mermaid 围栏渲染为流程图/时序图等（依赖 mermaid 包）
+    mermaid: true,
   },
 
   // 插件配置

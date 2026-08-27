@@ -15,7 +15,7 @@ flowchart LR
     A[Client<br>应用进程] --> D[Binder 驱动<br>内核空间]
     B[Server<br>系统进程] --> D
     C[ServiceManager<br>实名注册] --> D
-    D --> E[/dev/binder<br>设备文件]
+    D --> E["/dev/binder<br>设备文件"]
 ```
 
 | 层级 | 组件 | 职责 |

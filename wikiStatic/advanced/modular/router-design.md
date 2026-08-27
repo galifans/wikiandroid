@@ -34,10 +34,10 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A[注解<br>@Route @Autowired] --> B[APT 注解处理器]
+    A["注解<br>@Route @Autowired"] --> B[APT 注解处理器]
     B --> C[生成路由表<br>RouteTable.java]
     C --> D[Router 初始化<br>加载路由表]
-    D --> E[Router.getInstance().build(path).navigation()]
+    D --> E["Router.getInstance().build(path).navigation()"]
     E --> F[拦截器链<br>Interceptor]
     F --> G[Intent 跳转 / Fragment 切换]
 ```

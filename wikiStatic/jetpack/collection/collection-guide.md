@@ -120,7 +120,7 @@ class ArrayMap<K, V> {
 ```mermaid
 flowchart LR
     A[ArrayMap] -->|退化| B[ArraySet]
-    B -->|hash[]| C[value[]]
+    B -->|"hash[]"| C["value[]"]
 ```
 
 ## 3. LruCache 缓存

@@ -16,7 +16,7 @@ flowchart LR
     A -->|fork| C[应用进程 2]
     A -->|fork| D[应用进程 3]
     A -->|fork| E[SystemServer<br>系统服务]
-    Note over A: 预加载框架类与资源<br>fork 时复制内存页<br>(写时复制 COW)
+    N["📌 预加载框架类与资源<br>fork 时复制内存页<br>(写时复制 COW)"]
 ```
 
 | 特点 | 说明 |

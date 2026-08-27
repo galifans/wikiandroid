@@ -12,10 +12,10 @@ description: Hilt 多模块化、自定义组件与限定符、与协程/测试�
 
 ```mermaid
 flowchart TD
-    A[Hilt] --> B[组件层级<br>SingletonComponent → ActivityComponent → ...]
-    A --> C[绑定方式<br>@Inject 构造 / @Provides 模块]
-    A --> D[作用域<br>@Singleton / @ActivityScoped ...]
-    A --> E[限定符<br>@Named / 自定义 @Qualifier]
+    A[Hilt] --> B["组件层级<br>SingletonComponent → ActivityComponent → ..."]
+    A --> C["绑定方式<br>@Inject 构造 / @Provides 模块"]
+    A --> D["作用域<br>@Singleton / @ActivityScoped ..."]
+    A --> E["限定符<br>@Named / 自定义 @Qualifier"]
     A --> F[注入点<br>Activity/Fragment/ViewModel/Service]
 ```
 

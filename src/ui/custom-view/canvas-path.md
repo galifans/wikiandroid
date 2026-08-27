@@ -14,7 +14,7 @@ description: Canvas 核心 API、Path 贝塞尔曲线、自定义绘制进阶（
 
 ```mermaid
 flowchart LR
-    A[自定义 View] --> B[onDraw(canvas)]
+    A[自定义 View] --> B["onDraw(canvas)"]
     B --> C[Canvas 绘制指令]
     C --> D[Paint 决定样式]
     C --> E[坐标变换 save/translate/restore]

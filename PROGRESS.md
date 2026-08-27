@@ -21,6 +21,14 @@
 
 ## 2. 进展时间线
 
+### 2026-08-27（全站 mermaid 图表渲染修复：安装 mermaid 依赖 + 开启渲染 + 修复 7 处语法错误）
+- ✓ 用户反馈：页面中有很多 mermaid 代码块，看不到渲染后的图表——要么成功渲染，要么去掉（不做半成品）
+- ✓ 基础设施：`package.json` 新增 devDependency `mermaid@^11.14.0`（浏览器实际加载 11.17.2，页面模块 `/assets/mermaid.esm.min-*.js`）；`src/.vuepress/theme.ts` 开启 `markdown: { mermaid: true }`（theme-hope rc.107 内置 `@vuepress/plugin-markdown-chart` 的 Mermaid 组件自动接线）；默认 securityLevel=strict（非 loose）
+- ✓ 新增校验脚本：`scripts/validate-mermaid.mjs`——**必须配 jsdom 环境**（无 DOM 时 mermaid 内部 DOMPurify.sanitize 为 undefined，parse 报"DOMPurify.sanitize is not a function"掩盖真实词法错误）；jsdom 环境 + `securityLevel:"loose"` 与浏览器渲染行为一致；`node scripts/validate-mermaid.mjs` → 307 个 mermaid 块 **ALL OK**
+- ✓ 修复 7 处语法错误（8 块，涉及 7 个文件）：`binder-driver.md`（`E[/dev/binder<br>设备文件]` 平行四边形标签内裸 `/` 词法错误 → 引号包裹）；`router-design.md`（`Router.getInstance().build(path).navigation()` 括号+点 → 引号）；`behavior-questions.md`（节点文本内 ASCII 引号 `考"会什么"` → 全角『』+ 引号）；`collection-guide.md`（`|hash[]|` 边标签方括号 → 引号）；`compose-layout.md`（`placeable.placeRelative(x, y)` → 引号）；`hilt-advanced.md`（**3 行含 `@` 符号** → 引号，`@Inject/@Provides/@Singleton/@Named` 裸写会触发 LINK_ID 错误）；`zygote-deep.md`（flowchart 中使用 **`Note over`（仅 sequenceDiagram 合法）** → 改为无连线注释节点）；`canvas-path.md`（`onDraw(canvas)` → 引号）
+- ✓ 浏览器实测：binder-driver 5/5 块渲染为 SVG、修复前页尾错误 svg 消失；router-design/behavior-questions/collection-guide/compose-layout/hilt-advanced/zygote-deep/canvas-path/retrofit-source/glide-source 全部渲染正常（块数与源码一致、无错误 svg、含文本节点）；`npm run build` 351 页面构建成功；`npm run sync:static` 已同步 wikiStatic
+-  教训：① Node mermaid.parse 不带 DOM 无法校验语法（DOMPurify 掩盖一切），校验脚本必须跑 jsdom；② 渲染失败时错误 svg 会追加到 BODY 底部（`dv-{id}` 临时容器），无论哪块失败都在页尾——用 svg id（v-N 对应组件挂载序）定位失败块；③ flowchart 中 `Note over` 是非法语法（sequenceDiagram 专属）；④ 标签内含 `/`、`()`、`[]`、`"`、`@`、`→` 等字符必须用引号包裹 `["..."]`；⑤ 修复任何 mermaid 块后必须全站重新校验 + 构建 + 浏览器抽查，防止同类错误遗漏
+
 ### 2026-08-26（Jetpack 板块对照 androidx 官方库补齐：Activity/AppCompat/Biometric/Collection/Core/Fragment/Compose Runtime）
 - ✓ 用户需求：重新审视 jetpack 板块文章质量，参考 https://github.com/androidx/androidx，充分完善——该新增就新增 Activity、AppCompat、Biometric、Collection、Compose Runtime、Core、DataStore、Fragment、Lifecycle、Navigation、Paging、Room、WorkManager（对照 androidx 官方 13 个核心库全覆盖）
 - ✓ 审视结论：原 19 篇文章（compose 6 / lifecycle-viewmodel 4 / room-datastore 3 / paging-navigation 3 / workmanager-hilt 3）质量良好（code-tabs 双语、面试导向、结构完整），对照 androidx 官方 13 库缺口为 7 个：Activity、AppCompat、Biometric、Collection、Compose Runtime（原理层）、Core、Fragment（库层）；DataStore/Lifecycle/Navigation/Paging/Room/WorkManager 已有覆盖

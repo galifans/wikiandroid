@@ -57,7 +57,7 @@ Glide.with(view)             // 从 View 推导出 Activity/Fragment
 
 ```mermaid
 flowchart LR
-    A[with(Activity)] --> B[RequestManagerRetriever]
+    A["with(Activity)"] --> B[RequestManagerRetriever]
     B --> C{Activity 已销毁?}
     C -->|是| D[绑定 Application<br>不感知生命周期]
     C -->|否| E[创建无 UI Fragment<br>SupportRequestManagerFragment]

@@ -195,8 +195,8 @@ fun FlowLayout(
 
 ```mermaid
 flowchart LR
-    A[① measure 所有子项<br>measurables.map { it.measure() }] --> B[② 计算总尺寸<br>layout(width, height)]
-    B --> C[③ 摆放子项<br>placeable.placeRelative(x, y)]
+    A["① measure 所有子项<br>measurables.map { it.measure() }"] --> B["② 计算总尺寸<br>layout(width, height)"]
+    B --> C["③ 摆放子项<br>placeable.placeRelative(x, y)"]
 ```
 
 ## 五、Intrinsic 尺寸与二次测量

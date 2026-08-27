@@ -278,7 +278,7 @@ class GsonResponseBodyConverter<T> : Converter<ResponseBody, T> {
 
 ```mermaid
 flowchart TD
-    A[Retrofit.create(接口)] --> B[动态代理生成实现]
+    A["Retrofit.create(接口)"] --> B[动态代理生成实现]
     B --> C[调用方法<br>invoke 拦截]
     C --> D[解析注解<br>ServiceMethod 缓存]
     D --> E[构造 Request]
