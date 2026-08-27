@@ -303,6 +303,7 @@
 
 | Commit | 说明 |
 | --- | --- |
+| `6ce7032` | feat(jetpack): 28 篇文章图表/代码块补充文字讲解、简单表格转文字，mermaid 缩小加边框，仅 Kotlin 代码块默认 Kotlin 且 Java 按钮灰化 |
 | `272848f` | fix(nav): 统一导航文案并优化侧边栏（概览命名 / 板块顺序与 navbar 严格对应 / 长标题换行） |
 | `2c77f78` | fix(nav): 补齐导航栏缺失入口（语言 +C++ / Android +Context、进程 / UI +Bitmap、Window / 系统 +操作系统）并修复 5 个模块侧边栏图标缺失导致的对齐问题 |
 | `ff89888` | feat(interview): 新增 Android 知识点汇总归纳文章并补齐内容缺口（Service START 模式表 / ContentProvider 与 SQL 区别 / WebView 本地资源替代） |
