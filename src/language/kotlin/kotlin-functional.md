@@ -12,6 +12,8 @@ description: Kotlin 高阶函数、Lambda、集合操作符与函数式编程范
 
 在 Kotlin 中，**函数可以被赋值给变量、作为参数传递、作为返回值返回**——这就是"函数一等公民"。
 
+函数一等公民的完整示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -65,6 +67,8 @@ fun main() {
 
 ### 函数类型语法
 
+函数类型的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -87,6 +91,8 @@ val f3: (String) -> Unit = { println(it) }   // 单参数可用 it
 
 :::
 
+常见函数类型的含义说明如下：
+
 | 写法 | 含义 |
 |------|------|
 | `(Int, Int) -> Int` | 两个 Int 参数，返回 Int |
@@ -97,6 +103,8 @@ val f3: (String) -> Unit = { println(it) }   // 单参数可用 it
 ## 二、Lambda 表达式
 
 ### 2.1 语法要点
+
+Lambda 的完整写法与简化写法如下：
 
 ::: code-tabs
 
@@ -172,6 +180,8 @@ listOf("a", "b").myForEach { println(it) }
 
 ### 2.3 匿名函数
 
+匿名函数的写法示例如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -196,6 +206,8 @@ val f = fun(x: Int): Int = x * 2   // 匿名函数，可显式声明返回类型
 函数式编程在集合处理上威力最大：
 
 ### 3.1 转换类
+
+转换类操作符的示例如下：
 
 ::: code-tabs
 
@@ -237,6 +249,8 @@ list.mapIndexed { i, v -> "$i:$v" }  // 带索引
 
 ### 3.2 过滤类
 
+过滤类操作符的示例如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -269,6 +283,8 @@ list.single { it > 4 }           // 恰好一个满足，否则抛异常
 
 ### 3.3 聚合类
 
+聚合类操作符的示例如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -298,6 +314,8 @@ list.average()                   // 3.0
 :::
 
 ### 3.4 顺序与条件
+
+顺序与条件判断操作符的示例如下：
 
 ::: code-tabs
 
@@ -369,6 +387,8 @@ listOf(1, 2, ..., 1000000)
 
 :::
 
+集合操作符与 Sequence 的适用场景对比说明如下：
+
 | 场景 | 集合操作符 | Sequence |
 |------|-----------|----------|
 | 数据量小 | ✓ 简单直观 | 不必要 |
@@ -387,6 +407,8 @@ listOf(1, 2, ..., 1000000)
 | `with` | `this` | Lambda 结果 | 对同一对象多次操作 |
 | `apply` | `this` | **对象本身** | 初始化/配置对象 |
 | `also` | `it` | **对象本身** | 副作用（日志、校验） |
+
+各作用域函数的实际用法示例如下：
 
 ::: code-tabs
 
@@ -526,6 +548,8 @@ inline fun repeatInline(n: Int, action: () -> Unit) { for (i in 0 until n) actio
 
 :::
 
+内联与未内联的调用开销对比流程如下：
+
 ```mermaid
 flowchart LR
     A[调用高阶函数] --> B{是否 inline}
@@ -535,6 +559,8 @@ flowchart LR
     D --> F[零开销]
 ```
 
+普通函数与 `inline` 函数的特性对比说明如下：
+
 | 特性 | 普通函数 | `inline` 函数 |
 |------|---------|--------------|
 | 运行时开销 | 有（对象创建） | 无（编译期展开） |
@@ -543,6 +569,8 @@ flowchart LR
 | 适用场景 | 常规 | 高频调用 + Lambda 参数 |
 
 ### noinline 与 crossinline
+
+`noinline` 与 `crossinline` 的用法示例如下：
 
 ::: code-tabs
 
@@ -614,6 +642,8 @@ val user: User = gson.fromJson("""{"name":"tom"}""")
 ### Q1：`let`、`run`、`with`、`apply`、`also` 有什么区别？
 ::: details 查看答案
 **核心区别在两点**：① Lambda 内是 `it` 还是 `this`；② 返回值是 Lambda 结果还是对象本身。
+
+各函数的接收者与返回值对比说明如下：
 
 | 函数 | 接收者 | 返回值 |
 |------|--------|--------|

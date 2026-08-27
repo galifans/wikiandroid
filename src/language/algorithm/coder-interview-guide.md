@@ -28,6 +28,8 @@ title: 程序员代码面试指南精选题
 
 ### 代码实现
 
+双栈协同维护最小值的完整实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -127,6 +129,8 @@ class GetMinStack {
 2. stack2 不为空时，stack1 绝不能向 stack2 压入数据（否则顺序会乱）。
 
 ### 代码实现
+
+两个栈协作实现队列的代码如下：
 
 ::: code-tabs
 
@@ -261,6 +265,8 @@ class TwoStacksQueue {
 2. **reverse：** 先取出栈底元素，递归逆序剩余元素，最后把栈底元素压回栈顶，实现整体逆序。
 
 ### 代码实现
+
+两个递归函数的实现如下：
 
 ::: code-tabs
 

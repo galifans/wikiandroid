@@ -17,6 +17,8 @@ title: LinkedHashMap 源码剖析
 
 ## 关键成员
 
+LinkedHashMap 的核心成员定义如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -49,6 +51,8 @@ class LinkedHashMap<K, V> : HashMap<K, V>(), Map<K, V> {
 :::
 
 ## 构造方法
+
+构造方法的实现如下：
 
 ::: code-tabs
 

@@ -17,6 +17,8 @@ title: 数据结构基础
 
 ### 创建方式
 
+数组的两种创建方式如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -38,6 +40,8 @@ val d = IntArray(10)                // 动态初始化，默认值为 0
 ### 基本操作
 
 **插入：** 将 index 后面的元素依次后移，再把新值插入 index 位置。
+
+数组插入元素的核心实现如下：
 
 ::: code-tabs
 
@@ -69,6 +73,8 @@ fun insert(old: IntArray, value: Int, index: Int): IntArray {
 
 **删除：** 将后面的值依次前移，最后一位置 0。
 
+数组删除元素的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -98,6 +104,8 @@ fun delete(old: IntArray, index: Int): IntArray {
 :::
 
 ### 封装一个 GeneralArray 类
+
+封装后的数组工具类核心实现如下：
 
 ::: code-tabs
 
@@ -212,6 +220,8 @@ class GeneralArray(max: Int) {
 
 ### 基于数组实现栈
 
+基于数组实现的栈核心代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -314,6 +324,8 @@ class ArrayStack(maxSize: Int) {
 - `Queue` 是 Collection 的子接口，其子接口为 `Deque`（双端队列，可作队列也可作栈）。
 - 插入、提取、检查操作都存在两种形式：失败时抛异常或返回特殊值。
 
+Queue 接口各操作的两种失败形式对比如下：
+
 | 操作 | 失败抛异常 | 失败返回特殊值 |
 | --- | --- | --- |
 | 添加 | `add(E e)` | `offer(E e)` 返回 false |
@@ -323,6 +335,8 @@ class ArrayStack(maxSize: Int) {
 常用实现类：`LinkedList`（双向链表实现，也可作队列）、`PriorityQueue`（优先级队列）。
 
 ## 四、数据结构选择建议
+
+不同场景下的数据结构选型建议如下：
 
 | 场景 | 推荐结构 |
 | --- | --- |

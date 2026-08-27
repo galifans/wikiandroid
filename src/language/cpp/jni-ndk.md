@@ -18,6 +18,8 @@ title: JNI 与 NDK 开发
 
 ### 基本数据类型
 
+JNI 基本数据类型与 Java 类型的对应关系如下：
+
 | Java 类型 | Native 类型 | 符号属性 | 字长 |
 | --- | --- | --- | --- |
 | boolean | jboolean | 无符号 | 8 位 |
@@ -31,6 +33,8 @@ title: JNI 与 NDK 开发
 
 ### 引用数据类型
 
+JNI 引用数据类型与 Java 类型的对应关系如下：
+
 | Java 引用类型 | Native 类型 | Java 引用类型 | Native 类型 |
 | --- | --- | --- | --- |
 | All objects | jobject | char[] | jcharArray |
@@ -42,6 +46,8 @@ title: JNI 与 NDK 开发
 | java.lang.Throwable | jthrowable | | |
 
 ## 三、String 字符串操作
+
+常用 JNI 字符串操作函数如下：
 
 | JNI 函数 | 描述 |
 | --- | --- |
@@ -56,6 +62,8 @@ title: JNI 与 NDK 开发
 | GetStringUTFRegion | 获取/设置 UTF-8 编码字符串指定范围的内容 |
 
 ## 四、JNI 访问 Java 对象
+
+被访问的 Java 类定义如下：
 
 ::: code-tabs
 
@@ -124,6 +132,8 @@ Java_com_example_myjniproject_MainActivity_getJobId(JNIEnv *env, jobject thiz, j
 ## 五、NDK 基础开发流程
 
 ### 1. Java 中声明 native 方法
+
+Java 层声明 native 方法的示例代码如下：
 
 ::: code-tabs
 
@@ -242,6 +252,8 @@ target_link_libraries(native-lib ${log-lib})
 ```
 
 ## 七、常用 NDK 原生 API
+
+各 API 级别对应的关键原生 API 如下：
 
 | API 级别 | 关键原生 API | 头文件 |
 | --- | --- | --- |

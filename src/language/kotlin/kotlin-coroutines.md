@@ -11,6 +11,8 @@ title: Kotlin 协程
 
 **协程**：可挂起（suspend）和恢复的计算单元，运行在线程之上，但不受线程调度限制。
 
+协程与线程池等价写法的对比如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -49,6 +51,8 @@ fun main() = runBlocking {
 
 ## 二、协程构建器
 
+三种协程构建器的对比说明如下：
+
 | 构建器 | 作用 |
 |--------|------|
 | `launch` | 启动协程，返回 `Job`，不返回结果 |
@@ -57,12 +61,16 @@ fun main() = runBlocking {
 
 ## 三、调度器（Dispatcher）
 
+常用调度器与适用场景的对比说明如下：
+
 | 调度器 | 线程 | 适用场景 |
 |--------|------|----------|
 | `Dispatchers.Main` | 主线程 | UI 操作 |
 | `Dispatchers.IO` | IO 线程池 | 网络、磁盘 |
 | `Dispatchers.Default` | CPU 密集型 | 计算任务 |
 | `Dispatchers.Unconfined` | 不限制 | 极少使用 |
+
+线程切换的标准写法如下：
 
 ::: code-tabs
 
@@ -92,6 +100,8 @@ viewModelScope.launch(Dispatchers.IO) {
 :::
 
 ## 四、结构化并发
+
+结构化并发的用法示例如下：
 
 ::: code-tabs
 
@@ -133,6 +143,8 @@ scope.launch {
 **异常处理**：`SupervisorJob` 使子协程异常互不影响，配合 `CoroutineExceptionHandler` 统一兜底。
 
 ## 五、Flow 冷流
+
+Flow 冷流的生产与收集写法如下：
 
 ::: code-tabs
 

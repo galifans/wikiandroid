@@ -13,6 +13,8 @@ title: 高频面试算法题精选
 
 使用队列逐层访问，每层先记录当前队列大小，再一次性取出该层所有节点。
 
+层次遍历的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -67,6 +69,8 @@ fun levelOrder(root: TreeNode?): List<List<Int>> {
 
 递归交换每个节点的左右子树。
 
+镜像翻转的递归实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -102,6 +106,8 @@ fun invertTree(root: TreeNode?): TreeNode? {
 - 最大深度：`max(left, right) + 1`，递归即可。
 - 最小深度：根到最近叶子节点的距离，需注意单边为空时取另一边的深度。
 
+最大深度与最小深度的计算代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -127,6 +133,8 @@ fun maxDepth(root: TreeNode?): Int {
 ### 4. 平衡二叉树判断
 
 任意节点的左右子树高度差不超过 1。自底向上计算高度，同时判断是否平衡。
+
+自底向上判断平衡的代码如下：
 
 ::: code-tabs
 
@@ -174,6 +182,8 @@ private fun depth(root: TreeNode?): Int {
 
 迭代法：三个指针 prev、curr、next 逐个翻转。
 
+三指针迭代翻转的代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -217,6 +227,8 @@ fun reverseList(head: ListNode?): ListNode? {
 ### 3. 判断是否为循环链表
 
 快慢指针：若存在环，快慢指针终将相遇。
+
+快慢指针判断环的代码如下：
 
 ::: code-tabs
 
@@ -264,6 +276,8 @@ fun hasCycle(head: ListNode?): Boolean {
 ### 1. 有效括号
 
 遍历字符串，遇到左括号入栈，遇到右括号弹出栈顶匹配，最终栈为空则合法。
+
+括号匹配的栈实现如下：
 
 ::: code-tabs
 
@@ -323,6 +337,8 @@ fun isValid(s: String): Boolean {
 
 在 [0, x] 区间二分查找，找到最大的平方不超过 x 的整数。
 
+二分法求平方根的实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -372,6 +388,8 @@ fun mySqrt(x: Int): Int {
 
 滑动窗口 + 哈希表记录字符最近出现位置，窗口左边界移动到重复字符之后。
 
+滑动窗口求最长无重复子串的代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -418,6 +436,8 @@ fun lengthOfLongestSubstring(s: String): Int {
 ### 前 K 大的数
 
 维护一个大小为 K 的最小堆（PriorityQueue），堆顶是当前 K 个数中最小的；遍历完整个数组后，堆中即为前 K 大的数。
+
+小顶堆求前 K 大数的代码如下：
 
 ::: code-tabs
 
@@ -473,6 +493,8 @@ fun topK(nums: IntArray, k: Int): IntArray {
 
 中序遍历二叉搜索树应得到递增序列；或递归时给每个节点传递 (min, max) 区间约束。
 
+区间约束法验证二叉搜索树的代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -520,6 +542,8 @@ private fun valid(node: TreeNode?, min: Long, max: Long): Boolean {
 
 快慢指针：快指针遍历，慢指针记录不重复元素的位置，遇到不同元素时写入。
 
+快慢指针去重的实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -563,6 +587,8 @@ fun removeDuplicates(nums: IntArray): Int {
 ### 1. 买卖股票的最佳时机
 
 只允许一次交易：遍历时记录历史最低价，同时计算当前价卖出收益并取最大。
+
+一次交易求最大利润的代码如下：
 
 ::: code-tabs
 
@@ -609,6 +635,8 @@ fun maxProfit(prices: IntArray): Int {
 ### 3. 最大子数组
 
 经典 Kadane 算法：`current = max(nums[i], current + nums[i])`，同时记录全局最大值。
+
+Kadane 算法求最大子数组和的代码如下：
 
 ::: code-tabs
 
@@ -681,6 +709,8 @@ $f(n) = f(n-1) + f(n-2)$，用滚动变量优化空间。
 - 相等：`dp[i][j] = dp[i-1][j-1]`
 - 不等：`dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])`（删除、插入、替换）
 
+编辑距离的动态规划实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -745,6 +775,8 @@ fun minDistance(word1: String, word2: String): Int {
 
 数组中只有一个数出现一次，其余出现两次：全部异或，成对的数抵消，剩下的就是落单的数。
 
+异或求落单数的代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -786,6 +818,8 @@ $G(n) = n \oplus (n >> 1)$。
 ### 2. LRU 缓存策略
 
 使用 **LinkedHashMap**（访问顺序模式）或"HashMap + 双向链表"实现：get 时把节点移到链表头部，put 时若容量已满删除尾部节点。
+
+LinkedHashMap 实现 LRU 的代码如下：
 
 ::: code-tabs
 

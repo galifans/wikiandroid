@@ -13,6 +13,8 @@ description: 扩展函数原理与实战、作用域函数 let/run/with/apply/al
 
 ### 1.1 定义与使用
 
+扩展函数的定义与调用示例如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -89,6 +91,8 @@ public static boolean isEmail(String $this) {
 
 ### 1.2 扩展属性
 
+扩展属性的定义方式如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -125,6 +129,8 @@ println("hello".lastChar)    // 'o'
 
 ### 1.3 成员函数优先级更高
 
+成员函数与扩展函数优先级的对比示例如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -159,6 +165,8 @@ Foo().bar()    // "成员函数"（成员优先于扩展）
 
 ### 1.4 扩展函数与泛型
 
+泛型扩展与可空接收者的写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -191,6 +199,8 @@ fun String?.isEmptyOrNull(): Boolean = this == null || this.isEmpty()
 
 ### 2.1 五个作用域函数总览
 
+五个作用域函数的对比说明如下：
+
 | 函数 | 上下文对象 | 返回值 | 适用场景 |
 | --- | --- | --- | --- |
 | `let` | it | 表达式结果 | 空安全 + 转换 |
@@ -200,6 +210,8 @@ fun String?.isEmptyOrNull(): Boolean = this == null || this.isEmpty()
 | `also` | it | **对象本身** | 副作用（日志/校验） |
 
 ### 2.2 各函数实战
+
+五个作用域函数的实战写法如下：
 
 ::: code-tabs
 
@@ -266,6 +278,8 @@ val user = User().also {
 
 ### 2.3 典型用法模式
 
+典型组合用法的示例如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -316,6 +330,8 @@ fun initView() {
 :::
 
 ## 3. 其他常用标准库函数
+
+其他常用标准库函数的写法如下：
 
 ::: code-tabs
 

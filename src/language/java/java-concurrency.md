@@ -11,6 +11,8 @@ description: 线程创建方式、线程生命周期、wait/notify、ThreadLocal
 
 ## 1. 线程的创建方式
 
+四种线程创建方式的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -69,6 +71,8 @@ NEW（新建）→ RUNNABLE（就绪/运行）→ BLOCKED（阻塞，等锁）
                                   → TIMED_WAITING（超时等待）
                                   → TERMINATED（终止）
 ```
+
+各方法对应的线程状态说明如下：
 
 | 方法 | 状态 | 说明 |
 | --- | --- | --- |
@@ -130,6 +134,8 @@ synchronized(lock) {
 
 ## 4. ThreadLocal
 
+ThreadLocal 的典型用法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -179,6 +185,8 @@ ReentrantLock / Semaphore / CountDownLatch / ReentrantReadWriteLock 都基于它
 ③ 模板方法：acquire / release（子类实现 tryAcquire / tryRelease）
 ```
 
+基于 AQS 实现自定义锁的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -217,6 +225,8 @@ class SimpleLock : AbstractQueuedSynchronizer() {
 
 ### 5.2 常用并发工具对比
 
+各并发工具的对比说明如下：
+
 | 工具 | 作用 | 适用场景 |
 | --- | --- | --- |
 | ReentrantLock | 可重入排他锁 | 替代 synchronized |
@@ -226,6 +236,8 @@ class SimpleLock : AbstractQueuedSynchronizer() {
 | Phaser | 分阶段屏障 | 复杂分阶段任务 |
 
 ## 6. 线程池
+
+线程池七大参数的示例代码如下：
 
 ::: code-tabs
 

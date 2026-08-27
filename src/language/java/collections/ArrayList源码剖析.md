@@ -15,6 +15,8 @@ title: ArrayList 源码剖析
 
 ## 关键成员
 
+关键成员的声明如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -43,6 +45,8 @@ class ArrayList<E> : AbstractList<E>(),
 :::
 
 ## 构造方法
+
+构造方法的实现如下：
 
 ::: code-tabs
 
@@ -126,6 +130,8 @@ fun ensureCapacity(minCapacity: Int) {
 - `trimToSize()` 可将容量调整为实际元素个数
 
 ## 与 LinkedList、Vector 对比
+
+三者的对比说明如下：
 
 | 对比项 | ArrayList | LinkedList | Vector |
 |--------|-----------|------------|--------|

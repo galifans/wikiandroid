@@ -16,6 +16,8 @@ title: Vector 源码剖析
 
 ## 二、核心字段
 
+核心字段的声明如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -37,6 +39,8 @@ protected var capacityIncrement: Int = 0       // 容量增长系数
 :::
 
 ## 三、构造函数
+
+构造函数的实现如下：
 
 ::: code-tabs
 
@@ -79,6 +83,8 @@ constructor(initialCapacity: Int, capacityIncrement: Int) {
 :::
 
 ## 四、扩容机制
+
+扩容机制的实现如下：
 
 ::: code-tabs
 
@@ -126,6 +132,8 @@ private fun ensureCapacityHelper(minCapacity: Int) {
 - 而 ArrayList 默认扩容为原来的 **1.5 倍**。
 
 ## 五、与 ArrayList 对比
+
+Vector 与 ArrayList 的对比说明如下：
 
 | 对比项 | Vector | ArrayList |
 | --- | --- | --- |

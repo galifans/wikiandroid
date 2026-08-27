@@ -76,6 +76,8 @@ fun main() {
 
 ### 应用场景
 
+类委托的典型应用场景说明如下：
+
 | 场景 | 说明 |
 |------|------|
 | 装饰器模式 | 不修改原类增强功能 |
@@ -174,6 +176,8 @@ operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T)   // var 
 
 ### 3.1 `lazy` 惰性初始化
 
+`lazy` 惰性初始化的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -205,6 +209,8 @@ class MainActivity : AppCompatActivity() {
 
 :::
 
+各 `lazy` 模式的线程安全说明如下：
+
 | `lazy` 模式 | 线程安全 | 场景 |
 |-------------|---------|------|
 | `LazyThreadSafetyMode.SYNCHRONIZED`（默认） | ✓ 加锁 | 多线程并发访问 |
@@ -212,6 +218,8 @@ class MainActivity : AppCompatActivity() {
 | `NONE` | ✗ | 单线程（如主线程） |
 
 ### 3.2 `observable` / `vetoable` 观察属性变化
+
+`observable` 与 `vetoable` 的用法示例如下：
 
 ::: code-tabs
 
@@ -253,6 +261,8 @@ age = 200   // 被拒绝，仍是 18
 
 ### 3.3 `by map` 委托给 Map
 
+`by map` 委托的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -290,6 +300,8 @@ println(cfg.name)    // app（从 map 读取）
 
 ## 四、`by lazy` vs `lateinit`
 
+`by lazy` 与 `lateinit` 的对比说明如下：
+
 | 对比项 | `lateinit var` | `by lazy` |
 |--------|---------------|-----------|
 | 适用类型 | var（非空、非基本类型） | val |
@@ -297,6 +309,8 @@ println(cfg.name)    // app（从 map 读取）
 | 线程安全 | 无 | 默认 SYNCHRONIZED |
 | 反初始化 | 可判断 `::x.isInitialized` | 无 |
 | 典型场景 | DI 注入、findViewById | ViewModel、昂贵资源 |
+
+两种初始化方式的实际写法如下：
 
 ::: code-tabs
 
@@ -334,6 +348,8 @@ val repository: UserRepository by lazy { UserRepository() }
 
 ### 5.1 `by viewModels()`
 
+`by viewModels()` 的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -359,6 +375,8 @@ class MainActivity : AppCompatActivity() {
 本质是属性委托：`getValue` 时通过 `ViewModelProvider` 获取实例。
 
 ### 5.2 `by lazy` + `binding`
+
+ViewBinding 与 `by lazy` 组合的写法如下：
 
 ::: code-tabs
 
@@ -386,6 +404,8 @@ private val binding: ActivityMainBinding by lazy {
 :::
 
 ### 5.3 自定义委托封装 SharedPreferences
+
+自定义委托封装 SharedPreferences 的实现如下：
 
 ::: code-tabs
 
@@ -508,6 +528,8 @@ val (name, age) = User("tom", 20)   // 解构声明
 
 :::
 
+data class 解构的构成关系如下：
+
 ```mermaid
 flowchart TD
     A[data class User] --> B[component1 返回 name]
@@ -518,6 +540,8 @@ flowchart TD
 ```
 
 ### 解构的应用
+
+解构在实际开发中的应用示例如下：
 
 ::: code-tabs
 
@@ -551,6 +575,8 @@ val (name, age) = listOf("tom", 20).let { it[0] to it[1] }
 :::
 
 ## 七、内联函数与 reified 回顾
+
+`reified` 泛型结合委托的回顾示例如下：
 
 ::: code-tabs
 

@@ -20,6 +20,8 @@ title: volatile 与内存可见性
 
 ## volatile 与 synchronized 的对比
 
+两者的对比说明如下：
+
 | 对比项 | volatile | synchronized |
 |--------|----------|--------------|
 | 同步强度 | 稍弱的同步机制 | 强同步机制 |
