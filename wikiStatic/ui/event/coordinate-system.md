@@ -12,6 +12,8 @@ description: View 坐标体系、MotionEvent 坐标系、getX/getRawX/getLocatio
 
 ### 1.1 三个坐标系
 
+屏幕、窗口、视图三层坐标各有原点：
+
 ```mermaid
 flowchart TD
     A[屏幕坐标系<br>Screen] --> B[原点: 屏幕左上角]
@@ -35,6 +37,8 @@ flowchart TD
 
 ### 2.1 位置相关属性
 
+位置属性分两组：布局位置与含平移的当前位置：
+
 ```mermaid
 flowchart LR
     A[View 位置] --> B[getLeft 左边界 x]
@@ -56,6 +60,8 @@ flowchart LR
 
 ### 2.2 滑动相关
 
+滚动类 API 移动的是内容：
+
 | API | 作用 |
 |-----|------|
 | `scrollTo(x, y)` | 滚动到绝对位置 |
@@ -67,6 +73,8 @@ flowchart LR
 ## 三、MotionEvent 坐标
 
 ### 3.1 事件坐标 API
+
+onTouchEvent 里能拿到两种坐标：
 
 ::: code-tabs
 
@@ -109,13 +117,13 @@ override fun onTouchEvent(event: MotionEvent): Boolean {
 
 :::
 
+各 API 的基准与注意点：
+
 | API | 坐标 | 注意 |
-|-----|------|------|
-| `getX()/getY()` | 相对当前 View 左上角 | 触摸点在 View 内 |
-| `getRawX()/getRawY()` | 相对屏幕左上角 | 不受 View 位置影响 |
-| `getScrollX()` | View 内容偏移 | 已滑动内容 |
 
 ### 3.2 getX 与 getRawX 的区别
+
+两者基准不同，关系如下：
 
 ```mermaid
 flowchart LR
@@ -136,6 +144,8 @@ getRawX() = getX() + view.getLeft() + 父容器的偏移
 ## 四、View 与窗口的位置获取
 
 ### 4.1 三个核心方法
+
+取位置的两个方法与一个判断可见性的方法：
 
 ::: code-tabs
 
@@ -174,6 +184,8 @@ view.getLocationInWindowToParent ?: 0  // API 30+，一般用下面方式
 
 ### 4.2 区别与换算
 
+三个方法基准不同，用途各异：
+
 | 方法 | 基准 | 典型用途 |
 |------|------|----------|
 | `getLocationInWindow` | 窗口左上角 | 弹出 PopupWindow/Dialog 定位 |
@@ -183,6 +195,8 @@ view.getLocationInWindowToParent ?: 0  // API 30+，一般用下面方式
 **两者关系**：`onScreen = inWindow + 窗口偏移`（状态栏高度等，不同系统版本有差异）。
 
 ### 4.3 判断 View 可见性
+
+结合 getGlobalVisibleRect 判断是否完全可见：
 
 ::: code-tabs
 
@@ -215,6 +229,8 @@ fun View.isCompletelyVisible(): Boolean {
 ## 五、坐标转换实战
 
 ### 5.1 手指位置 → 屏幕坐标
+
+拖拽跟随手指必须用 rawX/rawY 防漂移：
 
 ::: code-tabs
 
@@ -289,6 +305,8 @@ class DragView @JvmOverloads constructor(
 
 ### 5.2 PopupWindow 定位
 
+用 getLocationInWindow 拿到锚点位置再偏移：
+
 ::: code-tabs
 
 @tab:active Java
@@ -325,6 +343,8 @@ popupWindow.showAtLocation(
 
 ### 6.1 View 变换矩阵
 
+父坐标映射到子 View 局部坐标：
+
 ::: code-tabs
 
 @tab:active Java
@@ -350,6 +370,8 @@ matrix.mapPoints(point)
 :::
 
 ### 6.2 View 与 Canvas 坐标
+
+绘制与触摸都在 View 局部坐标系里：
 
 - `onDraw(canvas)` 中 Canvas 原点 = View 左上角（含 padding 需自行平移）
 - `canvas.translate()` 后绘制坐标随之变化

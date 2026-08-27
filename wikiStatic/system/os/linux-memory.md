@@ -10,6 +10,8 @@ description: 虚拟内存、分页机制、内存回收、OOM 机制、Android �
 
 ## 一、虚拟内存与分页
 
+虚拟内存与分页的完整映射关系如下：
+
 ```mermaid
 flowchart LR
     A[进程虚拟地址空间<br>4GB/128TB] --> B[页表映射]
@@ -17,6 +19,8 @@ flowchart LR
     B --> D[Swap 交换区]
     B --> E[文件页<br>mmap 映射]
 ```
+
+各核心概念的说明如下：
 
 | 概念 | 说明 |
 |------|------|
@@ -40,6 +44,8 @@ flowchart LR
 
 ## 三、内存回收机制
 
+内存回收的整体流程如下：
+
 ```mermaid
 flowchart TD
     A[内存压力] --> B{回收策略}
@@ -49,6 +55,8 @@ flowchart TD
     C --> F[回收匿名页<br>写回/丢弃]
     C --> G[回收文件页<br>脏页写回]
 ```
+
+各类回收对象的处理方式如下：
 
 | 回收对象 | 处理 |
 |---------|------|
@@ -60,6 +68,8 @@ flowchart TD
 ## 四、oom_adj 与进程优先级
 
 ### 4.1 OOM 优先级
+
+各进程优先级的 oom_adj 分布如下：
 
 ```mermaid
 flowchart LR
@@ -76,6 +86,8 @@ flowchart LR
     A --> F
 ```
 
+各进程分类对应的 oom_adj 值如下：
+
 | 进程分类 | oom_adj | 示例 |
 |---------|---------|------|
 | 系统/持久 | -17 ~ -12 | SystemServer、电话 |
@@ -85,6 +97,8 @@ flowchart LR
 | 缓存 | 9~15 | 后台 Activity |
 
 ### 4.2 AMS 动态调整
+
+AMS 动态调整 oom_adj 的核心逻辑如下：
 
 ::: code-tabs
 
@@ -112,6 +126,8 @@ flowchart LR
 
 ## 五、LMKD 内存压力管理
 
+LMKD 处理内存压力的整体流程如下：
+
 ```mermaid
 flowchart LR
     A[内存压力<br>PSI 事件] --> B[LMKD<br>Low Memory Killer Daemon]
@@ -122,6 +138,8 @@ flowchart LR
     B --> G[内核<br>oom_kill]
 ```
 
+LMKD 各机制的说明如下：
+
 | 机制 | 说明 |
 |------|------|
 | PSI | 内核内存压力信号(新版本) |
@@ -131,6 +149,8 @@ flowchart LR
 | App 状态 | 杀进程前通知应用(生命周期回调) |
 
 ## 六、内存泄漏与监控
+
+开发者排查内存泄漏的常用手段如下：
 
 ::: code-tabs
 

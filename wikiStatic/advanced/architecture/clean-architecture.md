@@ -52,6 +52,8 @@ Presentation → Domain ← Data
 
 ### 3.1 Domain 层（纯 Kotlin）
 
+Domain 层的实体与 UseCase 实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -108,6 +110,8 @@ class GetUserUseCase(
 :::
 
 ### 3.2 Data 层（实现接口 + Mapper）
+
+Data 层的接口实现与 Mapper 转换代码如下：
 
 ::: code-tabs
 
@@ -191,6 +195,8 @@ class UserMapper {
 
 ### 3.3 Presentation 层（UI + ViewModel）
 
+Presentation 层的 ViewModel 状态管理实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -263,6 +269,8 @@ sealed interface UserState {
 
 ## 4. 依赖注入
 
+Hilt 依赖注入的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -312,6 +320,8 @@ object RepositoryModule {
 :::
 
 ## 5. 优缺点与适用场景
+
+Clean Architecture 的优缺点对比说明如下：
 
 | 维度 | 说明 |
 | --- | --- |

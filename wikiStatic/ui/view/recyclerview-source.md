@@ -10,6 +10,8 @@ description: RecyclerView 缓存复用机制、五级缓存、回收与复用流
 
 ## 一、RecyclerView 核心组件
 
+五大组件各管一段：
+
 ```mermaid
 flowchart TD
     A[RecyclerView] --> B[LayoutManager<br>布局排列]
@@ -28,6 +30,8 @@ flowchart TD
 | ItemDecoration | 绘制分割线、边距 |
 
 ## 二、五级缓存结构
+
+回收的 ViewHolder 按复用成本分层存放：
 
 ```mermaid
 flowchart TD
@@ -51,6 +55,8 @@ flowchart TD
 
 ### 3.1 复用（getViewForPosition）
 
+复用路径按成本从低到高逐级查找：
+
 ```mermaid
 sequenceDiagram
     participant L as LayoutManager
@@ -65,6 +71,8 @@ sequenceDiagram
     R->>R: bindViewHolder 绑定数据
     R->>L: 返回 ItemView
 ```
+
+对应源码的核心注释如下：
 
 ::: code-tabs
 
@@ -98,6 +106,8 @@ fun getViewForPosition(position: Int, dryRun: Boolean): View {
 
 ### 3.2 回收（recycleViewHolderInternal）
 
+回收时按容量上限决定进缓存还是进共享池：
+
 ```mermaid
 flowchart LR
     A[条目滚出屏幕] --> B[判断缓存上限]
@@ -107,6 +117,8 @@ flowchart LR
     D --> F[快速复用]
     E --> G[需重新绑定]
 ```
+
+简化后的回收源码：
 
 ::: code-tabs
 
@@ -141,6 +153,8 @@ fun recycleViewHolderInternal(holder: ViewHolder) {
 :::
 
 ## 四、LayoutManager 复用触发
+
+LayoutManager 只负责摆位置，View 从哪来交给 Recycler：
 
 ::: code-tabs
 

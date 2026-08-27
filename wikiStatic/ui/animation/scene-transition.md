@@ -10,6 +10,8 @@ description: Activity/Fragment 转场动画、Scene 场景切换、共享元素 
 
 ## 一、转场动画体系
 
+Android 的转场方案按使用场景分为四类：
+
 ```mermaid
 flowchart TD
     A[转场动画] --> B[Activity 转场<br>overridePendingTransition]
@@ -23,6 +25,8 @@ flowchart TD
 ## 二、Activity 转场动画
 
 ### 2.1 传统方式：overridePendingTransition
+
+启动/返回时各调一次，指定进出动画资源：
 
 ::: code-tabs
 
@@ -52,6 +56,8 @@ overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
 
 :::
 
+动画资源本身是标准的补间动画 XML：
+
 ```xml
 <!-- res/anim/slide_in_right.xml -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
@@ -62,6 +68,8 @@ overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
 ```
 
 ### 2.2 现代方式：Activity Transition API（5.0+）
+
+通过 makeSceneTransitionAnimation 把共享 View 和过渡名一起传过去：
 
 ::: code-tabs
 
@@ -89,6 +97,8 @@ startActivity(Intent(this, DetailActivity::class.java), options)
 
 :::
 
+两个页面里 transitionName 相同的 View 才能配对：
+
 ```xml
 <!-- A 页面布局 -->
 <ImageView android:id="@+id/image" android:transitionName="shared_image" />
@@ -103,6 +113,8 @@ startActivity(Intent(this, DetailActivity::class.java), options)
 
 ### 3.1 核心概念
 
+Transition 框架的四个角色各司其职：
+
 | 概念 | 说明 |
 |------|------|
 | Scene | 场景（一组 View 层级状态） |
@@ -111,6 +123,8 @@ startActivity(Intent(this, DetailActivity::class.java), options)
 | 共享元素 | 两个场景中相同的 View |
 
 ### 3.2 Scene 切换（同一容器内状态切换）
+
+在同一个容器内切换两套布局，TransitionManager 负责调度：
 
 ::: code-tabs
 
@@ -158,6 +172,8 @@ TransitionManager.beginDelayedTransition(container)   // 记录当前状态
 
 ### 3.3 内置 Transition 类型
 
+每种效果对应一个具体的 Transition 子类：
+
 | Transition | 效果 |
 |-----------|------|
 | `Fade` | 淡入淡出 |
@@ -170,6 +186,8 @@ TransitionManager.beginDelayedTransition(container)   // 记录当前状态
 | `TransitionSet` | 多个 Transition 组合 |
 
 ### 3.4 共享元素支持的动画类型
+
+进入/返回过渡可以组合多种变换：
 
 ::: code-tabs
 
@@ -204,6 +222,8 @@ window.sharedElementReturnTransition = window.sharedElementEnterTransition
 :::
 
 ## 四、Fragment 转场
+
+Fragment 用 setCustomAnimations 指定进出动画，还能直接加共享元素：
 
 ::: code-tabs
 
@@ -243,6 +263,8 @@ supportFragmentManager.beginTransaction()
 
 ## 五、Transition 原理
 
+原理就是"两次快照 + 差值动画"：
+
 ```mermaid
 sequenceDiagram
     participant T as TransitionManager
@@ -260,6 +282,8 @@ sequenceDiagram
 
 ## 六、转场动画与性能
 
+转场动画的常见性能坑与对策：
+
 | 优化点 | 说明 |
 |--------|------|
 | 减少共享元素数量 | 3-5 个以内，过多动画叠加卡顿 |
@@ -269,6 +293,8 @@ sequenceDiagram
 | 用属性动画 | Transition 内部也是 Animator，遵循属性动画性能规则 |
 
 ## 七、Compose 时代的动画
+
+Compose 用声明式 API 描述同样的转场需求：
 
 ::: code-tabs
 
@@ -303,6 +329,8 @@ SharedTransitionLayout {
 ```
 
 :::
+
+常用 Compose 动画 API 与场景对应：
 
 | 方案 | 场景 |
 |------|------|

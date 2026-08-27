@@ -24,6 +24,8 @@ description: 音视频技术栈全景：采集、编码、播放、渲染、推�
 
 ## 2. 播放：Media3 ExoPlayer（推荐）
 
+ExoPlayer 的基本用法示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -71,6 +73,8 @@ ExoPlayer 优势：
 ```
 
 ## 3. 采集与硬编：Camera + MediaCodec
+
+采集与硬编的实现代码如下：
 
 ::: code-tabs
 
@@ -179,6 +183,8 @@ ffmpeg -i input.mp4 -vn -c:a copy audio.aac
 ```
 
 ## 6. 渲染方式对比
+
+各渲染方式的对比说明如下：
 
 | 方案 | 原理 | 适用 |
 | --- | --- | --- |

@@ -10,6 +10,8 @@ description: 从触摸屏到 onTouchEvent 的完整链路、InputReader/InputDis
 
 ## 一、输入事件全景链路
 
+一次触摸从硬件到应用进程，要经过系统侧三条跳转、应用侧两次分发，整体链路如下：
+
 ```mermaid
 flowchart TD
     A[触摸屏/键盘硬件] --> B[InputReader<br>内核驱动读取原始事件]
@@ -19,6 +21,8 @@ flowchart TD
     E --> F[DecorView<br>dispatchTouchEvent]
     F --> G[View 树分发<br>Activity → ViewGroup → View]
 ```
+
+链路中每个环节都由专门组件负责：
 
 | 环节 | 组件 | 职责 |
 |------|------|------|
@@ -31,6 +35,8 @@ flowchart TD
 ## 二、系统侧：InputReader 与 InputDispatcher
 
 ### 2.1 InputReader
+
+InputReader 负责把硬件原始数据变成标准事件，内部三步流水线：
 
 ```mermaid
 flowchart LR
@@ -45,6 +51,8 @@ flowchart LR
 - **InputMapper**：按设备类型转换成 MotionEvent / KeyEvent
 
 ### 2.2 InputDispatcher
+
+事件进入分发中心后，先找目标窗口再投递，时序如下：
 
 ```mermaid
 sequenceDiagram
@@ -66,6 +74,8 @@ sequenceDiagram
 > 这也是"点击无响应 5 秒 ANR"的来源之一（Input dispatching timed out）。
 
 ## 三、应用侧：ViewRootImpl 接收事件
+
+事件到达应用进程后，ViewRootImpl 用一条 InputStage 责任链逐级处理：
 
 ::: code-tabs
 
@@ -93,6 +103,8 @@ mSyntheticInputStage → mEarlyPostImeInputStage → mPostImeInputStage
 
 :::
 
+责任链最终落到 `ViewPostImeInputStage`，由它把事件交给 View 树：
+
 ```mermaid
 flowchart LR
     A[InputEventReceiver<br>收到事件] --> B[DeliverInputEvent]
@@ -104,6 +116,8 @@ flowchart LR
 ## 四、View 树分发：三大方法
 
 ### 4.1 核心方法链
+
+从 Activity 到 View 的分发决策流程——拦截与消费是两条分支：
 
 ```mermaid
 flowchart TD
@@ -119,6 +133,8 @@ flowchart TD
 
 ### 4.2 三个方法的分工
 
+三个方法各司其职，返回值都表示"事件是否被消费"：
+
 | 方法 | 职责 | 返回值含义 |
 |------|------|-----------|
 | `dispatchTouchEvent` | 事件分发入口 | true=事件被消费 |
@@ -126,6 +142,8 @@ flowchart TD
 | `onTouchEvent` | 处理事件 | true=消费 |
 
 ### 4.3 分发伪代码
+
+把上面的流程翻译成代码，核心就这几步：
 
 ::: code-tabs
 
@@ -189,6 +207,8 @@ override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
 
 ### 5.1 事件序列
 
+一次完整触摸是一个事件序列，从 DOWN 开始到 UP/CANCEL 结束：
+
 ```mermaid
 flowchart LR
     A[ACTION_DOWN<br>触摸按下] --> B[ACTION_MOVE...<br>多次移动]
@@ -199,18 +219,21 @@ flowchart LR
 
 ### 5.2 ACTION_CANCEL 什么时候出现
 
+CANCEL 不是用户动作，而是系统/父容器"收回触摸权"的信号，常见三种场景：
+
 | 场景 | 说明 |
 |------|------|
 | 父 View 在 MOVE 阶段拦截 | 子 View 收到 CANCEL |
 | 触摸事件被新窗口抢占 | 收到 CANCEL |
 | 视图被移除/滚动容器接管 | 收到 CANCEL |
 
+父 View 在 MOVE 阶段拦截时，系统会先给子 View 发 CANCEL——代码里的表现是这样的：
+
 ::: code-tabs
 
 @tab:active Java
 
 ```java
-// ViewGroup 拦截后：让子 View 先收 CANCEL 再自己处理
 @Override
 public boolean onInterceptTouchEvent(MotionEvent ev) {
     if (ev.getAction() == MotionEvent.ACTION_MOVE && 条件满足) {

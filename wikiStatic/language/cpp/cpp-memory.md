@@ -10,6 +10,8 @@ description: C++ 堆栈内存、RAII 思想、智能指针（unique_ptr/shared_p
 
 ## 一、内存分区
 
+C++ 程序的内存分区与各自的分配方式如下：
+
 ```mermaid
 flowchart TD
     A[C++ 程序内存布局] --> B[栈 Stack]
@@ -20,6 +22,8 @@ flowchart TD
     C --> C1[new/malloc 手动申请<br>需 delete/free 释放<br>容量大 受虚拟内存限制]
     D --> D1[全局变量/static<br>程序启动分配 结束释放]
 ```
+
+各内存区域的分配方式与生命周期对比如下：
 
 | 区域 | 分配方式 | 生命周期 | 大小 |
 |------|---------|---------|------|
@@ -41,6 +45,8 @@ void func() {
 ```
 
 ## 二、new/delete 与 malloc/free 的区别
+
+new/delete 与 malloc/free 的核心区别对比如下：
 
 | 对比项 | `new`/`delete` | `malloc`/`free` |
 |--------|----------------|-----------------|
@@ -100,6 +106,8 @@ void bad(const char* path) {
 
 C++11 标准库提供了三种智能指针，都是 RAII 的封装：
 
+三种智能指针的所有权语义与适用场景对比如下：
+
 | 智能指针 | 所有权语义 | 引用计数 | 场景 |
 |---------|-----------|---------|------|
 | `std::unique_ptr` | 独占 | 无 | 默认首选 |
@@ -150,6 +158,8 @@ std::shared_ptr<Widget> b = a;      // 引用计数 2
 
 ### 引用计数原理
 
+shared_ptr 引用计数增减的完整时序如下：
+
 ```mermaid
 sequenceDiagram
     participant A as shared_ptr A
@@ -193,6 +203,8 @@ int main() {
     b->prev = a;    // a 和 b 循环引用，析构函数永远不会被调用！
 }
 ```
+
+循环引用导致泄漏与 weak_ptr 修复的对比图如下：
 
 ```mermaid
 flowchart LR
@@ -261,6 +273,8 @@ void Java_..._init(JNIEnv* env, jobject thiz, jobject surface) {
 }
 ```
 
+各场景下智能指针的推荐选型如下：
+
 | 场景 | 推荐 |
 |------|------|
 | Native 层独占资源（GL 上下文、文件句柄） | `unique_ptr` |
@@ -269,6 +283,8 @@ void Java_..._init(JNIEnv* env, jobject thiz, jobject surface) {
 | JNI 全局引用 | 手动管理 + RAII 封装 |
 
 ## 九、常见内存问题
+
+常见内存问题的表现、原因与对策汇总如下：
 
 | 问题 | 表现 | 原因 | 对策 |
 |------|------|------|------|

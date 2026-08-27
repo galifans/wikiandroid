@@ -12,6 +12,8 @@ description: 约束体系核心概念、相对定位与链、比例与屏障、�
 
 ### 1.1 传统布局的痛点
 
+先看旧布局的问题在哪，才能理解新布局的价值：
+
 | 问题 | 说明 |
 |------|------|
 | 嵌套过深 | LinearLayout 多层嵌套导致 measure/layout 递归开销大 |
@@ -24,6 +26,8 @@ description: 约束体系核心概念、相对定位与链、比例与屏障、�
 - **约束体系**：任意 View 之间可建立相对关系，比 RelativeLayout 灵活
 - **性能**：单次遍历测量，比多层嵌套的 LinearLayout 快
 - **官方支持**：Android Studio 默认布局模板，Material 组件深度配合
+
+一个典型写法如下——用约束把两个 TextView 串起来：
 
 ```xml
 <androidx.constraintlayout.widget.ConstraintLayout
@@ -54,7 +58,7 @@ description: 约束体系核心概念、相对定位与链、比例与屏障、�
 
 ### 2.1 约束的建立
 
-每个 View 至少需要 **水平方向 2 个 + 垂直方向 2 个** 约束才能确定位置：
+每个 View 至少需要 **水平方向 2 个 + 垂直方向 2 个** 约束才能确定位置，常用属性如下：
 
 | 属性 | 含义 |
 |------|------|
@@ -67,6 +71,8 @@ description: 约束体系核心概念、相对定位与链、比例与屏障、�
 | `layout_constraintTop_toBottomOf` | 顶部贴目标底部（下方排列） |
 | `layout_constraintBottom_toTopOf` | 底部贴目标顶部（上方排列） |
 | `layout_constraintBaseline_toBaselineOf` | 文本基线对齐 |
+
+约束的本质是"当前 View 的边缘相对目标边缘"，三种典型关系示意：
 
 ```mermaid
 flowchart LR
@@ -85,6 +91,8 @@ flowchart LR
 
 ### 3.1 居中
 
+四个方向都约束到 parent 就实现了居中：
+
 ```xml
 <!-- 水平居中 + 垂直居中 -->
 <Button
@@ -98,6 +106,8 @@ flowchart LR
 ```
 
 ### 3.2 偏移比例
+
+居中基础上用 bias 打破平衡，实现比例偏移：
 
 ```xml
 <!-- 水平 30% 偏移 -->
@@ -117,11 +127,13 @@ flowchart LR
 | `layout_constraintHorizontal_bias` | 水平偏移（0-1，默认 0.5 居中） |
 | `layout_constraintVertical_bias` | 垂直偏移 |
 
+bias 取值范围 0-1，0.5 即居中。
+
 ## 四、链（Chain）
 
 ### 4.1 链的创建
 
-多个 View 两两首尾相接（`Start_toEndOf` / `Top_toBottomOf`）即形成链：
+多个 View 两两首尾相接（`Start_toEndOf` / `Top_toBottomOf`）即形成链，比如 A→B→C 依次相连：
 
 ```xml
 <TextView android:id="@+id/a" app:layout_constraintStart_toStartOf="parent"
@@ -134,12 +146,16 @@ flowchart LR
 
 ### 4.2 链的类型
 
+四种链头样式决定了元素如何分布：
+
 | 链类型 | 样式 | 行为 |
 |--------|------|------|
 | `spread`（默认） | 均匀分布 | 元素间等距排列 |
 | `spread_inside` | 两端贴边 | 两端贴容器，中间元素均匀分布 |
 | `packed` | 打包居中 | 元素紧贴成组，整体居中（可配 bias） |
 | `weighted` | 权重分配 | 配合 0dp 按权重填充剩余空间 |
+
+配合 0dp 和权重，可以让某个元素吃掉剩余空间：
 
 ```xml
 <!-- 权重链：b 占满剩余宽度 -->
@@ -152,6 +168,8 @@ flowchart LR
 ## 五、比例与尺寸
 
 ### 5.1 宽高比
+
+用约束把宽高都定成 0dp，再给一个比例即可：
 
 ```xml
 <!-- 宽高比约束：宽 = 高的 1.5 倍 -->
@@ -167,6 +185,8 @@ flowchart LR
 
 ### 5.2 尺寸模式
 
+三种尺寸写法的取舍如下：
+
 | 模式 | 写法 | 行为 |
 |------|------|------|
 | wrap_content | `wrap_content` | 内容包裹 |
@@ -180,6 +200,8 @@ flowchart LR
 
 ### 6.1 Guideline（参考线）
 
+Guideline 是一条不参与布局的辅助线，方便一组 View 统一对齐：
+
 ```xml
 <!-- 垂直参考线：位于父容器 50% 处 -->
 <androidx.constraintlayout.widget.Guideline
@@ -190,7 +212,7 @@ flowchart LR
     app:layout_constraintGuide_percent="0.5" />
 ```
 
-Guideline 定位方式：
+Guideline 有三种定位方式，按场景选择：
 
 | 属性 | 说明 |
 |------|------|
@@ -199,6 +221,8 @@ Guideline 定位方式：
 | `layout_constraintGuide_percent` | 按父容器百分比（0-1） |
 
 ### 6.2 Barrier（屏障）
+
+Barrier 是一条跟随多个 View 动态移动的边界线：
 
 ```xml
 <!-- 屏障：跟随多个 View 的最右侧（动态边界） -->
@@ -221,9 +245,13 @@ Guideline 定位方式：
 | `Placeholder` | 占位，运行时替换内容 |
 | `Flow` | 流式布局（自动换行排列） |
 
+Group 负责显示/隐藏，Placeholder 做运行时替换，Flow 处理自动换行。
+
 ## 七、性能与优化
 
 ### 7.1 性能对比
+
+三种布局在测量策略上的差异是选型关键：
 
 | 布局 | 测量特点 | 适用 |
 |------|----------|------|

@@ -59,6 +59,8 @@ println(a === b) // false：引用比较，等价 Java 的 ==
 
 ## String 类结构
 
+String 的类结构如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -86,6 +88,8 @@ class String : Serializable, Comparable<String>, CharSequence {
 - 实现 `Comparable`（`compareTo` 方法）、`CharSequence`（`length`、`charAt`、`subSequence` 方法）
 
 ## 要点总结
+
+核心要点的总结如下：
 
 | 知识点 | 说明 |
 |--------|------|

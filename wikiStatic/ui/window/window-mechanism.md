@@ -11,6 +11,8 @@ title: Window 与 WindowManager
 
 Window 是一个抽象类，具体实现是 PhoneWindow。WindowManager 是外界访问 Window 的入口，Window 的具体实现位于 WindowManagerService 中，两者的交互是一个 IPC 过程。
 
+按层级和作用分为三类：
+
 | Window 类型 | 说明 | 层级 |
 | --- | --- | --- |
 | Application Window | 对应着一个 Activity | 1~99 |
@@ -56,7 +58,7 @@ WindowManagerImpl 没有直接实现 Window 的三大操作，而是全部交给
 
 ## 三、Activity 的 Window 创建过程
 
-在 Activity 的创建过程中，最终由 ActivityThread 的 `performLaunchActivity()` 完成整个启动过程，内部通过类加载器创建 Activity 实例并调用 `attach()` 关联上下文环境变量：
+在 Activity 的创建过程中，最终由 ActivityThread 的 `performLaunchActivity()` 完成整个启动过程，内部通过类加载器创建 Activity 实例并调用 `attach()` 关联上下文环境变量。attach 里先创建 PhoneWindow：
 
 ::: code-tabs
 
@@ -124,7 +126,7 @@ fun makeVisible() {
 
 ## 四、Dialog 的 Window 创建过程
 
-Dialog 的 Window 创建过程和 Activity 类似，创建后的对象实际就是 PhoneWindow：
+Dialog 的 Window 创建过程和 Activity 类似，创建后的对象实际就是 PhoneWindow，构造函数里完成关联：
 
 ::: code-tabs
 
@@ -168,10 +170,7 @@ Dialog 关闭时通过 WindowManager 移除 DecorView：`mWindowManager.removeVi
 
 ## 五、Toast 的 Window 创建过程
 
-Toast 属于系统 Window，由于具有定时取消功能，系统采用了 Handler。Toast 内部有两类 IPC 过程：
-
-1. Toast 访问 NotificationManagerService（`service.enqueueToast(pkg, tn, mDuration)`）。
-2. NotificationManagerService 回调 Toast 里的 TN 接口（`record.callback.show()`）。
+Toast 属于系统 Window，由于具有定时取消功能，系统采用了 Handler。Toast 内部有两类 IPC 过程，先看 show() 里如何上报系统服务：
 
 ::: code-tabs
 

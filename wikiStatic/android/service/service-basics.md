@@ -36,6 +36,8 @@ Service（主线程）
 
 ### 2.1 启动式：startService
 
+启动式用法的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -53,6 +55,8 @@ startService(Intent(this, DownloadService::class.java))
 ```
 
 :::
+
+对应的 Service 实现如下：
 
 ::: code-tabs
 
@@ -117,6 +121,8 @@ class DownloadService : Service() {
 
 ### 2.2 绑定式：bindService
 
+绑定式用法的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -155,6 +161,8 @@ bindService(intent, connection, Context.BIND_AUTO_CREATE)
 ```
 
 :::
+
+对应的 Service 实现如下：
 
 ::: code-tabs
 
@@ -213,6 +221,8 @@ class DownloadService : Service() {
 
 ### 2.3 两种方式混合使用
 
+混合使用的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -237,6 +247,8 @@ bindService(intent, connection, Context.BIND_AUTO_CREATE)
 
 :::
 
+Service 的启动与绑定状态机如下：
+
 ```mermaid
 stateDiagram-v2
     [*] --> onCreate
@@ -254,11 +266,15 @@ stateDiagram-v2
 
 ## 三、onStartCommand 返回值详解
 
+各返回值的语义对比说明如下：
+
 | 返回值 | 行为 | 适用场景 | 安全性 |
 |--------|------|----------|--------|
 | `START_NOT_STICKY` | 系统杀死服务后**不重建**（除非有挂起 Intent） | 可随时重启的作业（如定时拉取） | 最安全，推荐默认 |
 | `START_STICKY` | 系统杀死后**重建**，回调 `onStartCommand` 但 intent 为 **null** | 媒体播放、不依赖参数的长任务 | 需处理 intent 为 null |
 | `START_REDELIVER_INTENT` | 系统杀死后**重建并重新投递最后一个 Intent** | 下载、上传等必须恢复的任务 | 需正确处理重入 |
+
+处理各返回值的示例代码如下：
 
 ::: code-tabs
 
@@ -293,6 +309,8 @@ override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
 ## 四、完整生命周期回调细节
 
+各生命周期回调的触发时机如下：
+
 | 回调 | 触发时机 | 注意事项 |
 |------|----------|----------|
 | `onCreate` | Service 首次创建（只一次） | 适合初始化线程池、通知渠道 |
@@ -301,6 +319,8 @@ override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 | `onUnbind` | 所有客户端解绑 | 返回 true 时后续 bind 会回调 `onRebind` |
 | `onRebind` | `onUnbind` 返回 true 后再次 bind | 可恢复状态 |
 | `onDestroy` | 销毁 | 释放资源、取消协程、移除通知 |
+
+生命周期回调的完整示例代码如下：
 
 ::: code-tabs
 
@@ -342,6 +362,8 @@ class MyService : Service() {
 
 ### 5.1 Binder（同进程 / 跨进程皆可）
 
+Binder 通信方式的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -380,6 +402,8 @@ override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
 :::
 
 ### 5.2 Messenger（基于 Handler 的轻量 IPC）
+
+Messenger 通信方式的示例代码如下：
 
 ::: code-tabs
 
@@ -432,6 +456,8 @@ messenger.send(Message.obtain(null, MSG_DOWNLOAD).apply {
 ```
 
 :::
+
+各通信方式的特点对比如下：
 
 | 方式 | 原理 | 适用场景 |
 |------|------|----------|
@@ -501,6 +527,8 @@ class DownloadService : Service() {
 
 ## 七、Android 8.0+ 后台服务限制
 
+后台任务类型的决策流程如下：
+
 ```mermaid
 flowchart TD
     A[后台任务需求] --> B{用户可见?}
@@ -509,6 +537,8 @@ flowchart TD
     D -->|是| E[WorkManager]
     D -->|否| F[前台服务（受 12+ 限制）]
 ```
+
+各版本后台限制的说明如下：
 
 | 版本 | 限制 |
 |------|------|
@@ -520,6 +550,8 @@ flowchart TD
 > 详见 [前台服务与通知](foreground-service.md) 与 [WorkManager](/jetpack/workmanager-hilt/)。
 
 ## 八、Service 与线程/协程的正确配合
+
+Service 与线程/协程配合的正确写法如下：
 
 ::: code-tabs
 

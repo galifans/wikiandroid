@@ -17,6 +17,8 @@ title: HashMap 源码剖析
 
 ## 关键成员
 
+关键成员的声明如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -66,6 +68,8 @@ class HashMap<K, V> : AbstractMap<K, V>(),
 构造时找出**大于 initialCapacity 的最小 2 的幂**作为容量，`threshold = capacity * loadFactor`。
 
 ## 高性能查找的关键
+
+高效查找的关键实现如下：
 
 ::: code-tabs
 

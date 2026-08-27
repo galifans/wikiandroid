@@ -12,6 +12,8 @@ description: Camera2 API 架构、拍照流水线、会话与会话配置、预�
 
 ### 1.1 从 Camera1 到 Camera2
 
+Camera1 与 Camera2 的对比说明如下：
+
 | 对比项 | Camera1 | Camera2 |
 |--------|---------|---------|
 | 模型 | 单一大对象 Camera | 面向对象的管线 |
@@ -22,6 +24,8 @@ description: Camera2 API 架构、拍照流水线、会话与会话配置、预�
 
 ### 1.2 核心组件
 
+Camera2 核心组件的构成关系如下：
+
 ```mermaid
 flowchart TD
     A[CameraManager<br>相机服务入口] --> B[CameraDevice<br>相机设备]
@@ -30,6 +34,8 @@ flowchart TD
     D --> E[CaptureResult<br>捕获结果]
     B --> F[CameraCharacteristics<br>能力描述]
 ```
+
+各核心组件的职责说明如下：
 
 | 组件 | 职责 |
 |------|------|
@@ -44,6 +50,8 @@ flowchart TD
 
 ### 2.1 数据流
 
+拍照流水线的数据流如下：
+
 ```mermaid
 flowchart LR
     A[传感器 Sensor] --> B[ISP 处理]
@@ -54,6 +62,8 @@ flowchart LR
 
 ### 2.2 三种关键输出流
 
+三种关键输出流的对比说明如下：
+
 | 输出流 | 用途 | 处理方 |
 |--------|------|--------|
 | SurfaceView/TextureView | 实时预览 | 显示系统 |
@@ -63,6 +73,8 @@ flowchart LR
 ## 三、拍照完整流程
 
 ### 3.1 打开相机
+
+打开相机的标准写法如下：
 
 ::: code-tabs
 
@@ -147,6 +159,8 @@ if (ContextCompat.checkSelfPermission(
 
 ### 3.2 创建会话（预览 + 拍照）
 
+创建会话的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -218,6 +232,8 @@ cameraDevice.createCaptureSession(
 
 ### 3.3 预览请求
 
+预览请求的实现代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -257,6 +273,8 @@ fun startPreview() {
 :::
 
 ### 3.4 拍照请求
+
+拍照请求的实现代码如下：
 
 ::: code-tabs
 
@@ -318,6 +336,8 @@ fun takePicture() {
 
 ### 3.5 取帧与保存
 
+取帧与保存的实现代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -366,6 +386,8 @@ imageReader.setOnImageAvailableListener({ reader ->
 
 ### 4.1 请求-结果模型
 
+请求-结果模型的完整时序如下：
+
 ```mermaid
 sequenceDiagram
     participant App as 应用
@@ -377,6 +399,8 @@ sequenceDiagram
     Dev-->>App: Surface 数据（预览/JPEG）
 ```
 
+请求-结果模型的特点说明如下：
+
 | 特点 | 说明 |
 |------|------|
 | 异步 | 请求排队，按序处理 |
@@ -384,6 +408,8 @@ sequenceDiagram
 | 多请求叠加 | 可组合 3A 策略 |
 
 ### 4.2 3A 引擎
+
+3A 引擎各模块的作用说明如下：
 
 | 模块 | 全称 | 作用 |
 |------|------|------|
@@ -397,6 +423,8 @@ sequenceDiagram
 LEGACY < LIMITED < FULL < LEVEL_3
 ```
 
+各能力级别的特性说明如下：
+
 | 级别 | 特性 |
 |------|------|
 | LEGACY | 兼容 Camera1 的基本能力 |
@@ -405,6 +433,8 @@ LEGACY < LIMITED < FULL < LEVEL_3
 | LEVEL_3 | 多路输出、YUV 实时处理 |
 
 ## 五、常见问题与优化
+
+常见问题与优化方案的对比说明如下：
 
 | 问题 | 原因 | 方案 |
 |------|------|------|

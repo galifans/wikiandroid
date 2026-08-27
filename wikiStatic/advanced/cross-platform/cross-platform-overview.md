@@ -10,6 +10,8 @@ description: Flutter、React Native、Compose Multiplatform 对比、渲染原�
 
 ## 一、为什么要跨端
 
+跨端方案的整体取舍流程如下：
+
 ```mermaid
 flowchart LR
     A[业务需求] --> B{两端开发?}
@@ -19,6 +21,8 @@ flowchart LR
     D --> F[React Native]
     D --> G[Compose Multiplatform]
 ```
+
+跨端带来的核心收益如下：
 
 | 痛点 | 跨端收益 |
 |------|---------|
@@ -31,6 +35,8 @@ flowchart LR
 
 ### 2.1 Flutter:自绘引擎
 
+Flutter 自绘渲染的完整链路如下：
+
 ```mermaid
 flowchart LR
     A[Dart 代码] --> B[Widget 树]
@@ -39,6 +45,8 @@ flowchart LR
     D --> E[Skia/Impeller 自绘]
     E --> F[GPU 渲染到屏幕]
 ```
+
+Flutter 方案的核心特点说明如下：
 
 | 特点 | 说明 |
 |------|------|
@@ -49,6 +57,8 @@ flowchart LR
 
 ### 2.2 React Native:原生桥接
 
+React Native 原生桥接的整体流程如下：
+
 ```mermaid
 flowchart LR
     A[JS 代码] --> B[React 组件]
@@ -56,6 +66,8 @@ flowchart LR
     C --> D[原生组件<br>UIView/View]
     D --> E[原生渲染]
 ```
+
+React Native 方案的核心特点说明如下：
 
 | 特点 | 说明 |
 |------|------|
@@ -66,6 +78,8 @@ flowchart LR
 
 ### 2.3 Compose Multiplatform:Kotlin 共享
 
+Compose Multiplatform 的自绘与共享链路如下：
+
 ```mermaid
 flowchart LR
     A[Kotlin 代码] --> B[Compose UI]
@@ -75,6 +89,8 @@ flowchart LR
     E --> F[Android/iOS/Desktop/Web]
 ```
 
+Compose Multiplatform 方案的核心特点说明如下：
+
 | 特点 | 说明 |
 |------|------|
 | 渲染 | 自绘:Skiko(Skia for Kotlin) |
@@ -83,6 +99,8 @@ flowchart LR
 | 优势 | Android 团队零学习成本,KMP 共享逻辑 |
 
 ## 三、方案对比
+
+三大方案的全面对比说明如下：
 
 | 维度 | Flutter | React Native | Compose Multiplatform |
 |------|---------|--------------|----------------------|
@@ -96,6 +114,8 @@ flowchart LR
 | 适用场景 | 重 UI 应用 | 已有 JS 团队 | Android 团队跨端 |
 
 ## 四、KMP 逻辑共享(趋势)
+
+KMP 共享逻辑的 expect/actual 实现如下：
 
 ::: code-tabs
 
@@ -146,6 +166,8 @@ actual fun platformName(): String = "iOS"
 
 :::
 
+KMP 可共享的各层内容如下：
+
 | KMP 共享层 | 内容 |
 |-----------|------|
 | 网络层 | Ktor Client / 序列化 |
@@ -156,6 +178,8 @@ actual fun platformName(): String = "iOS"
 > **趋势判断**:Kotlin Multiplatform 是 JetBrains/Google 共同推动的方向,Android 团队可以"先用 KMP 共享逻辑,再上 Compose Multiplatform 共享 UI",渐进式跨端。
 
 ## 五、选型决策框架
+
+跨端方案选型的完整决策流程如下：
 
 ```mermaid
 flowchart TD
@@ -168,6 +192,8 @@ flowchart TD
     G -->|是| H[仍考虑原生]
 ```
 
+各决策因素的权重说明如下：
+
 | 决策因素 | 权重 |
 |---------|------|
 | 团队技术栈 | 最高(学习成本) |
@@ -177,6 +203,8 @@ flowchart TD
 | 长期维护 | 中(框架升级风险) |
 
 ## 六、跨端常见问题
+
+跨端开发的常见问题说明如下：
 
 | 问题 | 说明 |
 |------|------|

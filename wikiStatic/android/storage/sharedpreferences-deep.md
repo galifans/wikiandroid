@@ -25,6 +25,8 @@ SP 以 **XML 文件**形式保存在 `/data/data/<packageName>/shared_prefs/` �
 
 ### 1.2 模式限制
 
+各模式的状态说明如下：
+
 | 模式 | 状态 | 说明 |
 |------|------|------|
 | `MODE_PRIVATE` | ✓ 唯一推荐 | 仅本应用可读 |
@@ -35,11 +37,15 @@ SP 以 **XML 文件**形式保存在 `/data/data/<packageName>/shared_prefs/` �
 
 ## 二、三种获取方式与单例缓存
 
+三种获取方式的对比说明如下：
+
 | 获取方式 | 文件名 | 说明 |
 | --- | --- | --- |
 | `Activity.getPreferences(mode)` | `MainActivity.xml` | 以 Activity 类名命名 |
 | `PreferenceManager.getDefaultSharedPreferences(ctx)` | `packageName_preferences.xml` | 包名 + `_preferences` |
 | `Context.getSharedPreferences(name, mode)` | 自定义 name | **所有方式的最终入口** |
+
+单例缓存的核心实现如下：
 
 ::: code-tabs
 
@@ -81,6 +87,8 @@ fun getSharedPreferences(name: String, mode: Int): SharedPreferences {
 
 ## 三、整体架构（源码层）
 
+SP 的整体架构链路如下：
+
 ```mermaid
 flowchart LR
     A[ContextImpl.getSharedPreferences] --> B[SharedPreferencesImpl<br/>内存 mMap + 文件]
@@ -97,6 +105,8 @@ flowchart LR
 
 ## 四、apply vs commit（核心考点）
 
+apply 与 commit 的对比说明如下：
+
 | 对比项 | apply | commit |
 | --- | --- | --- |
 | 返回值 | 无（void） | 有（boolean 是否成功） |
@@ -111,6 +121,8 @@ flowchart LR
 **`QueuedWork.waitToFinish()`**：在 Activity/Service 的 `onPause`、`onStop`、`onDestroy` 等生命周期收尾时，系统会调用 `QueuedWork.waitToFinish()`，**同步等待所有未完成的 apply 写盘结束**。如果磁盘 I/O 慢或有大量 apply 堆积，主线程就会被阻塞 → ANR。
 
 ### 4.2 高频写盘优化
+
+高频与批量写入的对比代码如下：
 
 ::: code-tabs
 
@@ -159,6 +171,8 @@ editor.apply()
 
 ## 六、替代方案：DataStore
 
+DataStore 替代 SP 的实现代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -201,6 +215,8 @@ suspend fun incrementCounter() {
 ```
 
 :::
+
+SP 与 DataStore 的对比说明如下：
 
 | 对比 | SharedPreferences | DataStore |
 |------|-------------------|-----------|

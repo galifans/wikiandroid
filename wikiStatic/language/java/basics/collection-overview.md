@@ -124,6 +124,8 @@ while (it.hasNext()) {
 
 ## 七、List、Set、Map、Queue、Stack 的特点总结
 
+各接口/类的特点对比说明如下：
+
 | 接口/类 | 特点 |
 | --- | --- |
 | List | 可通过下标取值，值可重复（ArrayList、Vector、LinkedList） |

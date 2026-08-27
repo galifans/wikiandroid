@@ -10,11 +10,15 @@ description: 从点击图标到首帧渲染的完整启动链路(Zygote fork、A
 
 ## 一、冷启动 / 温启动 / 热启动
 
+三种启动类型的触发条件与特点对比如下：
+
 | 类型 | 触发条件 | 特点 |
 |------|----------|------|
 | **冷启动** | 进程不存在，从零创建 | 最慢（含进程创建 + Application + 首帧），是优化重点 |
 | **温启动** | 进程存活，Activity 被销毁重建 | 跳过进程创建与 Application，只重建 Activity |
 | **热启动** | 进程与 Activity 均在内存 | 仅 onStart/onResume，几乎瞬间完成 |
+
+三种启动类型的判断流程如下：
 
 ```mermaid
 flowchart TD
@@ -54,6 +58,8 @@ flowchart TD
    └─ SurfaceFlinger 合成上屏
 ```
 
+冷启动各进程间的交互时序如下：
+
 ```mermaid
 sequenceDiagram
     participant U as 用户
@@ -79,6 +85,8 @@ sequenceDiagram
 
 ### 阶段 1：进程创建（Zygote fork）
 
+进程创建阶段的耗时点与优化手段如下：
+
 | 耗时点 | 说明 | 优化手段 |
 |--------|------|----------|
 | fork 本身 | 内存页复制（COW） | 减少进程数；避免不必要多进程 |
@@ -91,6 +99,8 @@ sequenceDiagram
 
 ### 阶段 3：Activity 创建与首帧
 
+Activity 创建与首帧阶段的耗时点与优化手段如下：
+
 | 耗时点 | 说明 | 优化手段 |
 |--------|------|----------|
 | Activity 构造 | 反射创建 + `setContent` | 布局扁平化、减少层级 |
@@ -98,6 +108,8 @@ sequenceDiagram
 | 数据加载 | 首屏数据未就绪 | 骨架屏 / 本地缓存先渲染 |
 
 ## 四、启动耗时测量
+
+启动耗时的测量实现如下：
 
 ::: code-tabs
 
@@ -188,6 +200,8 @@ adb shell am start -W -n com.example.app/.MainActivity
 
 ### 2. 布局优化
 
+常用布局优化手段及作用如下：
+
 | 手段 | 作用 |
 |------|------|
 | 扁平化布局 | 减少 measure/layout 时间（ConstraintLayout） |
@@ -196,6 +210,8 @@ adb shell am start -W -n com.example.app/.MainActivity
 | 避免过度绘制 | `adb shell setprop debug.hwui.overdraw show` 检查 |
 
 ### 3. 初始化优化（App Startup）
+
+App Startup 初始化器的实现如下：
 
 ::: code-tabs
 
@@ -236,6 +252,8 @@ class DatabaseInitializer : Initializer<Unit> {
 :::
 
 ### 4. 数据预加载
+
+首屏数据预加载的实现如下：
 
 ::: code-tabs
 

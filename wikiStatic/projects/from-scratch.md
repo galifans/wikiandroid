@@ -49,6 +49,8 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 
 ### 数据层（Data Layer）
 
+数据层仓库接口与实现的核心代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -105,6 +107,8 @@ class NewsRepositoryImpl(
 :::
 
 ### UI 层（Compose + ViewModel）
+
+UI 层 ViewModel 的核心实现如下：
 
 ::: code-tabs
 

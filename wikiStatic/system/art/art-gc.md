@@ -9,6 +9,8 @@ title: ART 运行时与 GC
 
 ## 一、ART 与 Dalvik 的区别
 
+ART 与 Dalvik 的对比说明如下：
+
 | 对比项 | Dalvik | ART |
 | --- | --- | --- |
 | 编译方式 | JIT（Just-In-Time）：解释字节码，运行时编译 | AOT（Ahead-Of-Time）：安装时预编译字节码为机器语言 |
@@ -41,6 +43,8 @@ ART 有多个不同的 GC 方案，默认方案是 **CMS（并发标记清除）
 除了新的垃圾回收器，ART 还引入基于位图的新内存分配程序 **RosAlloc**（插槽运行分配器）：具有分片锁，分配规模较小时可添加线程本地缓冲区，性能优于 DlMalloc。
 
 ## 四、ART GC 与 Dalvik 的对比
+
+ART GC 与 Dalvik GC 的对比说明如下：
 
 | 对比项 | Dalvik | ART |
 | --- | --- | --- |

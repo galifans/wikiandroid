@@ -10,6 +10,8 @@ description: 硬编硬解原理、MediaCodec 状态机、音视频编辑管线�
 
 ## 一、硬编与软编
 
+硬编与软编的方案选择如下：
+
 ```mermaid
 flowchart LR
     A[编码方案] --> B[硬件编码<br>MediaCodec]
@@ -19,6 +21,8 @@ flowchart LR
     D --> F[快 / 省电 / 功耗低]
     E --> G[灵活 / 格式全 / 可控]
 ```
+
+硬编与软编的对比说明如下：
 
 | 对比 | 硬件编码(MediaCodec) | 软件编码(FFmpeg) |
 |------|---------------------|-----------------|
@@ -31,6 +35,8 @@ flowchart LR
 > 实践结论:**实时场景(录制/直播)用硬编**,离线场景(导入转码)优先硬编、FFmpeg 兜底。
 
 ## 二、MediaCodec 状态机
+
+MediaCodec 状态机的完整流转如下：
 
 ```mermaid
 flowchart TD
@@ -47,6 +53,8 @@ flowchart TD
     G -->|release| H[Released]
 ```
 
+各状态的说明如下：
+
 | 状态 | 操作 |
 |------|------|
 | Uninitialized | `createEncoderByType` 创建 |
@@ -56,6 +64,8 @@ flowchart TD
 | Released | `release` 释放资源 |
 
 ## 三、硬编解码完整流程
+
+硬编解码的基础实现如下：
 
 ::: code-tabs
 
@@ -107,6 +117,8 @@ val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, 1280,
 ```
 
 :::
+
+编解码循环的核心实现如下：
 
 ::: code-tabs
 
@@ -186,6 +198,8 @@ class CodecPipeline(private val codec: MediaCodec) {
 
 ## 四、音视频编辑管线
 
+音视频编辑管线的整体流程如下：
+
 ```mermaid
 flowchart LR
     A[视频源] --> B[硬解<br>MediaExtractor+MediaCodec]
@@ -197,6 +211,8 @@ flowchart LR
 
 ### 4.1 核心流程
 
+各步骤的组件说明如下：
+
 | 步骤 | 组件 | 说明 |
 |------|------|------|
 | 解封装 | MediaExtractor | 提取音视频轨道 |
@@ -206,6 +222,8 @@ flowchart LR
 | 封装 | MediaMuxer | 合成 MP4 |
 
 ### 4.2 音视频同步
+
+音视频同步的关键点说明如下：
 
 ::: code-tabs
 
@@ -249,6 +267,8 @@ flowchart LR
 
 ### 5.1 两种集成方式
 
+两种集成方式的对比说明如下：
+
 | 方式 | 说明 | 特点 |
 |------|------|------|
 | 命令行方式 | 调用 ffmpeg 可执行文件 | 简单,性能差 |
@@ -275,6 +295,8 @@ ffmpeg -i a.mp4 -i b.mp4 -filter_complex "[0:v][1:v]concat" out.mp4  # 拼接
 > 这套"FFmpeg 解封装 + 硬编解码 + GPU 处理"是抖音/B站等主流播放器的标准架构。
 
 ## 六、性能优化要点
+
+各优化点的处理手段如下：
 
 | 优化点 | 手段 |
 |--------|------|

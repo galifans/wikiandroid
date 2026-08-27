@@ -12,6 +12,8 @@ description: Request/Response 规范、网络底层封装（线程池/统一回�
 
 ### 请求规范
 
+GET 与 POST 的参数传递约定如下：
+
 | 方法 | 参数传递 | 说明 |
 |------|----------|------|
 | GET | `k=v` 键值对放 URL | 便于做缓存，参数尽量简单类型 |
@@ -28,6 +30,8 @@ description: Request/Response 规范、网络底层封装（线程池/统一回�
 }
 ```
 
+统一 Response 结构中各字段的含义如下：
+
 | 字段 | 含义 |
 |------|------|
 | `isError` | 是否出错 |
@@ -36,6 +40,8 @@ description: Request/Response 规范、网络底层封装（线程池/统一回�
 | `result` | 业务数据 |
 
 ### 错误类型约定
+
+错误码的正负分区约定如下：
 
 | 错误码区间 | 含义 | 示例 |
 |------------|------|------|
@@ -50,6 +56,8 @@ description: Request/Response 规范、网络底层封装（线程池/统一回�
 
 ### 为什么弃用 AsyncTask
 
+AsyncTask 线程池阻塞请求的完整链路如下：
+
 ```mermaid
 flowchart LR
     A[页面 A 发起 5 个请求] --> B[AsyncTask 线程池排队]
@@ -60,6 +68,8 @@ flowchart LR
 - AsyncTask 无法灵活控制内部线程池，也无法取消请求
 - 页面 A 发起多个请求后跳转 B，A 的请求仍在线程池排队，**阻塞 B 的请求**
 - 改用 **`ThreadPoolExecutor` + Runnable + Handler** 原生封装，可控、可取消
+
+网络底层的线程池封装实现如下：
 
 ::: code-tabs
 
@@ -123,6 +133,8 @@ class NetworkManager private constructor() {
 
 ### 封装优化点
 
+各封装优化点的做法说明如下：
+
 | 优化点 | 做法 |
 |--------|------|
 | `onFail` 统一处理 | BaseActivity 定义 `AbstractRequestCallback`，默认统一错误提示，子类按需重写 |
@@ -134,6 +146,8 @@ class NetworkManager private constructor() {
 
 ### 缓存策略
 
+GET 请求的缓存命中与更新流程如下：
+
 ```mermaid
 flowchart TD
     A[发起 GET 请求] --> B{缓存命中?}
@@ -142,6 +156,8 @@ flowchart TD
     D --> E[回调最新数据]
     E --> F[写入缓存<br/>CacheManager]
 ```
+
+缓存策略的规则说明如下：
 
 | 规则 | 说明 |
 |------|------|
@@ -152,6 +168,8 @@ flowchart TD
 | 过期时间配置 | url.xml 中为每个接口配置 `Expires` |
 
 ### 强制更新
+
+强制更新时跳过缓存的实现如下：
 
 ::: code-tabs
 
@@ -188,6 +206,8 @@ fun invoke(url: String, params: Map<String, Any>, forceUpdate: Boolean, callback
 - url.xml 中通过 `MockClass` 属性指定接口对应的 Mock 类
 - `MockService` 基类定义抽象方法 `getJsonData()`，各接口子类返回假 JSON
 
+Mock 数据源的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -218,6 +238,8 @@ class LoginMockService : MockService() {
 ```
 
 :::
+
+Mock 与真实请求的切换逻辑如下：
 
 ::: code-tabs
 
@@ -265,6 +287,8 @@ if (mockClass != null) {
 - 正确方案：密码用**哈希散列（不可逆）**加密存储与传输，服务器比对哈希值
 
 ### Cookie / Token 机制
+
+Cookie 登录与自动携带的完整时序如下：
 
 ```mermaid
 sequenceDiagram

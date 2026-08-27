@@ -11,6 +11,8 @@ description: 泛型基础、协变与逆变、星投影、reified 实化类型�
 
 ## 1. 泛型基础
 
+泛型类、泛型函数与泛型接口的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -61,6 +63,8 @@ val box2 = Box<String>("hello")
 
 ## 2. 泛型约束
 
+泛型约束（上界与多个上界）的写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -103,6 +107,8 @@ fun <T : Any> notNull(value: T) { }    // T 不能为空
 
 ### 3.1 为什么需要型变
 
+Java 通配符与型变需求的说明如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -130,6 +136,8 @@ fun <T : Any> notNull(value: T) { }    // T 不能为空
 :::
 
 ### 3.2 Kotlin 的声明处型变
+
+声明处型变（out/in）的写法示例如下：
 
 ::: code-tabs
 
@@ -186,6 +194,8 @@ in T ：消费者（Consumer），只写，T 在参数类型
 
 ### 3.3 使用处型变（类型投影）
 
+使用处型变（类型投影）的写法示例如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -214,6 +224,8 @@ fun addAll(items: MutableList<in String>) { }
 :::
 
 ## 4. 星投影（Star Projection）
+
+星投影的标准写法如下：
 
 ::: code-tabs
 
@@ -246,6 +258,8 @@ fun <T> List<T>.firstOrNullSafe(): T? = ...
 :::
 
 ## 5. reified 实化类型
+
+`reified` 实化类型的使用示例如下：
 
 ::: code-tabs
 
@@ -294,6 +308,8 @@ val ints: List<Int> = numbers.filterIsInstance()   // [1]
 - 不能访问 reified 类型的构造器（需要 Class 引用时用 `T::class`）。
 
 ## 6. 泛型与协程/集合的实战
+
+泛型在实际场景中的综合应用示例如下：
 
 ::: code-tabs
 
@@ -350,6 +366,8 @@ fun <T, R> List<T>.map(transform: (T) -> R): List<R> {
 :::
 
 ## 7. Java 互操作
+
+泛型在 Java 与 Kotlin 间的互操作说明如下：
 
 ::: code-tabs
 

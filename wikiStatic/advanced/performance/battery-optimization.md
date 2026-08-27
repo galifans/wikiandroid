@@ -12,6 +12,8 @@ description: 电量分析工具、耗电组件排查、Doze 模式适配、WakeL
 
 ### 1.1 耗电大户
 
+电量消耗的构成关系如下：
+
 ```mermaid
 flowchart TD
     A[电量消耗] --> B[屏幕显示<br>占比最高]
@@ -21,6 +23,8 @@ flowchart TD
     A --> F[传感器<br>加速度/陀螺仪]
     A --> G[Keep-Alive<br>后台保活]
 ```
+
+各耗电项的典型场景与优化方向如下：
 
 | 耗电项 | 典型场景 | 优化方向 |
 |--------|---------|---------|
@@ -32,6 +36,8 @@ flowchart TD
 | WakeLock | 未释放/滥用 | 超时持有、必须释放 |
 
 ### 1.2 分析工具
+
+常用电量分析工具的用途如下：
 
 | 工具 | 用途 |
 |------|------|
@@ -54,6 +60,8 @@ adb shell dumpsys batterystats com.example.app > battery.txt
 
 > Android 6.0 引入 Doze:设备静止且灭屏一段时间后,系统限制 App 的 CPU、网络与闹钟,批量处理任务,大幅省电。
 
+Doze 模式的深浅状态转换流程如下：
+
 ```mermaid
 flowchart LR
     A[设备静止+灭屏] --> B[浅层 Doze<br>30s 后]
@@ -61,6 +69,8 @@ flowchart LR
     C --> D[维护窗口<br>周期性短暂恢复]
     D --> B
 ```
+
+Doze 模式下的各项限制说明如下：
 
 | 限制 | 说明 |
 |------|------|
@@ -71,6 +81,8 @@ flowchart LR
 | GPS/WiFi 扫描 | 频率降低 |
 
 ### 2.2 适配策略
+
+Doze 适配的核心实现如下：
 
 ::: code-tabs
 
@@ -127,6 +139,8 @@ alarmManager.setAlarmClock(
 
 ## 三、WakeLock 正确用法
 
+WakeLock 的标准用法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -166,6 +180,8 @@ try {
 
 :::
 
+WakeLock 常见错误用法与后果如下：
+
 | 错误用法 | 后果 |
 |---------|------|
 | 不释放 WakeLock | 手机无法休眠,电量狂掉 |
@@ -176,6 +192,8 @@ try {
 >  **最佳实践**:能用 WorkManager/JobScheduler 就不要自己拿 WakeLock;拿锁必须 try-finally 释放并带超时。
 
 ## 四、定位与传感器优化
+
+定位与传感器优化的实现如下：
 
 ::: code-tabs
 
@@ -230,6 +248,8 @@ onDestroy() { sensorManager.unregisterListener(listener) }
 
 ## 五、网络与数据同步省电
 
+网络与同步省电的常用做法如下：
+
 | 做法 | 说明 |
 |------|------|
 | 批量同步 | 积累数据一次同步,而非逐个 |
@@ -237,6 +257,8 @@ onDestroy() { sensorManager.unregisterListener(listener) }
 | 长连接保活 | 用系统级推送(FCM),避免自建长连接 |
 | 心跳合并 | 多条消息合并心跳 |
 | 避免频繁唤醒 | 轮询改事件驱动 |
+
+充电与 WiFi 条件下同步的实现如下：
 
 ::: code-tabs
 

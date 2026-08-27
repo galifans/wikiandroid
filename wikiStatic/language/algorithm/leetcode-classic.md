@@ -28,6 +28,8 @@ title: LeetCode 经典题
 
 ### 代码实现
 
+HashMap 两数之和的完整实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -105,6 +107,8 @@ Y   I   R
 时间复杂度 O(n)，空间复杂度 O(n)。
 
 ### 代码实现
+
+Z 字形变换的核心实现如下：
 
 ::: code-tabs
 

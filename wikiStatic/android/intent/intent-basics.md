@@ -10,12 +10,16 @@ description: 显式 Intent 与隐式 Intent 的完整解析，Intent 的结构�
 
 ## 一、Intent 是什么：组件通信的"邮递员"
 
+Intent 的投递链路如下：
+
 ```mermaid
 flowchart LR
     A[调用方<br/>startActivity / startService / sendBroadcast] -->|Intent 信封| B[AMS<br/>系统邮局]
     B -->|显式: 按 Component 投递| C[目标组件]
     B -->|隐式: 按 IntentFilter 匹配| C
 ```
+
+各角色的对应关系说明如下：
 
 | 角色 | 对应物 | 说明 |
 |------|--------|------|
@@ -29,6 +33,8 @@ Intent 本身**不直接调用组件**，它只是描述"意图"的数据对象�
 :::
 
 ## 二、Intent 的结构组成
+
+Intent 六大属性的标准写法如下：
 
 ::: code-tabs
 
@@ -73,6 +79,8 @@ val intent = Intent().apply {
 
 :::
 
+各属性的作用说明如下：
+
 | 属性 | 作用 | 典型值 |
 |------|------|--------|
 | `component` | 精确指定目标组件 | `ComponentName(pkg, class)` |
@@ -87,6 +95,8 @@ val intent = Intent().apply {
 Intent 中 `action` 与 `data` 是一体的：例如 `ACTION_VIEW` + `Uri.parse("tel:10086")` 表示"查看电话号码"，`ACTION_VIEW` + `https://` 表示"打开网页"。**同一个 action 配合不同 data 会进入不同的匹配分支**。
 
 ## 三、显式 Intent：精确指定目标
+
+显式 Intent 的两种标准写法如下：
 
 ::: code-tabs
 
@@ -127,6 +137,8 @@ startActivity(intent)
 
 **使用场景**：应用内导航（绝大多数情况）、跨应用跳转到已知类名。
 
+显式 Intent 的特点说明如下：
+
 | 特点 | 说明 |
 |------|------|
 | 精确 | 直接指定组件，无需系统匹配 |
@@ -137,7 +149,7 @@ startActivity(intent)
 ## 四、隐式 Intent：按规则匹配
 
 隐式 Intent 不指定组件，由系统根据 IntentFilter 匹配"谁能处理这个意图"。
-
+隐式 Intent 的典型写法如下：
 ::: code-tabs
 
 @tab:active Java
@@ -183,6 +195,8 @@ startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:10086")))
 | 多个匹配 | 弹出选择器（或触发默认应用） | `createChooser` 自定义标题 |
 | **无匹配** | 抛 `ActivityNotFoundException` | `resolveActivity` 预检查 |
 
+匹配失败的预检查写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -217,6 +231,8 @@ if (intent.resolveActivity(packageManager) != null) {
 
 Intent Flags 用于**跨进程/跨应用场景**下干预组件的启动行为，与 Manifest 中 `launchMode` 互补。
 
+各 Flag 的作用与启动模式关系如下：
+
 | Flag | 作用 | 与启动模式关系 |
 |------|------|----------------|
 | `FLAG_ACTIVITY_NEW_TASK` | 在新任务栈启动（**Service 中 startActivity 必须携带**） | 类似 `singleTask` |
@@ -225,7 +241,7 @@ Intent Flags 用于**跨进程/跨应用场景**下干预组件的启动行为�
 | `FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS` | 不显示在最近任务 | — |
 | `FLAG_ACTIVITY_NO_HISTORY` | 离开即销毁，不保留历史 | — |
 | `FLAG_ACTIVITY_CLEAR_TASK` | 启动前清空目标任务栈（需配合 `NEW_TASK`） | 常用于"回到首页并清空" |
-
+组合使用 Flags 的经典写法如下：
 ::: code-tabs
 
 @tab:active Java
@@ -258,6 +274,8 @@ startActivity(intent)
 在 **Service / Application / 非 Activity Context** 中调用 `startActivity`，必须添加 `FLAG_ACTIVITY_NEW_TASK`，否则抛 `AndroidRuntimeException: Calling startActivity() from outside of an Activity context requires the FLAG_ACTIVITY_NEW_TASK flag`。原因：非 Activity Context 没有任务栈上下文，系统需要知道"放到哪个任务栈"。
 
 ## 六、Extras：组件间数据传递
+
+Extras 数据传递的读写写法如下：
 
 ::: code-tabs
 
@@ -294,13 +312,15 @@ val tags = intent.getStringArrayExtra("tags")
 
 :::
 
+各传递方式的适用场景对比如下：
+
 | 传递方式 | 使用场景 | 特点 |
 |----------|----------|------|
 | `putExtra` 基本类型/序列化对象 | 常规页面间传参 | 简单直接 |
 | `Parcelable` 对象 | 传递自定义数据类 | 高效，跨进程首选（**必须 Parcelable，不能 Serializable 用于 Intent** 的跨进程场景） |
 | `Bundle` | 批量传参 | 统一封装、可复用 |
 | `Intent` 作为参数 | 携带"继续执行"的意图 | 常配合 `startActivityForResult` / PendingIntent |
-
+Parcelable 自定义对象的传递写法如下：
 ::: code-tabs
 
 @tab:active Java
@@ -347,11 +367,15 @@ val article = intent.getParcelableExtra<Article>("article")
 
 ## 七、Intent 在三大组件中的使用
 
+三大组件中 Intent 的使用方式如下：
+
 | 组件 | 启动方式 | Intent 作用 |
 |------|----------|-------------|
 | Activity | `startActivity(intent)` | 页面跳转、携带数据 |
 | Service | `startService(intent)` / `bindService(intent, ...)` | 启动/绑定服务，传参 |
 | BroadcastReceiver | `sendBroadcast(intent)` | 广播消息分发（可指定包名/权限） |
+
+组件间传递 Intent 的示例代码如下：
 
 ::: code-tabs
 
@@ -390,6 +414,8 @@ sendBroadcast(intent)
 :::
 
 ## 八、Intent 安全最佳实践
+
+各类安全风险的防护措施对比如下：
 
 | 风险 | 场景 | 防护措施 |
 |------|------|----------|

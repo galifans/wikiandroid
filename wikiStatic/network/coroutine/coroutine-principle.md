@@ -10,6 +10,8 @@ description: 协程挂起与恢复、CPS 变换、状态机、调度器、非阻
 
 ## 一、协程解决什么问题
 
+协程解决的问题的整体流程如下：
+
 ```mermaid
 flowchart LR
     A[回调地狱<br>嵌套回调] --> C[协程<br>顺序写法]
@@ -17,6 +19,8 @@ flowchart LR
     C --> D[同步代码风格<br>自动切线程]
     C --> E[自动取消<br>结构化并发]
 ```
+
+线程与协程的对比说明如下：
 
 | 对比 | 线程 | 协程 |
 |------|------|------|
@@ -29,6 +33,8 @@ flowchart LR
 ## 二、挂起函数的本质:CPS + 状态机
 
 ### 2.1 suspend 关键字编译后变成什么?
+
+suspend 函数编译前后的等价写法如下：
 
 ::: code-tabs
 
@@ -117,6 +123,8 @@ fun fetchUser(id: Long, cont: Continuation<User>): Any? {
 
 :::
 
+挂起与恢复的状态机流程如下：
+
 ```mermaid
 flowchart TD
     A[label=0<br>进入函数] --> B[调用 getToken<br>挂起?]
@@ -132,6 +140,8 @@ flowchart TD
 
 ### 2.2 挂起 vs 阻塞
 
+阻塞与挂起的对比说明如下：
+
 | 行为 | 阻塞(Thread.sleep) | 挂起(delay) |
 |------|-------------------|-------------|
 | 线程 | 占用线程不能做别的 | 释放线程 |
@@ -140,6 +150,8 @@ flowchart TD
 | 代码位置 | 任意 | 仅 suspend 函数/协程内 |
 
 ## 三、调度器:谁在哪个线程跑
+
+各调度器的标准写法如下：
 
 ::: code-tabs
 
@@ -178,6 +190,8 @@ suspend fun loadData(): Data = withContext(Dispatchers.IO) {
 
 :::
 
+withContext 切换线程的时序如下：
+
 ```mermaid
 sequenceDiagram
     participant M as 主线程
@@ -191,6 +205,8 @@ sequenceDiagram
 
 ### Dispatchers 实现原理
 
+各 Dispatchers 的底层实现说明如下：
+
 | 调度器 | 底层 | 说明 |
 |--------|------|------|
 | Main | Handler(Looper) | 通过 Handler post 到主线程 |
@@ -199,6 +215,8 @@ sequenceDiagram
 | 自定义 | CoroutineDispatcher | 可定制限流/优先级 |
 
 ## 四、协程上下文与 Job
+
+协程上下文与 Job 的等价写法如下：
 
 ::: code-tabs
 
@@ -238,6 +256,8 @@ CoroutineExceptionHandler:  // 异常处理
 
 ### Job 层级与取消传播
 
+Job 层级的构成关系如下：
+
 ```mermaid
 flowchart TD
     A[父 Job] --> B[子 Job 1]
@@ -248,6 +268,8 @@ flowchart TD
     A -.取消传播到所有子.-> B
 ```
 
+取消传播的行为说明如下：
+
 | 行为 | 说明 |
 |------|------|
 | 父取消 → 子全部取消 | 结构化并发保证 |
@@ -256,6 +278,8 @@ flowchart TD
 | 子取消 → 父不受影响 | 正常行为 |
 
 ## 五、协程的执行模型
+
+协程执行模型的完整示例代码如下：
 
 ::: code-tabs
 
@@ -301,6 +325,8 @@ fun main() = runBlocking {
 ```
 
 :::
+
+withContext 切线程的完整时序如下：
 
 ```mermaid
 sequenceDiagram

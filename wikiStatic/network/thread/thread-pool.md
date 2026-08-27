@@ -23,6 +23,8 @@ description: ThreadPoolExecutor 七大参数、四种拒绝策略、Executors �
 
 ## 2. ThreadPoolExecutor 七大参数
 
+线程池七大参数的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -74,12 +76,16 @@ ThreadPoolExecutor(
 
 ### 2.2 四种拒绝策略
 
+四种拒绝策略的对比说明如下：
+
 | 策略 | 行为 |
 | --- | --- |
 | `AbortPolicy`（默认） | 抛 `RejectedExecutionException` |
 | `CallerRunsPolicy` | 调用者线程自己执行（降级） |
 | `DiscardPolicy` | 静默丢弃 |
 | `DiscardOldestPolicy` | 丢弃队列中最老的任务 |
+
+对应的代码写法如下：
 
 ::: code-tabs
 
@@ -110,6 +116,8 @@ ThreadPoolExecutor(
 :::
 
 ## 3. Executors 工厂方法
+
+Executors 工厂方法的示例代码如下：
 
 ::: code-tabs
 
@@ -160,6 +168,8 @@ scheduled.scheduleAtFixedRate(task, 0, 1, TimeUnit.SECONDS)
 
 ### 4.1 协程调度器
 
+协程调度器的对应写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -185,6 +195,8 @@ Dispatchers.Main        // 主线程
 :::
 
 ### 4.2 自定义调度器
+
+自定义调度器的示例代码如下：
 
 ::: code-tabs
 
@@ -223,6 +235,8 @@ override fun onCleared() {
 :::
 
 ## 5. 源码核心
+
+execute() 的核心源码如下：
 
 ::: code-tabs
 

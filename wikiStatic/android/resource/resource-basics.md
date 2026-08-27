@@ -10,6 +10,8 @@ description: Android 资源系统的完整机制——R 文件生成、资源类
 
 ## 一、为什么要资源系统
 
+资源系统的整体工作链路如下：
+
 ```mermaid
 flowchart LR
     A[res/ 资源目录] -->|AAPT2 编译| B[二进制资源文件]
@@ -18,6 +20,8 @@ flowchart LR
     C --> E[代码引用<br/>R.string.app_name]
     D --> F[运行时加载<br/>Resources + AssetManager]
 ```
+
+资源系统带来的收益说明如下：
 
 | 好处 | 说明 |
 |------|------|
@@ -50,6 +54,8 @@ res/
 └── assets/          # 【注意】assets 不属于 res，原样打包，无 ID
 ```
 
+主要资源类型的引用方式如下：
+
 | 资源类型 | 引用方式 | 说明 |
 |----------|----------|------|
 | layout | `R.layout.activity_main` | XML 布局 |
@@ -66,6 +72,8 @@ res/
 
 ### assets/ vs res/raw/
 
+两者的对比说明如下：
+
 | 对比 | res/raw/ | assets/ |
 |------|----------|---------|
 | 是否编译 | 打包进 APK（保留原名） | 原样打包 |
@@ -74,6 +82,8 @@ res/
 | 适用场景 | 少量配置、音频 | 网页、大文件、目录结构数据 |
 
 ## 三、R 文件与资源 ID
+
+编译期生成的 R 文件示意如下：
 
 ::: code-tabs
 
@@ -116,6 +126,8 @@ object R {
   包 ID  类型 ID  条目 ID
 ```
 
+资源 ID 各段的含义如下：
+
 | 段 | 含义 |
 |----|------|
 | 包 ID（高 8 位） | `0x7f`：应用资源；`0x01`~`0x02`：系统资源（`android.R`） |
@@ -133,6 +145,8 @@ context.getResources()
   → 结合 Configuration 选择最佳限定符资源
   → 返回资源（字符串 / Drawable / XML 解析为 View）
 ```
+
+常用的资源加载 API 如下：
 
 ::: code-tabs
 
@@ -208,6 +222,8 @@ AAPT2 将 `res/` 下所有资源编译进 APK 的 `resources.arsc`（二进制�
     android:theme="@style/Theme.Wiki" />
 ```
 
+Style 与 Theme 的对比说明如下：
+
 | 对比 | Style 样式 | Theme 主题 |
 |------|-----------|-----------|
 | 作用对象 | 单个 View 或组件 | 整个 Activity / Application |
@@ -226,6 +242,8 @@ AAPT2 将 `res/` 下所有资源编译进 APK 的 `resources.arsc`（二进制�
 
 ## 六、代码资源分离最佳实践
 
+资源化最佳实践的各原则说明如下：
+
 | 原则 | 说明 | 反例 |
 |------|------|------|
 | 字符串不硬编码 | 所有文案放 strings.xml | `"确定"` 写死在代码里 |
@@ -239,6 +257,8 @@ AAPT2 将 `res/` 下所有资源编译进 APK 的 `resources.arsc`（二进制�
 <string name="confirm">确定</string>
 <string name="cancel">取消</string>
 ```
+
+代码中引用资源的正确写法如下：
 
 ::: code-tabs
 

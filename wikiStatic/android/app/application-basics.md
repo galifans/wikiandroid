@@ -10,6 +10,8 @@ description: Application 的创建时机与生命周期、onCreate 中全局初�
 
 ## 一、Application 是什么
 
+Application 从进程创建到组件启动的完整链路如下：
+
 ```mermaid
 flowchart LR
     Z[进程创建<br/>Zygote fork] --> A[创建 Application 实例<br/>newApplication]
@@ -17,6 +19,8 @@ flowchart LR
     B --> C[Application.onCreate<br/>全局初始化入口]
     C --> D[启动目标组件<br/>Activity / Service / Receiver]
 ```
+
+Application 的核心特性说明如下：
 
 | 特性 | 说明 |
 |------|------|
@@ -34,6 +38,8 @@ flowchart LR
     ...
 </application>
 ```
+
+自定义 Application 的核心实现如下：
 
 ::: code-tabs
 
@@ -92,6 +98,8 @@ class WikiApplication : Application() {
 
 ### ✗ 反面教材：全部同步初始化
 
+全部同步初始化的反面写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -128,6 +136,8 @@ override fun onCreate() {
 :::
 
 ### ✓ 最佳实践：按需 + 异步 + 启动器
+
+按需与异步初始化的最佳实践写法如下：
 
 ::: code-tabs
 
@@ -172,6 +182,8 @@ class WikiApplication : Application() {
 
 **关键原则**：
 
+各关键原则的说明如下：
+
 | 原则 | 说明 |
 |------|------|
 | 启动路径最小化 | 首帧前只做"必须现在做"的事 |
@@ -187,6 +199,8 @@ class WikiApplication : Application() {
     android:name=".PushService"
     android:process=":push" />
 ```
+
+多进程下的初始化判断写法如下：
 
 ::: code-tabs
 
@@ -231,6 +245,8 @@ Context(抽象)
  └── ContextImpl             ← 真正实现（每个 Context 都有一个）
 ```
 
+Application Context 与 Activity Context 的对比说明如下：
+
 | 对比 | Application Context | Activity Context |
 |------|--------------------|------------------|
 | 生命周期 | 进程存活期间 | Activity 销毁即失效 |
@@ -239,6 +255,8 @@ Context(抽象)
 | 显示 Dialog | 不支持（无窗口主题） | 支持 |
 | 绑定 Service | 支持 | 支持 |
 | 适用场景 | 单例、全局管理器、静态工具 | 界面相关操作 |
+
+单例安全持有 Application 的示例代码如下：
 
 ::: code-tabs
 
@@ -283,6 +301,8 @@ class NetworkManager private constructor(app: Application) {
 :::
 
 ## 五、Application 相关高频考点
+
+各高频考点的答案要点如下：
 
 | 考点 | 答案要点 |
 |------|----------|

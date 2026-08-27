@@ -9,6 +9,8 @@ title: Kotlin 基础语法
 
 ## 一、变量与数据类型
 
+变量声明与类型推断的写法示例如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -63,6 +65,8 @@ val len3 = b!!.length      // 非空断言（谨慎使用）
 
 ## 三、控制流
 
+Kotlin 控制流的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -98,6 +102,8 @@ for (i in 5 downTo 1 step 2) println(i)
 :::
 
 ## 四、函数与 Lambda
+
+函数定义与 Lambda 的标准写法如下：
 
 ::: code-tabs
 
@@ -144,6 +150,8 @@ listOf(1, 2, 3)
 
 ## 五、作用域函数
 
+五个作用域函数的对比说明如下：
+
 | 函数 | 上下文 | 返回值 | 适用场景 |
 |------|--------|--------|----------|
 | `let` | `it` | Lambda 结果 | 空安全链式调用 |
@@ -151,6 +159,8 @@ listOf(1, 2, 3)
 | `with` | `this` | Lambda 结果 | 多次调用同一对象的方法 |
 | `apply` | `this` | 对象本身 | 初始化配置 |
 | `also` | `it` | 对象本身 | 额外副作用（日志等） |
+
+作用域函数的实际用法示例如下：
 
 ::: code-tabs
 
@@ -177,6 +187,8 @@ val dialog = AlertDialog.Builder(context).apply {
 :::
 
 ## 六、扩展函数
+
+扩展函数的定义与调用示例如下：
 
 ::: code-tabs
 

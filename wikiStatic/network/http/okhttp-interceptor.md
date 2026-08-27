@@ -27,6 +27,8 @@ Interceptor1 ──→ Interceptor2 ──→ Interceptor3 ──→ 网络
 
 ### 1.2 OkHttp 的实现
 
+拦截器与责任链的核心接口定义如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -58,6 +60,8 @@ interface Chain {
 ```
 
 :::
+
+责任链的递归调用实现如下：
 
 ::: code-tabs
 
@@ -112,6 +116,8 @@ class RealInterceptorChain(
 
 ## 2. 内置拦截器链
 
+OkHttp 默认的七层拦截器链组成如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -162,6 +168,8 @@ class RealInterceptorChain(
 
 ### 2.3 CacheInterceptor
 
+开启 OkHttp 磁盘缓存的配置如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -189,6 +197,8 @@ val client = OkHttpClient.Builder().cache(cache).build()
   3. 响应带 Last-Modified → If-Modified-Since
   4. 未过期：直接返回缓存（磁盘缓存）
 ```
+
+强制刷新与离线模式的请求写法如下：
 
 ::: code-tabs
 
@@ -248,6 +258,8 @@ val request = Request.Builder()
 
 ### 3.1 统一鉴权
 
+自动附加 Token 的鉴权拦截器实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -298,6 +310,8 @@ class AuthInterceptor(private val tokenProvider: () -> String?) : Interceptor {
 
 ### 3.2 日志打印
 
+打印请求与响应耗时的拦截器实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -340,6 +354,8 @@ class LoggingInterceptor : Interceptor {
 :::
 
 ### 3.3 统一错误处理 / 重试
+
+失败重试与退避策略的拦截器实现如下：
 
 ::: code-tabs
 
@@ -400,6 +416,8 @@ class RetryInterceptor(private val maxRetries: Int = 3) : Interceptor {
 :::
 
 ### 3.4 响应模拟（测试）
+
+返回固定 Mock 响应的拦截器实现如下：
 
 ::: code-tabs
 

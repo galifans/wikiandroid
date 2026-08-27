@@ -283,6 +283,8 @@ fun invokeSubscriber(subscription: Subscription, event: Any) {
 
 ## 四、线程模式
 
+各线程模式的触发时机说明如下：
+
 | 模式 | 说明 |
 | --- | --- |
 | POSTING | 默认，在发送事件的线程直接调用 |

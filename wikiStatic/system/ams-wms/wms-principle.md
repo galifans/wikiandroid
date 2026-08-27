@@ -38,6 +38,8 @@ WindowManagerService：系统侧实现
   - 管理 WindowState（窗口状态）
 ```
 
+应用侧添加窗口的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java

@@ -19,6 +19,8 @@ Throwable
     └── 其他受检查异常（Checked Exception）
 ```
 
+各类异常与错误的说明如下：
+
 | 类别 | 定义 | 编译器检查 | 示例 | 处理方式 |
 | --- | --- | --- | --- | --- |
 | 运行时异常 | RuntimeException 及其子类 | 不检查，可编译通过 | ArithmeticException（除零）、IndexOutOfBoundsException（数组越界）、ConcurrentModificationException | 修改代码避免，也可 throws / try-catch |

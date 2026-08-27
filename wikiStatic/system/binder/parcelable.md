@@ -9,6 +9,8 @@ title: Parcelable 序列化
 
 ## 一、使用示例
 
+Parcelable 接口的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -90,6 +92,8 @@ class User : Parcelable {
 
 Parcel 内部包装了可序列化的数据，可以在 Binder 中自由传输。序列化功能由 `writeToParcel` 方法完成，最终通过 Parcel 中的一系列 write 方法完成；反序列化功能由 `CREATOR` 完成，通过 Parcel 的一系列 read 方法完成。
 
+各核心方法的功能说明如下：
+
 | 方法 | 功能 |
 | --- | --- |
 | `createFromParcel(Parcel in)` | 从序列化后的对象中创建原始对象 |
@@ -101,6 +105,8 @@ Parcel 内部包装了可序列化的数据，可以在 Binder 中自由传输�
 > 序列化和反序列化的读写顺序必须一致，否则数据会错乱。
 
 ## 三、Parcelable 与 Serializable 对比
+
+Parcelable 与 Serializable 的对比说明如下：
 
 | 对比项 | Parcelable | Serializable |
 | --- | --- | --- |

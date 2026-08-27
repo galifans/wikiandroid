@@ -11,12 +11,16 @@ description: View/ViewGroup 职责划分、View 树结构、LayoutParams、三�
 
 ## 1. 基本概念
 
+先分清两个基类各自的定位：
+
 ```text
 View：所有 UI 控件的基类（TextView、Button、ImageView...）
 ViewGroup：View 的子类，可以容纳其他 View（LinearLayout、FrameLayout...）
 
 ViewGroup 本身也是 View，因此可以嵌套（View 树）
 ```
+
+继承关系可以画成一棵树：
 
 ```text
 继承关系：
@@ -29,6 +33,8 @@ View
 ```
 
 ## 2. View 树的构成
+
+一个 Activity 的视图层级从窗口根节点展开：
 
 ```text
 PhoneWindow（窗口）
@@ -50,6 +56,8 @@ PhoneWindow（窗口）
 
 ## 3. 职责划分
 
+两者在三大流程中的分工如下：
+
 | 职责 | View | ViewGroup |
 | --- | --- | --- |
 | 测量自己 | ✓ `onMeasure` | ✓ 递归测量子 View |
@@ -58,35 +66,9 @@ PhoneWindow（窗口）
 | 管理子 View | ✗ | ✓ add/remove |
 | 事件分发 | 处理事件 | 拦截 + 分发 |
 
+一个最小可用的 ViewGroup 只需实现测量和布局两个方法：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// ViewGroup 核心方法（职责示例）
-public class MyViewGroup extends ViewGroup {
-
-    // ① 测量：确定子 View 尺寸
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // 测量所有子 View
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            measureChild(child, widthMeasureSpec, heightMeasureSpec);
-        }
-        setMeasuredDimension(defaultWidth, defaultHeight);
-    }
-
-    // ② 布局：摆放子 View 位置
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            child.layout(left, top, left + child.getMeasuredWidth(), top + child.getMeasuredHeight());
-        }
-    }
-}
-```
 
 @tab Kotlin
 
@@ -117,6 +99,8 @@ class MyViewGroup : ViewGroup {
 :::
 
 ## 4. LayoutParams：父容器视角的约束
+
+LayoutParams 是子 View 和父容器之间的"契约"：
 
 ::: code-tabs
 
@@ -152,7 +136,7 @@ params.weight = 1f   // LinearLayout 特有的权重
 
 :::
 
-**测量时的配合**：
+**测量时的配合**：父容器读 LayoutParams 生成 MeasureSpec，再传给子 View：
 
 ```text
 父 ViewGroup.onMeasure
@@ -162,6 +146,8 @@ params.weight = 1f   // LinearLayout 特有的权重
 ```
 
 ## 5. 三大流程协作
+
+measure、layout、draw 三步从根到叶递归执行：
 
 ```text
 measure（测量）：从根到叶，确定每个 View 的尺寸
@@ -179,6 +165,8 @@ draw（绘制）：从根到叶（背景 → 内容 → 子 View）
 ```
 
 ## 6. ViewGroup 的三个核心回调
+
+自定义 ViewGroup 最少要处理下面几个回调：
 
 ::: code-tabs
 

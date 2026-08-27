@@ -25,6 +25,8 @@ AMS（ActivityManagerService）
 
 ## 2. Activity 启动流程（完整链路）
 
+Activity 启动的完整链路如下：
+
 ```mermaid
 flowchart TD
     A[点击图标/startActivity] --> B[Activity.startActivity]
@@ -78,6 +80,8 @@ flowchart TD
 
 ## 3. 启动模式与任务栈
 
+四种启动模式的行为对比说明如下：
+
 | 模式 | 行为 | 场景 |
 | --- | --- | --- |
 | standard | 每次新建实例 | 默认 |
@@ -115,6 +119,8 @@ OOM_ADJ 数值：
 ```
 
 ## 5. 冷启动 vs 热启动
+
+冷启动、热启动与温启动的对比说明如下：
 
 | 类型 | 过程 | 优化点 |
 | --- | --- | --- |

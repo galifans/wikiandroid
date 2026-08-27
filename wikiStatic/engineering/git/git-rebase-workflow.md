@@ -12,6 +12,8 @@ description: Rebase 深入、Cherry-Pick、Stash、历史改写、分支模型�
 
 ### 1.1 Rebase 与 Merge 的区别
 
+Merge 与 Rebase 的历史结构差异如下：
+
 ```mermaid
 flowchart LR
     subgraph Merge
@@ -22,6 +24,8 @@ flowchart LR
         D[master] --> E[feature 变基<br>线性历史]
     end
 ```
+
+三种合并操作的结果与适用场景如下：
 
 | 操作 | 结果 | 适用 |
 |------|------|------|
@@ -58,6 +62,8 @@ squash d4e5f6  fix: 修复登录空指针     # 合并进上一个
 reword 7f8a9b  docs: 更新说明          # 修改提交信息
 edit  0c1d2e  feat: 新增设置           # 修改内容
 ```
+
+交互式变基各命令的作用如下：
 
 | 命令 | 作用 |
 |------|------|
@@ -105,6 +111,8 @@ git stash branch new-branch    # 从暂存创建分支
 
 ## 四、分支模型对比
 
+三种分支模型的结构对比图如下：
+
 ```mermaid
 flowchart TD
     subgraph Git Flow
@@ -114,6 +122,8 @@ flowchart TD
         A --> E[hotfix/*]
     end
 ```
+
+三种分支模型的对比说明如下：
 
 | 模型 | 分支 | 适用 |
 |------|------|------|
@@ -140,6 +150,8 @@ git rebase master      # 冲突后:
 git add 冲突文件
 git rebase --continue  # 继续变基
 ```
+
+各类冲突的成因与解决方式如下：
 
 | 冲突类型 | 原因 | 解决 |
 |---------|------|------|

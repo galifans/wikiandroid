@@ -33,19 +33,16 @@ y = top + translationY
 
 ### 事件坐标
 
+两种坐标获取方式：
+
 | 方法 | 含义 |
 |------|------|
 | `getX() / getY()` | 相对当前 View 左上角的坐标 |
 | `getRawX() / getRawY()` | 相对屏幕左上角的坐标 |
 
+计算手指位移时优先用 raw 坐标：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// 手指相对 View 的位移 = 屏幕位移（raw 差值相等，但 getX 受 View 位置影响）
-float dx = event.getRawX() - lastRawX;
-```
 
 @tab Kotlin
 
@@ -80,26 +77,17 @@ val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
 
 ## 三、滑动辅助类
 
+三个辅助类各司其职：
+
 | 辅助类 | 用途 | 关键 API |
 |--------|------|----------|
 | `VelocityTracker` | 追踪滑动速度 | `computeCurrentVelocity(1000)` 单位 px/s |
 | `GestureDetector` | 手势检测：单击/双击/长按/快速滑动 | `onSingleTapUp` / `onFling` / `onLongPress` |
 | `Scroller` | 配合 `computeScroll` 实现弹性滑动 | `startScroll` / `computeScrollOffset` |
 
+VelocityTracker 的使用模板：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// VelocityTracker 标准用法
-velocityTracker = VelocityTracker.obtain();
-velocityTracker.addMovement(event);
-velocityTracker.computeCurrentVelocity(1000); // 每 1000ms 的像素数
-float vx = velocityTracker.getXVelocity();
-// 使用完毕回收，避免内存泄漏
-velocityTracker.recycle();
-velocityTracker = null;
-```
 
 @tab Kotlin
 
@@ -118,21 +106,17 @@ velocityTracker = null
 
 ## 四、三种滑动方式对比
 
+三种方式的取舍：
+
 | 方式 | 特点 | 适用场景 |
 |------|------|----------|
 | `scrollTo` / `scrollBy` | 改变**内容**位置而非控件位置 | 内容滚动（TextView、WebView） |
 | 动画 | 操作 `translationX/Y`，3.0 以下需注意点击区域 | 过渡动画、进场出场 |
 | 修改 LayoutParams | 直接改布局参数，最灵活 | 需要真实位置移动的交互 View |
 
+scrollBy 的坐标系是反的，注意传负值：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// scrollTo：移动到 (x, y)；scrollBy：相对当前位置移动 (x, y)
-// 注意：scrollBy(dx, dy) 传正值，内容向左/向上移动（坐标系相反）
-view.scrollBy(-dx, -dy);
-```
 
 @tab Kotlin
 
@@ -154,6 +138,8 @@ view.scrollBy(-dx, -dy)
 
 ### 1. Scroller + computeScroll
 
+先看时序图：
+
 ```mermaid
 sequenceDiagram
     participant V as View
@@ -167,40 +153,9 @@ sequenceDiagram
     Note over V,S: 循环直到 computeScrollOffset 返回 false
 ```
 
+完整代码示例：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-public class SmoothScrollView extends View {
-
-    private final Scroller scroller;
-
-    public SmoothScrollView(Context context) {
-        this(context, null);
-    }
-
-    public SmoothScrollView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        scroller = new Scroller(context);
-    }
-
-    public void smoothScrollTo(int destX, int destY) {
-        int dx = destX - getScrollX();
-        int dy = destY - getScrollY();
-        scroller.startScroll(getScrollX(), getScrollY(), dx, dy, 500);
-        invalidate();
-    }
-
-    @Override
-    public void computeScroll() {
-        if (scroller.computeScrollOffset()) {
-            scrollTo(scroller.getCurrX(), scroller.getCurrY());
-            postInvalidate();
-        }
-    }
-}
-```
 
 @tab Kotlin
 

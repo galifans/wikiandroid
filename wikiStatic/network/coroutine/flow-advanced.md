@@ -13,6 +13,8 @@ description: 冷流与热流、StateFlow/SharedFlow、背压处理、扁平化�
 
 ### 1.1 冷流（Cold Flow）：flow {}
 
+冷流的等价写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -49,6 +51,8 @@ coldFlow.collect { println("接收: $it") }   // 再次输出（重新执行）
 特征：**惰性**、每个收集者独立数据流、无状态。
 
 ### 1.2 热流（Hot Flow）：StateFlow / SharedFlow
+
+热流的等价写法如下：
 
 ::: code-tabs
 
@@ -100,6 +104,8 @@ lifecycleScope.launch { stateFlow.collect { log("B: $it") } }
 
 ## 2. StateFlow vs LiveData
 
+StateFlow 与 LiveData 的对比说明如下：
+
 | 维度 | LiveData | StateFlow |
 | --- | --- | --- |
 | 平台依赖 | androidx | 纯 Kotlin |
@@ -108,6 +114,8 @@ lifecycleScope.launch { stateFlow.collect { log("B: $it") } }
 | 生命周期感知 | 内置 | 需 `repeatOnLifecycle` |
 | 单元测试 | 需主线程规则 | 纯协程，好测 |
 | 组合/变换 | MediatorLiveData | 丰富操作符 |
+
+对应的状态管理实现如下：
 
 ::: code-tabs
 
@@ -203,6 +211,8 @@ flow {
 
 ### 3.1 buffer（缓冲）
 
+buffer 缓冲的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -222,6 +232,8 @@ flow { ... }.buffer(10)   // 独立缓冲，生产者不等待消费者
 :::
 
 ### 3.2 conflate（合并）
+
+conflate 合并的标准写法如下：
 
 ::: code-tabs
 
@@ -243,6 +255,8 @@ flow { ... }.conflate()   // 只保留最新值，跳过中间值
 
 ### 3.3 collectLatest（取最新）
 
+collectLatest 的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -263,6 +277,8 @@ flow { ... }.collectLatest {
 
 :::
 
+各背压处理方式的对比说明如下：
+
 | 操作符 | 行为 |
 | --- | --- |
 | 无 | 生产等待消费（逐项） |
@@ -271,6 +287,8 @@ flow { ... }.collectLatest {
 | `collectLatest` | 新值到达取消旧处理 |
 
 ## 4. 扁平化操作符
+
+扁平化操作符的示例代码如下：
 
 ::: code-tabs
 
@@ -328,6 +346,8 @@ flow.filter { it.isValid }
 
 ## 5. 错误处理
 
+错误处理的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -371,6 +391,8 @@ flow { ... }
 :::
 
 ## 6. 组合多个流
+
+多流组合的示例代码如下：
 
 ::: code-tabs
 

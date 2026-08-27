@@ -27,6 +27,8 @@ description: 模块化拆分、组件与模块区别、路由通信、编译模�
 
 ## 2. 概念区分
 
+各概念的对比说明如下：
+
 | 概念 | 说明 | 粒度 |
 | --- | --- | --- |
 | 模块（Module） | Gradle 工程单元 | 编译单元 |
@@ -86,6 +88,8 @@ if (project.hasProperty('isModuleHome') && isModuleHome.toBoolean()) {
 ```
 
 ## 5. 组件间通信：路由
+
+组件间路由通信的示例代码如下：
 
 ::: code-tabs
 

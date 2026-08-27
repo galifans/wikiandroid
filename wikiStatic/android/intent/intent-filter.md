@@ -23,6 +23,8 @@ IntentFilter（意图过滤器）声明在组件所在应用的 Manifest 中，�
 </activity>
 ```
 
+隐式 Intent 的解析匹配流程如下：
+
 ```mermaid
 flowchart TD
     A[应用安装/更新] --> B[PMS 解析 Manifest<br/>构建 IntentFilter 表]
@@ -45,12 +47,16 @@ flowchart TD
 </intent-filter>
 ```
 
+action 匹配规则说明如下：
+
 | 规则 | 说明 |
 |------|------|
 | 匹配条件 | Intent 的 action 与 Filter 中**任意一个** action 字符串完全相等 |
 | 至少一个 | **必须至少匹配一个 action**，否则直接判定不匹配 |
 | 大小写 | 字符串严格相等，区分大小写 |
 | 空 Intent action | Intent 未设置 action 时，不参与 action 匹配（等于绕过） |
+
+action 匹配的发送方写法如下：
 
 ::: code-tabs
 
@@ -86,12 +92,16 @@ val intent = Intent(Intent.ACTION_VIEW)
 </intent-filter>
 ```
 
+category 匹配规则说明如下：
+
 | 规则 | 说明 |
 |------|------|
 | 包含关系 | Intent 携带的**每一个** category 都必须出现在 Filter 中（Filter 可以声明更多） |
 | 方向性 | Filter 多、Intent 少 → 匹配；Filter 少、Intent 多 → 不匹配 |
 | 自动补充 | `startActivity` / `startActivityForResult` 会自动给 Intent 加 `CATEGORY_DEFAULT` |
 | 隐含要求 | **隐式 Intent 的接收方 Filter 必须声明 `CATEGORY_DEFAULT`**，否则 `startActivity` 无法匹配 |
+
+category 自动补充的源码说明如下：
 
 ::: code-tabs
 
@@ -137,7 +147,7 @@ val intent = Intent(Intent.ACTION_VIEW)
 ```
 
 data 由四部分构成：`scheme`（协议）、`host`（主机）、`port`（端口）、`path`（路径），外加独立的 MIME `type`。
-
+data 各部分的匹配规则如下：
 | 部分 | 规则 |
 |------|------|
 | scheme | 必须匹配（有 data 时必须声明）；可省略表示"任何 scheme" |
@@ -148,12 +158,16 @@ data 由四部分构成：`scheme`（协议）、`host`（主机）、`port`（�
 
 ### data 与 type 的组合语义
 
+data 与 type 的各种组合匹配结果如下：
+
 | Filter 声明 | Intent 提供 | 匹配结果 |
 |------------|-------------|----------|
 | 仅 data（无 type） | 仅 data | 匹配（type 为空） |
 | 仅 type（无 data） | 仅 type | 匹配（data 为空） |
 | data + type 都有 | data + type | 需**同时**匹配 |
 | 仅 data | 仅 type | **不匹配** |
+
+data 与 type 同时携带时的发送方写法如下：
 
 ::: code-tabs
 
@@ -194,6 +208,8 @@ Android 源码 `IntentFilter.matchData()` 中，如果 Filter 未声明 data 也
 5. 输出：返回候选组件列表（可能为空 / 多个）
 ```
 
+手动查询匹配结果的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -230,6 +246,8 @@ candidates.forEach { ri ->
 | 2 | 系统"默认应用"设置（如默认浏览器） |
 | 3 | 用户最近选择的"始终"选项 |
 | 4 | 弹系统选择器（Chooser），用户临时选择 |
+
+强制显示选择器的写法如下：
 
 ::: code-tabs
 

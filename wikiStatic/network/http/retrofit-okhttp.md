@@ -31,6 +31,8 @@ Response → 转换器（Gson/Moshi）→ 业务对象
 
 ### 2.1 为什么接口不需要实现类
 
+接口的定义与使用方式如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -60,6 +62,8 @@ val api = retrofit.create(ApiService::class.java)  // 没有实现类！
 :::
 
 ### 2.2 动态代理机制
+
+动态代理的核心实现如下：
 
 ::: code-tabs
 
@@ -133,6 +137,8 @@ fun <T> create(service: Class<T>): T {
   └─ ⑥ CallServerInterceptor（读写数据）
 ```
 
+拦截器的添加示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -194,6 +200,8 @@ val client = OkHttpClient.Builder()
 
 ### 3.2 连接池
 
+连接池的配置示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -227,6 +235,8 @@ RealCall.execute()（同步）
 
 ## 4. 协程支持
 
+协程支持的接口定义如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -256,6 +266,8 @@ interface ApiService {
 ```
 
 :::
+
+协程的实际调用示例代码如下：
 
 ::: code-tabs
 

@@ -9,12 +9,16 @@ title: AsyncTask 与 IntentService 原理
 
 ## 一、AsyncTask 基本使用
 
+AsyncTask 四个回调方法的说明如下：
+
 | 方法 | 说明 |
 | --- | --- |
 | `onPreExecute()` | 异步任务执行前调用，做准备工作 |
 | `doInBackground(Params...)` | 执行异步任务，可通过 `publishProgress` 更新进度 |
 | `onProgressUpdate(...)` | 主线程中执行，后台任务进度改变时调用 |
 | `onPostExecute(...)` | 主线程中执行，异步任务执行完之后 |
+
+对应的标准写法如下：
 
 ::: code-tabs
 
@@ -80,6 +84,8 @@ class DownloadTask : AsyncTask<String, Int, Boolean>() {
 6. `execute()` 让同进程中的 AsyncTask 串行执行，需要并行时调用 `executeOnExecutor`。
 
 ## 二、AsyncTask 工作原理
+
+execute() 的核心实现如下：
 
 ::: code-tabs
 
@@ -209,6 +215,8 @@ override fun onCreate() {
 **stopSelf 的区别：** `stopSelf()` 立即停止服务；`stopSelf(int startId)` 等待所有消息处理完毕后才终止服务。
 
 ## 五、对比总结
+
+四种异步组件的对比说明如下：
 
 | 组件 | 封装 | 适用场景 | 特点 |
 | --- | --- | --- | --- |

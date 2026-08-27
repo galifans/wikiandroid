@@ -11,6 +11,8 @@ description: 自定义 View 分类、构造方法、自定义属性、onMeasure/
 
 ## 1. 自定义 View 的分类
 
+按实现方式分为三类，工作重心不同：
+
 | 类型 | 场景 | 核心工作 |
 | --- | --- | --- |
 | 自定义 View | 全新控件（图表、进度条、表情） | 重写 `onDraw` |
@@ -20,6 +22,8 @@ description: 自定义 View 分类、构造方法、自定义属性、onMeasure/
 ## 2. 标准流程
 
 ### 2.1 继承 View 并实现构造方法
+
+三个构造函数分别覆盖不同创建场景：
 
 ::: code-tabs
 
@@ -58,6 +62,8 @@ class CircleView @JvmOverloads constructor(
 
 ### 2.2 自定义属性
 
+先在 attrs.xml 里声明属性：
+
 ```xml
 <!-- res/values/attrs.xml -->
 <resources>
@@ -68,23 +74,9 @@ class CircleView @JvmOverloads constructor(
 </resources>
 ```
 
+再在构造函数中读取（用完必须 recycle）：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// 读取自定义属性（在构造函数中）
-private int circleColor;
-private float radius;
-
-public CircleView(Context context, AttributeSet attrs, int defStyleAttr) {
-    super(context, attrs, defStyleAttr);
-    TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.CircleView);
-    circleColor = ta.getColor(R.styleable.CircleView_circleColor, Color.GREEN);
-    radius = ta.getDimension(R.styleable.CircleView_radius, dp2px(50f));
-    ta.recycle();          // 必须回收！
-}
-```
 
 @tab Kotlin
 
@@ -104,6 +96,8 @@ init {
 :::
 
 ### 2.3 处理 wrap_content（onMeasure）
+
+不处理 wrap_content 会退化成 match_parent，正确写法：
 
 ::: code-tabs
 
@@ -133,6 +127,8 @@ override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
 :::
 
 ### 2.4 绘制内容（onDraw）
+
+用 Canvas + Paint 画出想要的图形：
 
 ::: code-tabs
 
@@ -166,6 +162,8 @@ override fun onDraw(canvas: Canvas) {
 :::
 
 ## 3. 完整示例：可点击的圆
+
+把上面的步骤串起来，做一个支持按压反馈的圆形 View：
 
 ::: code-tabs
 

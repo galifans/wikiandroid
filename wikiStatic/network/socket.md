@@ -20,6 +20,8 @@ Socket 是应用层与传输层之间的抽象层，把 TCP/IP 协议族的复�
 
 ### 客户端流程
 
+TCP 客户端的连接建立与流获取流程如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -54,6 +56,8 @@ val dos = DataOutputStream(os)
 
 ### 服务器端流程
 
+TCP 服务端的监听与接受连接流程如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -75,6 +79,8 @@ val socket = serverSocket.accept() // 阻塞等待客户端连接
 :::
 
 ### 读取输入流
+
+循环读取输入流数据的实现如下：
 
 ::: code-tabs
 
@@ -147,6 +153,8 @@ socket.receive(packet)
 :::
 
 ## 四、TCP 与 UDP 编程对比
+
+TCP 与 UDP 两种编程方式的对比说明如下：
 
 | 对比项 | TCP | UDP |
 | --- | --- | --- |

@@ -13,6 +13,8 @@ Bitmap 中有两个内部枚举类：`Config` 用来设置颜色配置信息，`
 
 ### Config 颜色配置
 
+不同 Config 决定每像素占多少字节，直接决定内存占用：
+
 | Config | 单位像素所占字节数 | 说明 |
 | --- | --- | --- |
 | ALPHA_8 | 1 | 颜色信息只由透明度组成，占 8 位 |
@@ -32,6 +34,8 @@ $$内存大小 = 宽 \times 高 \times 单位像素字节数$$
 
 ### CompressFormat 压缩方式
 
+压缩格式决定保存文件的体积与质量：
+
 | 格式 | 说明 |
 | --- | --- |
 | JPEG | 有损压缩，压缩后可保存为 .jpg 或 .jpeg |
@@ -41,6 +45,8 @@ $$内存大小 = 宽 \times 高 \times 单位像素字节数$$
 ## 二、常用操作
 
 ### 裁剪、缩放、旋转、移动
+
+用 Matrix 组合变换，一次 createBitmap 完成所有操作：
 
 ::: code-tabs
 
@@ -69,6 +75,8 @@ val bitmap = Bitmap.createBitmap(source, 0, 0,
 :::
 
 ### Bitmap 与 Drawable 转换
+
+Drawable 先画到 Bitmap 的 Canvas 上，反向则直接包装：
 
 ::: code-tabs
 
@@ -119,6 +127,8 @@ fun bitmapToDrawable(resources: Resources, bm: Bitmap): Drawable {
 
 ### 保存与释放
 
+compress 输出到文件，用完务必 recycle 释放原生内存：
+
 ::: code-tabs
 
 @tab:active Java
@@ -161,6 +171,8 @@ bitmap.recycle()
 
 ### 常用 Option 字段
 
+Options 控制解码行为，几个字段各有用处：
+
 | 字段 | 说明 |
 | --- | --- |
 | `inJustDecodeBounds` | 设为 true 不获取图片、不分配内存，但会返回图片宽高信息 |
@@ -173,6 +185,8 @@ bitmap.recycle()
 | `inPurgeable` | 内存不足时存储 Pixel 的内存空间是否可被回收 |
 
 ### 采样压缩（防 OOM 核心）
+
+两步解码法：先只量尺寸，再按目标尺寸算采样倍数真正解码：
 
 ::: code-tabs
 

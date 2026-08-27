@@ -12,6 +12,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 
 ## 一、Activity
 
+Activity 各知识点的核心内容如下：
+
 | 知识点 | 核心内容 | 详解 |
 |--------|----------|------|
 | 生命周期 | `onCreate → onStart → onResume → onPause → onStop → onDestroy`，配合 `onRestart` | [生命周期](/android/activity/activity-lifecycle.md) |
@@ -28,6 +30,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **事务提交时机**：只能在 Activity 保存状态前 `commit()`，之后提交会抛异常；不关心丢失时用 `commitAllowingStateLoss()`。
 - **与 Activity 通信**：在 Fragment 内定义回调接口，由宿主 Activity 实现（`onAttach` 时强转绑定）。
 
+Fragment 的核心考点如下：
+
 | 考点 | 详解 |
 |------|------|
 | 生命周期与通信 | [Fragment 生命周期与通信](/android/fragment/fragment-basics.md) |
@@ -41,11 +45,15 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 
 ### 三种返回模式（onStartCommand 返回值）
 
+三种返回模式的行为对比如下：
+
 | 模式 | 行为 | 适用场景 |
 |------|------|----------|
 | `START_NOT_STICKY` | 被杀后不重建（除非有挂起 Intent） | 可随时重启的作业 |
 | `START_STICKY` | 被杀后重建并回调 `onStartCommand`，Intent 为 null | 无限期运行的媒体播放 |
 | `START_REDELIVER_INTENT` | 被杀后重建并重新传递最后 Intent | 必须立即恢复的下载任务 |
+
+Service 的核心考点如下：
 
 | 考点 | 详解 |
 |------|------|
@@ -59,6 +67,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **8.0+ 限制**：target 26 后无法在 Manifest 声明大部分隐式广播，仅保留必要广播（`ACTION_BOOT_COMPLETED`、`ACTION_TIME_SET`、`ACTION_LOCALE_CHANGED` 等）；本地广播用 `LocalBroadcastManager`。
 - **注册过程**：注册/发送均与 AMS 交互（Binder 过程）。
 
+BroadcastReceiver 的核心考点如下：
+
 | 考点 | 详解 |
 |------|------|
 | 广播基础 | [BroadcastReceiver 基础](/android/broadcast/broadcast-basics.md) |
@@ -70,11 +80,15 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **特点**：CRUD 方法运行在 **Binder 线程池**中，需自行处理线程同步；`onCreate` 先于 `Application.onCreate` 执行。
 - **与 SQL 的区别**：屏蔽存储细节、可跨 App 共享、还能增删本地文件/XML 等非数据库数据。
 
+ContentProvider 的核心考点如下：
+
 | 考点 | 详解 |
 |------|------|
 | URI / CRUD / ContentObserver | [ContentProvider 详解](/android/content-provider/content-provider-basics.md) |
 
 ## 六、数据存储
+
+各存储方式的特点说明如下：
 
 | 方式 | 说明 |
 |------|------|
@@ -91,6 +105,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 
 `measure → layout → draw`，由 ViewRootImpl 调度；MeasureSpec 高 2 位为模式（`UNSPECIFIED / EXACTLY / AT_MOST`），低 30 位为尺寸。直接继承 View 需重写 `onMeasure` 处理 `wrap_content`。
 
+View 绘制流程的核心考点如下：
+
 | 考点 | 详解 |
 |------|------|
 | MeasureSpec 详解 | [MeasureSpec](/ui/view/measurespec.md) |
@@ -104,6 +120,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **分发机制**：`dispatchTouchEvent → onInterceptTouchEvent → onTouchEvent`，责任链式传递；ViewGroup 默认不拦截；`onTouch` 优先于 `onTouchEvent`。
 - **辅助类**：`VelocityTracker` 追踪滑动速度；`GestureDetector` 检测单击/双击/长按/滑动；`Scroller` + `computeScroll` 实现弹性滑动。
 
+触摸事件的核心考点如下：
+
 | 考点 | 详解 |
 |------|------|
 | 事件分发机制 | [事件分发](/ui/event/event-dispatch.md) |
@@ -115,6 +133,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **滑动方式**：`scrollTo/scrollBy`（内容滑动）、动画、改变布局参数。
 - **获取 View 宽高**（onCreate 中拿不到）：`onWindowFocusChanged`、`view.post`、`ViewTreeObserver.OnGlobalLayoutListener`。
 - **自定义 View 四种方式**：继承 View 重写 `onDraw`、继承 ViewGroup 派生布局、继承特定 View、继承特定 ViewGroup。
+
+View 滑动与自定义的核心考点如下：
 
 | 考点 | 详解 |
 |------|------|
@@ -133,6 +153,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **多进程问题**：静态成员/单例失效、线程同步失效、SP 可靠性下降、Application 多次创建（按进程名区分）。
 - **进程存活**：系统按 ADJ（OOM_ADJ）值决定被杀顺序，值越小越优先存活（前台 0 → 缓存 9~16）。
 - **保活方案**：1 像素 Activity、前台服务、多进程互相唤醒、JobScheduler、粘性服务等。
+
+进程与保活的核心考点如下：
 
 | 考点 | 详解 |
 |------|------|
@@ -153,6 +175,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **AIDL 定向 tag**：`in`（客户端→服务端）、`out`（服务端→客户端）、`inout`（双向）。
 - **Messenger**：轻量级 IPC，底层封装 AIDL，串行处理 Message。
 
+IPC 与 Binder 的核心考点如下：
+
 | 考点 | 详解 |
 |------|------|
 | IPC 方式对比 | [IPC 方式对比](/system/binder/ipc-comparison.md) |
@@ -164,6 +188,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **Window 分类**：Application Window（1~99）、Sub Window（1000~1999，如 Dialog）、System Window（2000~2999，如 Toast）。
 - **内部机制**：Window 以 View 形式存在，每个 Window 对应一个 View 和 ViewRootImpl；`WindowManagerImpl` 委托给 `WindowManagerGlobal`，最终通过 `IWindowSession`（Binder）与 WMS 交互。
 - **创建过程**：Activity 的 Window 在 `attach` 中创建 PhoneWindow，`makeVisible` 时 addView；Dialog 使用 Activity 的 token；Toast 属于系统 Window，内部有定时取消的 Handler 与两段 IPC。
+
+Window 机制的核心考点如下：
 
 | 考点 | 详解 |
 |------|------|
@@ -177,6 +203,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **BitmapFactory.Options**：`inJustDecodeBounds` 先读宽高不分配内存、`inSampleSize` 缩放、`inPreferredConfig` 色彩模式等。
 - **内存回收**：Bitmap 分为 Java 与 C（Native）两部分，`recycle()` 释放 C 部分内存（通过 JNI）。
 
+Bitmap 的核心考点如下：
+
 | 考点 | 详解 |
 |------|------|
 | 配置 / 压缩 / Factory / 回收 | [Bitmap 详解与图片压缩](/ui/bitmap/bitmap-guide.md) |
@@ -186,6 +214,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **单位换算**：`dpi = px / inch`，`density = dpi / 160`，`dp = px / density`；sp 随字体缩放。
 - **头条适配方案**：修改 `DisplayMetrics` 的 `density / scaledDensity / densityDpi`，使设计稿宽度统一（如 360dp），并监听字体切换。
 - **刘海屏适配**：Android P 用 `DisplayCutout.getSafeInsetTop()` 等获取安全区域；`layoutInDisplayCutoutMode` 三种模式（DEFAULT / NEVER / SHORT_EDGES）；P 之前需按厂商文档适配。
+
+屏幕适配的核心考点如下：
 
 | 考点 | 详解 |
 |------|------|
@@ -206,6 +236,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **apply vs commit**：apply 异步落盘、无返回值、效率高；commit 同步落盘、有返回值。
 - **注意**：不要存大 key/value、不要高频 apply、禁用 `MODE_MULTI_PROCESS`、读写分离拆分文件。
 
+SharedPreferences 的核心考点如下：
+
 | 考点 | 详解 |
 |------|------|
 | 获取方式 / 架构 / apply vs commit | [SharedPreferences 深挖](/android/storage/sharedpreferences-deep.md) |
@@ -217,6 +249,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **ThreadLocal**：线程内部数据存储，Looper 通过它实现「一线程一 Looper」。
 - **MessageQueue**：`enqueueMessage` 按时间插入单链表，`next` 无限循环阻塞取消息；支持同步屏障与 IdleHandler。
 - **Looper**：`prepare()` 创建、`loop()` 死循环分发（`msg.target.dispatchMessage`）、`quit` 直接退出 / `quitSafely` 处理完再退出。
+
+消息机制（Handler）的核心考点如下：
 
 | 考点 | 详解 |
 |------|------|
@@ -230,6 +264,8 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **HandlerThread**：内部创建 Looper 的线程，配合 Handler 执行串行任务。
 - **IntentService**：封装 HandlerThread + Handler，任务完成后 `stopSelf(startId)` 自动停止，优先级高于普通线程。
 - **线程池**：`ThreadPoolExecutor` 核心参数（核心线程数 / 最大线程数 / 超时 / 队列 / 工厂 / 拒绝策略）；四种常用线程池：Fixed / Cached / Scheduled / Single。
+
+线程异步的核心考点如下：
 
 | 考点 | 详解 |
 |------|------|
@@ -245,11 +281,15 @@ description: 覆盖 Activity、Fragment、Service、View、IPC、消息机制、
 - **加载优化**：本地资源替代（`shouldInterceptRequest` 命中本地 assets）、预加载预缓存、JS 后置执行、复用域名连接、WebView 池化。
 - **内存泄漏**：WebView 持 Activity 引用易泄漏；不要在 XML 直接声明、销毁时 `stopLoading + removeAllViews + destroy`。
 
+WebView 的核心考点如下：
+
 | 考点 | 详解 |
 |------|------|
 | 配置 / 回调 / 优化 / 泄漏 | [WebView 使用与优化](/ui/view/webview-guide.md) |
 
 ## 小结
+
+各模块的一句话记忆如下：
 
 | 模块 | 一句话记忆 |
 |------|-----------|

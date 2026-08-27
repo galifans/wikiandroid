@@ -18,6 +18,8 @@ Android 10                 → 2019 年起改用数字
 Android 10/11/12/13/14/15 → 数字命名
 ```
 
+各 Android 版本与 API Level 的对应关系如下：
+
 | Android 版本 | 代号 | API Level | 发布时间 |
 |--------------|------|-----------|----------|
 | 1.0 | — | 1 | 2008.09 |
@@ -42,6 +44,8 @@ Android 10/11/12/13/14/15 → 数字命名
 
 ### 2.1 系统机制演进
 
+Android 关键机制的整体演进链路如下：
+
 ```mermaid
 timeline
     title Android 关键机制演进
@@ -60,6 +64,8 @@ timeline
 
 ### 2.2 里程碑特性详解
 
+各里程碑版本的核心特性与开发者影响对比如下：
+
 | 版本 | 核心特性 | 开发者影响 |
 |------|----------|-----------|
 | 5.0 | ART 替换 Dalvik、Material Design | 运行性能跃升 |
@@ -77,12 +83,16 @@ timeline
 
 ### 3.1 targetSdk 的契约
 
+三个 sdkVersion 的协作关系如下：
+
 ```mermaid
 flowchart LR
     A[targetSdkVersion<br>声明目标版本] --> B[系统按此启用<br>新行为限制]
     C[minSdkVersion<br>最低支持] --> D[覆盖设备范围]
     E[compileSdkVersion<br>编译版本] --> F[API 可用性]
 ```
+
+三个版本字段的职责与建议说明如下：
 
 | 版本字段 | 作用 | 建议 |
 |----------|------|------|
@@ -91,6 +101,8 @@ flowchart LR
 | targetSdk | 触发新行为 | 跟随商店要求（2023 起要求 33+） |
 
 ### 3.2 行为变更检查
+
+版本差异判断的标准写法如下：
 
 ::: code-tabs
 
@@ -138,6 +150,8 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 
 ### 4.1 碎片化现状
 
+碎片化各维度的挑战说明如下：
+
 | 维度 | 挑战 |
 |------|------|
 | 系统版本 | 5.0~15 并存 |
@@ -147,6 +161,8 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 | 屏幕密度 | mdpi~xxxhdpi 多档 |
 
 ### 4.2 应对策略
+
+碎片化的整体应对策略如下：
 
 ```mermaid
 flowchart TD

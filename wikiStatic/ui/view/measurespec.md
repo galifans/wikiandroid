@@ -19,28 +19,19 @@ description: MeasureSpec 三种模式、EXACTLY/AT_MOST/UNSPECIFIED、getChildMe
 └─ 低 30 位：SpecSize（尺寸大小）
 ```
 
-::: code-tabs
+## 1. 什么是 MeasureSpec
 
-@tab:active Java
+**MeasureSpec** 封装了"父容器对子 View 的尺寸要求"，由两部分组成：
 
-```java
-// 源码定义
-public static class MeasureSpec {
-    private static final int MODE_SHIFT = 30;    // 模式位移
-    private static final int MODE_MASK  = 0x3 << MODE_SHIFT;
-
-    public static final int UNSPECIFIED = 0 << MODE_SHIFT;  // 不限定
-    public static final int EXACTLY     = 1 << MODE_SHIFT;  // 精确
-    public static final int AT_MOST     = 2 << MODE_SHIFT;  // 最大
-
-    // 打包：模式 + 尺寸 → MeasureSpec
-    public static int makeMeasureSpec(int size, int mode) { ... }
-
-    // 解包
-    public static int getMode(int measureSpec) { return measureSpec & MODE_MASK; }
-    public static int getSize(int measureSpec) { return measureSpec & ~MODE_MASK; }
-}
+```text
+32 位 int
+├─ 高 2 位：SpecMode（测量模式）
+└─ 低 30 位：SpecSize（尺寸大小）
 ```
+
+源码里的打包/解包工具方法：
+
+::: code-tabs
 
 @tab Kotlin
 
@@ -72,30 +63,17 @@ class MeasureSpec {
 
 ## 2. 三种模式
 
+三种模式的含义与产生条件：
+
 | 模式 | 含义 | 产生条件 |
 | --- | --- | --- |
 | `EXACTLY` | 精确尺寸（或 match_parent） | 父 ViewGroup 确定尺寸 |
 | `AT_MOST` | 最大不超过 size（wrap_content） | 父 ViewGroup 给上限 |
 | `UNSPECIFIED` | 无限制 | ScrollView 等可滚动容器 |
 
+实际使用时先解包再按模式分支处理：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// 从 MeasureSpec 解包
-int mode = MeasureSpec.getMode(measureSpec);
-int size = MeasureSpec.getSize(measureSpec);
-
-switch (mode) {
-    case MeasureSpec.EXACTLY:     // size 是精确值
-        break;
-    case MeasureSpec.AT_MOST:     // size 是最大值
-        break;
-    case MeasureSpec.UNSPECIFIED: // 不限
-        break;
-}
-```
 
 @tab Kotlin
 
@@ -115,7 +93,7 @@ when (mode) {
 
 ## 3. 测量规格的生成：getChildMeasureSpec
 
-父 ViewGroup 测量子 View 时，根据**父容器的 MeasureSpec + 子 View 的 LayoutParams** 生成子 View 的 MeasureSpec：
+父 ViewGroup 测量子 View 时，根据**父容器的 MeasureSpec + 子 View 的 LayoutParams** 生成子 View 的 MeasureSpec，核心逻辑如下：
 
 ::: code-tabs
 
@@ -234,6 +212,8 @@ fun getChildMeasureSpec(spec: Int, padding: Int, childDimension: Int): Int {
 
 ### 3.1 规则汇总表
 
+不同组合下的结果模式可以归纳成一张表：
+
 | 父模式 | 子 LayoutParams | 子 MeasureSpec |
 | --- | --- | --- |
 | EXACTLY | 具体值 | EXACTLY / 具体值 |
@@ -246,6 +226,8 @@ fun getChildMeasureSpec(spec: Int, padding: Int, childDimension: Int): Int {
 | UNSPECIFIED | MATCH/WRAP | UNSPECIFIED / 0 |
 
 ## 4. onMeasure 的正确写法
+
+先看错误示范——直接取 specSize 会让 wrap_content 失效：
 
 ::: code-tabs
 

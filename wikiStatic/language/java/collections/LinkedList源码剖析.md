@@ -16,6 +16,8 @@ title: LinkedList 源码剖析
 
 ## 关键成员
 
+关键成员的声明如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -57,6 +59,8 @@ class LinkedList<E> : AbstractSequentialList<E>(),
 :::
 
 ## 基本操作
+
+基本操作的实现如下：
 
 ::: code-tabs
 

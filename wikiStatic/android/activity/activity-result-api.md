@@ -31,6 +31,8 @@ description: registerForActivityResult 机制、ActivityResultContracts 内置�
 - **生命周期安全**：回调在 `LifecycleOwner` 处于 `STARTED` 之后才派发
 - **无需 requestCode**：系统自动管理请求编号
 
+新旧写法对比如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -81,6 +83,8 @@ private val launcher = registerForActivityResult(
 
 ### 2.1 registerForActivityResult
 
+对应的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -127,6 +131,8 @@ class MainActivity : ComponentActivity() {
 - 若在 `onCreate` 之后（如按钮点击时才注册），**重建后回调会丢失**，启动的 Activity 结果无法分发
 - Fragment 中同理，应在 `onAttach` / 字段初始化阶段注册
 
+错误示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -157,6 +163,8 @@ btn.setOnClickListener {
 
 ### 3.1 契约总览
 
+各内置契约的对比说明如下：
+
 | 契约 | 输入类型 | 返回类型 | 场景 |
 |------|----------|----------|------|
 | `StartActivityForResult` | `Intent` | `ActivityResult` | 通用启动，返回 resultCode + data |
@@ -175,6 +183,8 @@ btn.setOnClickListener {
 | `PickContact` | 无 | `Uri?` | 联系人选择 |
 
 ### 3.2 拍照与选图实战
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -245,6 +255,8 @@ fun openGallery() {
 
 ### 4.1 单权限
 
+对应的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -277,6 +289,8 @@ fun requestLocation() {
 :::
 
 ### 4.2 多权限批量
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -329,6 +343,8 @@ fun requestCameraAndStorage() {
 :::
 
 ### 4.3 权限回调时序
+
+权限回调的完整时序如下：
 
 ```mermaid
 sequenceDiagram
@@ -415,6 +431,8 @@ private val crop = registerForActivityResult(CropImageContract()) { uri ->
 
 ### 自定义契约要点
 
+各方法的职责说明如下：
+
 | 方法 | 职责 |
 |------|------|
 | `createIntent` | 根据输入参数构建启动 Intent |
@@ -425,6 +443,8 @@ private val crop = registerForActivityResult(CropImageContract()) { uri ->
 ## 六、底层原理
 
 ### 6.1 回调分发链路
+
+回调分发的完整链路如下：
 
 ```mermaid
 sequenceDiagram

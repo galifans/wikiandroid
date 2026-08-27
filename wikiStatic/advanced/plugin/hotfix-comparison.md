@@ -26,6 +26,8 @@ description: 热修复主流方案：类加载、底层替换、Instant Run；Ti
 
 ## 2. 主流方案分类
 
+主流热修复方案的对比说明如下：
+
 | 方案 | 原理 | 代表框架 | 特点 |
 | --- | --- | --- | --- |
 | 类加载替换 | 补丁 dex 插到 ClassLoader 前面 | Tinker（微信） | 兼容性好 |
@@ -46,6 +48,8 @@ description: 热修复主流方案：类加载、底层替换、Instant Run；Ti
 - 不能新增/删除方法或字段（结构变化 → ClassVerifyError）
 - 生效时机：下次启动（类加载前注入）
 ```
+
+Tinker 的使用示例代码如下：
 
 ::: code-tabs
 
@@ -109,6 +113,8 @@ Sophix：阿里移动热修复（基于 AndFix 演进）
 ```
 
 ## 6. 方案对比总结
+
+三大方案的多维度对比说明如下：
 
 | 维度 | Tinker | AndFix | Sophix |
 | --- | --- | --- | --- |

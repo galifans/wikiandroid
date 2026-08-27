@@ -11,6 +11,8 @@ description: 三种滑动冲突场景、外部拦截法与内部拦截法、Nest
 
 ## 1. 滑动冲突的三种场景
 
+按滑动方向与内外关系划分：
+
 | 场景 | 示例 | 冲突本质 |
 | --- | --- | --- |
 | 外部滑动方向不同 | ViewPager（横向）+ ListView（纵向） | 方向不同，按方向分 |
@@ -19,7 +21,7 @@ description: 三种滑动冲突场景、外部拦截法与内部拦截法、Nest
 
 ## 2. 解决方案一：外部拦截法（推荐）
 
-**思路**：父 View 在 `onInterceptTouchEvent` 中根据业务规则决定是否拦截。
+**思路**：父 View 在 `onInterceptTouchEvent` 中根据业务规则决定是否拦截，核心代码：
 
 ::: code-tabs
 
@@ -77,6 +79,8 @@ override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
 **规则口诀**：**DOWN 不拦、MOVE 判断、UP 不拦**。
 
 ### 2.1 判断滑动方向
+
+用 dx/dy 的绝对值比较来判断方向：
 
 ::: code-tabs
 
@@ -144,7 +148,7 @@ override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
 ## 3. 解决方案二：内部拦截法
 
 **思路**：子 View 消费 DOWN，通过 `requestDisallowInterceptTouchEvent(true)`
-禁止父 View 拦截，需要时再"归还"。
+禁止父 View 拦截，需要时再"归还"，代码如下：
 
 ::: code-tabs
 
@@ -209,7 +213,7 @@ override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
 
 ## 4. 解决方案三：NestedScrolling（现代方案）
 
-Android 5.0+ 提供了 NestedScrolling 嵌套滚动机制，**无需拦截**即可协调父子滚动。
+Android 5.0+ 提供了 NestedScrolling 嵌套滚动机制，**无需拦截**即可协调父子滚动，参与者和流程如下：
 
 ```text
 参与者：
@@ -223,31 +227,9 @@ NestedScrollingParent  （如 CoordinatorLayout）
 子 View 滚动后再通知父 View（dispatchNestedScroll）
 ```
 
+父容器里通过 Behavior 的 onNestedPreScroll 实现"预消费"：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// 父容器（CoordinatorLayout.Behavior 示例）
-public class HeaderBehavior extends CoordinatorLayout.Behavior<View> {
-
-    // 子 View 滚动前：父 View 先"预消费"
-    @Override
-    public void onNestedPreScroll(
-            CoordinatorLayout coordinatorLayout,
-            View child,
-            View target,
-            int dx, int dy,
-            int[] consumed
-    ) {
-        // 如：向上滑动时先收起头部（消费 dy）
-        if (dy > 0 && headerVisible) {
-            child.setTranslationY(child.getTranslationY() - dy);
-            consumed[1] = dy;     // 告知子 View 已消费多少
-        }
-    }
-}
-```
 
 @tab Kotlin
 

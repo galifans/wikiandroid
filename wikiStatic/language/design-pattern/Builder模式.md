@@ -19,6 +19,8 @@ title: Builder 建造者模式
 
 ## Android 中的实现：AlertDialog.Builder
 
+AlertDialog 的链式构建示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java

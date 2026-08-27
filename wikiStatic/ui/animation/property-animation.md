@@ -11,11 +11,15 @@ description: ValueAnimator/ObjectAnimator/AnimatorSet、插值器与估值器、
 
 ## 1. 动画体系演进
 
+从逐帧换图到状态驱动，动画体系经历了四代演进：
+
 ```text
 帧动画（FrameAnimation）→ 补间动画（Tween）→ 属性动画（Property Animation）
                                       ↓
                           Compose 动画（声明式、状态驱动）
 ```
+
+四代动画的核心差异对比如下：
 
 | 类型 | 原理 | 特点 |
 | --- | --- | --- |
@@ -27,6 +31,8 @@ description: ValueAnimator/ObjectAnimator/AnimatorSet、插值器与估值器、
 ## 2. 基础用法
 
 ### 2.1 ValueAnimator：值变化器
+
+ValueAnimator 只负责"值"的变化，不直接操作 View，需要监听回调手动应用：
 
 ::: code-tabs
 
@@ -64,6 +70,8 @@ animator.start()
 :::
 
 ### 2.2 ObjectAnimator：属性动画器（最常用）
+
+ObjectAnimator 自动调用属性的 setter 方法，是最常用的动画器：
 
 ::: code-tabs
 
@@ -107,6 +115,8 @@ ObjectAnimator.ofFloat(view, View.ROTATION, 0f, 360f).apply {
 
 ### 2.3 AnimatorSet：动画集合
 
+多个动画需要协同播放（同时或按顺序）时使用 AnimatorSet：
+
 ::: code-tabs
 
 @tab:active Java
@@ -148,6 +158,8 @@ AnimatorSet().apply {
 
 ### 3.1 插值器（Interpolator）：控制时间节奏
 
+插值器把"时间进度"映射为"动画进度"，决定动画的节奏快慢，常见内置实现如下：
+
 ```text
 输入：0→1 的时间进度（t）
 输出：0→1 的动画进度（插值后的值）
@@ -159,6 +171,8 @@ AccelerateDecelerate   ：先加速后减速
 OvershootInterpolator  ：超出目标再回弹
 BounceInterpolator     ：落地弹跳
 ```
+
+通过 setInterpolator 即可应用：
 
 ::: code-tabs
 
@@ -178,6 +192,8 @@ animator.interpolator = OvershootInterpolator(2f)
 
 ### 3.2 估值器（Evaluator）：把进度换算成属性值
 
+估值器把插值后的进度换算为具体属性值（如坐标、颜色），内置实现与自定义方式如下：
+
 ```text
 TypeEvaluator 输入：插值后的进度（0~1）
 输出：具体属性值（如颜色、坐标）
@@ -187,6 +203,8 @@ FloatEvaluator    ：float 值
 ArgbEvaluator     ：颜色渐变
 自定义：实现 evaluate(fraction, startValue, endValue)
 ```
+
+以自定义估值器和颜色渐变为例：
 
 ::: code-tabs
 
@@ -240,6 +258,8 @@ val colorAnimator = ValueAnimator.ofObject(
 
 ### 3.3 计算流程
 
+一次动画帧的完整计算链路如下：
+
 ```text
 时间 t → 插值器（fraction）→ 估值器（value）→ setter → 重绘
     ↑                                  ↓
@@ -247,6 +267,8 @@ val colorAnimator = ValueAnimator.ofObject(
 ```
 
 ## 4. PropertyValuesHolder 与 ViewPropertyAnimator
+
+一个动画同时改变多个属性，或追求最简链式调用时，可用这两个 API：
 
 ::: code-tabs
 
@@ -293,6 +315,8 @@ view.animate()
 
 ## 5. 动画监听
 
+需要感知动画的开始、结束等生命周期时，通过 addListener 注册监听：
+
 ::: code-tabs
 
 @tab:active Java
@@ -323,6 +347,8 @@ animator.doOnEnd { /* 结束回调 */ }
 :::
 
 ## 6. 动画与性能
+
+动画卡顿大多与布局、绘制和属性选择有关，优化要点如下：
 
 ```text
 ① 使用硬件加速：View 属性动画默认走 RenderThread，不阻塞主线程

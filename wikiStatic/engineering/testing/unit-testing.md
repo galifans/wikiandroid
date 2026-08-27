@@ -61,6 +61,8 @@ dependencies {
 
 ## 4. 基础用例示例
 
+纯逻辑测试的基础写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -109,6 +111,8 @@ class PriceCalculatorTest {
 ```
 
 :::
+
+ViewModel 状态流转的测试写法如下：
 
 ::: code-tabs
 
@@ -182,6 +186,8 @@ class LoginViewModelTest {
 
 :::
 
+协程与缓存的测试技巧如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -226,6 +232,8 @@ fun `缓存命中不请求网络`() = runTest {
 :::
 
 ## 5. Robolectric（JVM 模拟 Android）
+
+Robolectric 测试的写法如下：
 
 ::: code-tabs
 

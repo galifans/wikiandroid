@@ -13,6 +13,8 @@ title: Android IPC 方式对比
 
 ## 二、Android IPC 方式对比
 
+各 IPC 方式的优缺点与适用场景对比说明如下：
+
 | 方式 | 优点 | 缺点 | 适用场景 |
 | --- | --- | --- | --- |
 | Bundle | 简单易用 | 只能传输 Bundle 支持的数据类型 | 四大组件间的进程间通信 |
@@ -49,6 +51,8 @@ flowchart TD
         F
     end
 ```
+
+BinderPool 的池管理实现如下：
 
 ::: code-tabs
 

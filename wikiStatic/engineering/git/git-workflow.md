@@ -11,6 +11,8 @@ description: Git Flow/GitHub Flow/Trunk Based 对比、分支模型、提交规�
 
 ## 1. 常见工作流对比
 
+三种常见工作流的对比说明如下：
+
 | 工作流 | 分支模型 | 适用 | 特点 |
 | --- | --- | --- | --- |
 | Git Flow | 多分支（feature/develop/release/hotfix） | 版本化发布（App） | 规范但复杂 |
@@ -55,6 +57,8 @@ docs(readme): 更新安装说明
 ```
 
 ## 3. 合并策略选择
+
+三种合并策略的效果与适用场景如下：
 
 | 策略 | 效果 | 适用 |
 | --- | --- | --- |

@@ -12,6 +12,8 @@ description: Git Flow、GitHub Flow、GitLab Flow、主干开发，分支规范�
 
 ### 1.1 单一主干的痛点
 
+单一主干开发存在的痛点如下：
+
 ```mermaid
 flowchart LR
     A[多人直接提交 master] --> B[冲突频繁]
@@ -19,6 +21,8 @@ flowchart LR
     A --> D[发布不可控]
     A --> E[线上 bug 无法热修]
 ```
+
+各痛点对应的后果如下：
 
 | 问题 | 后果 |
 |------|------|
@@ -37,6 +41,8 @@ flowchart LR
 ## 二、Git Flow（经典）
 
 ### 2.1 分支结构
+
+Git Flow 五类分支的构成关系如下：
 
 ```mermaid
 flowchart TD
@@ -57,6 +63,8 @@ flowchart TD
 ```
 
 ### 2.2 各分支职责
+
+各分支的生命周期与职责如下：
 
 | 分支 | 生命周期 | 职责 |
 |------|----------|------|
@@ -99,6 +107,8 @@ git tag -a v1.2.1 -m "v1.2.1"
 
 ### 2.4 优缺点
 
+Git Flow 的优缺点对比如下：
+
 | 优点 | 缺点 |
 |------|------|
 | 流程清晰、适合版本发布型产品 | 分支多、操作繁琐 |
@@ -108,6 +118,8 @@ git tag -a v1.2.1 -m "v1.2.1"
 ## 三、GitHub Flow（轻量）
 
 ### 3.1 核心思想
+
+GitHub Flow 的核心流程如下：
 
 ```mermaid
 flowchart LR
@@ -125,6 +137,8 @@ flowchart LR
 
 ### 3.2 适用场景
 
+GitHub Flow 的适用场景如下：
+
 | 场景 | 是否适合 |
 |------|----------|
 | 持续部署的 SaaS | 适合 |
@@ -136,6 +150,8 @@ flowchart LR
 
 ### 4.1 环境分支
 
+GitLab Flow 环境分支的流转关系如下：
+
 ```mermaid
 flowchart TD
     A[main/master] --> B[pre-production<br>预发布]
@@ -143,6 +159,8 @@ flowchart TD
     A --> D[feature/*]
     D --> A
 ```
+
+GitLab Flow 各模式的说明如下：
 
 | 模式 | 说明 |
 |------|------|
@@ -160,12 +178,16 @@ flowchart TD
 
 ### 5.1 思想
 
+主干开发的核心思想如下：
+
 ```mermaid
 flowchart LR
     A[main 主干] --> B[短生命周期分支<br>几小时~几天]
     B --> A
     A --> C[功能开关<br>Feature Flag]
 ```
+
+主干开发的特点说明如下：
 
 | 特点 | 说明 |
 |------|------|
@@ -191,6 +213,8 @@ flowchart LR
 版本标签：v1.2.0 等，与版本号一致
 ```
 
+Android 团队推荐的组合流程如下：
+
 ```mermaid
 flowchart TD
     F[feature/login] -->|PR 评审| D[develop]
@@ -203,6 +227,8 @@ flowchart TD
 ```
 
 ### 6.2 版本分支管理
+
+各场景对应的分支操作如下：
 
 | 场景 | 操作 |
 |------|------|

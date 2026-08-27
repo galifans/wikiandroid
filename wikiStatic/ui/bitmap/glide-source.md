@@ -10,6 +10,8 @@ description: Glide 加载流程、三级缓存（内存/磁盘/网络）、生�
 
 ## 一、Glide 核心架构
 
+一次加载从 with 到 into 的完整链路：
+
 ```mermaid
 flowchart TD
     A[Glide.with context] --> B[RequestManager<br>生命周期感知]
@@ -30,6 +32,8 @@ flowchart TD
 ## 二、with()：生命周期绑定
 
 ### 2.1 with 的 6 个重载
+
+with 可以接收四种类型的参数，生命周期粒度不同：
 
 ::: code-tabs
 
@@ -55,6 +59,8 @@ Glide.with(view)             // 从 View 推导出 Activity/Fragment
 
 ### 2.2 生命周期绑定原理
 
+实现上是往 Activity 里塞一个透明 Fragment：
+
 ```mermaid
 flowchart LR
     A["with(Activity)"] --> B[RequestManagerRetriever]
@@ -68,6 +74,8 @@ flowchart LR
 > 关键技巧：**Glide 在目标 Activity 中插入一个透明的 SupportRequestManagerFragment**，通过 Fragment 的生命周期回调驱动请求管理，从而感知页面销毁并自动取消加载、释放资源——避免图片加载导致的内存泄漏。
 
 ### 2.3 绑定 Application 的后果
+
+传 Application 就失去了生命周期感知：
 
 ::: code-tabs
 
@@ -90,6 +98,8 @@ Glide.with(applicationContext)   //  不推荐，除非确实全局
 :::
 
 ## 三、load()：模型到数据源
+
+load 支持多种数据源类型，链式配置加载参数：
 
 ::: code-tabs
 
@@ -121,6 +131,8 @@ Glide.with(this)
 
 ### RequestOptions 链式配置
 
+常用配置项一览：
+
 | 配置 | 作用 |
 |------|------|
 | `placeholder` / `error` | 占位/错误图 |
@@ -134,6 +146,8 @@ Glide.with(this)
 ## 四、into()：目标与请求执行
 
 ### 4.1 执行链路
+
+into 之后的执行时序：
 
 ```mermaid
 sequenceDiagram
@@ -152,6 +166,8 @@ sequenceDiagram
 ```
 
 ### 4.2 请求 Key 的构成
+
+EngineKey 由多个字段共同决定缓存命中：
 
 ::: code-tabs
 
@@ -189,6 +205,8 @@ data class EngineKey(
 
 ### 5.1 三级缓存结构
 
+内存、磁盘、网络三层兜底：
+
 ```mermaid
 flowchart TD
     A[请求图片] --> B[内存缓存<br>LruResourceCache<br>BitmapPool 复用]
@@ -208,6 +226,8 @@ flowchart TD
 
 ### 5.2 磁盘缓存策略
 
+策略决定了缓存原图还是处理后的图：
+
 | 策略 | 说明 |
 |------|------|
 | `DATA` | 只缓存原始数据（原图） |
@@ -215,6 +235,8 @@ flowchart TD
 | `ALL`（默认） | 都缓存 |
 | `AUTOMATIC` | 自动选择（默认推荐） |
 | `NONE` | 不缓存 |
+
+代码里指定策略：
 
 ::: code-tabs
 
@@ -241,6 +263,8 @@ Glide.with(this)
 > **RESOURCE 策略**适合"同一图多种尺寸"场景（各尺寸缓存一份）；**DATA 策略**适合"一张图只显示一次"或需要原图的场景。
 
 ## 六、图片变换（Transformations）
+
+transform 可以组合多个变换：
 
 ::: code-tabs
 
@@ -272,6 +296,8 @@ Glide.with(this)
 | `RoundedCorners` | 圆角 |
 | `BlurTransformation` | 高斯模糊 |
 | 自定义 Transform | 继承 BitmapTransformation |
+
+内置变换不够用时，继承 BitmapTransformation 写自己的：
 
 ::: code-tabs
 
@@ -328,6 +354,8 @@ class GrayscaleTransform : BitmapTransformation() {
 ## 七、生命周期与内存
 
 ### 7.1 生命周期绑定效果
+
+各回调对应的 Glide 行为：
 
 | 生命周期 | Glide 行为 |
 |---------|-----------|

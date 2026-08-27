@@ -10,6 +10,8 @@ description: 运行时权限申请的工程实践——批量申请、时机选�
 
 ## 一、申请时机：何时申请最合理
 
+各申请时机的优劣对比如下：
+
 | 时机 | 场景 | 评价 |
 |------|------|------|
 | 冷启动立即申请 | 无明确业务上下文 | ✗ 通过率低，用户反感 |
@@ -18,7 +20,7 @@ description: 运行时权限申请的工程实践——批量申请、时机选�
 | 引导页一次性申请 | 注册流程强制 |  谨慎，部分应用被投诉 |
 
 **黄金法则：在用户真正需要该能力的那一刻申请**——"我要用，才向你借"。
-
+正确与错误的申请时机写法如下：
 ::: code-tabs
 
 @tab:active Java
@@ -53,6 +55,8 @@ fun onTakePhotoClick() {
 :::
 
 ## 二、批量申请与逐个申请
+
+批量申请与逐个申请的示例代码如下：
 
 ::: code-tabs
 
@@ -98,6 +102,8 @@ fun requestAll() {
 
 :::
 
+两种申请方式的优缺点对比如下：
+
 | 方式 | 优点 | 缺点 |
 |------|------|------|
 | 批量申请 | 一次弹窗流程，代码少 | 弹多个窗口用户易烦；拒绝难以逐个解释 |
@@ -106,6 +112,8 @@ fun requestAll() {
 **建议**：按业务场景分组合并申请（如"拍照功能"需要相机 + 存储），避免无关权限捆绑。
 
 ## 三、解释弹窗（Rationale）设计
+
+解释弹窗的实现代码如下：
 
 ::: code-tabs
 
@@ -148,6 +156,8 @@ private fun showRationale(permission: String, onConfirm: () -> Unit) {
 
 特殊权限无法通过 `requestPermissions` 申请，必须跳系统设置页。
 
+常见特殊权限的跳转方式如下：
+
 | 特殊权限 | 权限常量 | 跳转方式 |
 |----------|----------|----------|
 | 悬浮窗 | `SYSTEM_ALERT_WINDOW` | `Settings.ACTION_MANAGE_OVERLAY_PERMISSION` |
@@ -155,6 +165,8 @@ private fun showRationale(permission: String, onConfirm: () -> Unit) {
 | 无障碍 | `BIND_ACCESSIBILITY_SERVICE` | `Settings.ACTION_ACCESSIBILITY_SETTINGS` |
 | 电池优化 | `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | `Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS` |
 | 闹钟与提醒（14+） | `SCHEDULE_EXACT_ALARM` | `Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM` |
+
+悬浮窗权限检查与跳转的示例代码如下：
 
 ::: code-tabs
 
@@ -206,6 +218,8 @@ override fun onResume() {
 
 ## 五、常见问题与崩溃排查
 
+常见问题的原因与解决方案对比如下：
+
 | 问题 | 原因 | 解决方案 |
 |------|------|----------|
 | `SecurityException: Permission Denial` | 未申请权限或用户拒绝 | 检查 Manifest 声明 + 运行时申请 |
@@ -214,6 +228,8 @@ override fun onResume() {
 | 权限已授但仍崩溃 | 厂商 ROM 修改了权限行为 | 调用前 try-catch + 功能降级 |
 | targetSdk 升级后通知不显示 | Android 13 通知权限未申请 | 动态申请 `POST_NOTIFICATIONS` |
 | 存储权限失效 | Android 10+ 分区存储 | 改用 `MediaStore` / SAF 文件选择器 |
+
+调用敏感 API 的健壮性兜底写法如下：
 
 ::: code-tabs
 
@@ -260,6 +276,8 @@ fun openCameraSafely() {
 :::
 
 ## 六、合规建议（上架必备）
+
+各项合规要求说明如下：
 
 | 合规项 | 要求 |
 |--------|------|

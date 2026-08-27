@@ -12,6 +12,8 @@ description: ANR 定义与四大阈值、产生原因分析、traces.txt 定位�
 
 **ANR（Application Not Responding，应用无响应）**：应用主线程在规定时间内未完成响应，系统弹出 ANR 对话框。
 
+ANR 的判定流程如下：
+
 ```mermaid
 flowchart LR
     A[主线程收到输入事件/启动任务] --> B{规定时间内<br/>完成处理?}
@@ -21,6 +23,8 @@ flowchart LR
 ```
 
 ## 二、四大 ANR 阈值
+
+四大 ANR 阈值的对比说明如下：
 
 | 组件 | 场景 | 阈值 |
 |------|------|------|
@@ -35,6 +39,8 @@ flowchart LR
 
 ## 三、ANR 产生原因
 
+ANR 的常见产生原因如下：
+
 | 原因 | 说明 |
 |------|------|
 | 主线程耗时操作 | IO（网络/磁盘/数据库）、大量计算、JSON 解析大对象 |
@@ -42,6 +48,8 @@ flowchart LR
 | Binder 调用阻塞 | 主线程同步调用慢的 Binder 服务（如频繁跨进程读写） |
 | 广播处理耗时 | `onReceive` 中直接做耗时操作 |
 | 低内存（LMK） | 内存紧张时频繁 GC 或被杀，间接拖慢主线程 |
+
+ANR 从主线程阻塞到系统判定的完整链路如下：
 
 ```mermaid
 flowchart TD
@@ -79,6 +87,8 @@ adb logcat -b events | grep -i anr
 ```
 
 ### 3. 主动监控：Choreographer 帧回调
+
+Choreographer 帧回调监控的实现如下：
 
 ::: code-tabs
 
@@ -120,6 +130,8 @@ Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallba
 :::
 
 ### 4. StrictMode 开发期拦截
+
+StrictMode 开发期拦截的配置如下：
 
 ::: code-tabs
 
@@ -163,6 +175,8 @@ if (BuildConfig.DEBUG) {
 
 ## 五、预防手段
 
+各维度的预防手段如下：
+
 | 维度 | 手段 |
 |------|------|
 | 异步化 | IO/网络/DB 全部丢线程池或协程，主线程只做 UI |
@@ -173,6 +187,8 @@ if (BuildConfig.DEBUG) {
 | 锁策略 | 主线程不持锁等待；跨线程用有界队列而非无界锁等待 |
 | 广播治理 | `onReceive` 只做收尾，耗时逻辑移入 `goAsync()` + 线程池 |
 | Binder 优化 | 高频跨进程读写批量合并，避免逐条同步调用 |
+
+广播耗时处理的实现如下：
 
 ::: code-tabs
 

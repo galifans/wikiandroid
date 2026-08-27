@@ -31,12 +31,16 @@ BootClassLoader（启动类加载器）
                  └─ 加载插件/热修复 dex
 ```
 
+各加载器的职责对比说明如下：
+
 | 类加载器 | 作用 | 特点 |
 | --- | --- | --- |
 | BootClassLoader | 加载系统框架类 | 最高优先级 |
 | PathClassLoader | 加载已安装 App 的 dex | 默认应用类加载器 |
 | DexClassLoader | 加载外部 dex（SD 卡/下载） | 热修复、插件化 |
 | InMemoryDexClassLoader | 内存 dex | 启动优化 |
+
+获取类加载器的示例代码如下：
 
 ::: code-tabs
 
@@ -70,6 +74,8 @@ val systemLoader = ClassLoader.getSystemClassLoader()
 - 避免重复加载（框架类只加载一次）
 - 安全：防止自定义类覆盖系统类（如 String）
 ```
+
+双亲委派的核心实现如下：
 
 ::: code-tabs
 
@@ -140,6 +146,8 @@ class MyClassLoader : ClassLoader(parent) {
 
 关键：元素组 dex 顺序（补丁在前）
 ```
+
+热修复类加载方案的核心实现如下：
 
 ::: code-tabs
 

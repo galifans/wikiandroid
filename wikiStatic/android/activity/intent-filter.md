@@ -10,10 +10,14 @@ description: 显式/隐式 Intent 与 IntentFilter 的 action/category/data 三�
 
 ## 一、显式 Intent 与隐式 Intent
 
+两者的对比说明如下：
+
 | 类型 | 指定方式 | 特点 | 适用场景 |
 |------|----------|------|----------|
 | 显式 Intent | 指定 `ComponentName`（包名 + 类名） | 确定性高、无匹配开销 | 应用内跳转、服务绑定 |
 | 隐式 Intent | 只声明 `action` / `category` / `data` | 由系统匹配解析，可跨应用 | 系统调用（拍照、拨号）、跨应用跳转 |
+
+对应的示例代码如下：
 
 ::: code-tabs
 
@@ -44,6 +48,8 @@ val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://example.com"))
 :::
 
 ## 二、IntentFilter 三大匹配规则
+
+IntentFilter 的完整匹配流程如下：
 
 ```mermaid
 flowchart LR
@@ -76,6 +82,8 @@ URI 结构：scheme://host:port/path
 例：content://com.example.provider/user/1
 ```
 
+各匹配维度的规则如下：
+
 | 匹配维度 | 规则 |
 |----------|------|
 | `scheme` | 必须相同（`http`、`content`、`file` 等） |
@@ -89,6 +97,8 @@ URI 结构：scheme://host:port/path
 :::
 
 ## 三、匹配流程：resolveActivity
+
+resolveActivity 的完整匹配时序如下：
 
 ```mermaid
 sequenceDiagram
@@ -109,6 +119,8 @@ sequenceDiagram
         App->>App: 抛 ActivityNotFoundException
     end
 ```
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -137,6 +149,8 @@ if (resolveInfo == null) {
 :::
 
 ## 四、实际应用：系统常见 Intent
+
+常用系统 Intent 如下：
 
 | 场景 | Intent 写法 |
 |------|-------------|

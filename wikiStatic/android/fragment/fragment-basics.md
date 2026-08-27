@@ -12,6 +12,8 @@ description: Fragment 完整生命周期、与 Activity 的联动关系、Fragme
 
 ### 1.1 生命周期全景
 
+Fragment 完整生命周期如下：
+
 ```mermaid
 stateDiagram-v2
     [*] --> onAttach: 与 Activity 关联
@@ -30,6 +32,8 @@ stateDiagram-v2
 
 ### 1.2 生命周期与 Activity 联动
 
+Fragment 与 Activity 生命周期的联动时序如下：
+
 ```mermaid
 sequenceDiagram
     participant A as Activity
@@ -45,6 +49,8 @@ sequenceDiagram
 ```
 
 ### 1.3 核心回调详解
+
+各核心回调的时机与注意事项如下：
 
 | 回调 | 时机 | 典型操作 | 注意事项 |
 |------|------|----------|----------|
@@ -71,6 +77,8 @@ View 生命周期：        onCreateView → ... → onDestroyView（可能多�
 - Fragment 的 **View 可能先于 Fragment 销毁**（例如 `replace` 后 Fragment 实例还在返回栈里，但 View 已被销毁）。
 - 重建 View 时（如从返回栈弹出、配置变更），会重新走 `onCreateView → onViewCreated`，**但不会重新走 onCreate**。
 - 因此 **View 相关操作必须绑定 `viewLifecycleOwner`**，而非 Fragment 本身的 lifecycle。
+
+viewLifecycleOwner 的正确用法如下：
 
 ::: code-tabs
 
@@ -112,6 +120,8 @@ lifecycleScope.launch {
 
 ### 2.1 三个 FragmentManager 的区别
 
+三个 FragmentManager 的对比说明如下：
+
 | Manager | 作用域 | 获取方式 | 典型场景 |
 |---------|--------|----------|----------|
 | `supportFragmentManager` | Activity 级 | `supportFragmentManager` | 管理 Activity 的 Fragment |
@@ -123,6 +133,8 @@ lifecycleScope.launch {
 :::
 
 ### 2.2 事务操作详解
+
+事务操作的标准写法如下：
 
 ::: code-tabs
 
@@ -150,6 +162,8 @@ supportFragmentManager.commit {
 
 :::
 
+各事务操作的对比说明如下：
+
 | 操作 | 行为 | 状态保留 | 适用场景 |
 |------|------|----------|----------|
 | `add` | 叠加显示（新旧并存） | 都保留 | 同时展示多个 Fragment（如平板双栏） |
@@ -166,6 +180,8 @@ supportFragmentManager.commit {
 
 ### 2.3 commit 的三种方式
 
+三种 commit 方式的对比说明如下：
+
 | API | 行为 | 场景 |
 |-----|------|------|
 | `commit()` | 异步提交，状态丢失时抛异常 | 默认选择 |
@@ -175,6 +191,8 @@ supportFragmentManager.commit {
 ## 三、Fragment 间通信（四种方式）
 
 ### 3.1 共享 ViewModel（推荐首选）
+
+共享 ViewModel 的标准写法如下：
 
 ::: code-tabs
 
@@ -217,6 +235,8 @@ class DetailFragment : Fragment() {
 - 父子 Fragment 间共享用 `by viewModels(ownerProducer = { requireParentFragment() })` 或 `activityViewModels()`。
 
 ### 3.2 setFragmentResult（官方轻量通信）
+
+setFragmentResult 的标准写法如下：
 
 ::: code-tabs
 
@@ -266,6 +286,8 @@ setFragmentResult("request_key", bundleOf("result" to "data"))
 - 注意：监听器回调在 **onStart 之后才可用**（FragmentManager 会在 onStart 时投递延迟结果）。
 
 ### 3.3 接口回调（传统方式）
+
+接口回调的标准写法如下：
 
 ::: code-tabs
 
@@ -321,6 +343,8 @@ class ItemListFragment : Fragment() {
 
 ### 3.4 直接访问（简单场景，谨慎使用）
 
+直接访问的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -347,12 +371,16 @@ val fragment = supportFragmentManager.findFragmentById(R.id.container) as? Detai
 
 ## 四、Fragment 状态保存
 
+各状态类型的保存机制如下：
+
 | 状态类型 | 保存机制 | 恢复时机 |
 |----------|----------|----------|
 | `arguments` | FragmentManager 自动保存 | 重建时自动传入 |
 | View 状态（EditText 文本等） | View 自身的 onSaveInstanceState | `onViewCreated` 后自动恢复 |
 | 成员变量 | **不会自动保存** | 需手动 `onSaveInstanceState` |
 | 业务数据 | ViewModel（推荐） | 进程内跨配置变更 |
+
+手动保存状态的示例代码如下：
 
 ::: code-tabs
 
@@ -401,6 +429,8 @@ class ProfileFragment : Fragment() {
 > **现代推荐**：业务数据放 ViewModel；UI 状态用 `SavedStateHandle`；只有"无法放 ViewModel 的轻量标志"才手动 `onSaveInstanceState`。
 
 ## 五、Fragment 与 ViewPager2
+
+ViewPager2 适配器的标准写法如下：
 
 ::: code-tabs
 
@@ -459,6 +489,8 @@ class MainActivity : AppCompatActivity() {
 ```
 
 :::
+
+两种适配器的对比说明如下：
 
 | 适配器 | 特点 | 适用场景 |
 |--------|------|----------|

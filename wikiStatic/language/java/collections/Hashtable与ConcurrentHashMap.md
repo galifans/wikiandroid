@@ -15,6 +15,8 @@ title: Hashtable 与 ConcurrentHashMap
 
 ## HashMap 与 Hashtable 的区别
 
+HashMap 与 Hashtable 的对比说明如下：
+
 | 对比项 | HashMap | Hashtable |
 |--------|---------|-----------|
 | 线程安全 | 否 | 是（方法级 synchronized） |
@@ -32,6 +34,8 @@ Hashtable 的同步是**方法级**的，并发度低（整张表一把锁）。
 - 支持高并发场景
 
 ## 线程安全集合的选择
+
+不同并发场景下的集合选择建议如下：
 
 | 场景 | 推荐 |
 |------|------|

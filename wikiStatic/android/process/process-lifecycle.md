@@ -34,6 +34,8 @@ description: 进程概念、五级生命周期与 ADJ 机制、多进程模式�
 
 ### 1.2 进程与线程的区别（经典面试题）
 
+进程与线程的区别对比说明如下：
+
 | 维度 | 进程 | 线程 |
 |------|------|------|
 | 定义 | 资源分配的基本单位 | CPU 调度的基本单位 |
@@ -46,6 +48,8 @@ description: 进程概念、五级生命周期与 ADJ 机制、多进程模式�
 ## 二、进程生命周期（五级）
 
 > 与 Activity 生命周期无关——**进程优先级由组件状态决定**，系统按优先级回收进程。
+
+五级进程生命周期的流转关系如下：
 
 ```mermaid
 flowchart TD
@@ -60,6 +64,8 @@ flowchart TD
     A -->|内存严重不足| F
 ```
 
+各级别进程的触发条件与被杀顺序如下：
+
 | 级别 | 条件 | 被杀优先级 |
 | --- | --- | --- |
 | 前台进程 | 正在交互的 Activity（`onResume`）；绑定前台 Activity 的 Service；前台服务（`startForeground`）；正在执行生命周期回调的 Service；正在执行 `onReceive()` 的 Receiver | 最后被杀 |
@@ -71,6 +77,8 @@ flowchart TD
 ## 三、进程优先级背后的 OOM_ADJ 机制
 
 系统用 **ADJ（Adjustment）值**对进程打分，值越小优先级越高（越晚被杀）。这是 LMK（Low Memory Killer，内核 `lmkd` 进程）决策的依据：
+
+各 ADJ 级别的取值与含义如下：
 
 | ADJ 级别 | 取值 | 解释 |
 | --- | --- | --- |
@@ -100,6 +108,8 @@ flowchart TD
 
 ### 4.1 为什么会创建多个 Application
 
+多进程下 Application 的创建时序如下：
+
 ```mermaid
 sequenceDiagram
     participant S as system_server
@@ -113,6 +123,8 @@ sequenceDiagram
 
 ### 4.2 多进程带来的问题
 
+多进程带来的典型问题与解决方案如下：
+
 | 问题 | 原因 | 解决 |
 |------|------|------|
 | 静态成员/单例失效 | 每个进程独立内存，变量不共享 | 进程内判断 + 跨进程通信（Binder） |
@@ -120,6 +132,8 @@ sequenceDiagram
 | SharedPreferences 不可靠 | 内存缓存不同步 | 用 ContentProvider 或数据库（如 Room） |
 | Application 多次初始化 | 每进程都走 onCreate | 按进程名分支初始化 |
 | Binder 死锁风险 | 主线程等待其他进程 Binder 返回 | 避免主线程同步跨进程调用 |
+
+按进程名分支初始化的示例代码如下：
 
 ::: code-tabs
 
@@ -168,6 +182,8 @@ class MyApplication : Application() {
 
 ### 5.1 历史上的保活手段
 
+历史保活方案的原理与现状如下：
+
 | 方案 | 原理 | 现状 |
 |------|------|------|
 | 一个像素 Activity | 透明 Activity 提升前台优先级 | ✗ 已被系统检测限制（8.0+） |
@@ -179,6 +195,8 @@ class MyApplication : Application() {
 | 静默前台服务 | 隐藏通知 | ✗ Android 8.0+ 必须显示通知，否则崩溃 |
 
 ### 5.2 Android 8.0+ 的现实
+
+系统版本限制对保活方案的影响如下：
 
 ```mermaid
 flowchart LR
@@ -195,6 +213,8 @@ flowchart LR
 2. **引导用户加入电池优化白名单**：`ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`。
 3. **WorkManager**：系统统一调度的延迟/周期任务，优先于自行保活。
 4. **接受现实**：纯后台 App 在息屏后被杀是**系统设计**，不是 bug。
+
+判断应用是否在电池优化白名单中的代码如下：
 
 ::: code-tabs
 

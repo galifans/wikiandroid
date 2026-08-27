@@ -11,11 +11,15 @@ description: dispatchTouchEvent/onInterceptTouchEvent/onTouchEvent 三大方法�
 
 ## 1. 三个核心方法
 
+分发、拦截、消费各司其职：
+
 | 方法 | 所属 | 作用 |
 | --- | --- | --- |
 | `dispatchTouchEvent` | View / ViewGroup | 事件分发入口 |
 | `onInterceptTouchEvent` | ViewGroup 独有 | 是否拦截事件 |
 | `onTouchEvent` | View / ViewGroup | 是否消费事件 |
+
+分发链条从 Activity 一直走到子 View：
 
 ```text
 分发链条：
@@ -30,6 +34,8 @@ Activity.dispatchTouchEvent
 ```
 
 ## 2. ViewGroup 分发逻辑（伪代码）
+
+拦截、遍历子 View、兜底处理三步：
 
 ::: code-tabs
 
@@ -95,6 +101,8 @@ override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
 
 ## 3. View 的消费逻辑
 
+Listener 优先于 onTouchEvent：
+
 ::: code-tabs
 
 @tab:active Java
@@ -130,18 +138,9 @@ override fun dispatchTouchEvent(event: MotionEvent): Boolean {
 **优先级**：`OnTouchListener > onTouchEvent > OnClickListener`（onClick 在
 onTouchEvent 的 ACTION_UP 中触发）。
 
+onClick 在 ACTION_UP 时触发：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// onTouchEvent 中点击事件的触发
-if (action == MotionEvent.ACTION_UP) {
-    if (mOnClickListener != null) {
-        mOnClickListener.onClick(this);   // 点击回调在 UP 时触发
-    }
-}
-```
 
 @tab Kotlin
 
@@ -161,6 +160,8 @@ if (action == MotionEvent.ACTION_UP) {
 
 ## 4. 事件传递的完整流程图
 
+完整的分发与回传路径：
+
 ```mermaid
 flowchart TD
     A[Activity.dispatchTouchEvent] --> B[DecorView.dispatchTouchEvent]
@@ -179,12 +180,16 @@ flowchart TD
 
 ### 5.1 DOWN 不拦截就锁定目标
 
+目标锁定的规则：
+
 ```text
 一旦 DOWN 被某个 View 消费，后续 MOVE/UP 都发给它（mTarget）
 除非父 View 在后续事件中调用 requestDisallowInterceptTouchEvent(true)
 ```
 
 ### 5.2 两个关键 API
+
+禁止父 View 拦截的两个姿势：
 
 ::: code-tabs
 
@@ -211,6 +216,8 @@ parent.requestDisallowInterceptTouchEvent(true)
 :::
 
 ### 5.3 事件的坐标
+
+注意两套坐标系的区别：
 
 ::: code-tabs
 

@@ -78,6 +78,8 @@ override fun onSaveInstanceState(outState: Bundle) {
 
 ### 2.2 恢复状态
 
+状态恢复的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -198,6 +200,8 @@ class ProfileActivity : ComponentActivity() {
 
 ### 三者的分工对比
 
+三者的分工对比说明如下：
+
 | 维度 | onSaveInstanceState | ViewModel | 持久化存储 |
 |------|---------------------|-----------|-----------|
 | 生命周期 | Activity 销毁前 | Activity 最终销毁前（onCleared） | 独立于生命周期 |
@@ -249,6 +253,8 @@ override fun onConfigurationChanged(newConfig: Configuration) {
 
 ### configChanges 的坑
 
+configChanges 的常见坑点如下：
+
 | 坑点 | 说明 |
 |------|------|
 | 资源不自动切换 | 不会自动加载 `layout-land` 等限定符资源，需手工处理 |
@@ -267,6 +273,8 @@ Fragment 状态由 FragmentManager 统一管理：
 - `onSaveInstanceState`：Fragment 自身轻量状态
 - `FragmentManager.saveFragmentInstanceState`：整个 Fragment 的实例状态（含 view state）
 - 重建后 `onCreate` 收到 `savedInstanceState`，`getArguments()` 保留构造参数
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -337,6 +345,8 @@ flowchart TD
 - ViewModel 不参与进程级恢复（除非用 SavedStateHandle）
 
 ### SavedStateHandle：进程死亡也能恢复的 ViewModel
+
+SavedStateHandle 的核心实现如下：
 
 ::: code-tabs
 

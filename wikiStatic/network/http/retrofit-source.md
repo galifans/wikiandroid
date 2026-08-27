@@ -10,6 +10,8 @@ description: Retrofit 接口如何变成网络请求、动态代理、CallAdapte
 
 ## 一、Retrofit 做了什么
 
+Retrofit 接口的定义与使用方式如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -45,6 +47,8 @@ val user = api.getUser(1)   // 实际发生了网络请求!
 **答案**:Retrofit 用 **动态代理** 在运行时生成了接口的实现——所有方法调用都会被拦截,解析注解后构造 OkHttp 请求。
 
 ## 二、动态代理核心
+
+动态代理的核心实现如下：
 
 ::: code-tabs
 
@@ -91,6 +95,8 @@ fun <T> create(service: Class<T>): T {
 
 :::
 
+动态代理的完整调用链路如下：
+
 ```mermaid
 sequenceDiagram
     participant U as 调用方
@@ -106,6 +112,8 @@ sequenceDiagram
 ```
 
 ## 三、ServiceMethod:注解 → 请求
+
+ServiceMethod 的核心实现如下：
 
 ::: code-tabs
 
@@ -153,6 +161,8 @@ class ServiceMethod {
 
 ### 注解解析规则
 
+各注解的解析规则说明如下：
+
 | 注解 | 作用 | 示例 |
 |------|------|------|
 | `@GET/@POST/@PUT/@DELETE/@PATCH/@HEAD` | HTTP 方法 | `@GET("users")` |
@@ -164,6 +174,8 @@ class ServiceMethod {
 | `@Multipart + @Part` | 文件上传 | `file=@xxx` |
 
 ## 四、CallAdapter:返回类型适配
+
+CallAdapter 的核心实现如下：
 
 ::: code-tabs
 
@@ -207,6 +219,8 @@ class DefaultCallAdapterFactory : CallAdapter.Factory {
 
 ### 返回类型对照
 
+各返回类型的适配方式说明如下：
+
 | 接口方法返回类型 | 适配方式 |
 |-----------------|---------|
 | `Call<User>` | 直接返回 Call,手动 enqueue/execute |
@@ -214,6 +228,8 @@ class DefaultCallAdapterFactory : CallAdapter.Factory {
 | `suspend fun ...: Response<User>` | 返回完整响应(含状态码) |
 | `Observable<User>` (RxJava) | RxJavaCallAdapterFactory |
 | `Flow<User>` | FlowCallAdapterFactory |
+
+各返回类型的适配链路如下：
 
 ```mermaid
 flowchart LR
@@ -225,6 +241,8 @@ flowchart LR
 ```
 
 ## 五、Converter:响应体转换
+
+Converter 的核心实现如下：
 
 ::: code-tabs
 
@@ -265,6 +283,8 @@ class GsonResponseBodyConverter<T> : Converter<ResponseBody, T> {
 
 :::
 
+常用 Converter 的对比说明如下：
+
 | Converter | 用途 |
 |-----------|------|
 | GsonConverterFactory | JSON(Gson) |
@@ -275,6 +295,8 @@ class GsonResponseBodyConverter<T> : Converter<ResponseBody, T> {
 | 自定义 | 任意格式 |
 
 ## 六、Retrofit 整体流程
+
+Retrofit 的整体流程如下：
 
 ```mermaid
 flowchart TD

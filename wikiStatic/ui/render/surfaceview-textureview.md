@@ -18,7 +18,7 @@ description: 独立 Surface 原理、双缓冲机制、TextureView 与 SurfaceVi
 - 相机预览需要实时刷新画面
 - 游戏需要高帧率渲染
 
-如果这些都在主线程，会阻塞 UI 交互。因此 Android 提供 **SurfaceView**：
+如果这些都在主线程，会阻塞 UI 交互。因此 Android 提供 **SurfaceView**，两者对比：
 
 ```mermaid
 flowchart LR
@@ -34,6 +34,8 @@ flowchart LR
 
 ### 2.1 独立 Surface
 
+SurfaceView 的图层在 View 层级之外：
+
 ```mermaid
 flowchart TD
     A[Activity Window] --> B[View 层级<br>普通 View]
@@ -47,6 +49,8 @@ flowchart TD
 
 ### 2.2 双缓冲机制
 
+前后台缓冲交替使用避免撕裂：
+
 ```mermaid
 flowchart LR
     A[前台缓冲<br>正在显示] <--> B[后台缓冲<br>正在绘制]
@@ -58,6 +62,8 @@ flowchart LR
 - 视频/游戏流畅度的关键
 
 ### 2.3 SurfaceHolder 使用
+
+在子线程里用 lockCanvas 绘制的完整写法：
 
 ::: code-tabs
 
@@ -172,6 +178,8 @@ flowchart LR
 
 ### 3.2 基本使用
 
+先监听纹理可用再开始渲染：
+
 ::: code-tabs
 
 @tab:active Java
@@ -222,6 +230,8 @@ textureView.surfaceTextureListener = object : TextureView.SurfaceTextureListener
 
 ### 3.3 抓帧与转换
 
+getBitmap 可以直接抓取当前帧：
+
 ::: code-tabs
 
 @tab:active Java
@@ -250,6 +260,8 @@ val savedBitmap = textureView.getBitmap(bitmapWidth, bitmapHeight)
 
 ### 4.1 对比表
 
+两者在关键维度上的差异：
+
 | 维度 | SurfaceView | TextureView |
 |------|-------------|-------------|
 | 本质 | 独立 Surface 图层 | 普通 View + GPU 纹理 |
@@ -262,6 +274,8 @@ val savedBitmap = textureView.getBitmap(bitmapWidth, bitmapHeight)
 | 适用 | 视频、游戏、相机 | 需要变换的预览、抠图、直播特效 |
 
 ### 4.2 选择建议
+
+按需求走一遍决策树：
 
 ```mermaid
 flowchart TD
@@ -279,6 +293,8 @@ flowchart TD
 ## 五、实战场景
 
 ### 5.1 视频播放
+
+ExoPlayer 直接绑定 SurfaceView：
 
 ::: code-tabs
 
@@ -305,6 +321,8 @@ player.play()
 :::
 
 ### 5.2 相机预览（Camera2 + TextureView）
+
+把预览画面送到 SurfaceTexture：
 
 ::: code-tabs
 

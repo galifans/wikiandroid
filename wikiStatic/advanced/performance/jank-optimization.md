@@ -62,6 +62,8 @@ Android 渲染：
 
 ### 3.2 代码检测（Looper 监控原理）
 
+Looper 卡顿监控的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java

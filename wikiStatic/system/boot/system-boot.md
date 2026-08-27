@@ -11,6 +11,8 @@ description: 从电源键到 Launcher 的完整启动链路、Boot ROM/内核/in
 
 ## 1. 启动总览
 
+Android 系统启动的完整链路如下：
+
 ```mermaid
 flowchart LR
     A[电源键] --> B[Boot ROM]

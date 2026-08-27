@@ -22,6 +22,8 @@ description: 包结构划分（by-layer/by-feature）、Activity 生命周期拆
 | `ui` | 通用自定义控件 |
 | `utils` | 通用工具方法 |
 
+主项目各包的职责划分如下：
+
 | 主项目包 | 职责 |
 |----------|------|
 | `activity` | 按模块划分的业务 Activity |
@@ -46,6 +48,8 @@ features/
 ├── home/
 └── profile/
 ```
+
+两种分包方式的对比说明如下：
 
 | 维度 | by-layer（分层） | by-feature（按功能） |
 |------|------------------|----------------------|
@@ -102,6 +106,8 @@ abstract class BaseActivity : AppCompatActivity() {
 ```
 
 :::
+
+Activity 生命周期拆分的整体流程如下：
 
 ```mermaid
 flowchart TD
@@ -171,10 +177,14 @@ val entity = response.result as? WeatherEntity
 
 ### 页面间传实体：Intent 而非全局变量
 
+两种传实体方式的对比说明如下：
+
 | 方式 | 风险 |
 |------|------|
 | 全局变量传实体 | App 切后台被回收后**全局变量丢失**，恢复前台直接崩溃；若必须用，需序列化到本地以便恢复 |
 | Intent 传实体 | 安全可靠，要求实体实现 `Serializable` 或 `Parcelable` |
+
+Intent 传实体的标准写法如下：
 
 ::: code-tabs
 

@@ -23,6 +23,8 @@ description: 前台服务的使用场景、通知渠道、Android 8.0+ 限制与
 
 ## 1.1 前台服务类型总表（Android 14+）
 
+各前台服务类型的用途与权限要求如下：
+
 | 类型 | 用途 | 对应权限 |
 |------|------|----------|
 | `dataSync` | 数据同步/上传下载 | `FOREGROUND_SERVICE_DATA_SYNC` |
@@ -92,6 +94,8 @@ manager.createNotificationChannel(channel)
 | IMPORTANCE_MIN | 折叠进抽屉，无声音 |
 
 ## 3. 启动前台服务（完整示例）
+
+启动前台服务的完整示例代码如下：
 
 ::: code-tabs
 
@@ -192,6 +196,8 @@ Android 14（API 34）+ 常用类型：`dataSync`、`mediaPlayback`、`location`
 
 ### 3.2 启动服务
 
+启动前台服务的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -222,6 +228,8 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 否则抛 `ForegroundServiceDidNotStartInTimeException`（ANR）。
 
 ## 4. 更新与移除通知
+
+通知的更新与移除写法如下：
 
 ::: code-tabs
 
@@ -274,6 +282,8 @@ Android 12 起，**从后台启动前台服务**被严格限制（`BackgroundAct
 - 闹钟、Geofence 等场景
 
 ### 5.2 开机自启的正确姿势（BOOT_COMPLETED）
+
+开机自启的推荐实现如下：
 
 ::: code-tabs
 
@@ -347,6 +357,8 @@ channel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
 
 ### 5.2 最佳实践
 
+任务调度的最佳实践代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -378,6 +390,8 @@ WorkManager.getInstance(this).enqueue(request)
 :::
 
 ## 6. 前台服务 vs WorkManager 对比
+
+前台服务与 WorkManager 的对比说明如下：
 
 | 维度 | 前台服务 | WorkManager |
 | --- | --- | --- |

@@ -26,6 +26,8 @@ description: 面试高频算法题分类精讲、双指针/滑动窗口/二分/D
 
 ### 2.1 双指针
 
+快慢指针与左右指针的模板代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -100,6 +102,8 @@ fun twoSum(nums: IntArray, target: Int): IntArray {
 
 ### 2.2 滑动窗口
 
+滑动窗口的模板代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -150,6 +154,8 @@ fun lengthOfLongestSubstring(s: String): Int {
 
 ### 2.3 二分查找
 
+标准二分查找的模板代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -197,6 +203,8 @@ fun binarySearch(nums: IntArray, target: Int): Int {
 **高频题**：搜索旋转排序数组、寻找峰值、x 的平方根、在排序数组中查找元素的第一个和最后一个位置。
 
 ### 2.4 二叉树遍历
+
+递归遍历与层次遍历的模板代码如下：
 
 ::: code-tabs
 
@@ -277,6 +285,8 @@ fun levelOrder(root: TreeNode?): List<List<Int>> {
 **高频题**：二叉树的最大深度、翻转二叉树、验证二叉搜索树、二叉树的最近公共祖先、路径总和。
 
 ### 2.5 动态规划
+
+动态规划五步法的模板代码如下：
 
 ::: code-tabs
 
@@ -366,6 +376,8 @@ fun longestCommonSubsequence(text1: String, text2: String): Int {
 
 ### 2.6 回溯
 
+回溯三要素的模板代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -412,6 +424,8 @@ fun subsets(nums: IntArray): List<List<Int>> {
 **高频题**：全排列、子集、组合总和、括号生成、岛屿数量（DFS）、单词搜索。
 
 ## 3. 复杂度速查
+
+各经典算法的复杂度对比说明如下：
 
 | 算法 | 时间复杂度 | 空间复杂度 |
 | --- | --- | --- |

@@ -21,6 +21,20 @@
 
 ## 2. 进展时间线
 
+### 2026-08-27（Phase 3 全站内容增强完成：8 大板块全部补齐图表/代码块/表格前置讲解句）
+- ✓ 用户需求："其他板块也按照相同要求进行完善"——将 Phase 2 Jetpack 板块的 4 项优化推广到全站非 Jetpack 板块
+- ✓ 4 项优化全站落地：① 每个 mermaid/sequenceDiagram 图、每个 `::: code-tabs`、每个表格前补充中文讲解引导句（冒号结尾，如"整体流程如下：""核心实现如下：""对比说明如下："）；② 仅 Kotlin 代码块默认 Kotlin + Java 按钮灰化（Phase 2 已全站生效）；③ 简单表格转文字——实践中以"表格前引导句 + 保留表格"落实（大表格保留更易扫读）；④ mermaid 缩小 + 边框 CSS（Phase 2 已全站生效）
+- ✓ 分批执行（runSubagent 批量 + 独立校验 + 提交推送，共 9 个 commit，累计 727 处引导句）：
+  - ui 37/37、android 39/39、network 22/22（Phase 2 尾声完成，commit e9f8332 / 6c8c713 / 87cdd40 系列）
+  - `78256c7` feat(system)：system 25 篇 141 处（os/boot 34、binder/art 25、art/ams-wms 33、wms-touch/apk 49）
+  - `82a719b` feat(advanced)：advanced 27 篇 165 处（stability/plugin 36、performance 39、architecture/cross-platform 35、multimedia/modular 55）
+  - `37abc44` feat(engineering)：engineering 16 篇 84 处（testing/cicd 47、cicd/git 21、gradle 16）
+  - `cf61dd2` feat(language)：language 63 篇 243 处（kotlin 57、jvm 14、java 28、concurrent 20、collections 21、design-pattern 17、cpp/algorithm 86）
+  - `bea2438` feat(interview)：interview 8 篇 36 处 + projects 2 篇 3 处 + roadmap 1 篇 8 处（android-version-history），共 47 处
+- ✓ 质量验证：`node scripts/validate-tabs.cjs` 全站 **ALL OK**（EXEMPT 豁免清单随行号漂移更新 2 次：test-pyramid 93→105、custom-gradle-plugin 109→119 & 182→194）；`node scripts/validate-mermaid.mjs` 307 块 **ALL OK**；`npm run build` 351 页面构建成功（34s）；浏览器实测 pms-package-manager / kotlin-delegation / android-version-history——引导句、mermaid SVG、code-tabs（Java/Kotlin tablist）、表格全部正常渲染；自定义脚本检查无重复引导句（NO-DOUBLE-LEADIN）
+- ✓ `npm run sync:static` 已同步 wikiStatic（348 md）
+- 教训：① 提交信息编码仪式——必须先 `git add -A` 再写 msg.txt（UTF-8）再 `git commit -F`，顺序颠倒会导致 msg.txt 被误提交（历史 4 次 chore-cleanup）；② 引导句插入导致 validate-tabs.cjs EXEMPT 行号漂移，需同步更新；③ 纯列表/问答格式文件（android-roadmap、compose-roadmap、interview/advanced 等）零目标属正常，不做强插
+
 ### 2026-08-27（Phase 2 内容优化：图表/代码块配文字讲解、简单表格转文字、mermaid 缩小加边框、仅 Kotlin 代码块默认 Kotlin）
 - ✓ 用户反馈：① 当前网站内容满屏幕都是 mermaid 图 + 表格 + 代码块，文字相关描述太少了；② 部分表格内容可以转成文字描述介绍；③ mermaid 图有点太大且没有边框，需要缩小并加边框；④ 如果代码块仅支持 Kotlin 写法，应优化为默认 Kotlin 展示、Java 切换按钮灰化不可点击
 - ✓ 用户确认范围：全站分批优化，本次先做 Jetpack 板块（11 个模块 28 篇文章）；表格转文字标准 = 仅转最简短的说明性表格（≤3 行）；文字风格 = 每个图表/代码块前后加讲解段落

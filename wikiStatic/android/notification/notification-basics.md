@@ -10,6 +10,8 @@ description: Android 通知体系全解析——通知渠道(Channel)机制、No
 
 ## 一、通知架构
 
+通知从应用到状态栏的完整链路如下：
+
 ```mermaid
 flowchart LR
     A[应用<br/>NotificationManager] -->|notify id, notification| B[系统服务<br/>NotificationManagerService]
@@ -19,6 +21,8 @@ flowchart LR
     C --> F[悬浮窗<br/>heads-up]
     B -->|POST_NOTIFICATIONS 权限<br/>Android 13+| G{用户授权?}
 ```
+
+各角色的职责说明如下：
 
 | 角色 | 说明 |
 |------|------|
@@ -33,6 +37,8 @@ flowchart LR
 
 Android 8.0 之前用户只能"全部开/关"通知；有了渠道，用户可以**对每个渠道单独控制**：关闭营销渠道、保留消息渠道。
 
+渠道分类与用户控制的构成关系如下：
+
 ```mermaid
 flowchart TD
     A[应用定义渠道] --> B[消息渠道<br/>importance HIGH]
@@ -42,6 +48,8 @@ flowchart TD
 ```
 
 ### 创建渠道
+
+创建通知渠道的标准写法如下：
 
 ::: code-tabs
 
@@ -119,6 +127,8 @@ class WikiApplication : Application() {
 
 :::
 
+各重要性的行为表现如下：
+
 | 重要性 | 行为 |
 |--------|------|
 | `IMPORTANCE_HIGH` | 悬浮窗 + 声音 + 震动 |
@@ -131,6 +141,8 @@ class WikiApplication : Application() {
 :::
 
 ## 三、构建通知
+
+构建并发送通知的完整示例代码如下：
 
 ::: code-tabs
 
@@ -193,6 +205,8 @@ fun showMessageNotification(title: String, content: String) {
 
 ### Builder 常用方法
 
+Builder 常用方法的作用说明如下：
+
 | 方法 | 作用 |
 |------|------|
 | `setSmallIcon` | 状态栏小图标（**必须设置**） |
@@ -207,6 +221,8 @@ fun showMessageNotification(title: String, content: String) {
 | `setDeleteIntent` | 用户滑动删除时回调 |
 
 ## 四、通知样式（Style）
+
+四种常用通知样式的写法如下：
 
 ::: code-tabs
 
@@ -270,6 +286,8 @@ NotificationCompat.Builder(this, "downloads")
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 ```
 
+动态申请通知权限的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -302,6 +320,8 @@ fun ensureNotificationPermission() {
 ```
 
 :::
+
+不同 targetSdk 下的通知权限行为如下：
 
 | targetSdk | 行为 |
 |-----------|------|
@@ -365,6 +385,8 @@ class MusicService : Service() {
 :::
 
 ## 七、常见问题排查
+
+常见问题的原因与解决方案对比如下：
 
 | 问题 | 原因 | 解决方案 |
 |------|------|----------|

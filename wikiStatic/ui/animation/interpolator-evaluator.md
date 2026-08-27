@@ -12,6 +12,8 @@ description: Interpolator 时间函数、Evaluator 数值映射、二者协作�
 
 ### 1.1 动画执行流程
 
+一次动画从开始到更新属性的链路：
+
 ```mermaid
 flowchart LR
     A[ValueAnimator.start] --> B[时间插值器<br>Interpolator]
@@ -44,6 +46,8 @@ fraction = interpolator.getInterpolation(input)
 
 ### 2.2 内置插值器
 
+系统内置的插值器各有节奏特点：
+
 | 插值器 | 效果 | 特点 |
 |--------|------|------|
 | LinearInterpolator | 匀速 | 无加速减速 |
@@ -56,6 +60,8 @@ fraction = interpolator.getInterpolation(input)
 | AnticipateOvershootInterpolator | 蓄力 + 回弹 | 组合效果 |
 | CycleInterpolator | 循环 | 正弦循环 |
 
+用公式表达，加速与回弹的曲线差异：
+
 ```mermaid
 flowchart LR
     A[Linear] --> B[匀速直线]
@@ -64,6 +70,8 @@ flowchart LR
 ```
 
 ### 2.3 自定义插值器
+
+实现 getInterpolation 即可自定义节奏曲线：
 
 ::: code-tabs
 
@@ -111,6 +119,8 @@ class EaseInOutCubicInterpolator : Interpolator {
 value = evaluator.evaluate(fraction, startValue, endValue)
 ```
 
+内置估值器覆盖了常用类型：
+
 | 内置估值器 | 处理类型 | 说明 |
 |------------|----------|------|
 | IntEvaluator | Int | 整数插值 |
@@ -120,6 +130,8 @@ value = evaluator.evaluate(fraction, startValue, endValue)
 | RectEvaluator | Rect | 矩形插值 |
 
 ### 3.2 插值器与估值器的协作
+
+两者在每帧中的协作时序：
 
 ```mermaid
 sequenceDiagram
@@ -145,6 +157,8 @@ sequenceDiagram
 ## 四、自定义估值器
 
 ### 4.1 TypeEvaluator 实现
+
+自定义估值器实现 evaluate 即可：
 
 ::: code-tabs
 
@@ -201,6 +215,8 @@ animator.addUpdateListener { va ->
 
 ### 4.2 ObjectAnimator 与估值器
 
+估值器算出的值由 ObjectAnimator 反射调用 setter：
+
 ::: code-tabs
 
 @tab:active Java
@@ -235,6 +251,8 @@ animator.start()
 
 ### 5.1 关键帧（Keyframe）
 
+用多个关键帧把动画拆成分段节奏：
+
 ::: code-tabs
 
 @tab:active Java
@@ -264,6 +282,8 @@ val animator = ObjectAnimator.ofPropertyValuesHolder(view, property)
 关键帧允许：**不同阶段使用不同插值器**（通过 `kf.interpolator` 设置），实现复杂节奏。
 
 ### 5.2 动画执行主循环
+
+每帧执行的核心计算：
 
 ::: code-tabs
 

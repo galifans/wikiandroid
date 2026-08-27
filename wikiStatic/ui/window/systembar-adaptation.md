@@ -12,12 +12,16 @@ description: 状态栏/导航栏适配、WindowInsets 详解、沉浸式与刘�
 
 ### 1.1 系统栏组成
 
+屏幕被系统栏划分为几个区域，布局如下：
+
 ```mermaid
 flowchart TD
     A[屏幕] --> B[状态栏 StatusBar<br>顶部]
     A --> C[导航栏 NavigationBar<br>底部 三键/手势]
     A --> D[内容区域<br>Content]
 ```
+
+各系统栏的职责如下：
 
 | 系统栏 | 位置 | 说明 |
 |--------|------|------|
@@ -26,6 +30,8 @@ flowchart TD
 | 刘海/挖孔 | 屏幕内 | 摄像头区域，需避开 |
 
 ### 1.2 沉浸式类型
+
+沉浸式按程度分为三类，效果与适用场景如下：
 
 | 类型 | 效果 | 适用 |
 |------|------|------|
@@ -48,6 +54,8 @@ flowchart LR
     B --> F[IME<br>键盘区域]
 ```
 
+常用 Insets 类型及含义如下：
+
 | Insets 类型 | 含义 |
 |-------------|------|
 | `systemBars()` | 状态栏 + 导航栏整体 |
@@ -58,6 +66,8 @@ flowchart LR
 | `safeDrawing()` | 安全绘制区域（API 30+） |
 
 ### 2.2 传统获取方式（WindowInsets 前）
+
+WindowInsets 出现之前，只能通过反射等脆弱手段获取：
 
 ::: code-tabs
 
@@ -96,6 +106,8 @@ fun getStatusBarHeight(context: Context): Int {
 :::
 
 ### 2.3 现代方式：OnApplyWindowInsetsListener
+
+现代推荐在 View 上注册 OnApplyWindowInsetsListener 统一处理：
 
 ::: code-tabs
 
@@ -155,6 +167,8 @@ class InsetsView(context: Context) : View(context) {
 
 ### 3.1 状态栏透明 + 深色图标
 
+透明状态栏需要分版本做兼容处理：
+
 ::: code-tabs
 
 @tab:active Java
@@ -208,6 +222,8 @@ fun setupStatusBar(activity: Activity) {
 
 ### 3.2 全屏沉浸（视频/游戏）
 
+全屏沉浸通过 systemUiVisibility 组合 flag 实现隐藏与恢复：
+
 ::: code-tabs
 
 @tab:active Java
@@ -250,6 +266,8 @@ fun showSystemBars(activity: Activity) {
 
 :::
 
+常用 flag 的作用如下：
+
 | Flag | 作用 |
 |------|------|
 | `SYSTEM_UI_FLAG_FULLSCREEN` | 隐藏状态栏 |
@@ -260,6 +278,8 @@ fun showSystemBars(activity: Activity) {
 | `SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR` | 导航栏深色图标 |
 
 ### 3.3 新 API：WindowInsetsController（API 30+）
+
+API 30+ 提供了更规范的 WindowInsetsController 来控制系统栏：
 
 ::: code-tabs
 
@@ -296,6 +316,8 @@ fun setupImmersive(activity: Activity) {
 ## 四、刘海屏适配
 
 ### 4.1 获取刘海区域
+
+通过 displayCutout 监听刘海区域，给内容留出安全距离：
 
 ::: code-tabs
 
@@ -338,6 +360,8 @@ view.setOnApplyWindowInsetsListener { v, insets ->
 
 ### 4.2 布局适配策略
 
+刘海屏布局有三种适配策略：
+
 | 策略 | 做法 |
 |------|------|
 | 避开模式 | 内容 padding 避开刘海区 |
@@ -358,6 +382,8 @@ view.setOnApplyWindowInsetsListener { v, insets ->
 **Edge-to-Edge**：内容延伸到整个屏幕（状态栏和导航栏后），系统栏透明或半透明，由应用自己管理避让。
 
 ### 5.2 适配要点
+
+让内容延伸到系统栏后方，核心代码如下：
 
 ::: code-tabs
 
@@ -395,6 +421,8 @@ fun enableEdgeToEdge(activity: Activity) {
 - 全屏页面：自动隐藏系统栏
 
 ### 5.3 常见适配代码
+
+实际项目中常用根布局统一处理 insets 的写法：
 
 ::: code-tabs
 

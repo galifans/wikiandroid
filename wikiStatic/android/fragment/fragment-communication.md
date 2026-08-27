@@ -19,6 +19,8 @@ Fragment 通信主要分四类场景：
 | Fragment 与 Fragment | 详情页接收列表页选中项 | 共享 ViewModel / Result API |
 | 跨模块 / 跨页面 | 深链、事件总线 | Navigation Result / 事件总线 |
 
+各类通信场景的构成关系如下：
+
 ```mermaid
 flowchart LR
     A[Activity] <-->|接口回调 / 共享 ViewModel| B[Fragment A]
@@ -84,6 +86,8 @@ class DetailFragment : Fragment() {
 
 ### 为什么用 Arguments 而不是构造参数
 
+构造参数与 Arguments 的对比说明如下：
+
 | 对比 | 构造参数 | Arguments |
 |------|----------|-----------|
 | 系统重建 | 丢失（无参构造重建） | 自动保留 |
@@ -95,6 +99,8 @@ class DetailFragment : Fragment() {
 ## 三、接口回调：Fragment 通知 Activity
 
 ### 3.1 标准写法
+
+接口回调的标准写法如下：
 
 ::: code-tabs
 
@@ -285,6 +291,8 @@ class DetailFragment : Fragment() {
 
 ### 4.2 共享 ViewModel 的优点
 
+共享 ViewModel 各优点的说明如下：
+
 | 优点 | 说明 |
 |------|------|
 | 解耦 | Fragment 互不知道对方存在，只依赖 ViewModel 接口 |
@@ -296,6 +304,8 @@ class DetailFragment : Fragment() {
 ### 4.3 与 Navigation 的组合
 
 在 Navigation 组件中，还可使用 **Navigation 作用域**的共享 ViewModel（`by navGraphViewModels(R.id.graph_id)`），把共享范围限定在某个导航图内，避免跨图耦合。
+
+Navigation 作用域共享 ViewModel 的写法如下：
 
 ::: code-tabs
 
@@ -394,6 +404,8 @@ setFragmentResultListener("child_result") { _, bundle ->
 
 ### 5.2 Result API vs 接口回调
 
+Result API 与接口回调的对比说明如下：
+
 | 维度 | Fragment Result API | 接口回调 |
 |------|---------------------|----------|
 | 生命周期 | 监听器在 STARTED 后接收，安全 | 同步调用，可能空指针 |
@@ -406,6 +418,8 @@ setFragmentResultListener("child_result") { _, bundle ->
 ## 六、其他通信手段
 
 ### 6.1 事件总线（EventBus / LiveDataBus）
+
+事件总线的示例代码如下：
 
 ::: code-tabs
 
@@ -441,6 +455,8 @@ fun onRefresh(event: ArticleRefreshEvent) {
 
 ### 6.2 findFragmentById / parentFragment 直接调用
 
+直接调用的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -466,6 +482,8 @@ if (parent != null) {
 - 仅适合非常简单的同层级临时操作
 
 ### 6.3 单 Activity 架构下的选择
+
+单 Activity 架构下通信方案的选择流程如下：
 
 ```mermaid
 flowchart TD

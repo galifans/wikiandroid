@@ -10,6 +10,8 @@ description: Binder 内核驱动、mmap 内存映射、binder_proc/binder_thread
 
 ## 一、Binder 整体架构
 
+Binder 的整体架构关系如下：
+
 ```mermaid
 flowchart LR
     A[Client<br>应用进程] --> D[Binder 驱动<br>内核空间]
@@ -17,6 +19,8 @@ flowchart LR
     C[ServiceManager<br>实名注册] --> D
     D --> E["/dev/binder<br>设备文件"]
 ```
+
+各层级的组件与职责说明如下：
 
 | 层级 | 组件 | 职责 |
 |------|------|------|
@@ -29,6 +33,8 @@ flowchart LR
 
 ### 2.1 传统 IPC:两次拷贝
 
+传统 IPC 的两次拷贝流程如下：
+
 ```mermaid
 sequenceDiagram
     participant A as 进程 A
@@ -40,6 +46,8 @@ sequenceDiagram
 ```
 
 ### 2.2 Binder:一次拷贝
+
+Binder 的一次拷贝流程如下：
 
 ```mermaid
 sequenceDiagram
@@ -81,6 +89,8 @@ struct binder_proc {
 };
 ```
 
+各字段的含义说明如下：
+
 | 字段 | 含义 |
 |------|------|
 | threads | 线程:每个 binder_thread 处理一个事务 |
@@ -102,12 +112,16 @@ struct binder_thread {
 
 ### 3.3 binder_node / binder_ref:服务与引用
 
+服务与引用对象的关联关系如下：
+
 ```mermaid
 flowchart LR
     A[Server 进程] --> B[binder_node<br>服务实体<br>内部对象指针]
     C[Client 进程] --> D[binder_ref<br>句柄 handle]
     D -->|通过驱动| B
 ```
+
+各对象的持有者与含义说明如下：
 
 | 对象 | 持有者 | 含义 |
 |------|--------|------|
@@ -147,6 +161,8 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 }
 ```
 
+各命令的用途说明如下：
+
 | 命令 | 说明 |
 |------|------|
 | BINDER_WRITE_READ | 核心:写事务 + 读结果 |
@@ -154,6 +170,8 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 | BINDER_SET_CONTEXT_MGR | 设置 ServiceManager |
 
 ## 五、一次事务完整流程
+
+一次事务的完整调用链路如下：
 
 ```mermaid
 sequenceDiagram
@@ -170,6 +188,8 @@ sequenceDiagram
 ```
 
 ## 六、为什么 Binder 只有一次拷贝?
+
+Binder 与传统 IPC 的对比说明如下：
 
 | 对比项 | Binder | 传统 IPC(Socket/管道) |
 |--------|--------|----------------------|

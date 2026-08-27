@@ -12,12 +12,16 @@ description: Android 10/11 分区存储演进、MediaStore 增删改查、SAF �
 
 ### 1.1 存储模型变革
 
+各版本存储模型的对比说明如下：
+
 | 版本 | 存储模型 | 公共目录访问 |
 |------|----------|--------------|
 | Android 9- | 全盘可读，任意文件路径 | `WRITE_EXTERNAL_STORAGE` 权限后直接读写 |
 | Android 10 | 分区存储（可开关） | 只能通过 MediaStore / SAF 访问其他应用文件 |
 | Android 11+ | 分区存储强制开启 | 同上，且不可关闭 |
 | Android 13+ | 细粒度媒体权限 | 读图片/视频/音频分权限申请 |
+
+三层存储空间的构成关系如下：
 
 ```mermaid
 flowchart LR
@@ -36,6 +40,8 @@ flowchart LR
 ## 二、应用专属目录（免权限）
 
 ### 2.1 目录获取
+
+各存储目录的获取方式如下：
 
 ::: code-tabs
 
@@ -69,12 +75,16 @@ context.externalCacheDir               // 外部缓存
 
 ### 2.2 特点
 
+应用专属目录的特点说明如下：
+
 | 特性 | 说明 |
 |------|------|
 | 免权限 | 无需任何存储权限即可读写 |
 | 私有性 | 其他应用默认不可访问（除非 root/ADB） |
 | 卸载清除 | 应用卸载时目录被系统清除 |
 | 不占公共空间 | 不进入用户相册/音乐库 |
+
+向应用专属目录写入文件的示例代码如下：
 
 ::: code-tabs
 
@@ -112,6 +122,8 @@ fun saveToAppDir(context: Context, bitmap: Bitmap) {
 ## 三、MediaStore：公共媒体库
 
 ### 3.1 插入媒体文件
+
+插入媒体文件的标准写法如下：
 
 ::: code-tabs
 
@@ -168,6 +180,8 @@ fun saveToGallery(context: Context, bitmap: Bitmap) {
 :::
 
 ### 3.2 查询媒体
+
+查询媒体文件的示例代码如下：
 
 ::: code-tabs
 
@@ -231,6 +245,8 @@ fun queryImages(context: Context): List<Uri> {
 
 ### 3.3 更新与删除
 
+更新与删除媒体的写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -268,6 +284,8 @@ contentResolver.delete(uri, null, null)
 
 ### 4.1 SAF 文件选择器
 
+使用 SAF 选择文件的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -303,6 +321,8 @@ fun pickPdf() {
 :::
 
 ### 4.2 目录选择与持久授权
+
+目录选择与持久授权的写法如下：
 
 ::: code-tabs
 
@@ -340,6 +360,8 @@ private val openTree = registerForActivityResult(
 
 :::
 
+SAF 的常用 API 如下：
+
 | SAF 能力 | API |
 |----------|-----|
 | 打开单文件 | `ACTION_OPEN_DOCUMENT` / `OpenDocument` |
@@ -349,6 +371,8 @@ private val openTree = registerForActivityResult(
 | 文档 URI 操作 | `DocumentsContract`（listDocuments 等） |
 
 ## 五、权限变化时间线
+
+各版本存储权限的变化如下：
 
 | Android 版本 | 权限模型 |
 |--------------|----------|
@@ -369,6 +393,8 @@ private val openTree = registerForActivityResult(
 
 ### 6.1 兼容策略
 
+存储方案选择的决策流程如下：
+
 ```mermaid
 flowchart TD
     A[保存/读取需求] --> B{公共媒体?}
@@ -382,6 +408,8 @@ flowchart TD
 ```
 
 ### 6.2 最佳实践清单
+
+分区存储的最佳实践说明如下：
 
 | 实践 | 说明 |
 |------|------|

@@ -10,6 +10,8 @@ description: Jenkins 架构、Pipeline 语法、Android 构建、多分支流水
 
 ## 一、Jenkins 架构
 
+Jenkins Master/Agent 架构的构成关系如下：
+
 ```mermaid
 flowchart TD
     A[Jenkins Master<br>调度与配置] --> B[Agent 1<br>构建节点]
@@ -19,6 +21,8 @@ flowchart TD
     C --> F[部署/通知]
     A --> G[插件生态<br>5000+ 插件]
 ```
+
+各组件职责说明如下：
 
 | 组件 | 职责 |
 |------|------|
@@ -59,6 +63,8 @@ pipeline {
 }
 ```
 
+声明式 Pipeline 常用语法元素说明如下：
+
 | 语法元素 | 作用 |
 |---------|------|
 | pipeline | 根节点 |
@@ -83,6 +89,8 @@ pipeline {
 ```
 
 ## 三、Android 构建流水线
+
+Android 构建流水线的整体流程如下：
 
 ```mermaid
 flowchart LR
@@ -109,6 +117,8 @@ stage('签名打包') {
     }
 }
 ```
+
+各构建环节的关键点说明如下：
 
 | 环节 | 关键点 |
 |------|--------|
@@ -138,6 +148,8 @@ pipeline {
 
 ## 五、分布式与性能优化
 
+常用性能优化手段说明如下：
+
 | 优化手段 | 说明 |
 |---------|------|
 | 多 Agent | 不同模块并行构建 |
@@ -148,6 +160,8 @@ pipeline {
 | 定时错峰 | 构建避开高峰 |
 
 ## 六、Jenkins vs GitHub Actions
+
+Jenkins 与 GitHub Actions 的对比说明如下：
 
 | 维度 | Jenkins | GitHub Actions |
 |------|---------|----------------|

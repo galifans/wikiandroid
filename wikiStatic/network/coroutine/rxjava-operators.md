@@ -23,6 +23,8 @@ Observer（观察者）
     └─ onComplete()   完成
 ```
 
+订阅的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -52,6 +54,8 @@ Observable.just(1, 2, 3)
 :::
 
 ### 1.2 线程调度：subscribeOn / observeOn
+
+线程调度的标准写法如下：
 
 ::: code-tabs
 
@@ -87,6 +91,8 @@ Observable.create<String> { emitter ->
 
 :::
 
+各调度器的用途说明如下：
+
 | 调度器 | 用途 |
 | --- | --- |
 | `Schedulers.io()` | IO 操作（网络、文件） |
@@ -99,6 +105,8 @@ Observable.create<String> { emitter ->
 > 就近原则。
 
 ## 2. 创建操作符
+
+常用创建操作符如下：
 
 ::: code-tabs
 
@@ -129,6 +137,8 @@ Observable.create { emitter -> ... }  // 手动创建
 :::
 
 ## 3. 变换操作符
+
+常用变换操作符如下：
 
 ::: code-tabs
 
@@ -190,6 +200,8 @@ Observable.range(1, 6).buffer(3)   // [1,2,3], [4,5,6]
 
 ## 4. 过滤操作符
 
+常用过滤操作符如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -219,6 +231,8 @@ Observable.just(1, 2, 3, 4, 5)
 :::
 
 ## 5. 组合操作符
+
+常用组合操作符如下：
 
 ::: code-tabs
 
@@ -276,6 +290,8 @@ Observable.concat(obs1, obs2)     // 1 全部发完再发 2
 
 ## 6. 错误处理
 
+错误处理操作符的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -309,6 +325,8 @@ Observable.just(1, 2, 0, 3)
 :::
 
 ## 7. 背压（Backpressure）
+
+背压处理的标准写法如下：
 
 ::: code-tabs
 
@@ -365,6 +383,8 @@ Flowable.create({ emitter ->
 :::
 
 ## 8. RxJava vs 协程
+
+RxJava 与协程 Flow 的对比说明如下：
 
 | 维度 | RxJava | 协程 Flow |
 | --- | --- | --- |
