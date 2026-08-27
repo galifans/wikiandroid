@@ -121,6 +121,8 @@ title: 大厂面试经验实录
 
 ## 七、高频考点总结
 
+各公司的高频考点总结如下：
+
 | 类别 | 考点 |
 | --- | --- |
 | Java | HashMap 底层、GC 与引用计数、内部类持有外部引用、final、String、try-catch-finally、ArrayList vs Vector |
