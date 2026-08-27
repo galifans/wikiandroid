@@ -10,6 +10,8 @@ description: MockK 基础用法、验证、协程测试、插桩、与 Mockito �
 
 ## 一、为什么用 MockK
 
+MockK 与 Mockito 的能力对比说明如下：
+
 | 能力 | Mockito | MockK |
 |------|---------|-------|
 | Kotlin 协程 | 支持弱 | 原生支持 |
@@ -22,6 +24,8 @@ description: MockK 基础用法、验证、协程测试、插桩、与 Mockito �
 ## 二、核心用法
 
 ### 2.1 创建 Mock 与 Stub
+
+创建 mock 与打桩的标准写法如下：
 
 ::: code-tabs
 
@@ -57,6 +61,8 @@ every { repository.search(match { it.startsWith("A") }) } returns listOf()
 
 :::
 
+常用打桩 API 的用途说明如下：
+
 | API | 用途 |
 |-----|------|
 | mockk&lt;T&gt;() | 创建 mock 对象 |
@@ -67,6 +73,8 @@ every { repository.search(match { it.startsWith("A") }) } returns listOf()
 | match { } | 自定义匹配 |
 
 ### 2.2 验证调用
+
+验证调用次数与顺序的标准写法如下：
 
 ::: code-tabs
 
@@ -112,6 +120,8 @@ confirmVerified(repository)   // 确认无其他调用
 
 ## 三、Spy 与部分 Mock
 
+Spy 与部分 mock 的写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -142,11 +152,15 @@ val spy = spyk(real)
 
 :::
 
+三种 mock 方式的对比说明如下：
+
 | 类型 | 行为 |
 |------|------|
 | mockk() | 全部打桩,无 stub 返回默认值 |
 | spyk() | 真实实现,可覆盖个别方法 |
 | relaxed mock | 自动返回"合理"默认值 |
+
+宽松 mock 的使用示例如下：
 
 ::: code-tabs
 
@@ -169,6 +183,8 @@ repo.getOrders()   // 返回空列表,无需 every
 :::
 
 ## 四、协程测试
+
+协程测试的标准写法如下：
 
 ::: code-tabs
 
@@ -216,6 +232,8 @@ fun `协程测试`() = runTest {
 
 :::
 
+协程测试常用 API 的说明如下：
+
 | API | 用途 |
 |-----|------|
 | coEvery / coVerify | suspend 函数打桩/验证 |
@@ -224,6 +242,8 @@ fun `协程测试`() = runTest {
 | StandardTestDispatcher | 手动调度 |
 
 ## 五、Object 与静态 Mock
+
+object 单例与静态函数的 mock 写法如下：
 
 ::: code-tabs
 
@@ -269,6 +289,8 @@ every { Utils.formatTime(any()) } returns "00:00"
 
 ## 六、Android 环境测试
 
+Android 环境测试的写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -309,6 +331,8 @@ class MainViewModelTest {
 
 ## 七、最佳实践
 
+常用测试最佳实践说明如下：
+
 | 实践 | 说明 |
 |------|------|
 | 只 mock 依赖 | 被测对象本身不 mock |
@@ -317,6 +341,8 @@ class MainViewModelTest {
 | 测试行为非实现 | 验证交互而非内部细节 |
 | 命名清晰 | `fun \`应该...\`()` 中文描述 |
 | 与协程测试结合 | runTest 控制时间 |
+
+完整的 ViewModel 测试示例如下：
 
 ::: code-tabs
 

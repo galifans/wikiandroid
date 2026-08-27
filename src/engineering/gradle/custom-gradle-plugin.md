@@ -10,12 +10,16 @@ description: 插件类型、Project API、Transform/ASM、发布与调试、实�
 
 ## 一、为什么要写插件
 
+各场景下手动做法与插件化的对比说明如下：
+
 | 场景 | 手工做法 | 插件化 |
 |------|---------|--------|
 | 多渠道包名注入 | 每个模块复制脚本 | 统一插件 |
 | 埋点字节码插桩 | 难以实现 | ASM Transform |
 | 构建产物检查 | 人肉检查 | 自动化 Task |
 | 版本统一 | 多处维护 | 插件统一注入 |
+
+从重复构建逻辑到封装插件的整体链路如下：
 
 ```mermaid
 flowchart LR
@@ -28,11 +32,15 @@ flowchart LR
 
 ## 二、三种插件形式
 
+三种插件形式的对比说明如下：
+
 | 形式 | 写法 | 适用 |
 |------|------|------|
 | 构建脚本插件 | `build.gradle.kts` 内定义 | 单模块小逻辑 |
 | buildSrc | 模块内源码编译 | 项目内共享 |
 | 独立插件工程 | 单独发布到仓库 | 跨项目/团队复用 |
+
+构建脚本内定义插件的写法如下：
 
 ::: code-tabs
 
@@ -65,6 +73,8 @@ apply<HelloPlugin>()
 ```
 
 :::
+
+buildSrc 模块中插件的写法如下：
 
 ::: code-tabs
 
@@ -129,6 +139,8 @@ implementation-class=com.example.plugin.MyPlugin
 
 ## 四、Extension 扩展配置
 
+扩展配置的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -190,6 +202,8 @@ myPlugin {
 
 ## 五、Task 与依赖编排
 
+任务挂接到构建生命周期的实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -217,6 +231,8 @@ project.afterEvaluate {
 
 :::
 
+常用挂接点的时机说明如下：
+
 | 常用挂接点 | 时机 |
 |-----------|------|
 | preBuild | 构建前 |
@@ -228,6 +244,8 @@ project.afterEvaluate {
 ## 六、Transform 与字节码插桩
 
 > 经典场景:埋点、无埋点统计、方法耗时统计、隐私合规检测。
+
+Transform 核心流程的示例代码如下：
 
 ::: code-tabs
 
@@ -257,6 +275,8 @@ project.afterEvaluate {
 
 :::
 
+class 文件从输入到打包的完整链路如下：
+
 ```mermaid
 flowchart LR
     A[class 文件] --> B[Transform<br>输入]
@@ -265,6 +285,8 @@ flowchart LR
     D --> E[输出 class]
     E --> F[dex 打包]
 ```
+
+ASM 插桩的示例代码如下：
 
 ::: code-tabs
 
@@ -289,6 +311,8 @@ flowchart LR
 :::
 
 ## 七、调试与发布
+
+插件调试与发布各步骤的说明如下：
 
 | 步骤 | 说明 |
 |------|------|

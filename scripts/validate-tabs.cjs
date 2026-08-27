@@ -4,8 +4,8 @@ const F = String.fromCharCode(96).repeat(3);
 // 豁免：Kotlin DSL 构建脚本（build.gradle.kts 配置，非程序示例代码，无需 Java/Kotlin 切换）
 // 格式: { '相对路径': [行号, ...] } 或 { '相对路径': null } 表示整文件豁免
 const EXEMPT = {
-  'src/engineering/gradle/custom-gradle-plugin.md': [109, 182],
-  'src/engineering/testing/test-pyramid.md': [93],
+  'src/engineering/gradle/custom-gradle-plugin.md': [119, 194],
+  'src/engineering/testing/test-pyramid.md': [105],
   'src/engineering/testing/unit-testing.md': [45],
 };
 function walk(d) {
