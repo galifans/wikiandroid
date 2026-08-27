@@ -10,12 +10,16 @@ description: Dialog 生命周期与内存泄漏、Toast 实现原理、PopupWind
 
 ## 一、三种弹窗概览
 
+三者的体系归属：
+
 ```mermaid
 flowchart TD
     A[弹窗体系] --> B[Dialog<br>窗口级 阻塞交互]
     A --> C[Toast<br>系统级 短暂提示]
     A --> D[PopupWindow<br>悬浮窗口 灵活定位]
 ```
+
+关键维度对比：
 
 | 维度 | Dialog | Toast | PopupWindow |
 |------|--------|-------|-------------|
@@ -28,6 +32,8 @@ flowchart TD
 ## 二、Dialog 详解
 
 ### 2.1 基本使用
+
+AlertDialog 链式调用 + 自定义 Dialog：
 
 ::: code-tabs
 
@@ -86,6 +92,8 @@ class CustomDialog(context: Context) : Dialog(context) {
 
 ### 2.2 Dialog 生命周期
 
+从 show 到 dismiss 的流转：
+
 ```mermaid
 flowchart LR
     A[show] --> B[创建 Window]
@@ -100,6 +108,8 @@ flowchart LR
 
 ### 2.3 内存泄漏问题
 
+最常见的三种泄漏场景与对策：
+
 | 泄漏场景 | 原因 | 解决 |
 |----------|------|------|
 | Activity 销毁未 dismiss | Dialog 持有 Context | onDestroy 中 dismiss |
@@ -107,6 +117,8 @@ flowchart LR
 | 旋转屏幕 | 旧 Activity 泄漏 | DialogFragment 代替 |
 
 **推荐：DialogFragment 管理 Dialog 生命周期**
+
+生命周期交给 FragmentManager，旋转、销毁自动处理：
 
 ::: code-tabs
 
@@ -163,6 +175,8 @@ ConfirmDialogFragment().show(supportFragmentManager, "confirm")
 
 ### 3.1 基本使用与原理
 
+标准用法很简单：
+
 ::: code-tabs
 
 @tab:active Java
@@ -181,7 +195,7 @@ Toast.makeText(this, "操作成功", Toast.LENGTH_SHORT).show()
 
 :::
 
-**Toast 实现原理**：
+**Toast 实现原理**：从创建到自动隐藏的完整链路：
 
 ```mermaid
 flowchart LR
@@ -197,6 +211,8 @@ flowchart LR
 - 多个 Toast 排队显示（后到的等待前一个消失）
 
 ### 3.2 自定义 Toast
+
+自定义布局 + 位置：
 
 ::: code-tabs
 
@@ -237,13 +253,15 @@ Toast(context).apply {
 
 ### 3.3 Toast 的限制
 
+需要注意的限制：
+
 | 限制 | 说明 |
 |------|------|
 | 不能频繁调用 | 会排队堆积，体验差 |
 | Android 11+ 后台限制 | 后台应用不能显示自定义 Toast |
 | 无法交互 | 纯展示 |
 
-**替代方案：Snackbar（Material）**
+**替代方案：Snackbar（Material）**，支持交互操作：
 
 ::: code-tabs
 
@@ -268,6 +286,8 @@ Snackbar.make(view, "操作完成", Snackbar.LENGTH_SHORT)
 ## 四、PopupWindow 详解
 
 ### 4.1 基本使用
+
+下拉菜单的完整配置：
 
 ::: code-tabs
 
@@ -318,6 +338,8 @@ popupWindow.showAtLocation(anchorView, Gravity.CENTER, 0, 0)
 
 ### 4.2 关键属性
 
+几个属性决定交互表现：
+
 | 属性 | 作用 |
 |------|------|
 | `isFocusable` | 是否可获取焦点（决定能否响应点击） |
@@ -327,6 +349,8 @@ popupWindow.showAtLocation(anchorView, Gravity.CENTER, 0, 0)
 | `width/height` | 尺寸（MATCH_PARENT 可做底部弹窗） |
 
 ### 4.3 PopupWindow 与 Dialog 对比
+
+两者差异一览：
 
 | 维度 | PopupWindow | Dialog |
 |------|-------------|--------|
@@ -339,6 +363,8 @@ popupWindow.showAtLocation(anchorView, Gravity.CENTER, 0, 0)
 
 ## 五、选型指南
 
+按交互需求走决策树：
+
 ```mermaid
 flowchart TD
     A[弹窗需求] --> B{需要交互确认?}
@@ -347,6 +373,8 @@ flowchart TD
     D -->|是| E[PopupWindow]
     D -->|否| F[Toast / Snackbar]
 ```
+
+常见场景的推荐：
 
 | 场景 | 推荐 | 原因 |
 |------|------|------|

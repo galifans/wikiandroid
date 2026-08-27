@@ -13,6 +13,8 @@ title: RecyclerView 优化与 ListView 对比
 
 2. **数据优化：** 分页拉取远端数据并缓存提升二次加载速度；新增或删除数据通过 DiffUtil 局部刷新，而不是全局刷新：
 
+先自定义 Callback 告诉 DiffUtil"哪些条目相同"：
+
 ::: code-tabs
 
 @tab:active Java
@@ -73,6 +75,8 @@ class AdapterDiffCallback(
 
 :::
 
+算出差异后派发给 Adapter 即可局部刷新：
+
 ::: code-tabs
 
 @tab:active Java
@@ -105,6 +109,8 @@ diffResult.dispatchUpdatesTo(mAdapter)
 8. **共用 RecycledViewPool：** 多个 RecyclerView 的 Adapter 一样（如嵌套 RecyclerView）时，通过 `setRecycledViewPool(pool)` 共用一个池。
 
 ## 二、ListView 与 RecyclerView 对比
+
+两者在复用机制、滚动方向、动画等关键能力上差异明显：
 
 | 对比项 | ListView | RecyclerView |
 | --- | --- | --- |

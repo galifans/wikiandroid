@@ -14,7 +14,7 @@ description: 多指事件流、pointerIndex 与 actionIndex、GestureDetector/Sc
 
 单指触摸时事件简单：ACTION_DOWN → 多个 ACTION_MOVE → ACTION_UP。
 
-多指触摸引入新概念：
+多指触摸引入新概念，事件流如下：
 
 ```mermaid
 flowchart LR
@@ -27,6 +27,8 @@ flowchart LR
 ```
 
 ### 1.2 新事件类型
+
+多指相关的事件类型：
 
 | 事件 | 含义 |
 |------|------|
@@ -41,48 +43,16 @@ flowchart LR
 
 ### 2.1 两个索引概念
 
+id 与 index 的区别：
+
 | 概念 | 方法 | 说明 |
 |------|------|------|
 | pointerId | `getPointerId(index)` | 手指的**唯一标识**，从按下到抬起不变 |
 | pointerIndex | `getActionIndex()` | 事件中的**位置索引**，会随手指抬起重排 |
 
+处理多指事件时按 action 分流：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-@Override
-public boolean onTouchEvent(MotionEvent event) {
-    int action = event.getActionMasked();
-    switch (action) {
-        case MotionEvent.ACTION_POINTER_DOWN:
-            // 新按下手指的 index
-            int index = event.getActionIndex();
-            int id = event.getPointerId(index);
-            float x = event.getX(index);
-            float y = event.getY(index);
-            Log.d("Multi", "第 " + event.getPointerCount() + " 指按下: id=" + id + " (" + x + ", " + y + ")");
-            break;
-        case MotionEvent.ACTION_MOVE:
-            // 遍历所有手指
-            for (int i = 0; i < event.getPointerCount(); i++) {
-                int id2 = event.getPointerId(i);
-                float x2 = event.getX(i);
-                float y2 = event.getY(i);
-            }
-            break;
-        case MotionEvent.ACTION_POINTER_UP:
-            // 抬起手指的 index（注意：抬起后该 index 失效）
-            int upIndex = event.getActionIndex();
-            int upId = event.getPointerId(upIndex);
-            break;
-        case MotionEvent.ACTION_UP:
-            // 最后一指抬起
-            break;
-    }
-    return true;
-}
-```
 
 @tab Kotlin
 
@@ -123,6 +93,8 @@ override fun onTouchEvent(event: MotionEvent): Boolean {
 
 ### 2.2 pointerId 与 index 的区别
 
+用实例对比两者的变化：
+
 | 场景 | pointerId | pointerIndex |
 |------|-----------|--------------|
 | 手指 2 按下 | 手指 2 的 id = 1 | index = 1 |
@@ -134,6 +106,8 @@ override fun onTouchEvent(event: MotionEvent): Boolean {
 ## 三、GestureDetector 手势识别
 
 ### 3.1 使用方式
+
+把事件交给 GestureDetector 即可识别常见手势：
 
 ::: code-tabs
 
@@ -228,6 +202,8 @@ class GestureView(context: Context) : View(context) {
 
 ### 3.2 手势与阈值的判定逻辑
 
+各手势的判定条件与回调：
+
 | 手势 | 判定条件 | 回调 |
 |------|----------|------|
 | 单击 | 手指按下后抬起，位移小于 touch slop | onSingleTapUp |
@@ -241,6 +217,8 @@ class GestureView(context: Context) : View(context) {
 ## 四、ScaleGestureDetector 缩放
 
 ### 4.1 双指缩放实现
+
+ScaleGestureDetector 直接驱动缩放：
 
 ::: code-tabs
 
@@ -315,6 +293,8 @@ class ZoomView(context: Context) : View(context) {
 
 ### 4.2 核心 API
 
+缩放检测器的核心数据：
+
 | API | 含义 |
 |-----|------|
 | `scaleFactor` | 本次回调相对上次的缩放比例 |
@@ -324,6 +304,8 @@ class ZoomView(context: Context) : View(context) {
 | `isInProgress()` | 缩放是否进行中 |
 
 ### 4.3 缩放 + 平移组合
+
+按手指数量分流实现双指缩放单指平移：
 
 ::: code-tabs
 
@@ -382,6 +364,8 @@ override fun onTouchEvent(event: MotionEvent): Boolean {
 
 ### 5.1 判断角度与方向
 
+用 dx/dy 判断滑动手势方向：
+
 ::: code-tabs
 
 @tab:active Java
@@ -419,6 +403,8 @@ private fun getDirection(dx: Float, dy: Float): String {
 :::
 
 ### 5.2 触摸阈值常量
+
+系统提供的判断阈值：
 
 ::: code-tabs
 

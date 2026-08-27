@@ -20,6 +20,8 @@ flowchart LR
     C[硬件加速<br>CPU 构建显示列表] --> D[GPU 渲染<br>高效光栅化]
 ```
 
+软件绘制与硬件加速的维度对比：
+
 | 维度 | 软件绘制 | 硬件加速 |
 |------|----------|----------|
 | 执行者 | CPU | GPU |
@@ -29,6 +31,8 @@ flowchart LR
 | 兼容性 | 全支持 | 部分 API 限制 |
 
 ### 1.2 开启方式
+
+硬件加速可在三个粒度开启：
 
 ```xml
 <!-- 全局开启（默认开启） -->
@@ -83,6 +87,8 @@ sequenceDiagram
 
 ### 3.1 完整帧流程
 
+一帧从 VSYNC 到屏幕显示的完整流程如下：
+
 ```mermaid
 flowchart TD
     A[VSYNC 信号] --> B[主线程<br>measure/layout/draw<br>构建 DisplayList]
@@ -93,6 +99,8 @@ flowchart TD
 ```
 
 ### 3.2 硬件加速下的关键优化
+
+硬件加速带来的关键优化手段如下：
 
 | 优化 | 原理 |
 |------|------|
@@ -121,11 +129,15 @@ flowchart TD
 
 ### 4.2 关闭硬件加速的场景
 
+需要关闭硬件加速的典型场景如下：
+
 | 场景 | 原因 |
 |------|------|
 | 大量使用不支持的 API | 需要软件绘制兼容 |
 | 极端兼容性要求 | 旧设备 GPU 驱动问题 |
 | 特定动画效果 | 需要 CPU 精确控制 |
+
+单个 View 也可单独关闭硬件加速：
 
 ::: code-tabs
 
@@ -145,6 +157,8 @@ view.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 
 :::
 
+三种 LayerType 的区别如下：
+
 | LayerType | 说明 |
 |-----------|------|
 | `LAYER_TYPE_NONE` | 默认，不设图层 |
@@ -154,6 +168,8 @@ view.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 ## 五、硬件加速与动画性能
 
 ### 5.1 属性动画为什么流畅
+
+属性动画流畅的秘密在于只更新属性节点：
 
 ```mermaid
 flowchart LR
@@ -166,6 +182,8 @@ flowchart LR
 - 硬件加速：alpha/translation/scale 等**属性动画只更新属性节点**，GPU 合成时直接应用变换，动画流畅
 
 ### 5.2 最佳实践
+
+动画性能最佳实践清单如下：
 
 | 实践 | 说明 |
 |------|------|

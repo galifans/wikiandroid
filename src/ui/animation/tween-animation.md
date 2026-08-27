@@ -10,6 +10,8 @@ description: 补间动画（Tween）、帧动画与属性动画对比、插值�
 
 ## 一、Android 动画体系总览
 
+四大动画体系的分类关系：
+
 ```mermaid
 flowchart TD
     A[Android 动画] --> B[帧动画<br>Frame Animation]
@@ -22,6 +24,8 @@ flowchart TD
     E --> E1[页面转场/共享元素]
 ```
 
+四者机制与能力对比：
+
 | 动画类型 | 机制 | 改变属性？ | 推荐度 |
 |---------|------|-----------|--------|
 | 帧动画 | 逐帧换图 | 否 | 低（简单场景） |
@@ -30,6 +34,8 @@ flowchart TD
 | 转场动画 | 场景切换 | ✓ | 高 |
 
 ## 二、帧动画（Frame Animation）
+
+先在 drawable 里用 animation-list 定义帧序列：
 
 ```xml
 <!-- res/drawable/frame_anim.xml -->
@@ -41,15 +47,9 @@ flowchart TD
 </animation-list>
 ```
 
+加载后调用 start() 开始播放：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-imageView.setBackgroundResource(R.drawable.frame_anim);
-AnimationDrawable anim = (AnimationDrawable) imageView.getBackground();
-anim.start();
-```
 
 @tab Kotlin
 
@@ -61,11 +61,9 @@ anim.start()
 
 :::
 
+它的优缺点很明显：
+
 | 优点 | 缺点 |
-|------|------|
-| 实现简单、效果可控 | 每帧都是 Bitmap，**内存占用大** |
-| 适合加载动画 | 不适合复杂/长动画 |
-| 兼容性好 | 无法交互控制 |
 
 > 优化：帧动画图片用 WebP 动画替代，或改用 Lottie（矢量动画）。
 
@@ -74,6 +72,8 @@ anim.start()
 补间动画通过 `Animation` 对 View 做**外观变换**：平移、缩放、旋转、透明。
 
 ### 3.1 XML 定义
+
+平移、缩放、旋转、透明可以组合在一个 set 里：
 
 ```xml
 <!-- res/anim/translate_anim.xml -->
@@ -108,6 +108,8 @@ anim.start()
 
 ### 3.2 代码方式
 
+效果等同 XML，但更灵活：
+
 ::: code-tabs
 
 @tab:active Java
@@ -132,6 +134,8 @@ view.startAnimation(anim)
 :::
 
 ### 3.3 补间动画的致命缺陷
+
+动画结束后位置其实没变，看代码就明白：
 
 ::: code-tabs
 
@@ -159,18 +163,17 @@ view.startAnimation(TranslateAnimation(0f, 300f, 0f, 0f))
 
 :::
 
+这些缺陷汇总：
+
 | 缺陷 | 说明 |
-|------|------|
-| 不改变真实属性 | 视觉动了，坐标没动 |
-| 点击区域错位 | 动画后点击无效区域 |
-| 无法获得动画后的真实位置 | `getLeft()` 等不变 |
-| 有限的能力 | 只有 4 种变换 |
 
 > 这正是**属性动画**诞生的原因：直接操作属性，真实改变状态。
 
 ## 四、属性动画（Property Animation）
 
 ### 4.1 核心类
+
+ValueAnimator 算值、ObjectAnimator 自动设值、AnimatorSet 组合编排：
 
 ::: code-tabs
 
@@ -239,6 +242,8 @@ AnimatorSet().apply {
 
 ### 4.2 动画三要素
 
+计算一个属性值需要三个输入：
+
 ```mermaid
 flowchart LR
     A[插值器 Interpolator] --> D[计算]
@@ -253,21 +258,9 @@ flowchart LR
 | **估值器** TypeEvaluator | 根据 fraction 计算**具体属性值** | `FloatEvaluator` |
 | 时间 | duration 内的时间片 | — |
 
+两个接口各司其职：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// 插值器：时间 → 进度
-public interface Interpolator extends TimeInterpolator {
-    float getInterpolation(float input);  // input 0→1 时间比例，返回 0→1 进度
-}
-
-// 估值器：进度 → 值
-public interface TypeEvaluator<T> {
-    T evaluate(float fraction, T startValue, T endValue);
-}
-```
 
 @tab Kotlin
 
@@ -286,6 +279,8 @@ interface TypeEvaluator<T> {
 :::
 
 ### 4.3 自定义插值器示例
+
+比如实现先加速后反弹的效果：
 
 ::: code-tabs
 
@@ -318,6 +313,8 @@ class BounceInterpolator : Interpolator {
 
 ### 4.4 内置插值器对比
 
+常用内置插值器及效果：
+
 | 插值器 | 效果 |
 |--------|------|
 | `LinearInterpolator` | 匀速 |
@@ -330,6 +327,8 @@ class BounceInterpolator : Interpolator {
 | `PathInterpolator` | 贝塞尔曲线自定义 |
 
 ### 4.5 自定义估值器（颜色渐变）
+
+颜色渐变需要逐通道插值：
 
 ::: code-tabs
 
@@ -386,6 +385,8 @@ ObjectAnimator.ofObject(view, "backgroundColor", ArgbEvaluator(), Color.RED, Col
 
 ## 五、属性动画的原理
 
+每帧的计算时序：
+
 ```mermaid
 sequenceDiagram
     participant C as Choreographer
@@ -405,6 +406,8 @@ sequenceDiagram
 > 属性动画依赖 Choreographer 的每帧回调计算属性值，所以动画与 VSYNC 同步，掉帧时动画自动"跳过"耗时帧，保持流畅。
 
 ### setter 找不到怎么办？
+
+缺 setter 时动画会报错，需要自己补一个：
 
 ::: code-tabs
 
@@ -450,6 +453,8 @@ ObjectAnimator.ofFloat(myView, "progress", 0f, 1f).start()
 :::
 
 ## 六、动画监听
+
+通过监听器感知动画状态：
 
 ::: code-tabs
 

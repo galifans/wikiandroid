@@ -12,7 +12,7 @@ description: VSYNC 信号、doFrame 回调、掉帧检测与插帧、Choreograph
 
 ### 1.1 问题背景
 
-Android 渲染需要与屏幕刷新同步：
+Android 渲染需要与屏幕刷新同步，否则会出现撕裂和卡顿：
 
 ```mermaid
 flowchart LR
@@ -26,6 +26,8 @@ flowchart LR
 - Choreographer 统一协调：**输入、动画、绘制**都在 VSYNC 时刻执行
 
 ### 1.2 Choreographer 的职责
+
+四件事都由它统管：
 
 | 职责 | 说明 |
 |------|------|
@@ -45,6 +47,8 @@ flowchart LR
 - 系统在 VSYNC 时刻统一派发帧任务，避免绘制一半被扫描
 
 ### 2.2 doFrame 的执行
+
+doFrame 是每帧的核心，按类型分发三类回调：
 
 ::: code-tabs
 
@@ -96,6 +100,8 @@ private fun doFrame(frameTimeNanos: Long, frame: FrameInfo?) {
 
 ### 2.3 三类回调顺序
 
+回调的先后顺序决定了帧内一致性：
+
 ```mermaid
 sequenceDiagram
     participant VS as VSYNC 信号
@@ -116,6 +122,8 @@ sequenceDiagram
 
 ### 3.1 View.invalidate 的完整链路
 
+一次 invalidate 最终合并到下一帧执行：
+
 ```mermaid
 flowchart TD
     A[View.invalidate] --> B[ViewRootImpl.invalidateChildInParent]
@@ -129,6 +137,8 @@ flowchart TD
 
 ### 3.2 关键 API
 
+帧回调相关的 API 一览：
+
 | API | 作用 |
 |-----|------|
 | `postFrameCallback(cb)` | 下一帧回调（每帧一次） |
@@ -136,36 +146,9 @@ flowchart TD
 | `postCallback(type, cb)` | 指定类型回调（输入/动画/遍历） |
 | `removeFrameCallback(cb)` | 移除帧回调 |
 
+用 postFrameCallback 就能实现一个简易 FPS 统计器：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// 自定义 FPS 统计：每帧回调
-public class FpsTracker {
-    private int frameCount = 0;
-    private long startTime = 0;
-    private float fps = 0f;
-
-    public void start() {
-        startTime = System.nanoTime();
-        Choreographer.getInstance().postFrameCallback(this::onFrame);
-    }
-
-    private void onFrame(long frameTimeNanos) {
-        frameCount++;
-        long elapsed = (frameTimeNanos - startTime) / 1_000_000;
-        if (elapsed >= 1000) {
-            fps = frameCount * 1000f / elapsed;
-            Log.d("Fps", "FPS: " + fps);
-            frameCount = 0;
-            startTime = frameTimeNanos;
-        }
-        // 持续注册下一帧
-        Choreographer.getInstance().postFrameCallback(this::onFrame);
-    }
-}
-```
 
 @tab Kotlin
 
@@ -202,6 +185,8 @@ class FpsTracker {
 
 ### 4.1 掉帧的原因
 
+掉帧的常见诱因集中在主线程：
+
 | 原因 | 说明 |
 |------|------|
 | 主线程耗时 | 大量计算、IO、反射阻塞消息队列 |
@@ -213,28 +198,11 @@ class FpsTracker {
 
 ### 4.2 掉帧检测手段
 
+### 4.2 掉帧检测手段
+
+先看用帧间隔直接检测的代码：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// 方式一：Choreographer 帧间隔检测
-final AtomicLong lastFrameTime = new AtomicLong(0);
-Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
-    @Override
-    public void doFrame(long frameTimeNanos) {
-        long last = lastFrameTime.get();
-        if (last != 0L) {
-            long gapMs = (frameTimeNanos - last) / 1_000_000;
-            if (gapMs > 50) {
-                Log.w("Jank", "掉帧: 帧间隔 " + gapMs + "ms");
-            }
-        }
-        lastFrameTime.set(frameTimeNanos);
-        Choreographer.getInstance().postFrameCallback(this);
-    }
-});
-```
 
 @tab Kotlin
 
@@ -257,6 +225,8 @@ Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallba
 ```
 
 :::
+
+配合系统工具做深入定位：
 
 | 工具 | 用途 |
 |------|------|

@@ -10,7 +10,7 @@ description: Canvas 核心 API、Path 贝塞尔曲线、自定义绘制进阶（
 
 ## 一、Canvas 核心概念
 
-**Canvas（画布）** 是绘制指令的载体：`Canvas.drawXxx(paint)` 把图形绘制到其绑定的 Bitmap/View 上。
+**Canvas（画布）** 是绘制指令的载体：`Canvas.drawXxx(paint)` 把图形绘制到其绑定的 Bitmap/View 上，整体结构：
 
 ```mermaid
 flowchart LR
@@ -20,6 +20,8 @@ flowchart LR
     C --> E[坐标变换 save/translate/restore]
     C --> F[硬件加速渲染]
 ```
+
+常用绘制 API 一览：
 
 | API | 用途 |
 |-----|------|
@@ -32,6 +34,8 @@ flowchart LR
 | `drawArc` | 弧形/扇形 |
 
 ## 二、Paint 样式体系
+
+绘制前先配置好 Paint：
 
 ::: code-tabs
 
@@ -72,6 +76,8 @@ val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
 
 ### 样式速查表
 
+各属性的可选值：
+
 | Paint 属性 | 可选值 | 作用 |
 |-----------|--------|------|
 | `style` | FILL / STROKE / FILL_AND_STROKE | 填充/描边 |
@@ -85,6 +91,8 @@ val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
 ## 三、Path：路径绘制
 
 ### 3.1 基础路径
+
+用 moveTo/lineTo/close 画折线轮廓：
 
 ::: code-tabs
 
@@ -114,6 +122,8 @@ canvas.drawPath(path, paint)
 :::
 
 ### 3.2 贝塞尔曲线
+
+二阶和三阶贝塞尔的区别：
 
 ::: code-tabs
 
@@ -149,6 +159,8 @@ val path2 = Path().apply {
 
 :::
 
+控制点数量决定了曲线形态：
+
 ```mermaid
 flowchart LR
     A[P0 起点] --> B[P1 控制点]
@@ -164,6 +176,8 @@ flowchart LR
 
 ### 3.3 Path 常用方法
 
+路径操作的核心方法：
+
 | 方法 | 作用 |
 |------|------|
 | `moveTo` / `lineTo` | 移动/画线 |
@@ -176,6 +190,8 @@ flowchart LR
 | `measure()` | 路径长度测量 |
 
 ### 3.4 PathMeasure 实现动画
+
+动态截取路径片段实现描边动画：
 
 ::: code-tabs
 
@@ -222,6 +238,8 @@ val animator = ValueAnimator.ofFloat(0f, 1f).apply {
 
 ## 四、Canvas 变换与保存/恢复
 
+四种变换操作：
+
 ::: code-tabs
 
 @tab:active Java
@@ -250,6 +268,8 @@ canvas.restore()               // 恢复画布状态（出栈）
 
 :::
 
+save/restore 配合变换的完整流程：
+
 ```mermaid
 flowchart LR
     A[save 入栈] --> B[变换坐标系]
@@ -263,6 +283,8 @@ flowchart LR
 ## 五、高级效果
 
 ### 5.1 渐变 Shader
+
+线性与径向渐变的写法：
 
 ::: code-tabs
 
@@ -306,6 +328,8 @@ paint.shader = RadialGradient(
 
 ### 5.2 阴影与模糊
 
+阴影和模糊的效果设置：
+
 ::: code-tabs
 
 @tab:active Java
@@ -332,6 +356,8 @@ paint.maskFilter = BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL)
 
 ### 5.3 剪裁 Clip
 
+把绘制限制在某个区域内：
+
 ::: code-tabs
 
 @tab:active Java
@@ -357,6 +383,8 @@ canvas.restore()
 :::
 
 ## 六、文字绘制
+
+文字垂直居中需要先算基线：
 
 ::: code-tabs
 
@@ -399,14 +427,13 @@ val textWidth = paint.measureText(text)
 
 :::
 
+字体相关的核心概念：
+
 | 文字概念 | 说明 |
-|---------|------|
-| ascent / descent | 文字顶部/底部（基线之上/之下） |
-| baseline | 绘制基准线（drawText 的 y 参数） |
-| leading | 行间距 |
-| StaticLayout | 多行文字排版工具 |
 
 ## 七、绘制性能优化
+
+高频绘制场景的优化要点：
 
 | 优化 | 说明 |
 |------|------|
@@ -417,34 +444,9 @@ val textWidth = paint.measureText(text)
 | 复杂效果降级 | 模糊/阴影在低端机关闭 |
 | 使用 hardwareAccelerated | 显示列表缓存 |
 
+对象在 init 中创建、onDraw 只复用：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// 正确姿势：对象在 init/构造中创建，onDraw 只绘制
-public class ProgressView extends View {
-
-    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);   // 复用！
-    private final Path path = new Path();                           // 复用！
-
-    public ProgressView(Context context) {
-        super(context);
-    }
-
-    public ProgressView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        path.reset();          // 清空复用，不 new
-        // ... 绘制逻辑
-        canvas.drawPath(path, paint);
-    }
-}
-```
 
 @tab Kotlin
 

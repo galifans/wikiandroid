@@ -9,6 +9,8 @@ title: 屏幕适配方案
 
 ## 一、常用单位
 
+适配前先厘清四个基本单位——它们的换算关系如下：
+
 | 单位 | 全称 | 说明 |
 | --- | --- | --- |
 | dpi | dot per inch | 每英寸像素数 |
@@ -23,9 +25,13 @@ density = dpi / 160
 dp = px / density
 ```
 
+简单说：**dpi 是物理值，dp/sp 是逻辑值**。同一 dp 在不同密度的屏幕上对应不同 px 数，这正是系统帮我们做的适配工作。
+
 ## 二、头条适配方案
 
 核心思路：**修改系统的 Density 值，让设计稿宽度（如 360dp）在所有设备上保持一致**，从而所有 dp 单位自动适配。
+
+实现上要同时改 Application 和 Activity 的 DisplayMetrics，并监听字体切换保证 sp 同步缩放：
 
 ::: code-tabs
 
@@ -125,7 +131,7 @@ private fun setCustomDensity(activity: Activity, application: Application) {
 
 ### Android P（9.0）及以上
 
-通过 `DisplayCutout` 类确定非功能区域（凹口）的位置和形状，使用 `getDisplayCutout()` 获取：
+通过 `DisplayCutout` 类确定非功能区域（凹口）的位置和形状，使用 `getDisplayCutout()` 获取。先看它能提供哪些信息：
 
 | DisplayCutout 方法 | 说明 |
 | --- | --- |
@@ -135,7 +141,7 @@ private fun setCustomDensity(activity: Activity, application: Application) {
 | `getSafeInsetTop()` | 安全区域距屏幕顶部的距离（px） |
 | `getSafeInsetBottom()` | 安全区域距屏幕底部的距离（px） |
 
-`WindowManager.LayoutParams` 新增属性 `layoutInDisplayCutoutMode`：
+`WindowManager.LayoutParams` 新增属性 `layoutInDisplayCutoutMode`，三种模式决定窗口能否延伸到凹口区域：
 
 | 模式 | 说明 |
 | --- | --- |

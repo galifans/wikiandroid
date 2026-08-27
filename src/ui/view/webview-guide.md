@@ -9,6 +9,8 @@ title: WebView 使用与优化
 
 ## 一、基本使用
 
+先看常用状态查询 API：
+
 ::: code-tabs
 
 @tab:active Java
@@ -39,6 +41,8 @@ webView.setNetworkAvailable(true) // 通知 WebView 内核网络状态
 
 ### 存储
 
+存储类配置：
+
 ::: code-tabs
 
 @tab:active Java
@@ -63,6 +67,8 @@ settings.setAppCachePath(context.cacheDir.absolutePath)
 
 ### JavaScript 与窗口
 
+JS 与窗口相关配置：
+
 ::: code-tabs
 
 @tab:active Java
@@ -84,6 +90,8 @@ settings.setJavaScriptCanOpenWindowsAutomatically(false) // 是否允许 JS(wind
 :::
 
 ### 资源访问与加载
+
+资源访问权限配置（安全相关）：
 
 ::: code-tabs
 
@@ -115,6 +123,8 @@ settings.setBlockNetworkLoads(false)       // 禁止加载所有网络资源
 
 ### 缩放与文本
 
+缩放与文本配置：
+
 ::: code-tabs
 
 @tab:active Java
@@ -140,6 +150,8 @@ settings.setTextZoom(100)
 :::
 
 ### 版本相关
+
+分版本做兼容配置：
 
 ::: code-tabs
 
@@ -177,6 +189,8 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
 ### 缓存策略
 
+按网络状态选择缓存模式：
+
 ::: code-tabs
 
 @tab:active Java
@@ -207,6 +221,8 @@ if (isNetworkConnected(context)) {
 
 ## 三、WebViewClient 核心回调
 
+页面加载过程的回调一览：
+
 | 回调 | 说明 |
 | --- | --- |
 | `shouldOverrideUrlLoading` | 拦截页面加载，返回 true 表示宿主 App 拦截处理该 url；API24 废弃不处理 POST 请求 |
@@ -219,6 +235,8 @@ if (isNetworkConnected(context)) {
 | `onScaleChanged` | 页面缩放系数变化 |
 
 ## 四、WebChromeClient 核心回调
+
+与浏览器 UI 相关的回调：
 
 | 回调 | 说明 |
 | --- | --- |
@@ -310,7 +328,7 @@ mWebView.webViewClient = object : WebViewClient() {
 WebView 持有 Activity 引用容易造成内存泄漏，处理方式：
 
 1. **不要在布局 XML 中直接声明 WebView**，改为在代码中创建并添加到容器。
-2. **Activity 销毁时释放：**
+2. **Activity 销毁时释放**，先停加载再销毁：
 
 ::: code-tabs
 

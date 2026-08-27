@@ -9,7 +9,7 @@ title: View 绘制流程
 
 ## 一、绘制入口
 
-ViewRootImpl 的 `performTraversals()` 是绘制的总入口：
+ViewRootImpl 的 `performTraversals()` 是绘制的总入口，按顺序触发三个子流程：
 
 ```mermaid
 flowchart TD
@@ -20,7 +20,7 @@ flowchart TD
 
 ## 二、Measure：测量阶段
 
-**MeasureSpec**：一个 32 位 int，高 2 位为模式，低 30 位为尺寸。
+**MeasureSpec**：一个 32 位 int，高 2 位为模式，低 30 位为尺寸。三种模式对应不同的触发场景：
 
 | 模式 | 含义 | 触发场景 |
 |------|------|----------|
@@ -28,19 +28,9 @@ flowchart TD
 | `EXACTLY` | 精确尺寸 | `match_parent` / 固定 dp |
 | `AT_MOST` | 最大尺寸 | `wrap_content` |
 
+自定义 View 重写 onMeasure 来决定自己的尺寸：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-@Override
-protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    // 自定义测量逻辑
-    int width = MeasureSpec.getSize(widthMeasureSpec);
-    int height = MeasureSpec.getSize(heightMeasureSpec);
-    setMeasuredDimension(width, height);
-}
-```
 
 @tab Kotlin
 
@@ -60,6 +50,8 @@ override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
 :::
 
 ## 三、Layout：布局阶段
+
+ViewGroup 在 onLayout 中为每个子 View 指定位置：
 
 ::: code-tabs
 
@@ -92,12 +84,14 @@ override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
 
 ## 四、Draw：绘制阶段
 
-绘制顺序（dispatchDraw 之前）：
+绘制顺序（dispatchDraw 之前）按固定次序执行：
 
 1. 绘制背景（`drawBackground`）
 2. 绘制自身内容（`onDraw`）
 3. 绘制子 View（`dispatchDraw`）
 4. 绘制装饰（`onDrawForeground`）
+
+在 onDraw 里用 Canvas 画出自定义内容：
 
 ::: code-tabs
 
@@ -137,6 +131,8 @@ override fun onDraw(canvas: Canvas) {
 
 ### 1. onWindowFocusChanged
 
+窗口获得焦点时 View 已完成初始化，可安全读取尺寸：
+
 ::: code-tabs
 
 @tab:active Java
@@ -170,6 +166,8 @@ override fun onWindowFocusChanged(hasFocus: Boolean) {
 注意：频繁 onResume/onPause 时该方法会被频繁调用。
 
 ### 2. view.post(runnable)
+
+把读取操作投递到消息队列，执行时 View 已初始化：
 
 ::: code-tabs
 
@@ -205,6 +203,8 @@ override fun onStart() {
 :::
 
 ### 3. ViewTreeObserver
+
+监听全局布局回调，在布局完成时读取：
 
 ::: code-tabs
 

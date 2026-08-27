@@ -12,6 +12,8 @@ description: attrs.xml 声明、obtainStyledAttributes 解析、TypedArray 使�
 
 ### 1.1 场景
 
+比如自定义仪表盘，希望支持 XML 配置颜色和刻度：
+
 ```xml
 <!-- 需求：自定义仪表盘 View，支持 XML 配置颜色和刻度 -->
 <com.example.views.GaugeView
@@ -26,6 +28,8 @@ description: attrs.xml 声明、obtainStyledAttributes 解析、TypedArray 使�
 
 ### 1.2 属性体系总览
 
+自定义属性从声明到使用的完整路径：
+
 ```mermaid
 flowchart TD
     A[XML 属性] --> B[android: 系统属性<br>layout_width 等]
@@ -37,6 +41,8 @@ flowchart TD
 ## 二、声明属性：attrs.xml
 
 ### 2.1 基本声明
+
+在 attrs.xml 里用 declare-styleable 声明属性及类型：
 
 ```xml
 <!-- res/values/attrs.xml -->
@@ -61,6 +67,8 @@ flowchart TD
 
 ### 2.2 format 类型大全
 
+每种 format 对应的写法和用途：
+
 | format | XML 写法 | 说明 |
 |--------|----------|------|
 | `color` | `#FF0000` / `@color/red` | 颜色 |
@@ -76,6 +84,8 @@ flowchart TD
 | 组合 | `color\|reference` | 支持多种 |
 
 ### 2.3 复用属性
+
+想被多个 View 共用就声明为全局 attr：
 
 ```xml
 <resources>
@@ -96,6 +106,8 @@ flowchart TD
 ## 三、解析属性：obtainStyledAttributes
 
 ### 3.1 构造函数解析
+
+在构造函数里用 obtainStyledAttributes 读取 XML 属性：
 
 ::: code-tabs
 
@@ -190,6 +202,8 @@ class GaugeView @JvmOverloads constructor(
 
 ### 3.2 读取方法对应
 
+不同 format 要选对应的 getter：
+
 | format | 读取方法 |
 |--------|----------|
 | color | `ta.getColor(index, default)` |
@@ -204,6 +218,8 @@ class GaugeView @JvmOverloads constructor(
 | 组合 | 先判断类型再对应读取 |
 
 ### 3.3 资源引用解析
+
+引用类型属性有两种读取姿势：
 
 ::: code-tabs
 
@@ -237,6 +253,8 @@ val drawable = ta.getDrawable(
 
 ### 4.1 三层默认值体系
 
+属性值来源按优先级排列：
+
 ```mermaid
 flowchart LR
     A[XML 显式指定] --> B[优先]
@@ -248,6 +266,8 @@ flowchart LR
 **优先级**：XML 显式 > 主题 style 中指定 > defStyleRes > 代码默认值。
 
 ### 4.2 完整构造函数示例
+
+四个参数配合 defStyleAttr/defStyleRes 的完整写法：
 
 ::: code-tabs
 
@@ -300,6 +320,8 @@ class GaugeView @JvmOverloads constructor(
 
 ### 5.1 主题中提供默认值
 
+未显式写属性时从样式资源取值：
+
 ```xml
 <!-- res/values/styles.xml -->
 <style name="GaugeViewStyle">
@@ -309,6 +331,8 @@ class GaugeView @JvmOverloads constructor(
 ```
 
 ### 5.2 Theme 中指定默认
+
+主题里直接覆盖属性默认值：
 
 ```xml
 <!-- themes.xml -->
@@ -323,6 +347,8 @@ class GaugeView @JvmOverloads constructor(
 
 ### 6.1 DataBinding 绑定
 
+布局里通过 @{} 表达式直接绑定数据：
+
 ```xml
 <!-- 布局中通过 app 命名空间直接绑定 -->
 <com.example.views.GaugeView
@@ -331,6 +357,8 @@ class GaugeView @JvmOverloads constructor(
     app:gaugeColor="@{viewModel.color}"
     app:maxValue="@{viewModel.max}" />
 ```
+
+BindingAdapter 负责把绑定值转成属性设置：
 
 ::: code-tabs
 

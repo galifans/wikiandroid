@@ -10,6 +10,8 @@ description: WindowManager 添加/更新/移除 Window、窗口类型与权限�
 
 ## 一、Window / WindowManager / View 的关系
 
+三者是"管理接口—抽象窗口—内容载体"的关系：
+
 ```mermaid
 flowchart TD
     A[WindowManager] -->|addView/updateViewLayout/removeView| B[Window]
@@ -17,6 +19,8 @@ flowchart TD
     C --> D[ViewRootImpl]
     D -->|performTraversals| E[WMS 窗口管理]
 ```
+
+各角色的职责区分：
 
 | 概念 | 说明 |
 |------|------|
@@ -29,6 +33,8 @@ flowchart TD
 > 一句话理解：**WindowManager.addView(view, params) 把 View 装进一个 Window，通过 Binder 通知 WMS 在屏幕上开一个窗口**。
 
 ## 二、WindowManager 核心方法
+
+WindowManager 接口只有三个核心操作——增、改、删：
 
 ::: code-tabs
 
@@ -66,6 +72,8 @@ wm.removeView(view)
 
 ### 添加流程源码链
 
+addView 一次调用背后是一整条调用链，最终落到 WMS：
+
 ```mermaid
 sequenceDiagram
     participant A as 调用方
@@ -84,6 +92,8 @@ sequenceDiagram
 > 深入可参考：[WMS 窗口管理](/system/ams-wms/wms-principle.md)（系统原理板块）
 
 ## 三、Window 类型与层级
+
+按用途分成三类，type 值决定了显示层级：
 
 ```mermaid
 flowchart TD
@@ -106,10 +116,14 @@ Android 8.0（API 26）开始，悬浮窗必须使用 `TYPE_APPLICATION_OVERLAY`
 
 ### 4.1 权限声明
 
+悬浮窗属于系统窗口，必须声明 SYSTEM_ALERT_WINDOW 权限：
+
 ```xml
 <!-- AndroidManifest.xml -->
 <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 ```
+
+声明后还需在运行时跳转设置页申请授权：
 
 ::: code-tabs
 
@@ -136,6 +150,8 @@ if (!Settings.canDrawOverlays(this)) {
 :::
 
 ### 4.2 创建悬浮窗
+
+授权通过后，addView 一个指定了悬浮窗类型的 View 即可显示：
 
 ::: code-tabs
 

@@ -11,6 +11,8 @@ description: ViewGroup 测量与布局原理、onMeasure/onLayout 实战、自�
 
 ## 1. ViewGroup 的核心职责
 
+自定义 ViewGroup 只需回答两个问题——子 View 多大、放在哪：
+
 ```text
 1. onMeasure：测量所有子 View，确定自身尺寸
 2. onLayout：为所有子 View 分配位置
@@ -27,6 +29,8 @@ description: ViewGroup 测量与布局原理、onMeasure/onLayout 实战、自�
 | 核心 API | Paint/Canvas | measureChild/getChildAt |
 
 ## 2. 完整示例：流式布局（FlowLayout）
+
+以最典型的"标签流式换行"为例，完整实现 onMeasure + onLayout：
 
 ::: code-tabs
 

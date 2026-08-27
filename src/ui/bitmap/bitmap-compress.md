@@ -12,6 +12,8 @@ description: 采样压缩、质量压缩、尺寸压缩、RGB_565/ARGB_8888 内�
 
 ### 1.1 内存计算
 
+Bitmap 内存由宽、高与像素格式共同决定，构成关系如下：
+
 ```mermaid
 flowchart LR
     A[Bitmap 内存] --> B[宽 width]
@@ -28,6 +30,8 @@ flowchart LR
 内存 = width × height × 每像素字节数
 ```
 
+不同像素格式的占用与特点对比如下：
+
 | 格式 | 每像素 | 说明 |
 |------|--------|------|
 | ARGB_8888 | 4 字节 | 默认，全彩 + 透明 |
@@ -39,6 +43,8 @@ flowchart LR
 > 示例：1080×1920 的 ARGB_8888 图 = 1080×1920×4 ≈ **7.9MB**，一张 12MP 照片解码可达 48MB，极易 OOM。
 
 ### 1.2 Android 8.0 的存储变化
+
+8.0 前后像素数据的存放位置发生了关键变化：
 
 | 版本 | 存储位置 |
 |------|----------|
@@ -53,6 +59,8 @@ flowchart LR
 ### 2.1 inSampleSize 原理
 
 **采样压缩是 OOM 治理的第一道防线**：解码时按比例缩减像素，而不是解码后再缩放。
+
+标准三步流程的代码实现如下：
 
 ::: code-tabs
 
@@ -94,6 +102,8 @@ val bitmap = BitmapFactory.decodeFile(path, options)
 ```
 
 :::
+
+采样率的计算需要结合目标尺寸循环倍增：
 
 ::: code-tabs
 
@@ -147,6 +157,8 @@ private fun calculateInSampleSize(
 
 ### 2.2 采样率规则
 
+采样率与内存缩减的对应关系如下：
+
 | inSampleSize | 效果 | 内存 |
 |--------------|------|------|
 | 1 | 原图 | 100% |
@@ -159,6 +171,8 @@ private fun calculateInSampleSize(
 ## 三、质量压缩（重新编码）
 
 ### 3.1 compress 压缩
+
+质量压缩通过调整编码质量减小文件体积，实现如下：
 
 ::: code-tabs
 
@@ -186,6 +200,8 @@ fun compressQuality(bitmap: Bitmap, quality: Int = 80): ByteArray {
 
 :::
 
+三种常见编码格式的取舍如下：
+
 | 格式 | 特点 | 适用 |
 |------|------|------|
 | JPEG | 有损，质量可调 | 照片，无透明通道 |
@@ -195,6 +211,8 @@ fun compressQuality(bitmap: Bitmap, quality: Int = 80): ByteArray {
 > 注意：质量压缩用于**减少文件体积**（上传、存储），不减少内存占用（解码后仍是原像素）；**内存优化靠采样压缩**。
 
 ### 3.2 尺寸压缩（缩放）
+
+尺寸压缩直接改变像素数量，从而减少内存，实现如下：
 
 ::: code-tabs
 
@@ -244,6 +262,8 @@ fun compressScale(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
 
 ### 4.1 LruCache 内存缓存
 
+内存缓存采用最近最少使用策略，示例实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -278,6 +298,8 @@ val lruCache = object : LruCache<String, Bitmap>(cacheSize) {
 :::
 
 ### 4.2 inBitmap 复用
+
+复用已分配像素内存可减少频繁分配，示例代码如下：
 
 ::: code-tabs
 
@@ -318,6 +340,8 @@ BitmapFactory.decodeResource(res, R.drawable.img, options)
 
 ### 5.1 完整策略清单
 
+防止 OOM 的策略从解码、格式、缓存到复用层层递进：
+
 ```mermaid
 flowchart TD
     A[图片加载] --> B[采样压缩<br>inSampleSize]
@@ -329,6 +353,8 @@ flowchart TD
     A --> H[库: Glide/Coil<br>自动处理]
 ```
 
+各策略带来的收益对比如下：
+
 | 策略 | 收益 |
 |------|------|
 | inSampleSize 采样 | 解码时减像素，内存直接降 |
@@ -339,6 +365,8 @@ flowchart TD
 | 图片库 | Glide/Coil 自动采样 + 缓存 |
 
 ### 5.2 大图查看场景
+
+超大长图用 BitmapRegionDecoder 分块加载，只解码可见区域：
 
 ::: code-tabs
 

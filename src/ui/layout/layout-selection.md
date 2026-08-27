@@ -12,6 +12,8 @@ description: LinearLayout/FrameLayout/RelativeLayout/ConstraintLayout 的选型�
 
 ### 1.1 布局体系
 
+四大基础布局都继承自 ViewGroup，各自解决一类排列需求：
+
 ```mermaid
 flowchart TD
     A[ViewGroup] --> B[LinearLayout<br>线性排列]
@@ -20,6 +22,8 @@ flowchart TD
     A --> E[ConstraintLayout<br>约束]
     A --> F[其他<br>TableLayout/GridLayout/...]
 ```
+
+各自的特点与典型场景：
 
 | 布局 | 特点 | 典型场景 |
 |------|------|----------|
@@ -31,6 +35,8 @@ flowchart TD
 ## 二、各布局的测量成本
 
 ### 2.1 measure 阶段的开销
+
+不同布局的测量策略不同，遍历次数是性能的关键差异：
 
 ```mermaid
 flowchart LR
@@ -52,6 +58,8 @@ flowchart LR
 
 ### 2.2 测量成本对比
 
+按测量次数排序，一目了然：
+
 | 布局 | 测量次数 | 说明 |
 |------|----------|------|
 | FrameLayout | 1 次 | 子 View 不依赖彼此 |
@@ -65,6 +73,8 @@ flowchart LR
 
 ### 3.1 按需求选型
 
+选型逻辑可以走一遍决策树：
+
 ```mermaid
 flowchart TD
     A[布局需求] --> B{结构简单线性?}
@@ -77,6 +87,8 @@ flowchart TD
 ```
 
 ### 3.2 选型建议表
+
+常见场景的直接推荐：
 
 | 场景 | 推荐 | 原因 |
 |------|------|------|
@@ -92,6 +104,8 @@ flowchart TD
 
 ### 4.1 用 lint 检测嵌套
 
+先让工具告诉我们哪里嵌套过深：
+
 ```bash
 # 层级检查
 ./gradlew lint
@@ -99,6 +113,8 @@ flowchart TD
 ```
 
 ### 4.2 include 复用
+
+include 把公共布局抽出来复用，还能覆盖部分属性：
 
 ```xml
 <!-- 复用头部布局 -->
@@ -117,6 +133,8 @@ flowchart TD
 
 ### 4.3 merge 减少层级
 
+merge 直接展开到父布局，不产生额外节点：
+
 ```xml
 <!-- merge 标签：消除 include 产生的多余层级 -->
 <?xml version="1.0" encoding="utf-8"?>
@@ -134,6 +152,8 @@ flowchart TD
 > merge 直接展开到父布局，不产生额外 ViewGroup 节点；只能作为 include 的根或布局根。
 
 ### 4.4 ViewStub 延迟加载
+
+先占位、用时再 inflate，适合低频 UI：
 
 ```xml
 <!-- 初始不可见，按需 inflate -->
@@ -163,6 +183,8 @@ val adView = findViewById<ViewStub>(R.id.stub_ad).inflate()
 :::
 
 ## 五、性能优化清单
+
+把前面的手段汇总成一张检查清单：
 
 | 优化项 | 做法 | 收益 |
 |--------|------|------|

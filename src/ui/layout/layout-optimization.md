@@ -11,6 +11,8 @@ description: include/merge/ViewStub/ConstraintLayout 优化手段、过度绘制
 
 ## 1. 为什么要优化布局
 
+层级越深，每帧的递归成本越高：
+
 ```text
 布局层级越深 → 测量/布局/绘制耗时越长
 原因：
@@ -24,6 +26,8 @@ description: include/merge/ViewStub/ConstraintLayout 优化手段、过度绘制
 ## 2. 四大优化手段
 
 ### 2.1 include：复用公共布局
+
+公共布局定义一次，到处 include：
 
 ```xml
 <!-- 公共布局 item_header.xml -->
@@ -45,6 +49,8 @@ description: include/merge/ViewStub/ConstraintLayout 优化手段、过度绘制
 
 ### 2.2 merge：减少嵌套层级
 
+merge 作为 include 的根时直接并入父布局：
+
 ```xml
 <!-- 根布局用 merge，被 include 后直接并入父布局，减少一层 -->
 <merge>
@@ -60,6 +66,10 @@ description: include/merge/ViewStub/ConstraintLayout 优化手段、过度绘制
 
 ### 2.3 ViewStub：延迟加载
 
+### 2.3 ViewStub：延迟加载
+
+先用 0 尺寸占位，需要时再 inflate：
+
 ```xml
 <ViewStub
     android:id="@+id/stub_loading"
@@ -73,20 +83,9 @@ description: include/merge/ViewStub/ConstraintLayout 优化手段、过度绘制
     android:layout="@layout/view_error" />
 ```
 
+代码里两种方式都能触发加载：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// 触发加载（只会加载一次，inflate 后 ViewStub 被替换为实际布局）
-View loadingView = ((ViewStub) findViewById(R.id.stub_loading)).inflate();
-
-// 或
-View stubLoading = findViewById(R.id.stub_loading);
-if (stubLoading != null) {
-    stubLoading.setVisibility(View.VISIBLE);
-}
-```
 
 @tab Kotlin
 
@@ -104,6 +103,8 @@ findViewById<View>(R.id.stub_loading)?.visibility = View.VISIBLE
 
 ### 2.4 ConstraintLayout：扁平化布局
 
+多层嵌套 vs 单层约束的对比：
+
 ```text
 传统：多层 LinearLayout 嵌套（3-5 层）
 优化：单层 ConstraintLayout（1 层）
@@ -113,6 +114,8 @@ ConstraintLayout 优势：
 ② 支持 0dp 比例、链、Guideline、Barrier、Group
 ③ 配合 MotionLayout 做动画
 ```
+
+具体写法示意：
 
 ```xml
 <androidx.constraintlayout.widget.ConstraintLayout ...>
@@ -131,6 +134,8 @@ ConstraintLayout 优势：
 
 ### 3.1 什么是过度绘制
 
+同一像素被画多次就会产生过度绘制，开发者选项可以直接观察：
+
 ```text
 同一像素被绘制多次
 系统检查：开发者选项 → 调试 GPU 过度绘制
@@ -145,6 +150,8 @@ ConstraintLayout 优势：
 
 ### 3.2 常见原因与解决
 
+常见成因和对应的修法：
+
 | 原因 | 解决 |
 | --- | --- |
 | 根布局/子 View 重复设置背景 | 删除重复背景 |
@@ -152,17 +159,9 @@ ConstraintLayout 优势：
 | 复杂动画（模糊、阴影） | 控制动画范围 |
 | 多层级窗口 | 透明窗口设置为 false |
 
+代码层面用 clipRect 缩小绘制区域：
+
 ::: code-tabs
-
-@tab:active Java
-
-```java
-// 减少绘制区域
-canvas.clipRect(0, 0, getWidth() / 2, getHeight());
-
-// 移除不必要的背景
-view.setBackground(null);
-```
 
 @tab Kotlin
 
@@ -177,6 +176,8 @@ view.background = null
 :::
 
 ## 4. 分析工具链
+
+各工具负责不同层面的检查：
 
 | 工具 | 用途 |
 | --- | --- |

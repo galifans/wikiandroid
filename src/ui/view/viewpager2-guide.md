@@ -12,6 +12,8 @@ description: ViewPager2 与 ViewPager 对比、RecyclerView 内核、PageTransfo
 
 ### 1.1 前世今生
 
+ViewPager2 与 ViewPager 的核心差异先睹为快：
+
 | 维度 | ViewPager | ViewPager2 |
 |------|-----------|------------|
 | 内核 | 自研 ViewGroup | RecyclerView 封装 |
@@ -23,6 +25,8 @@ description: ViewPager2 与 ViewPager 对比、RecyclerView 内核、PageTransfo
 | 官方状态 | 维护中 | 新项目推荐 |
 
 ### 1.2 基本使用
+
+布局中直接声明 ViewPager2，代码中配置适配器与方向：
 
 ```xml
 <androidx.viewpager2.widget.ViewPager2
@@ -87,6 +91,8 @@ viewPager.offscreenPageLimit = 2  // 预加载页数
 
 ### 2.1 适配器差异
 
+适配器是两者差异最大的地方：
+
 | 维度 | PagerAdapter（ViewPager） | RecyclerView.Adapter（ViewPager2） |
 |------|---------------------------|-------------------------------------|
 | 更新通知 | notifyDataSetChanged 整体刷新 | 细粒度 notifyItemXxx |
@@ -95,6 +101,8 @@ viewPager.offscreenPageLimit = 2  // 预加载页数
 | ViewHolder | 无 | 有，性能更好 |
 
 ### 2.2 常用特性对比
+
+ViewPager2 相对 ViewPager 的主要能力增强如下：
 
 ```mermaid
 flowchart LR
@@ -111,6 +119,8 @@ flowchart LR
 ## 三、PageTransformer 页面动画
 
 ### 3.1 自定义变换
+
+通过 PageTransformer 实现缩放、视差等联动动画：
 
 ::: code-tabs
 
@@ -163,6 +173,8 @@ viewPager.setPageTransformer(ScaleTransformer())
 
 ### 3.2 position 含义
 
+transformPage 中 position 的取值含义如下：
+
 | position | 含义 |
 |----------|------|
 | 0 | 当前完全可见页 |
@@ -173,6 +185,8 @@ viewPager.setPageTransformer(ScaleTransformer())
 ## 四、Fragment 懒加载
 
 ### 4.1 FragmentStateAdapter 的加载时机
+
+Fragment 的加载时机链路如下：
 
 ```mermaid
 flowchart LR
@@ -188,6 +202,8 @@ flowchart LR
 - 真正可见用 `setMaxLifecycle` 控制
 
 ### 4.2 官方懒加载姿势
+
+官方推荐的两种懒加载姿势如下：
 
 ::: code-tabs
 
@@ -249,6 +265,8 @@ viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback(
 
 ### 4.3 setMaxLifecycle 控制
 
+通过 setMaxLifecycle 把非当前页限制在 STARTED：
+
 ::: code-tabs
 
 @tab:active Java
@@ -279,6 +297,8 @@ viewPager.setCurrentItem(position)
 
 ### 5.1 基于 RecyclerView 的内核
 
+ViewPager2 的内部架构如下：
+
 ```mermaid
 flowchart TD
     A[ViewPager2] --> B[RecyclerView 内部包装]
@@ -289,6 +309,8 @@ flowchart TD
 ```
 
 ### 5.2 关键设计
+
+核心组件各自承担的角色如下：
 
 | 组件 | 作用 |
 |------|------|
@@ -307,6 +329,8 @@ flowchart TD
 
 ### 6.1 与 ScrollView 嵌套
 
+与 NestedScrollView 嵌套时需注意高度问题：
+
 ```xml
 <!-- NestedScrollView 嵌套 ViewPager2 需固定高度 -->
 <androidx.core.widget.NestedScrollView>
@@ -318,6 +342,8 @@ flowchart TD
 ViewPager2 原生支持 NestedScrolling，横向滑动不会与外层纵向冲突；但竖向 ViewPager2 与 ScrollView 嵌套需注意方向冲突处理。
 
 ### 6.2 常见问题排查
+
+高频问题与解决方案对照如下：
 
 | 问题 | 原因 | 解决 |
 |------|------|------|

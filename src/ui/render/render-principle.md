@@ -10,6 +10,8 @@ description: Android 渲染管线、VSYNC 与 Choreographer、硬件加速原理
 
 ## 一、一帧画面的旅程
 
+一帧画面从应用代码到屏幕，要经过 CPU 生成指令、GPU 光栅化、SurfaceFlinger 合成三段旅程：
+
 ```mermaid
 flowchart TD
     A[应用代码<br>onDraw / 布局变更] --> B[CPU 测量与布局<br>Measure → Layout → Draw]
@@ -19,6 +21,8 @@ flowchart TD
     E --> F[SurfaceFlinger 合成<br>合成所有窗口图层]
     F --> G[屏幕显示<br>逐帧扫描]
 ```
+
+各阶段的执行者和职责如下：
 
 | 阶段 | 执行者 | 职责 |
 |------|--------|------|
@@ -31,7 +35,7 @@ flowchart TD
 
 ## 二、VSYNC：渲染的节拍器
 
-**VSYNC（垂直同步）** 是硬件产生的脉冲信号，屏幕每刷新一帧产生一次（60Hz 屏 = 每 16.6ms 一次）。
+**VSYNC（垂直同步）** 是硬件产生的脉冲信号，屏幕每刷新一帧产生一次（60Hz 屏 = 每 16.6ms 一次）。信号驱动整条渲染链的节奏：
 
 ```mermaid
 sequenceDiagram
@@ -57,6 +61,8 @@ sequenceDiagram
 
 ### doFrame 调用链
 
+Choreographer 通过 postCallback 注册回调，等 VSYNC 到达后执行：
+
 ::: code-tabs
 
 @tab:active Java
@@ -80,6 +86,8 @@ Choreographer.postCallback(CALLBACK_ANIMATION, ...)
 ```
 
 :::
+
+doFrame 内部按优先级处理三类回调，最后统一进入 performTraversals：
 
 ```mermaid
 flowchart LR
@@ -151,6 +159,8 @@ Android 3.0+ 默认开启硬件加速，View 绘制从纯 CPU 软件绘制升级
 
 ### 4.1 软件绘制 vs 硬件绘制
 
+两条绘制路线的核心差异在"谁画、怎么缓存"：
+
 | 对比项 | 软件绘制（Software） | 硬件加速（Hardware） |
 |--------|---------------------|---------------------|
 | 绘制执行者 | CPU | GPU（RenderThread） |
@@ -160,6 +170,8 @@ Android 3.0+ 默认开启硬件加速，View 绘制从纯 CPU 软件绘制升级
 | 兼容性 | 全部 API 支持 | 部分 Canvas API 不支持（早期版本） |
 
 ### 4.2 绘制缓存机制
+
+硬件加速的关键是 DisplayList 缓存——View 没变就零成本复用：
 
 ```mermaid
 flowchart TD
@@ -175,12 +187,16 @@ flowchart TD
 
 ### 4.3 硬件加速检测与开关
 
+在 Manifest 里按应用或单页控制开关：
+
 ```xml
 <!-- AndroidManifest.xml 应用级/Activity 级 -->
 <application android:hardwareAccelerated="true">
     <activity android:hardwareAccelerated="false" />  <!-- 单页关闭 -->
 </application>
 ```
+
+运行时也可以查询某个 View 是否处于硬件加速状态：
 
 ::: code-tabs
 
@@ -204,6 +220,8 @@ val isAccelerated = view.isHardwareAccelerated
 
 ## 五、渲染性能指标
 
+衡量渲染健康度的几个核心指标如下：
+
 | 指标 | 含义 | 达标 |
 |------|------|------|
 | FPS | 每秒帧数 | 60fps（16.6ms/帧） |
@@ -213,6 +231,8 @@ val isAccelerated = view.isHardwareAccelerated
 | 过度绘制 | 同一像素被绘制次数 | ≤ 2x |
 
 ### 帧耗时分解
+
+16.6ms 预算在各个环节的典型分配：
 
 ```mermaid
 flowchart LR
@@ -226,6 +246,8 @@ flowchart LR
 > **优化思路**：任何阶段超支都会掉帧——布局嵌套深减测量时间、动画用属性动画减重绘、自绘 View 减指令数量、位图减 GPU 内存压力。
 
 ## 六、Profiler 工具
+
+不同工具有各自的观察维度：
 
 | 工具 | 用途 |
 |------|------|
