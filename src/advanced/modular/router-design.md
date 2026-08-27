@@ -10,6 +10,8 @@ description: 路由表、APT 注解处理器、ARouter 原理、路由降级与�
 
 ## 一、为什么需要路由
 
+组件间路由解耦的整体流程如下：
+
 ```mermaid
 flowchart TD
     A[组件 A<br>home] -->|需要跳转| B[组件 B<br>user]
@@ -19,6 +21,8 @@ flowchart TD
     R -->|path=/user/profile| B
     R -->|path=/order/list| C
 ```
+
+各痛点的路由方案说明如下：
 
 | 痛点 | 路由方案 |
 |------|---------|
@@ -32,6 +36,8 @@ flowchart TD
 
 ### 2.1 架构
 
+路由框架的整体架构如下：
+
 ```mermaid
 flowchart LR
     A["注解<br>@Route @Autowired"] --> B[APT 注解处理器]
@@ -43,6 +49,8 @@ flowchart LR
 ```
 
 ### 2.2 核心类
+
+路由框架核心类的实现代码如下：
 
 ::: code-tabs
 
@@ -110,6 +118,8 @@ class Postcard {
 
 ## 三、注解处理器(APT)生成路由表
 
+APT 注解处理器的实现代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -176,6 +186,8 @@ class RouteProcessor : AbstractProcessor() {
 
 :::
 
+常用 APT 工具的说明如下：
+
 | APT 工具 | 说明 |
 |---------|------|
 | javapoet | 生成 Java 代码 |
@@ -184,6 +196,8 @@ class RouteProcessor : AbstractProcessor() {
 | kapt / ksp | Kotlin 注解处理 |
 
 ## 四、拦截器与降级
+
+拦截器与降级的实现代码如下：
 
 ::: code-tabs
 
@@ -245,6 +259,8 @@ class DegradeService : IDegradeService {
 
 :::
 
+拦截器与降级的完整时序如下：
+
 ```mermaid
 sequenceDiagram
     participant C as 调用方
@@ -261,6 +277,8 @@ sequenceDiagram
 ```
 
 ## 五、服务暴露与发现(SPI)
+
+服务暴露与发现的实现代码如下：
 
 ::: code-tabs
 
@@ -318,6 +336,8 @@ if (userService.isLogin()) {
 
 :::
 
+路由核心能力的说明如下：
+
 | 能力 | 说明 |
 |------|------|
 | 页面跳转 | 路由路径 → Activity/Fragment |
@@ -328,6 +348,8 @@ if (userService.isLogin()) {
 
 ## 六、ARouter 核心流程
 
+ARouter 的核心流程如下：
+
 ```mermaid
 flowchart LR
     A[ARouter.init<br>加载路由表] --> B[builder.build]
@@ -335,6 +357,8 @@ flowchart LR
     C --> D[拦截器线程<br>按优先级执行]
     D --> E[startActivity<br>或 Fragment 实例化]
 ```
+
+各核心模块的职责说明如下：
 
 | 模块 | 职责 |
 |------|------|

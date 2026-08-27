@@ -33,6 +33,8 @@ Android 中的 MVC：
 - Model：数据层（Bean / 数据库 / 网络）
 ```
 
+MVC 的 Controller 与 Model 交互实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -80,6 +82,8 @@ Presenter：持有 View 引用，处理业务，更新 View
 
 特点：View 与 Model 完全解耦，通过 Presenter 桥接
 ```
+
+MVP 的 View 接口与 Presenter 实现如下：
 
 ::: code-tabs
 
@@ -182,6 +186,8 @@ ViewModel：持有状态（State），暴露给 View 观察
 
 特点：数据驱动 UI（双向绑定/状态观察），ViewModel 不持有 View 引用
 ```
+
+MVVM 的 ViewModel 与状态观察实现如下：
 
 ::: code-tabs
 
@@ -304,6 +310,8 @@ Intent：用户意图（Action）
 特点：单向数据流 + 状态不可变（类似 Redux）
 ```
 
+MVI 的 Intent、State 与 Reducer 实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -402,6 +410,8 @@ class LoginViewModel : ViewModel() {
 **缺点**：样板代码多、学习成本高、状态合并复杂。
 
 ## 6. 对比总结
+
+各架构模式的整体对比说明如下：
 
 | 模式 | 数据流向 | View 持有 | 状态管理 | 可测试性 | 学习成本 |
 | --- | --- | --- | --- | --- | --- |

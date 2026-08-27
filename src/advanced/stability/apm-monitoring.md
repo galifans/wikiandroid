@@ -10,6 +10,8 @@ description: 性能监控平台、卡顿监控、ANR 监控、网络监控、埋
 
 ## 一、APM 全景架构
 
+APM 体系的完整链路如下：
+
 ```mermaid
 flowchart TD
     A[APM SDK<br>App 内采集] --> B[数据上报]
@@ -19,6 +21,8 @@ flowchart TD
     E --> F[问题定位<br>符号还原/日志]
     F --> G[修复验证<br>灰度/对比]
 ```
+
+各层的职责说明如下：
 
 | 层级 | 内容 |
 |------|------|
@@ -33,11 +37,15 @@ flowchart TD
 
 ### 2.1 崩溃监控
 
+各崩溃类型的采集与还原方式如下：
+
 | 类型 | 采集方式 | 还原手段 |
 |------|---------|---------|
 | Java 崩溃 | Thread.UncaughtExceptionHandler | 堆栈 + 版本聚合 |
 | Native 崩溃 | 信号处理器 + Breakpad | 符号表还原 |
 | 逻辑错误 | 自定义异常捕获 | 现场信息回捞 |
+
+崩溃捕获的核心实现如下：
 
 ::: code-tabs
 
@@ -90,6 +98,8 @@ class CrashHandler : Thread.UncaughtExceptionHandler {
 
 ### 2.2 卡顿监控
 
+卡顿监控的三种实现方案如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -141,6 +151,8 @@ class JankMonitor {
 
 :::
 
+各方案的优缺点对比如下：
+
 | 方案 | 优点 | 缺点 |
 |------|------|------|
 | FrameCallback | 准确反映掉帧 | 只能知道"卡了" |
@@ -149,6 +161,8 @@ class JankMonitor {
 | 组合方案 | 采样 + 帧率结合 | 实现复杂 |
 
 ### 2.3 ANR 监控
+
+ANR 监控的核心实现如下：
 
 ::: code-tabs
 
@@ -194,6 +208,8 @@ class ANRMonitor {
 
 ## 三、网络与页面监控
 
+网络与页面监控的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -234,6 +250,8 @@ class PageMonitor : ActivityLifecycleCallbacks {
 
 :::
 
+各监控类型的指标与采集点如下：
+
 | 监控类型 | 指标 | 采集点 |
 |---------|------|--------|
 | 页面 | 启动耗时 / 渲染完成 / 停留时长 | LifecycleCallbacks |
@@ -243,6 +261,8 @@ class PageMonitor : ActivityLifecycleCallbacks {
 | 自定义 | 业务关键事件 | 埋点 SDK |
 
 ## 四、数据上报与采样
+
+数据上报与采样控制的核心实现如下：
 
 ::: code-tabs
 
@@ -298,6 +318,8 @@ class ReportManager {
 
 ## 五、告警与定位
 
+告警与定位的完整流程如下：
+
 ```mermaid
 flowchart LR
     A[指标] --> B{是否超阈值}
@@ -308,6 +330,8 @@ flowchart LR
     F --> G[修复 → 灰度 → 全量]
     G --> H[验证指标回落]
 ```
+
+各告警类型的阈值与通知方式如下：
 
 | 告警类型 | 阈值示例 | 通知 |
 |---------|---------|------|

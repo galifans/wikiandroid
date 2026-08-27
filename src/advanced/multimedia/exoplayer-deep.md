@@ -10,6 +10,8 @@ description: ExoPlayer 架构、MediaSource 数据管线、渲染器、自适应
 
 ## 一、ExoPlayer 架构总览
 
+ExoPlayer 的整体架构如下：
+
 ```mermaid
 flowchart LR
     A[ExoPlayer<br>对外 API] --> B[MediaSource<br>数据源抽象]
@@ -22,6 +24,8 @@ flowchart LR
     H --> I[AudioTrack / Surface]
 ```
 
+各核心组件的职责说明如下：
+
 | 组件 | 职责 |
 |------|------|
 | ExoPlayer | 统一入口,状态管理 |
@@ -33,6 +37,8 @@ flowchart LR
 | LoadControl | 缓冲策略控制 |
 
 ## 二、PlayerView 与基本使用
+
+PlayerView 的基本用法示例代码如下：
 
 ::: code-tabs
 
@@ -123,6 +129,8 @@ class PlayerActivity : AppCompatActivity() {
 
 ## 三、MediaSource 数据管线
 
+MediaSource 数据管线的完整链路如下：
+
 ```mermaid
 sequenceDiagram
     participant P as ExoPlayer
@@ -138,6 +146,8 @@ sequenceDiagram
     Note over S: DASH:解析 MPD →<br>按码率拉取分片
 ```
 
+各数据源的对比说明如下：
+
 | 数据源 | 容器 | 场景 |
 |--------|------|------|
 | ProgressiveMediaSource | MP4/WebM | 点播文件 |
@@ -148,6 +158,8 @@ sequenceDiagram
 
 ## 四、自适应码率(ABR)
 
+自适应码率的切换流程如下：
+
 ```mermaid
 flowchart LR
     A[网络良好] --> B[高码率<br>1080p]
@@ -156,12 +168,16 @@ flowchart LR
     B -.检测带宽恢复.-> A
 ```
 
+ABR 各策略的说明如下：
+
 | 策略 | 说明 |
 |------|------|
 | 带宽估算 | 基于下载速度估算可用带宽 |
 | 缓冲水平 | 缓冲低→降码率,缓冲高→升码率 |
 | DefaultTrackSelector | 默认:平衡画质与流畅 |
 | 手动指定 | 用户可选固定清晰度 |
+
+限制最大清晰度的示例代码如下：
 
 ::: code-tabs
 
@@ -196,6 +212,8 @@ val player = ExoPlayer.Builder(this)
 :::
 
 ## 五、渲染器与自定义
+
+渲染器与自定义的示例代码如下：
 
 ::: code-tabs
 
@@ -250,6 +268,8 @@ class CustomRenderer : BaseRenderer(C.TRACK_TYPE_VIDEO) {
 
 ## 六、DRM 与加密播放
 
+DRM 加密播放的配置代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -296,6 +316,8 @@ val mediaItem = MediaItem.Builder()
 
 ## 七、播放器最佳实践
 
+播放器最佳实践的说明如下：
+
 | 实践 | 说明 |
 |------|------|
 | 生命周期管理 | onStop 暂停,onDestroy release |
@@ -305,6 +327,8 @@ val mediaItem = MediaItem.Builder()
 | 播放进度 | 进度持久化,断点续播 |
 | 弱网降级 | 限制码率 + 超时控制 |
 | 埋点 | 播放成功率、卡顿率、平均码率 |
+
+播放器池的示例代码如下：
 
 ::: code-tabs
 

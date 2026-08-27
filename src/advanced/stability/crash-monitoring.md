@@ -26,6 +26,8 @@ description: 崩溃类型、捕获原理、Native 崩溃、崩溃上报链路、
 
 ## 2. Java 崩溃捕获原理
 
+Java 崩溃捕获的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -164,6 +166,8 @@ Native 崩溃：信号机制（SIGSEGV/SIGABRT 等）
 ```
 
 ## 6. 线上方案选型
+
+各线上崩溃监控方案的对比说明如下：
 
 | 方案 | 特点 | 适用 |
 | --- | --- | --- |

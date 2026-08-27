@@ -39,6 +39,8 @@ ViewModel → Repository（接口）→ Remote / Local
 
 ## 3. 基础实现
 
+Repository 的基础实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -116,6 +118,8 @@ class UserRepositoryImpl(
 
 ### 4.1 常见策略
 
+各缓存策略的对比说明如下：
+
 | 策略 | 流程 | 适用 |
 | --- | --- | --- |
 | 缓存优先 | 有缓存先用，后台刷新 | 列表页（新闻/推荐） |
@@ -124,6 +128,8 @@ class UserRepositoryImpl(
 | 缓存穿透 | 先缓存，过期才网络 | 配置类数据 |
 
 ### 4.2 缓存过期
+
+缓存过期的判定与降级实现如下：
 
 ::: code-tabs
 
@@ -186,6 +192,8 @@ class UserRepositoryImpl(...) : UserRepository {
 :::
 
 ## 5. Flow 数据流（响应式）
+
+响应式数据流的标准写法如下：
 
 ::: code-tabs
 
@@ -260,6 +268,8 @@ class NewsViewModel(private val repo: NewsRepository) : ViewModel() {
 :::
 
 ## 6. 多数据源结合（Remote + Local + Memory）
+
+多数据源结合的完整实现如下：
 
 ::: code-tabs
 

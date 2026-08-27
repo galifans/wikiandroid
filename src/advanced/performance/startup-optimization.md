@@ -9,6 +9,8 @@ title: 启动优化
 
 ## 一、启动类型
 
+各类启动方式的对比说明如下：
+
 | 类型 | 场景 | 特点 |
 |------|------|------|
 | 冷启动 | 进程不存在 | 最慢，重点优化对象 |
@@ -37,6 +39,8 @@ Application.attachBaseContext → Application.onCreate
 ```
 
 ### 2. 异步初始化（启动器框架）
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -77,6 +81,8 @@ StartupInitializer.initialize(context, listOf(
 - 首屏使用 `ViewStub` 延迟加载非关键视图
 
 ## 四、测量工具
+
+常用测量工具如下：
 
 | 工具 | 用途 |
 |------|------|

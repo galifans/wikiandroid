@@ -16,6 +16,8 @@ title: Hook 技术详解
 
 ## 二、使用示例：替换 View 的点击事件
 
+替换点击事件的完整实现代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -95,6 +97,8 @@ fun hook(context: Context, view: View) {
 - **动态代理：** `Proxy.newProxyInstance(类加载器, 接口数组, InvocationHandler)`，无需为每个接口写代理类。
 
 ## 三、Hook 的两种思路
+
+两种 Hook 思路的对比说明如下：
 
 | 思路 | 原理 | 典型应用 |
 | --- | --- | --- |

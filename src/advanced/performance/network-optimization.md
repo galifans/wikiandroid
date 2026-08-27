@@ -10,6 +10,8 @@ description: DNS 优化、连接复用、弱网适配、流量优化、网络监
 
 ## 一、网络优化全景
 
+网络优化的整体流程如下：
+
 ```mermaid
 flowchart TD
     A[网络优化] --> B[DNS 优化]
@@ -26,6 +28,8 @@ flowchart TD
     G --> G1[质量监控 / 告警]
 ```
 
+各维度的优化手段与收益对比说明如下：
+
 | 维度 | 手段 | 收益 |
 |------|------|------|
 | DNS | HTTPDNS、预解析 | 减少 DNS 延迟与劫持 |
@@ -39,6 +43,8 @@ flowchart TD
 
 ### 2.1 传统 DNS 的问题
 
+传统 DNS 的主要问题如下：
+
 | 问题 | 说明 |
 |------|------|
 | 解析慢 | 递归查询多级,平均 30-100ms |
@@ -47,6 +53,8 @@ flowchart TD
 | 无感知 | 域名失效无自动切换 |
 
 ### 2.2 HTTPDNS 方案
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -113,6 +121,8 @@ val client = OkHttpClient.Builder()
 
 ### 3.1 连接复用
 
+连接复用的完整链路如下：
+
 ```mermaid
 sequenceDiagram
     participant C as 客户端
@@ -126,6 +136,8 @@ sequenceDiagram
     C->>S: 流 1 / 流 2 / 流 3 并行
 ```
 
+各连接复用方案的说明如下：
+
 | 方案 | 说明 |
 |------|------|
 | keep-alive | HTTP/1.1 默认复用 TCP |
@@ -134,6 +146,8 @@ sequenceDiagram
 | 连接池预建 | 启动时预热连接 |
 
 ### 3.2 超时与重试策略
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -195,6 +209,8 @@ fun retryDelay(attempt: Int): Long {
 
 ## 四、弱网适配
 
+弱网适配的决策流程如下：
+
 ```mermaid
 flowchart LR
     A[弱网检测] --> B{网络质量}
@@ -203,6 +219,8 @@ flowchart LR
     B -->|差| E[降级:图片缩略图<br>视频低码率 / 预加载]
     B -->|无网络| F[排队 / 提示 / 离线模式]
 ```
+
+常用弱网策略的实现说明如下：
 
 | 弱网策略 | 实现 |
 |---------|------|
@@ -217,6 +235,8 @@ flowchart LR
 
 ### 5.1 数据压缩
 
+各压缩手段的说明与效果如下：
+
 | 手段 | 说明 | 效果 |
 |------|------|------|
 | Gzip / Brotli | 文本压缩 | 60%-80% |
@@ -224,6 +244,8 @@ flowchart LR
 | 协议二进制化 | Protobuf 替代 JSON | 体积小 50%+ |
 | 增量更新 | 只传变更数据 | 按场景 |
 | 合并请求 | 接口聚合(BFF) | 减少请求次数 |
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -277,6 +299,8 @@ fun imageUrl(url: String, width: Int): String =
 ```
 
 ## 六、网络监控
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -336,6 +360,8 @@ class NetworkMonitorInterceptor : Interceptor {
 ```
 
 :::
+
+各监控指标的含义如下：
 
 | 监控指标 | 含义 |
 |---------|------|

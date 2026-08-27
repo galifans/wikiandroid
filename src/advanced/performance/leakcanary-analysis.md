@@ -193,6 +193,8 @@ override fun dumpHeap(): File? {
 
 :::
 
+发现 retained 实例后的处理逻辑如下：
+
 ::: code-tabs
 
 @tab:active Java

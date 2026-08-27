@@ -34,6 +34,8 @@ vs 热修复：热修复改 bug（小），插件化加功能（大）
 
 ## 3. 类加载方案
 
+插件 dex 的加载实现代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -78,6 +80,8 @@ val instance = clazz.newInstance()
 ```
 
 ## 4. 资源加载方案
+
+插件资源合并的实现代码如下：
 
 ::: code-tabs
 
@@ -153,6 +157,8 @@ Instrumentation Hook 方案：
 - 配合占位 Activity，实现生命周期透明转发
 ```
 
+占位式启动的简化示意代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -209,6 +215,8 @@ class ProxyActivity : Activity() {
 :::
 
 ## 6. 代表框架对比
+
+各插件化框架的对比说明如下：
 
 | 框架 | 作者 | 组件方案 | 特点 |
 | --- | --- | --- | --- |
