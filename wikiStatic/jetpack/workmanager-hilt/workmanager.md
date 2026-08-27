@@ -20,9 +20,13 @@ WorkManager 解决的是**可延迟、需要保证执行**的后台任务：
 | 图片压缩/上传 | 前台 UI 相关操作 |
 | 定期数据清理 | 需要立即响应用户操作 |
 
+判断是否该用 WorkManager 的关键问题只有一个：**这个任务能不能等？** 如果能接受"稍后执行、但必须执行"，就交给 WorkManager（系统会在合适时机调度，进程被杀也能恢复）；如果必须立即响应，就应该走协程、前台服务或闹钟。**点击按钮后立刻要看到结果的"即时任务"不是 WorkManager 的菜。**
+
 ## 2. 基础使用
 
 ### 2.1 定义 Worker
+
+自定义 `Worker` 时只需要重写 `doWork()` 方法，它运行在 WorkManager 的后台线程中。返回值表达任务结局：`Result.success()` 表示成功结束，`Result.failure()` 表示不可重试的失败，`Result.retry()` 表示按退避策略稍后重试。传入参数通过 `getInputData()` 读取，一个 Worker 类的骨架如下：
 
 ::: code-tabs
 
@@ -78,6 +82,8 @@ class UploadWorker(
 
 ### 2.2 提交任务
 
+`OneTimeWorkRequest.Builder` 负责配置任务的"运行条件"：**约束（Constraints）** 决定何时才允许执行（需要网络、充电中、电量充足等），**退避（Backoff）** 决定失败后如何重试（线性或指数退避）。这些条件在 `enqueue()` 时注册进 WorkManager，系统只在条件满足时执行任务：
+
 ::: code-tabs
 
 @tab:active Java
@@ -125,6 +131,8 @@ WorkManager.getInstance(context).enqueue(request)
 
 ### 2.3 观察结果
 
+任务状态通过 `WorkInfo` 观察：`getWorkInfoByIdLiveData` 返回的 LiveData 会随状态变化推送最新信息。UI 层通常在这里根据 `SUCCEEDED`/`FAILED`/`RUNNING` 等状态刷新界面，也顺带读取任务上报的进度数据：
+
 ::: code-tabs
 
 @tab:active Java
@@ -161,6 +169,8 @@ WorkManager.getInstance(context)
 :::
 
 ## 3. 任务链（Chain）
+
+任务链用于表达任务间的**依赖关系**：`beginWith` 声明起点（可以是一个或并行的多个），`then` 追加后续步骤——后续任务只在所有前置任务成功后才会启动，其中任何一个失败都会中断链条。典型的"压缩 → 上传 → 清理"流水线就是这么搭出来的：
 
 ::: code-tabs
 
@@ -201,6 +211,8 @@ WorkManager.getInstance(context)
 :::
 
 ## 4. 周期性任务
+
+周期性任务用 `PeriodicWorkRequestBuilder` 创建，注意两个特性：一是**最小间隔 15 分钟**，更短的周期会被忽略；二是实际执行时间不精确——系统会结合 Doze 等省电机制自行安排，因此它适合"定期同步"而非"定点闹钟"。搭配 `enqueueUniquePeriodicWork` 可保证全局只有一份周期任务：
 
 ::: code-tabs
 
@@ -251,6 +263,8 @@ WorkManager.getInstance(context).enqueueUniquePeriodicWork(
 
 ### 5.1 唯一任务（避免重复）
 
+同一用户快速多次触发上传时，普通 `enqueue` 会产生多份重复任务。`enqueueUniqueWork` 以唯一名称登记任务，并通过 `ExistingWorkPolicy` 决定冲突策略：`KEEP` 保留旧任务、`REPLACE` 用新任务替换、`APPEND` 让新任务排队等待：
+
 ::: code-tabs
 
 @tab:active Java
@@ -298,6 +312,8 @@ WorkManager.getInstance(context).cancelAllWork()
 :::
 
 ### 5.3 进度上报
+
+长任务的进度可以通过 `setProgress` 上报，配合 `getWorkInfoByIdLiveData` 观察即可实时驱动进度条。注意 `setProgress` 只能在任务运行中调用，且每次调用都会触发一次 WorkInfo 更新：
 
 ::: code-tabs
 
@@ -363,6 +379,8 @@ WorkManager.getInstance(context)
 
 ### 5.4 CoroutineWorker（推荐）
 
+生产环境更推荐用 `CoroutineWorker` 替代普通 `Worker`：`doWork()` 变成 suspend 函数，可以直接调用协程 API（`delay`、`withContext`），还自动绑定协程取消——任务被取消时协程随之取消，不会泄漏。普通 `Worker` 的 `doWork` 是同步阻塞式，写异步逻辑要自己处理线程：
+
 ::: code-tabs
 
 @tab:active Java
@@ -412,6 +430,8 @@ class SyncWorker(
 > `CoroutineWorker` 基于协程，任务自动绑定协程取消（`setForeground` 可更新进度）。
 
 ## 6. 对比总结
+
+四个方案各有分工，核心差异看三个维度：能否延迟执行、能否保证执行（跨进程存活）、能否精确到点触发：
 
 | 方案 | 延迟执行 | 保证执行 | 精确时间 | 场景 |
 | --- | --- | --- | --- | --- |

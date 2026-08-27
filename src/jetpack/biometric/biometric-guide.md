@@ -13,6 +13,8 @@ description: BiometricManager 支持性检测、BiometricPrompt 认证流程、C
 
 ### 1.1 为什么用 androidx.biometric
 
+先由 `BiometricManager` 检测设备支持哪种生物特征（指纹/人脸/虹膜），再统一交给 `BiometricPrompt` 弹系统对话框，一套 API 覆盖所有机型：
+
 ```mermaid
 flowchart LR
     A[应用需要认证] --> B{BiometricManager}
@@ -39,6 +41,8 @@ flowchart LR
 | DEVICE_CREDENTIAL | PIN / 密码 / 图案（备用） | Class 1 |
 
 ## 2. 支持性检测
+
+动手弹窗之前先问一句"设备支持吗"——`BiometricManager.canAuthenticate` 返回是否可用：
 
 ::: code-tabs
 
@@ -89,6 +93,8 @@ object BiometricHelper {
 ## 3. BiometricPrompt 认证
 
 ### 3.1 基础认证流程
+
+认证的核心是 `BiometricPrompt` + 回调：**成功**进主流程、**失败**可重试、**错误**（取消/超时/锁定）结束流程：
 
 ::: code-tabs
 
@@ -201,6 +207,8 @@ class LoginActivity : AppCompatActivity() {
 
 ### 3.2 认证流程状态机
 
+整个流程是一个有限状态机：
+
 ```mermaid
 stateDiagram-v2
     [*] --> 认证中: authenticate()
@@ -220,7 +228,7 @@ stateDiagram-v2
 
 ### 4.1 为什么需要 CryptoObject
 
-生物识别通过后要使用**密钥**解密数据。CryptoObject 把密钥和认证绑定，只有认证成功才能使用密钥，防止绕过认证直接解密：
+普通认证只证明"你是机主"；要解密敏感数据还需要证明"认证后你才被授权用这把钥匙"。CryptoObject 把密钥与认证绑定：
 
 ```mermaid
 sequenceDiagram
@@ -314,6 +322,8 @@ object CryptoManager {
 :::
 
 ### 4.2 认证 + 解密
+
+认证通过后从 `AuthenticationResult` 里取回已授权的 Cipher 完成解密——密钥只在认证成功那一刻解锁：
 
 ::: code-tabs
 

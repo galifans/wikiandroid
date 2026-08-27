@@ -22,9 +22,26 @@ description: Room 三要素、DAO 设计、Flow 响应式查询、Migration 升�
 Room ← 抽象层 → SQLite ← 存储
 ```
 
+## 1. Room 是什么
+
+**Room** 是 Jetpack 的 SQLite 抽象层，在 SQLite 之上提供：
+
+- **编译期 SQL 校验**（写错 SQL 直接编译失败）。
+- **协程/Flow 集成**（响应式查询）。
+- **Migration 机制**（数据库升级管理）。
+- **减少样板代码**（自动生成 DAO 实现）。
+
+一句话理解它的定位：**你写 SQL 和数据结构，Room 负责在编译期帮你校验、运行时帮你执行**：
+
+```text
+Room ← 抽象层 → SQLite ← 存储
+```
+
 ## 2. 三要素
 
 ### 2.1 @Entity（表）
+
+`@Entity` 把普通类映射成数据库表：类名/字段名即表名/列名，可用 `@ColumnInfo` 改名，`@PrimaryKey` 声明主键，`@Index` 建索引。唯一索引能保证 email 不重复：
 
 ::: code-tabs
 
@@ -70,7 +87,7 @@ data class User(
 
 :::
 
-关系表：
+多对多关系需要一张"关系表"：联合主键 + 外键，`onDelete = CASCADE` 让主表删记录时自动清理关联数据：
 
 ::: code-tabs
 
@@ -119,6 +136,8 @@ data class UserBook(val userId: Long, val bookId: Long)
 :::
 
 ### 2.2 @Dao（数据访问）
+
+`@Dao` 定义所有数据操作：`@Insert/@Update/@Delete` 处理常规增删改，`@Query` 写自定义 SQL。返回 `Flow` 的方法具备**响应式**能力——表数据一变，UI 自动刷新：
 
 ::: code-tabs
 
@@ -193,6 +212,8 @@ interface UserDao {
 :::
 
 ### 2.3 @Database（数据库）
+
+`@Database` 把实体和 DAO 组装成一个数据库入口：声明 entities、version，并提供单例 + 迁移注册。数据库升级必须写 `Migration`，否则版本不匹配会崩：
 
 ::: code-tabs
 
@@ -283,7 +304,7 @@ abstract class AppDatabase : RoomDatabase() {
 
 ## 3. 响应式查询：Flow
 
-Room 对 `Flow` 的支持是最大亮点：
+Room 对 `Flow` 的支持是最大亮点：DAO 方法返回 `Flow`/`LiveData` 后，**任何表变化都会自动重新查询并推送**，UI 侧只管订阅，不用手动刷新：
 
 ::: code-tabs
 
@@ -358,6 +379,8 @@ class UserFragment : Fragment() {
 
 ### 4.1 返回部分列（DTO）
 
+不想把整个表字段都查出来时，用 DTO 只取需要的列：
+
 ::: code-tabs
 
 @tab:active Java
@@ -389,6 +412,8 @@ fun observeNames(): Flow<List<UserName>>
 :::
 
 ### 4.2 关联查询（JOIN）
+
+`@Embedded` + `@Relation` 组合实现"一查多"：一次查询返回用户和他的书列表，`@Transaction` 保证一致性：
 
 ::: code-tabs
 
@@ -426,6 +451,8 @@ fun observeUsersWithBooks(): Flow<List<UserWithBooks>>
 
 ### 4.3 原生查询
 
+`@RawQuery` 用于编译期无法确定 SQL 的场景（如动态拼接搜索条件）：
+
 ::: code-tabs
 
 @tab:active Java
@@ -462,6 +489,8 @@ dao.search(SimpleSQLiteQuery("SELECT * FROM user WHERE name LIKE ?", arrayOf("%$
 - 生产环境必须手写 Migration。
 
 ### 5.2 迁移测试
+
+迁移代码一定要测——用 `MigrationTestHelper` 模拟"老版本数据库 + 真实数据 → 执行迁移 → 校验数据还在"：
 
 ::: code-tabs
 
@@ -534,6 +563,8 @@ class MigrationTest {
 :::
 
 ## 6. Room vs 原生 SQLite vs 其他 ORM
+
+选型时从"校验时机、响应式支持、迁移管理"三个维度对比：
 
 | 维度 | 原生 SQLite | Room | GreenDAO |
 | --- | --- | --- | --- |

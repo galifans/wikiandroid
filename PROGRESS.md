@@ -21,6 +21,15 @@
 
 ## 2. 进展时间线
 
+### 2026-08-27（Phase 2 内容优化：图表/代码块配文字讲解、简单表格转文字、mermaid 缩小加边框、仅 Kotlin 代码块默认 Kotlin）
+- ✓ 用户反馈：① 当前网站内容满屏幕都是 mermaid 图 + 表格 + 代码块，文字相关描述太少了；② 部分表格内容可以转成文字描述介绍；③ mermaid 图有点太大且没有边框，需要缩小并加边框；④ 如果代码块仅支持 Kotlin 写法，应优化为默认 Kotlin 展示、Java 切换按钮灰化不可点击
+- ✓ 用户确认范围：全站分批优化，本次先做 Jetpack 板块（11 个模块 28 篇文章）；表格转文字标准 = 仅转最简短的说明性表格（≤3 行）；文字风格 = 每个图表/代码块前后加讲解段落
+- ✓ 文字描述增强（**28 篇 jetpack 文章 + 1 篇 ui**）：为每个 mermaid 图、code-tabs 代码块、简单表格补充讲解段落——图/代码块前加"前置讲解"（forward reference，如"下面的流程图展示了……"），表格后加"后置总结"（backward reference，如"上面这张表说明了……"），累计新增约 240 处讲解段落；`compose-animation.md` 第 8 节简单表格直接转为 5 点要点文字
+- ✓ 仅 Kotlin 代码块处理：新增 `scripts/scan-kotlin-only.mjs`（扫描仅含 Kotlin 围栏的 code-tabs）与 `scripts/convert-kotlin-only.mjs`（自动转换），41 个仅 Kotlin 块全部转为"默认 Kotlin + Java 按钮灰化禁用"；新增自定义 `src/.vuepress/components/CodeTabs.ts` 组件（检测空 tab 槽位 → 该按钮 disabled + 灰化样式 + aria-disabled + title 提示"此代码块仅支持 Kotlin 写法"，onClick/onKeydown 早退）+ `src/.vuepress/client.ts` 注册；`src/.vuepress/styles/index.scss` 追加 `.vp-code-tab-nav.disabled` 灰化样式（color text-mute / cursor not-allowed / opacity 0.55）
+- ✓ mermaid 缩小 + 边框：`src/.vuepress/styles/index.scss` 追加 `.mermaid-content` 样式——`width: fit-content; max-width: 100%; margin: 1em auto; border: 1px solid var(--vp-c-border); border-radius: 8px; padding: 12px 16px; background: var(--vp-c-bg-alt); overflow-x: auto` + svg `display: block; max-width: 100%; height: auto`（实测 1593px → 561px 宽）
+- ✓ 质量验证：`node scripts/validate-tabs.cjs` 全站 **ALL OK**；`npm run build` 351 页面构建成功（30s）；浏览器实测 appcompat-principle.html / fragment-source.html——讲解段落全部渲染、mermaid SVG 正常、code-tabs 6/3 个正常
+- 教训：① multi_replace 批量替换遇 "Multiple matches found" 时逐个核对——本次 fragment-source.md 的 sequenceDiagram intro 因 oldString 匹配两处而静默跳过，浏览器抽查才发现并补上；② 验证 CSS/内容改动必须用 `?t=` 缓存穿透 URL（浏览器缓存导致首次验证误判）；③ 表格转文字只转 ≤3 行说明性表格，大表格保留表格形式（更易扫读）
+
 ### 2026-08-27（全站 mermaid 图表渲染修复：安装 mermaid 依赖 + 开启渲染 + 修复 7 处语法错误）
 - ✓ 用户反馈：页面中有很多 mermaid 代码块，看不到渲染后的图表——要么成功渲染，要么去掉（不做半成品）
 - ✓ 基础设施：`package.json` 新增 devDependency `mermaid@^11.14.0`（浏览器实际加载 11.17.2，页面模块 `/assets/mermaid.esm.min-*.js`）；`src/.vuepress/theme.ts` 开启 `markdown: { mermaid: true }`（theme-hope rc.107 内置 `@vuepress/plugin-markdown-chart` 的 Mermaid 组件自动接线）；默认 securityLevel=strict（非 loose）

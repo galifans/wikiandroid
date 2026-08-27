@@ -10,6 +10,8 @@ description: Compose 动画体系、animate*AsState、AnimatedVisibility、Anima
 
 ## 一、动画体系总览
 
+Compose 动画按"控制粒度"从简到繁分五层：`animate*AsState` 管单个值、`AnimatedVisibility` 管显隐、`AnimatedContent` 管内容切换、`Animatable` 提供精细控制、`Transition` 协调一组相关属性。从简单到复杂逐级选用：
+
 ```mermaid
 flowchart TD
     A[Compose 动画] --> B[值动画<br>animate*AsState]
@@ -30,14 +32,11 @@ flowchart TD
 
 ## 二、值动画:animate*AsState
 
+值动画是使用频率最高的动画：把"目标值"作为状态，值一变 Compose 自动做平滑过渡。点赞按钮的缩放效果只需一个 `animateFloatAsState`：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：ObjectAnimator / ValueAnimator 命令式实现，或 AnimatedVectorDrawable
-```
 
 @tab Kotlin
 
@@ -76,14 +75,11 @@ fun LikeButton(isLiked: Boolean) {
 
 ## 三、可见性动画:AnimatedVisibility
 
+`AnimatedVisibility` 让"显示/隐藏"也有动画：`visible` 为 true 时播放 `enter` 动画，为 false 时播放 `exit` 动画。多个动画可以用 `+` 组合（如"滑动+淡入"）：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：View.animate() + 可见性切换，或 TransitionManager 过渡
-```
 
 @tab Kotlin
 
@@ -121,14 +117,11 @@ fun ExpandableCard(expanded: Boolean) {
 
 ## 四、内容转场:AnimatedContent
 
+切换"不同内容"（如登录态/游客态、加载中/成功）时用 `AnimatedContent`：旧内容播放退出动画、新内容播放进入动画，两者用 `togetherWith` 组合。只要淡入淡出的话用 `Crossfade` 更省事：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：FragmentTransaction.setCustomAnimations / Transition 转场
-```
 
 @tab Kotlin
 
@@ -158,14 +151,11 @@ Crossfade(targetState = isLoading, label = "loading") { loading ->
 
 ## 五、高级控制:Animatable
 
+手势交互（拖拽、回弹、fling）需要"动画可以被随时打断、无缝接管"，这正是 `Animatable` 的强项——它是 `animate*AsState` 的底层实现，暴露了更精细的控制 API：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：ViewDragHelper + Scroller 实现手势跟随与松手回弹
-```
 
 @tab Kotlin
 
@@ -213,14 +203,11 @@ Box(
 
 ## 六、弹簧与关键帧
 
+`AnimationSpec` 决定动画"怎么跑"：`tween` 固定时长线性过渡、`spring` 基于物理模型回弹、`keyframes` 多阶段关键帧。三个典型规格对比：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：XML 中的 interpolator（overshoot / bounce / fast_out_slow_in）与 duration 时长
-```
 
 @tab Kotlin
 
@@ -260,14 +247,11 @@ val tweenSpec = tween(
 
 ## 七、Transition 多属性动画
 
+当多个属性需要"同步协调"地动画（尺寸+颜色+旋转一起变）时，`updateTransition` 把一组动画绑定到同一个状态上，状态切换时所有属性同步过渡：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：ObjectAnimator + AnimatorSet 组合多个属性动画
-```
 
 @tab Kotlin
 
@@ -304,22 +288,11 @@ fun AnimatedBox() {
 
 ## 八、性能与最佳实践
 
-| 实践 | 说明 |
-|------|------|
-| 只动画"变化的部分" | 避免整个界面重组 |
-| 用 `graphicsLayer` 动画 | 平移/缩放/旋转走 GPU,不触发布局 |
-| 复用 AnimationSpec | 定义为常量避免重组重建 |
-| `derivedStateOf` | 高频变化值派生时避免重组风暴 |
-| 可打断优先 | 手势动画用 Animatable 支持打断 |
+动画性能的核心是"**别让动画拖累布局**"，几条经验值得记住：① 只动画**变化的部分**，避免整个界面重组；② 平移/缩放/旋转优先用 `graphicsLayer` 走 GPU 合成，不触发布局；③ AnimationSpec 定义为顶层常量复用，避免重组时反复重建；④ 高频变化值配合 `derivedStateOf` 防止重组风暴；⑤ 手势动画用 `Animatable`，天然支持打断接管。下面代码演示 graphicsLayer 的正确用法：
 
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：View.setTranslationX / setRotation / setScaleX 走 GPU 合成，避免 setLayoutParams 触发布局
-```
 
 @tab Kotlin
 

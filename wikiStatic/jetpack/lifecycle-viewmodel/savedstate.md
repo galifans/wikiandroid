@@ -13,6 +13,8 @@ description: SavedStateHandle 原理、与 Bundle 的区别、ViewModel 中保�
 
 ### 1.1 配置变更 vs 进程死亡
 
+先厘清两个容易混淆的概念：**配置变更**（旋转屏幕）只是 Activity 重建，进程还在；**进程死亡**（内存不足回收、用户划掉）是整个进程连同 ViewModel 一起消失。两者的差异决定了状态保存策略：
+
 | 场景 | 内存是否被清空 | ViewModel 是否存活 | 需要持久化 |
 | --- | --- | --- | --- |
 | 旋转屏幕 | ✗ 否 | ✓ 存活 | ✗ 不需要 |
@@ -23,6 +25,8 @@ description: SavedStateHandle 原理、与 Bundle 的区别、ViewModel 中保�
 > `SavedStateHandle` / `onSaveInstanceState` 保存。
 
 ### 1.2 传统方案的不足
+
+传统 `onSaveInstanceState` 方案的问题在于"手工"：保存、恢复、key 管理全在 Activity 里手动完成，代码分散、key 拼写错误只能运行时发现、且与 UI 逻辑强耦合：
 
 ::: code-tabs
 
@@ -66,7 +70,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 ## 2. SavedStateHandle 是什么
 
 `SavedStateHandle` 是 ViewModel 的**状态保存容器**，配合 `SavedStateViewModelFactory`
-自动在进程死亡后恢复数据。
+自动在进程死亡后恢复数据。它提供了两种写入方式：`get/set` 直接读写键值；`getLiveData(key)` 把某个键变成可观察数据——推荐后者，UI 层直接订阅即可，数据恢复后自动推送：
 
 ::: code-tabs
 
@@ -141,6 +145,8 @@ class SearchViewModel(
 
 ### 3.1 构造注入（推荐）
 
+获取 SavedStateHandle 最自然的方式是把它作为构造参数——框架的 `SavedStateViewModelFactory` 在创建 ViewModel 时自动注入，无需手动初始化：
+
 ::: code-tabs
 
 @tab:active Java
@@ -168,6 +174,8 @@ class MyViewModel(
 > 配合 `SavedStateViewModelFactory` 自动注入，无需手动创建。
 
 ### 3.2 Hilt 注入
+
+使用 Hilt 时同样简单：`@HiltViewModel` 的构造参数里声明 `SavedStateHandle`，Hilt 自动提供（它在内部同样走 SavedStateViewModelFactory 的链路）：
 
 ::: code-tabs
 
@@ -228,6 +236,8 @@ class DetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
 ### 4.1 数据流向
 
+SavedStateHandle 的数据流向横跨 Activity 与 ViewModel 两层：Activity 持有 `SavedStateRegistry`（状态仓库），ViewModel 创建时从仓库取回上次保存的 Bundle 并包装成 SavedStateHandle。进程死亡后流程重演一遍——Activity 重建 → 仓库恢复 Bundle → ViewModel 拿到数据：
+
 ```text
 Activity 创建
   → SavedStateViewModelFactory 创建 ViewModel
@@ -238,6 +248,8 @@ Activity 创建
 ```
 
 ### 4.2 关键类
+
+整个链路涉及四个关键类，职责划分如下：
 
 | 类 | 职责 |
 | --- | --- |
@@ -253,6 +265,8 @@ Activity 创建
 - ViewModel 的 SavedStateHandle 数据**在进程死亡时**会序列化进 Bundle（受 Binder 大小限制）。
 
 ## 5. 与 Bundle / ViewModel 的对比
+
+三个方案从"旋转屏幕、进程死亡、数据类型、UI 解耦、可观察性"五个维度对比：
 
 | 维度 | onSaveInstanceState | ViewModel | SavedStateHandle |
 | --- | --- | --- | --- |

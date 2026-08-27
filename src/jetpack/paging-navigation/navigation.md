@@ -11,7 +11,7 @@ description: NavHost、NavController、类型安全导航、返回栈管理、De
 
 ## 1. 为什么用 Navigation
 
-传统 Fragment 导航的问题：
+传统方案用 FragmentManager 手写事务，样板代码多、返回栈管理繁琐、类型错误难以察觉：
 
 ::: code-tabs
 
@@ -47,7 +47,7 @@ Navigation 解决：
 
 ### 2.1 导航图（NavGraph）
 
-XML 方式：
+导航图集中声明"有哪些页面、页面之间怎么跳"。XML 方式如下——`startDestination` 指定首页，`<action>` 定义跳转关系，`<argument>` 声明页面参数：
 
 ```xml
 <!-- res/navigation/nav_graph.xml -->
@@ -77,6 +77,8 @@ XML 方式：
 ```
 
 ### 2.2 宿主机与控制器
+
+导航图需要"宿主"来承载——`NavHostFragment` 作为容器 View 放在布局里，代码中通过它拿到 `NavController`，一切跳转都由控制器执行：
 
 ```xml
 <!-- Fragment 方式 -->
@@ -110,6 +112,8 @@ val navController = (supportFragmentManager
 ## 3. 导航跳转
 
 ### 3.1 传统方式
+
+传统方式用资源 ID 定位目的地，参数塞进 Bundle——写法繁琐且参数类型编译期不校验：
 
 ::: code-tabs
 
@@ -146,14 +150,11 @@ val userId = arguments?.getInt("userId")
 
 ### 3.2 类型安全导航（推荐，2.8+）
 
+Navigation 2.8 起推荐**类型安全导航**：路由用 `@Serializable` 类定义，跳转直接传对象，参数自动解析，编译期就杜绝"字符串路由拼错、Bundle 类型写错"这类问题：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 类型安全导航仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：XML 导航图 + safe-args 插件生成 Directions/Args 类，实现编译期参数校验
-```
 
 @tab Kotlin
 
@@ -194,6 +195,8 @@ fun AppNavHost() {
 > 类型安全导航在编译期校验路由与参数，杜绝 `bundleOf("userId" to "42")` 类型错误。
 
 ## 4. 返回栈管理
+
+返回栈是导航的"撤销历史"。常用操作：`navigateUp` 返回上一页、`popBackStack` 弹到指定页、`popUpTo` 清栈跳转（登录后进主页）、`launchSingleTop` 防重复创建：
 
 ::: code-tabs
 
@@ -245,6 +248,8 @@ navController.navigate(R.id.tabFragment) {
 
 ## 5. DeepLink 深链
 
+深链让外部链接直接打开应用内指定页面。先在导航图中声明带占位符的 uri（`{message}` 是动态参数）：
+
 ```xml
 <fragment
     android:id="@+id/shareFragment"
@@ -256,11 +261,6 @@ navController.navigate(R.id.tabFragment) {
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// 代码方式声明深链（composable + navDeepLink）仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：在导航图 XML 中用 <deepLink app:uri="https://example.com/share/{message}" /> 声明
-```
 
 @tab Kotlin
 
@@ -303,14 +303,11 @@ navController.handleDeepLink(intent)
 
 ## 6. 与 Hilt / ViewModel 集成
 
+导航天然是 ViewModel 的"作用域边界"：**每个 `NavBackStackEntry` 都是独立的 `ViewModelStoreOwner`**，页面在返回栈里 ViewModel 就活着，pop 出去自动清除：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// @Composable 部分仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：ViewModelProvider(backStackEntry).get(DetailViewModel.class)，以 NavBackStackEntry 为作用域
-```
 
 @tab Kotlin
 

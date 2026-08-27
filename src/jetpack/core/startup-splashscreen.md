@@ -13,6 +13,8 @@ description: App Startup 组件初始化、InitializationProvider 原理、Splas
 
 ### 1.1 传统初始化的痛点
 
+Android 的 ContentProvider 机制被各 SDK 拿来"偷"初始化时机——谁都要一个 Provider，启动链路被拖垮：
+
 ```mermaid
 flowchart LR
     A[自定义 ContentProvider] --> B[启动耗时增加]
@@ -32,13 +34,19 @@ flowchart LR
 
 ### 1.2 App Startup 的解决思路
 
+App Startup 的解法很直接：
+
 - 所有初始化器合并到**一个** `InitializationProvider`；
 - 显式声明初始化依赖顺序；
 - 支持手动按需初始化（`AppInitializer`）。
 
+Provider 数量从"每库一个"变成"全局一个"，启动耗时、顺序、依赖全部可控。
+
 ## 2. 定义初始化器
 
 ### 2.1 实现 Initializer
+
+每个库写一个 `Initializer`：`create` 里做初始化并返回结果，`dependencies` 声明"我依赖谁"：
 
 ::: code-tabs
 
@@ -86,6 +94,8 @@ class WorkManagerInitializer : Initializer<WorkManager> {
 
 ### 2.2 在 Manifest 中合并
 
+所有初始化器都在同一个 `InitializationProvider` 下以 `<meta-data>` 声明——这就是"合并"的实现方式：
+
 ```xml
 <!-- AndroidManifest.xml -->
 <provider
@@ -103,6 +113,8 @@ class WorkManagerInitializer : Initializer<WorkManager> {
 
 ### 2.3 初始化顺序（依赖图）
 
+依赖关系画出来是一张有向图：
+
 ```mermaid
 flowchart TD
     A[LoggerInitializer] --> B[WorkManagerInitializer]
@@ -117,6 +129,8 @@ App Startup 会做**拓扑排序**，保证依赖先于被依赖者执行。
 ## 3. 按需初始化
 
 ### 3.1 延迟初始化
+
+不想启动就初始化的库，干脆不写进 Manifest，改成首次使用时手动触发：
 
 ::: code-tabs
 
@@ -190,6 +204,8 @@ class MyInitializer : Initializer<MyApi> {
 
 ### 4.2 基本配置
 
+配置只需两步：主题继承 `Theme.SplashScreen` 并指定图标/背景，然后 `installSplashScreen()` 接管显示逻辑：
+
 ```xml
 <!-- values/themes.xml：应用主题继承启动画面主题 -->
 <style name="Theme.MyApp" parent="Theme.SplashScreen">
@@ -248,6 +264,8 @@ class MainActivity : AppCompatActivity() {
 :::
 
 ### 4.3 兼容原理
+
+一套代码兼容所有版本的关键，是"按 API 版本分流"：
 
 ```mermaid
 flowchart LR

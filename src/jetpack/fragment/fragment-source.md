@@ -11,7 +11,7 @@ description: FragmentManager 调度原理、事务提交机制、状态保存与
 
 ## 1. FragmentManager 是什么
 
-FragmentManager 是 Fragment 的**调度中心**：执行事务、管理生命周期、保存/恢复状态。
+FragmentManager 是 Fragment 的**调度中心**：执行事务、管理生命周期、保存/恢复状态。它内部有几个关键部件各司其职：
 
 ```mermaid
 flowchart LR
@@ -32,6 +32,8 @@ flowchart LR
 ## 2. 事务提交机制
 
 ### 2.1 事务是什么
+
+事务（Transaction）把"一次界面变更"打包成一串操作——add、remove、replace 等都可以链式组合，最后 `commit` 提交：
 
 ::: code-tabs
 
@@ -73,12 +75,16 @@ class MainActivity : AppCompatActivity() {
 
 ### 2.2 commit 与 commitNow
 
+提交方式分"异步/同步"和"是否允许状态丢失"两个维度：
+
 | 方法 | 执行时机 | 场景 |
 | --- | --- | --- |
 | `commit()` | **异步**，主线程下一帧执行 | 常规添加/替换 |
 | `commitNow()` | **同步**，立即执行 | 需要立刻生效 |
 | `commitAllowingStateLoss()` | 异步，允许状态丢失时提交 | 极端场景慎用 |
 | `commitNowAllowingStateLoss()` | 同步 + 允许状态丢失 | 同上 |
+
+commit 的异步执行流程如下：
 
 ```mermaid
 sequenceDiagram
@@ -101,6 +107,8 @@ sequenceDiagram
 ## 3. 状态保存与恢复
 
 ### 3.1 保存的时机
+
+状态保存发生在 `onSaveInstanceState`，重建时再恢复——FragmentManager 把整个过程封装成 saveAllState / restoreAllState：
 
 ```mermaid
 sequenceDiagram
@@ -145,6 +153,8 @@ sequenceDiagram
 - 传参构造（避免 setArguments 方式）；
 - 依赖注入（Hilt 的 HiltFragmentFactory）；
 - 统一逻辑（埋点、初始化）。
+
+看一个传参构造的例子：
 
 ::: code-tabs
 

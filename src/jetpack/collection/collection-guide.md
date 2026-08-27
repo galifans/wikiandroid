@@ -13,6 +13,8 @@ description: ArrayMap 原理、ArraySet、LruCache 缓存、不可变集合、Fl
 
 ### 1.1 为什么需要 ArrayMap
 
+HashMap 的每个条目都是一个独立对象（Entry），内存开销大。ArrayMap 用**两个数组**替代：一个存哈希、一个交错存 key/value，紧凑得多：
+
 ```mermaid
 flowchart LR
     A[HashMap] -->|两个数组| B[hash 数组 + 节点数组]
@@ -28,6 +30,8 @@ flowchart LR
 | 迭代 | 无序 | 插入序（实际上按数组顺序） |
 
 ### 1.2 内部结构
+
+核心结构就两个数组：`mHashes` 存哈希值（保持有序以便二分查找），`mArray` 按 [key, value, key, value…] 交错存数据：
 
 ::: code-tabs
 
@@ -112,10 +116,14 @@ class ArrayMap<K, V> {
 
 ## 2. ArraySet
 
+ArraySet 是 ArrayMap 思路的单元素版本：
+
 - 基于 ArrayMap 思路的单元素集合；
 - 内部只有 hash 数组 + value 数组；
 - 适合**小集合去重**场景；
 - 查找用二分，插入保持有序。
+
+它和 ArrayMap 的关系可以看作"退化"：
 
 ```mermaid
 flowchart LR
@@ -127,7 +135,7 @@ flowchart LR
 
 ### 3.1 LRU 算法
 
-LruCache 基于 LinkedHashMap 实现 **LRU（Least Recently Used）**：最近最少使用优先淘汰。
+LruCache 基于 LinkedHashMap 实现 **LRU（Least Recently Used）**：最近最少使用优先淘汰。新元素进链表头，缓存满时淘汰链表尾：
 
 ```mermaid
 flowchart LR
@@ -139,6 +147,8 @@ flowchart LR
 ```
 
 ### 3.2 使用示例
+
+图片缓存是 LruCache 的经典用法：容量按进程内存的 1/8 算，`sizeOf` 告诉 LruCache"单个元素占多大"，淘汰时走 `entryRemoved` 回调：
 
 ::: code-tabs
 
@@ -222,11 +232,15 @@ class ImageCache {
 
 ### 4.1 为什么需要不可变集合
 
+不可变集合解决三个问题：
+
 - **安全**：集合内容不可修改，防止外部误改；
 - **性能**：内部直接访问，无防御性拷贝；
 - **Compose 友好**：UI 状态传递更安全。
 
 ### 4.2 用法
+
+构建不可变集合有 builder 和 `immutableListOf` 两种方式，读取与普通集合一致：
 
 ::: code-tabs
 
@@ -279,7 +293,7 @@ for (name in names) {
 
 ## 5. FlowExt 协程扩展
 
-androidx.collection 提供少量 Flow 工具，常用集合转换：
+androidx.collection 提供少量 Flow 工具，常用集合转换：把集合 `asFlow()` 后接标准 Flow 操作符即可：
 
 ::: code-tabs
 

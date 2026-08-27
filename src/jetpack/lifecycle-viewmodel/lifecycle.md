@@ -67,9 +67,13 @@ class MainActivity : AppCompatActivity() {
 
 **Lifecycle 的解决方案**：组件自己声明"我需要在哪些生命周期做哪些事"，由系统自动回调。
 
+这样定位、传感器、动画等"随界面存在"的组件，从"依赖具体 Activity 子类"变成"依赖抽象的 LifecycleOwner"，组件可复用、可测试，也不会因为漏写回调而泄漏。
+
 ## 2. 核心概念
 
 ### 2.1 三个角色
+
+Lifecycle 用观察者模式把"生命周期"抽象成三个角色：Activity/Fragment 是**事件源**（LifecycleOwner），`Lifecycle` 对象是**状态机**（负责记录与派发），业务组件是**观察者**（LifecycleObserver）。业务方只与观察者接口打交道：
 
 | 角色 | 类 | 职责 |
 | --- | --- | --- |
@@ -78,6 +82,8 @@ class MainActivity : AppCompatActivity() {
 | 观察者 | `LifecycleObserver` | 订阅生命周期事件 |
 
 ### 2.2 状态与事件
+
+理解 Lifecycle 的第一步是分清**事件（Event）与状态（State）**：事件是"发生了什么"（onCreate 回调触发 ON_CREATE），状态是"当前处于什么阶段"（事件发生后的结果）。同一个事件会从最高到最低的观察者依次派发，而状态则用于判断是否需要通知观察者：
 
 ```text
 事件（Event）：
@@ -98,6 +104,8 @@ DESTROYED ← INITIALIZED ← CREATED ← STARTED ← RESUMED
 
 ### 2.3 状态机迁移图
 
+状态迁移遵循严格的先后顺序，不允许跳跃（例如从 CREATED 直接到 RESUMED 不合法）。值得注意的是**回退路径**：`ON_PAUSE`/`ON_STOP` 事件会在界面不可见时触发，观察者在此释放重资源，这正是定位、传感器类组件防泄漏的关键：
+
 ```mermaid
 stateDiagram-v2
     [*] --> INITIALIZED
@@ -113,6 +121,8 @@ stateDiagram-v2
 ## 3. 使用方式
 
 ### 3.1 实现 LifecycleObserver
+
+最早的写法是实现 `LifecycleObserver` 接口 + `@OnLifecycleEvent` 注解，在注解上声明关心哪个事件。注册方式统一：`lifecycle.addObserver(组件实例)` 即可，组件内部自动完成"该做的事"：
 
 ::: code-tabs
 
@@ -171,6 +181,8 @@ class MainActivity : AppCompatActivity() {
 
 ### 3.2 现代写法：DefaultLifecycleObserver
 
+`@OnLifecycleEvent` 已被废弃，原因是它依赖运行时注解反射、且无法在编译期校验事件参数。官方推荐的 `DefaultLifecycleObserver` 是普通接口——需要关心哪个生命周期就重写哪个方法，编译期类型安全，IDE 智能提示也更友好：
+
 ::: code-tabs
 
 @tab:active Java
@@ -213,7 +225,7 @@ class LocationManager : DefaultLifecycleObserver {
 
 ### 4.1 LifecycleRegistry 状态同步
 
-`LifecycleRegistry` 是 `Lifecycle` 的默认实现，核心机制：
+`LifecycleRegistry` 是 `Lifecycle` 的默认实现，它的职责是"**把生命周期事件转成状态，并同步给所有观察者**"。整个派发链路如下：
 
 ```text
 Activity onStart()
@@ -273,6 +285,8 @@ private fun sync() {
 - 使用 `LinearLayout` 保证**同步性**：在真正执行 onCreate 之前完成状态更新。
 
 ## 5. 常见应用场景
+
+Lifecycle 的典型价值在于"资源随界面生死"：摄像头在 `onStart` 打开、`onStop` 释放；轮询在 `onResume` 启动、`onPause` 停止；自定义 View 也可以实现 `LifecycleOwner` 让自己的状态可被观察。三个高频场景一起看：
 
 ::: code-tabs
 

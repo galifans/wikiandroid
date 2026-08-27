@@ -194,4 +194,47 @@
   .vp-code-tab-nav.active {
     color: var(--vp-c-accent);
   }
+
+  // 禁用按钮（仅 Kotlin 代码块的 Java tab）：灰化 + 不可点击 + 悬停无反馈
+  .vp-code-tab-nav.disabled {
+    color: var(--vp-c-text-mute, #9a9a9a);
+    cursor: not-allowed;
+    opacity: 0.55;
+
+    &:hover {
+      background: none;
+      color: var(--vp-c-text-mute, #9a9a9a);
+    }
+
+    &.active {
+      // 兜底：即使意外被激活也保持灰化
+      color: var(--vp-c-text-mute, #9a9a9a);
+      background: var(--code-c-bg, var(--vp-c-bg-alt));
+    }
+  }
+}
+
+// ============ Mermaid 图表样式（缩小 + 边框）============
+// 需求：mermaid 图过大（svg 固定宽度如 1592px，远超内容区约 595px）且无边框，
+// 在页面中显突兀。处理：
+// 1) 容器 width: fit-content + max-width: 100% —— 边框贴合图表宽度，
+//    宽图缩到内容区宽、窄图保持原始宽度（fit-content 取 min(内容宽, 容器宽)）；
+// 2) svg max-width: 100% + height: auto —— 借助 viewBox 等比缩放；
+// 3) 加边框/圆角/内边距/浅色底（深色模式用主题变量自动适配）+ 水平居中。
+
+.mermaid-content {
+  width: fit-content;
+  max-width: 100%;
+  margin: 1em auto; // 上下留白 + 水平居中
+  border: 1px solid var(--vp-c-border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: var(--vp-c-bg-alt);
+  overflow-x: auto; // 兜底：极端长图允许横向滚动
+
+  svg {
+    display: block;
+    max-width: 100%;
+    height: auto; // 覆盖 svg 固定 width/height 属性，等比缩放
+  }
 }

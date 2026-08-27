@@ -274,11 +274,6 @@ sequenceDiagram
 
 @tab:active Java
 
-```java
-// Compose 动画仅支持 Kotlin DSL，无 Java 等价写法；
-// View 体系中对应的页面切换 / 共享元素方案见上文 2.2 与 3.4 小节
-```
-
 @tab Kotlin
 
 ```kotlin

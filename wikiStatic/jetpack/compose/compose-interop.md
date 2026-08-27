@@ -10,6 +10,8 @@ description: AndroidView/ComposeView 嵌入、生命周期桥接、共享 ViewMo
 
 ## 一、互操作场景总览
 
+Compose 与 View 的互操作是**双向**的：Compose 里要显示 WebView/Map 这类成熟三方控件，用 `AndroidView` 嵌入；View 布局里要放 Compose 组件，用 `ComposeView` 嵌入。真实项目迁移期两种方向同时存在：
+
 ```mermaid
 flowchart LR
     A[View 体系] -->|AndroidView 嵌入| B[Compose]
@@ -26,15 +28,11 @@ flowchart LR
 
 ## 二、Compose 中嵌入 View:AndroidView
 
+`AndroidView` 把传统 View 包装成可组合函数。核心是两个回调的分工：**factory** 只调用一次（创建 View + 一次性配置），**update** 每次重组都调用（把最新状态同步过去）。WebView 是典型场景：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// AndroidView 的 factory/update/onRelease 对应 View 体系：
-// factory → 创建 WebView 并做一次性配置；update → 状态变化时 loadUrl；onRelease → destroy 防泄漏
-```
 
 @tab Kotlin
 
@@ -64,6 +62,8 @@ fun WebViewDemo(url: String) {
 
 ### AndroidView 生命周期
 
+View 的生命周期由 Compose 托管，四个回调覆盖"创建 → 更新 → 重置 → 释放"全流程：
+
 ```mermaid
 sequenceDiagram
     participant C as Compose
@@ -83,14 +83,11 @@ sequenceDiagram
 
 ### 高级:拦截 View 回调到 Compose 状态
 
+三方控件（如 Google Map）的回调是异步的，需要"**把 View 的异步回调桥接成 Compose 状态**"——状态放在 Compose 侧，update 里根据状态驱动 View 更新，形成单向数据流：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：MapView 直接放入布局，getMapAsync 回调中 clear / addMarker
-```
 
 @tab Kotlin
 
@@ -122,6 +119,8 @@ fun MapViewWithMarker(markerPosition: LatLng?) {
 :::
 
 ## 三、View 中嵌入 Compose:ComposeView
+
+反向嵌入靠 `ComposeView`：它本身是一个 View，可以出现在 XML 里，也可以用代码创建后 `addView` 到任意容器。核心是调用 `setContent { }` 声明 Compose 内容：
 
 ::: code-tabs
 
@@ -208,6 +207,8 @@ class ProfileFragment : Fragment() {
 
 ### ViewCompositionStrategy 策略
 
+View 不是天然"生命周期感知"的，所以 ComposeView 需要明确"何时销毁组合"——这就是 `ViewCompositionStrategy` 的职责：
+
 | 策略 | 说明 |
 |------|------|
 | `DisposeOnDetachedFromWindow` | 默认:View 脱离窗口即释放组合 |
@@ -218,14 +219,11 @@ class ProfileFragment : Fragment() {
 
 ### 4.1 生命周期感知
 
+Compose 侧想感知宿主生命周期，用 `DisposableEffect` + `LifecycleEventObserver` 即可——进入组合时注册、退出组合时移除，与 View 体系的 addObserver 完全对应：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：LifecycleObserver + getLifecycle().addObserver() 在 View 中监听生命周期
-```
 
 @tab Kotlin
 
@@ -254,14 +252,11 @@ fun LifecycleAwareView() {
 
 ### 4.2 共享 ViewModel
 
+混合布局最怕"两套状态"。只要 Compose 与 View 使用**同一个 ViewModelStoreOwner**（Activity/Fragment），`viewModel()` 与 `ViewModelProvider` 拿到的就是同一实例，状态天然统一：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// @Composable 部分仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：ViewModelProvider(requireActivity()).get(MyViewModel.class) 获取同一 ViewModel，observe() 更新控件
-```
 
 @tab Kotlin
 
@@ -290,6 +285,8 @@ fun HybridScreen(viewModel: MyViewModel = viewModel()) {
 > View 体系与 Compose 共享 ViewModel 的关键:`viewModel()` 与 `ViewModelProvider` 使用同一 ViewModelStoreOwner(Activity/Fragment),实现状态统一。
 
 ## 五、渐进式迁移策略
+
+老项目迁 Compose 不必推倒重来，按"试点 → 混合 → 提取 → 收尾"四步渐进：
 
 ```mermaid
 flowchart LR

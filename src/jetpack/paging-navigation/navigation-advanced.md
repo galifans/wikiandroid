@@ -10,6 +10,8 @@ description: Navigation 类型安全导航、Deep Link、返回栈管理、嵌�
 
 ## 一、Navigation 核心概念
 
+Navigation 的架构围绕"**状态机 + 栈**"展开：`NavHost` 是容器，`NavController` 是状态机，返回栈记录导航历史，`NavGraph` 描述目的地与跳转关系：
+
 ```mermaid
 flowchart LR
     A[NavHost] --> B[NavController<br>导航状态机]
@@ -27,6 +29,8 @@ flowchart LR
 | NavOptions | 导航选项(动画/返回行为) |
 
 ## 二、类型安全导航(官方推荐)
+
+Navigation 2.8+ 支持**类型安全路由**：用 `@Serializable` 类表示目的地，替代易错的字符串路由。Kotlin 侧直接传对象，Java 侧可用构造器实现等价效果：
 
 > Navigation 2.8+ 的**类型安全路由**:用 Kotlin 类表示目的地,替代字符串路由。
 
@@ -105,6 +109,8 @@ NavHost(navController = navController, startDestination = HomeRoute) {
 
 ### 3.1 声明深链
 
+深链声明有两种：类型安全方式用 `@DeepLink` 注解 + `navDeepLink`，View 体系则写在导航图 XML 里：
+
 ::: code-tabs
 
 @tab:active Java
@@ -145,6 +151,8 @@ composable<UserDeepLink>(
 :::
 
 ### 3.2 manifest 配置(应用外启动)
+
+应用外启动的深链必须在 Manifest 的 intent-filter 里声明 scheme/host，否则系统不知道把链接交给谁：
 
 ```xml
 <activity
@@ -213,6 +221,8 @@ class MainActivity : ComponentActivity() {
 
 ### 4.1 NavOptions 控制
 
+返回栈的精细控制靠 `NavOptions`：`popUpTo` 弹到指定目的地、`inclusive` 决定是否连目标一起弹出、`launchSingleTop` 栈顶去重、`saveState/restoreState` 保持底部导航状态：
+
 ::: code-tabs
 
 @tab:active Java
@@ -277,6 +287,8 @@ navController.navigate(ProfileRoute) {
 | `saveState/restoreState` | 底部导航状态保持 |
 | `currentBackStackEntry` | 当前栈帧 |
 
+下面时序演示"返回栈如何被裁剪"——`popUpTo(List)` 把中间的页面全部弹掉：
+
 ```mermaid
 sequenceDiagram
     participant U as 用户
@@ -289,14 +301,11 @@ sequenceDiagram
 
 ## 五、嵌套导航图
 
+底部导航的经典方案是**嵌套导航图**：每个 Tab 一个子图、独立返回栈。切换 Tab 时用 `saveState/restoreState` 保留旧 Tab 的状态：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// 嵌套导航图（navigation<T> 为 Compose DSL）仅支持 Kotlin，无 Java 等价写法；
-// 对应 View 体系：XML 中用 <navigation> 嵌套子图，底部导航时各 Tab 子图独立返回栈
-```
 
 @tab Kotlin
 
@@ -327,15 +336,11 @@ navController.navigate(MainTab2Route) {
 
 ## 六、与 ViewModel 集成
 
+导航与 ViewModel 的配合有两种作用域：默认每个目的地一个 ViewModel（页面独立状态）；需要共享时用 `getBackStackEntry` 拿到上级图的作用域：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// composable + hiltViewModel 为 Compose DSL，仅支持 Kotlin；
-// 对应 View 体系：ViewModelProvider(backStackEntry).get(...) 以返回栈条目为作用域；
-// 共享 ViewModel 时以父级 NavBackStackEntry 为作用域
-```
 
 @tab Kotlin
 

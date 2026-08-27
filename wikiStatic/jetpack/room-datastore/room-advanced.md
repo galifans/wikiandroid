@@ -12,6 +12,8 @@ description: Room 实体关系、TypeConverter、数据库迁移、事务与 Flo
 
 ### 1.1 一对多:嵌套对象与关系
 
+"一个用户多只宠物"是典型的一对多。建表时用外键表达归属关系，注意两点：`onDelete = CASCADE` 让删用户时宠物级联删除；**外键列必须建索引**，否则 JOIN 查询会全表扫描：
+
 ::: code-tabs
 
 @tab:active Java
@@ -81,6 +83,8 @@ data class Pet(
 
 ### 1.2 关系查询:@Embedded + @Relation
 
+建好表后怎么"一次查出用户和他的宠物"？`@Embedded` 把 User 平铺进结果对象，`@Relation` 声明关联列，两者组合就是一条查询。**必须加 `@Transaction`**——@Relation 内部会执行多次 SQL，需要原子性：
+
 ::: code-tabs
 
 @tab:active Java
@@ -124,6 +128,8 @@ interface UserDao {
 :::
 
 ### 1.3 多对多:关联表
+
+"我关注了谁"这种多对多关系，需要一张关联表存"谁关注了谁"，再 JOIN 查出结果：
 
 ::: code-tabs
 
@@ -172,6 +178,8 @@ fun getFollowing(followerId: Long): List<User>
 :::
 
 ## 二、TypeConverter 类型转换
+
+SQLite 只存基础类型，`List`、`Date` 这类复杂类型要用 `TypeConverter` 桥接——下面把 `List<String>` 序列化成 JSON 字符串存储：
 
 ::: code-tabs
 
@@ -229,6 +237,8 @@ abstract class AppDatabase : RoomDatabase() {
 
 :::
 
+常见场景一览：
+
 | 场景 | Converter 示例 |
 |------|---------------|
 | List/Set/Map | JSON 序列化 |
@@ -244,6 +254,8 @@ abstract class AppDatabase : RoomDatabase() {
 ### 3.1 为什么必须写迁移
 
 > 直接改实体再 `fallbackToDestructiveMigration()` 会**清空用户数据**。生产应用必须提供 Migration 保数据。
+
+迁移就是给数据库"打补丁"而不是"重建"——`ALTER TABLE` 加列、`CREATE TABLE` 建新表，逐版本递进：
 
 ::: code-tabs
 
@@ -297,6 +309,8 @@ Room.databaseBuilder(context, AppDatabase::class.java, "app.db")
 
 ### 3.2 迁移原则
 
+实体一改，迁移流程就启动了——从需求变更到 schema 验证的完整链路：
+
 ```mermaid
 flowchart LR
     A[需求变更] --> B[实体变更]
@@ -317,6 +331,8 @@ flowchart LR
 ## 四、事务与性能
 
 ### 4.1 事务使用
+
+"转账扣分"这类多步写操作，任何一步失败都要整体回滚——用 `@Transaction` 包裹：
 
 ::: code-tabs
 
@@ -363,6 +379,8 @@ interface UserDao {
 
 :::
 
+是否需要事务，取决于"操作是否涉及多步"：
+
 | 场景 | 是否用事务 |
 |------|-----------|
 | 单条写操作 | ✗ 不需要 |
@@ -371,6 +389,8 @@ interface UserDao {
 | 批量插入 | ✓ 提升性能(单事务) |
 
 ### 4.2 批量操作性能
+
+循环单条插入每条都开一个事务，慢得可怕；一次性 `insertAll` 合并成单事务，能快 10-50 倍：
 
 ::: code-tabs
 
@@ -411,6 +431,8 @@ interface UserDao {
 :::
 
 ## 五、Flow 响应式查询
+
+DAO 方法返回 `Flow` 后，**任何写操作都会自动触发重新查询**，UI 订阅即自动刷新：
 
 ::: code-tabs
 
@@ -468,6 +490,8 @@ class UserViewModel(private val dao: UserDao) : ViewModel() {
 > Flow 查询的优势:任何 `@Insert/@Update/@Delete` 变更都会**自动触发重新查询**,UI 自动刷新,无需手动 notify。
 
 ## 六、性能优化清单
+
+性能优化集中在"查询怎么走索引、写怎么合并事务"两点：
 
 | 优化 | 说明 |
 |------|------|

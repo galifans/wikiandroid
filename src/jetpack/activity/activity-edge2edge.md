@@ -13,7 +13,7 @@ description: enableEdgeToEdge、WindowInsets 处理、系统栏样式、预测�
 
 ### 1.1 概念
 
-Edge-to-Edge（边到边）指内容绘制延伸到系统栏（状态栏、导航栏）**之后**，由应用自己处理避让与布局。
+Edge-to-Edge（边到边）指内容绘制延伸到系统栏（状态栏、导航栏）**之后**，由应用自己处理避让与布局。传统模式与边到边的差异一目了然：
 
 ```mermaid
 flowchart LR
@@ -39,6 +39,8 @@ flowchart LR
 ## 2. 启用方式
 
 ### 2.1 enableEdgeToEdge（推荐）
+
+启用只需一行：`EdgeToEdge.enable(this)`，**必须在 `setContentView` 之前调用**：
 
 ::: code-tabs
 
@@ -82,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
 ## 3. WindowInsets 处理
 
-启用后必须用 insets 避让，否则内容会被系统栏遮挡。
+启用后必须用 insets 避让，否则内容会被系统栏遮挡。`setOnApplyWindowInsetsListener` 里读取系统栏尺寸并设 padding 即可：
 
 ### 3.1 获取并应用 insets
 
@@ -145,6 +147,8 @@ class MainActivity : AppCompatActivity() {
 
 ### 3.3 动态监听（软键盘示例）
 
+insets 是**动态**的——软键盘弹起就是最典型的例子，监听 `ime()` 类型的 insets 让输入框跟着上移：
+
 ::: code-tabs
 
 @tab:active Java
@@ -174,6 +178,8 @@ ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.input_root)) { v, in
 ## 4. 系统栏样式调整
 
 ### 4.1 深色模式对比度
+
+系统栏图标颜色要与背景区分：亮色内容配深色图标，暗色内容配浅色图标：
 
 ```mermaid
 flowchart TD
@@ -229,6 +235,8 @@ class MainActivity : AppCompatActivity() {
 :::
 
 ### 4.2 沉浸式（全屏）场景
+
+视频/游戏要"隐藏系统栏、滑动边缘临时唤出"——用 `WindowInsetsControllerCompat` 实现：
 
 ::: code-tabs
 
@@ -286,7 +294,7 @@ class PlayerActivity : AppCompatActivity() {
 
 ### 5.1 OnBackPressedDispatcher
 
-传统 `onBackPressed()` 已废弃，统一由 `OnBackPressedDispatcher` 管理：
+传统 `onBackPressed()` 已废弃，统一由 `OnBackPressedDispatcher` 管理——它按"注册顺序"倒序分发，还支持预测性返回动画：
 
 ::: code-tabs
 

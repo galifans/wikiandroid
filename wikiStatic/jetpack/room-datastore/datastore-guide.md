@@ -11,6 +11,8 @@ description: Preferences DataStore 与 Proto DataStore 完整使用、迁移 SP�
 
 ## 1. 两种 DataStore
 
+DataStore 有两种形态，选择依据是"要不要类型安全"：存简单键值对用 Preferences，存结构化对象用 Proto：
+
 | 类型 | 存储内容 | 类型安全 | 依赖 |
 | --- | --- | --- | --- |
 | Preferences DataStore | 键值对 | ✗（key 为字符串） | `datastore-preferences` |
@@ -25,6 +27,8 @@ implementation("androidx.datastore:datastore-preferences:1.1.1")
 ```
 
 ### 2.2 基本使用
+
+Preferences DataStore 的用法分三步：顶层声明实例、`data` 流读、`edit` 写。读取是响应式的（Flow），写入是事务性的（suspend）：
 
 ::: code-tabs
 
@@ -105,6 +109,8 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
 ### 2.3 支持的 key 类型
 
+每种基础类型都有对应的 key 工厂函数：
+
 | 函数 | 类型 |
 | --- | --- |
 | `intPreferencesKey()` | Int |
@@ -117,6 +123,8 @@ enum class ThemeMode { SYSTEM, LIGHT, DARK }
 ## 3. Proto DataStore
 
 ### 3.1 定义 schema
+
+Proto DataStore 需要先定义 `.proto` 文件——字段名、类型、编号都写在这里：
 
 ```protobuf
 // proto/user_preferences.proto
@@ -159,6 +167,8 @@ dependencies {
 ```
 
 ### 3.3 使用生成的类
+
+编译器会根据 schema 生成 `UserPreferences` 类，配合自定义 `Serializer` 完成读写：
 
 ::: code-tabs
 
@@ -228,6 +238,8 @@ class UserRepository(private val context: Context) {
 
 ### 4.1 自动迁移
 
+老项目从 SharedPreferences 换 DataStore，迁移不用手写循环读——`SharedPreferencesMigration` 一次搞定：
+
 ::: code-tabs
 
 @tab:active Java
@@ -259,6 +271,8 @@ val Context.dataStore by preferencesDataStore(
 - **注意**：迁移只读取一次；若 SP 在迁移后又被写入，数据不会同步。
 
 ## 5. 异常处理
+
+磁盘 IO 会失败，DataStore 的约定是：读取失败用 `catch` 优雅降级，写入失败捕获 `IOException` 处理：
 
 ::: code-tabs
 
@@ -305,6 +319,8 @@ try {
 :::
 
 ## 6. 与 SharedPreferences 对比
+
+DataStore 是 SP 的官方替代品，核心差异在"异步、一致、响应式"三个词上：
 
 | 维度 | SharedPreferences | DataStore |
 | --- | --- | --- |

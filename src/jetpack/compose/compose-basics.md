@@ -20,6 +20,8 @@ description: 声明式 UI、可组合函数、重组原理、Modifier 链、Comp
   状态变化 → 自动重组 UI（无需手动操作）
 ```
 
+两者的对比在代码里更直观——命令式需要你拿着控件引用一步步改，声明式只需描述"UI 长什么样"，状态变了框架自动重绘：
+
 ::: code-tabs
 
 @tab:active Java
@@ -59,14 +61,11 @@ fun Greeting(name: String) {
 
 ## 2. 可组合函数（Composable）
 
+可组合函数是 Compose 的最小构建单元：一个普通函数加上 `@Composable` 注解，就具备了"参与 UI 组合"的能力。它描述 UI 而不返回视图对象，通过参数接收数据、通过组合自由复用：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：XML 布局 + findViewById + setText / setOnClickListener
-```
 
 @tab Kotlin
 
@@ -95,6 +94,8 @@ fun ProfileCard(user: User) {
 
 ## 3. 重组（Recomposition）
 
+重组是 Compose 性能的核心机制：状态变化时，Compose 不会重绘整个界面，而是**重新执行受影响的函数**并智能跳过参数未变的部分。理解重组的前提是理解它的三个关键机制：
+
 ```text
 状态改变 → 调用方重组 → 只更新受影响的可组合函数
 
@@ -104,14 +105,11 @@ fun ProfileCard(user: User) {
 ③ 幂等：重组可被随时取消/重放
 ```
 
+一个最经典的计数器例子——`remember` 保住状态，读取状态的地方自动订阅变化：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：TextView + Button，onClick 中手动更新文本
-```
 
 @tab Kotlin
 
@@ -141,14 +139,11 @@ fun Counter() {
 
 ## 4. Modifier：链式修饰
 
+Modifier 是 Compose 中"修饰 UI 元素"的统一入口：尺寸、间距、背景、点击、语义都可以通过链式调用叠加。注意**顺序敏感**——`clip` 在 `background` 之前，背景才会被圆角裁剪：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// Modifier 链对应 View 体系的 XML 属性 / setPadding / setBackground 等 API
-```
 
 @tab Kotlin
 
@@ -174,17 +169,15 @@ Modifier
 | 交互 | `clickable` `pointerInput` `draggable` |
 | 语义 | `semantics` `testTag` `contentDescription` |
 
+> 记忆技巧：布局管"位置尺寸"、绘制管"外观"、交互管"响应"、语义管"无障碍与测试"——大部分场景按这个思路找对应 Modifier 即可。
+
 ## 5. Compose 与 View 互操作
+
+Compose 与 View 体系可以双向嵌入：在 Compose 里通过 `AndroidView` 把传统 View 包成可组合函数；在 View 体系里通过 `ComposeView` + `setContent` 嵌入 Compose 内容。项目迁移期的"新页面 Compose、旧页面 View"混合架构全靠这两个桥：
 
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// ① AndroidView：Compose 中嵌入 View 的唯一入口，只能由 Kotlin 编写
-// ② ComposeView：View 中嵌入 Compose，Java 中 findViewById 后 setContent 的 Composable lambda 仍需 Kotlin 桥接
-```
 
 @tab Kotlin
 
@@ -214,14 +207,11 @@ composeView.setContent {
 
 ## 6. 状态提升（State Hoisting）
 
+状态提升指的是"**把状态从子组件提升到父组件**"：子组件变成纯展示（接收值 + 回调），状态归父组件持有。这样做的收益是单一数据源——同一个状态在界面上只有一个出处，测试、复用、调试都更简单：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 状态提升对应 View 体系：自定义 View 暴露回调接口（如 OnTextChangedListener），数据由外部持有
-```
 
 @tab Kotlin
 

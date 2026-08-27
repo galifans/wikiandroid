@@ -43,6 +43,8 @@ class UserViewModel {
 
 **DI 方案**：依赖的创建由容器统一管理，使用时注入。
 
+DI 带来的三个直接收益：① **可测试性**——测试时只需替换容器中的绑定（如把网络换成 Fake），被测类无需改动；② **可维护性**——依赖集中在 Module 中声明，一目了然；③ **生命周期可控**——结合作用域，单例、页面级、请求级对象各得其所，避免内存泄漏。
+
 ## 2. Hilt 与 Dagger 的关系
 
 - **Dagger**：Google 的编译期 DI 框架（Java/Kotlin），功能强大但配置繁琐。
@@ -57,6 +59,8 @@ Dagger 生成 DaggerXxxComponent（手写 DI 代码）
         │
 Hilt 自动集成 Android 组件生命周期
 ```
+
+这张图揭示了 Hilt 的本质：**Dagger 负责"编译期生成 DI 代码"，Hilt 负责"把这些代码接入 Android 组件"**。开发者只写注解，生成、接线全部由框架完成，这也是 Hilt 被称为"Android 专用 DI 框架"的原因。
 
 ## 3. 基础用法
 
@@ -234,7 +238,11 @@ abstract class RepositoryModule {
 
 :::
 
+`@Provides` 与 `@Binds` 的分工值得强调：前者在方法体内**编写创建逻辑**（适合 Retrofit、OkHttp 这类需要配置的第三方对象），后者则是**纯声明式绑定**（接口 → 有 `@Inject` 构造的实现类），方法体为空、效率更高。一个模块里两种写法可以并存：需要配置的用 `@Provides`，接口实现映射用 `@Binds`。
+
 ## 5. 作用域（Scope）
+
+作用域的本质是**给绑定加上生命周期限制**：标注 `@Singleton` 的绑定在整个 Application 存活期间只有一份实例，标注 `@ActivityScoped` 的绑定则在 Activity 销毁时随之释放。选择作用域的唯一依据是"依赖的存活时间应该和哪个组件一致"：
 
 | 作用域 | 存活时间 | 安装位置 |
 | --- | --- | --- |
@@ -243,6 +251,8 @@ abstract class RepositoryModule {
 | `@FragmentScoped` | Fragment 生命周期 | FragmentComponent |
 | `@ViewModelScoped` | ViewModel 生命周期 | ViewModelComponent |
 | `@ServiceScoped` | Service 生命周期 | ServiceComponent |
+
+> **匹配原则**：作用域必须与安装组件匹配——例如 `@ActivityScoped` 的绑定只能放在 `@InstallIn(ActivityComponent.class)` 的模块中，放在 SingletonComponent 中会直接编译报错。另外，作用域只对"标注了作用域的绑定"生效：同一类型若无作用域注解，则每次注入都会新建实例。一个经典误区是"以为 `@Singleton` 是全局唯一，其实它只是被 SingletonComponent 持有"。
 
 ::: code-tabs
 
@@ -271,6 +281,8 @@ class SessionManager @Inject constructor() { ... }
 > **注意**：作用域必须与安装组件匹配（`@ActivityScoped` 不能放在 SingletonComponent 的 Module 中）。
 
 ## 6. ViewModel 注入
+
+给 ViewModel 注入依赖有两条路径：传统方式需要手写 `ViewModelProvider.Factory`，把 Repository 等依赖手动传进去，代码繁琐；Hilt 方式只需给 ViewModel 加上 `@HiltViewModel`，构造参数用 `@Inject` 标注，Hilt 就会自动生成工厂。Fragment/Activity 端无需关心工厂细节，`ViewModelProvider(this).get(...)` 或 `by viewModels()` 即可拿到已注入依赖的实例：
 
 ::: code-tabs
 
@@ -322,6 +334,8 @@ class UserListFragment : Fragment() {
 :::
 
 ## 7. 测试支持
+
+Hilt 的测试支持围绕"替换依赖"展开：`@TestInstallIn(replaces = NetworkModule.class)` 让测试模块在测试环境中顶替生产模块，把真实的网络实现换成内存 Fake；`@HiltAndroidTest` + `HiltAndroidRule` 则保证测试运行时依赖图被完整构建并注入到测试类中。这样测试既不需要 Mock 框架，也能验证真实装配关系：
 
 ::: code-tabs
 

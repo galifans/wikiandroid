@@ -13,6 +13,8 @@ description: registerForActivityResult 使用与原理、ActivityResultContracts
 
 ### 1.1 传统方式的痛点
 
+传统 `startActivityForResult` 最大的问题是**回调与调用分离**——发起请求在一处，处理结果在另一处，requestCode 靠魔法数关联：
+
 ::: code-tabs
 
 @tab:active Java
@@ -80,6 +82,8 @@ class MainActivity : AppCompatActivity() {
 
 ### 2.1 注册与启动
 
+新 API 的两步法：**字段初始化时注册**（回调绑定好），**点击时 launch**（传参数）。GetContent 的输入是 MIME 类型，输出是 Uri：
+
 ::: code-tabs
 
 @tab:active Java
@@ -137,6 +141,8 @@ class MainActivity : AppCompatActivity() {
 
 ## 3. ActivityResultContracts 内置契约
 
+内置契约覆盖了绝大多数场景——文件选择、拍照录像、权限请求、联系人等，输入输出都是类型安全的：
+
 | 契约类 | 输入 | 输出 | 用途 |
 | --- | --- | --- | --- |
 | `StartActivityForResult` | Intent | ActivityResult | 通用（返回 Intent） |
@@ -150,6 +156,8 @@ class MainActivity : AppCompatActivity() {
 | `PickContact` | 无（Void） | Uri? | 选择联系人 |
 
 ### 3.1 相机拍照完整示例
+
+拍照契约需要先**创建输出文件**（FileProvider 提供 Uri），相机把照片写到指定位置：
 
 ::: code-tabs
 
@@ -221,6 +229,8 @@ class MainActivity : AppCompatActivity() {
 
 ### 3.2 运行时权限（推荐写法）
 
+权限请求也应该走统一契约：先检查，没授予就 `launch`，回调里根据结果决定继续还是引导设置页：
+
 ::: code-tabs
 
 @tab:active Java
@@ -288,6 +298,8 @@ class MainActivity : AppCompatActivity() {
 
 ### 4.1 为什么旋转屏幕不丢回调
 
+答案在 `ActivityResultRegistry` + SavedState：结果先暂存，重建后重新注册时再分发：
+
 ```mermaid
 sequenceDiagram
     participant A as Activity
@@ -315,6 +327,8 @@ sequenceDiagram
 | 注册时机校验 | STARTED 之后注册会抛 `IllegalStateException`（防误用） |
 
 ### 4.3 Fragment 中使用
+
+Fragment 里用法完全一致，直接 `registerForActivityResult` 即可——Fragment 内部已接入 registry：
 
 ::: code-tabs
 
@@ -373,7 +387,7 @@ class ProfileFragment : Fragment() {
 
 ## 5. 自定义契约
 
-当内置契约不满足需求时，可以自定义 `ActivityResultContract`：
+当内置契约不满足需求时，可以自定义 `ActivityResultContract`——只需实现 `createIntent`（把输入变成 Intent）和 `parseResult`（把结果 Intent 解析成输出）两个方法：
 
 ::: code-tabs
 

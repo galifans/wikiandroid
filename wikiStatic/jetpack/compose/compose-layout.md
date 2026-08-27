@@ -22,10 +22,7 @@ sequenceDiagram
     P->>C: place(x, y) 摆放
 ```
 
-| 阶段 | 方法 | 说明 |
-|------|------|------|
-| 测量 | `MeasureScope.measure(constraints)` | 在约束内确定尺寸 |
-| 摆放 | `Placeable.placeRelative(x, y)` | 确定子节点位置 |
+整个过程分两个阶段：**测量**调用 `MeasureScope.measure(constraints)` 在约束内确定尺寸，**摆放**调用 `Placeable.placeRelative(x, y)` 确定子节点位置——测量管"多大"、摆放管"在哪"。
 
 > 与 View 的 measure/layout 相比:Compose 没有 MeasureSpec,而是统一的 Constraints(约束范围),语义更清晰且强制支持"测量两次"(Intrinsic)模式。
 
@@ -33,14 +30,11 @@ sequenceDiagram
 
 ### 2.1 三大基础容器
 
+Compose 的三个基础容器各有分工：**Row** 水平排列、**Column** 垂直排列、**Box** 堆叠排列（类似 FrameLayout，常用于"背景 + 覆盖层"）。三者都通过 `Arrangement`（主轴分布）和 `Alignment`（交叉轴对齐）控制子项的位置：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// Row/Column/Box 对应 View 体系：LinearLayout（horizontal/vertical）与 FrameLayout
-```
 
 @tab Kotlin
 
@@ -82,14 +76,11 @@ Box(modifier = Modifier.size(200.dp)) {
 
 > 解决复杂嵌套:用约束关系代替多层布局嵌套,提升性能。
 
+当布局需要"头像在左上、名字在头像右侧、描述在名字下方"这类相对定位时，多层嵌套 Row/Column 会带来层级爆炸。ConstraintLayout 用**约束关系**描述这些相对位置，一次测量完成布局，复杂界面优先考虑它：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// ConstraintLayout 对应 View 体系：androidx.constraintlayout.widget.ConstraintLayout + XML 约束
-```
 
 @tab Kotlin
 
@@ -145,14 +136,11 @@ fun ConstraintDemo() {
 
 ### 4.1 测量与摆放
 
+内置容器不满足需求时，`Layout` 函数提供完全自定义的能力：接收子项的 `measurables` 和父布局的 `constraints`，自己决定怎么测量、怎么排版、回报多大尺寸。下面用流式换行布局演示完整三步：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：自定义 ViewGroup 重写 onMeasure / onLayout 实现流式换行
-```
 
 @tab Kotlin
 
@@ -193,6 +181,8 @@ fun FlowLayout(
 
 ### 4.2 自定义布局三步法
 
+自定义布局的套路是固定的三步，记住这张流程图即可：
+
 ```mermaid
 flowchart LR
     A["① measure 所有子项<br>measurables.map { it.measure() }"] --> B["② 计算总尺寸<br>layout(width, height)"]
@@ -201,14 +191,11 @@ flowchart LR
 
 ## 五、Intrinsic 尺寸与二次测量
 
+正常布局是"父给约束 → 子测尺寸"，但有些场景需要"**先知道子项内容大小再定约束**"——比如一行里文字和分割线要等高。`IntrinsicSize.Min`/`Max` 让父布局先查询子项的固有尺寸，实现这类对齐：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：两列等高可用 ConstraintLayout 的 0dp 约束或自定义测量实现
-```
 
 @tab Kotlin
 
@@ -240,6 +227,8 @@ Row(
 | `defaultMinSize` | 最小尺寸 |
 
 ## 七、Compose vs View 布局对比
+
+从布局文件到测量模型，两个体系差异很大，关键对比维度如下：
 
 | 维度 | View | Compose |
 |------|------|---------|

@@ -20,18 +20,17 @@ description: 重组优化、稳定性推断、不可变性、LazyColumn 性能�
 目标：最小化重组范围、减少布局计算、减少绘制负担
 ```
 
+四个指标对应性能优化的四个抓手：**重组**管 CPU（少执行函数体）、**布局**管测量摆放、**绘制**管 GPU 合成、**跳过**则是 Compose 的免费午餐——参数没变就什么都不做。优化时优先从"减少重组"入手，收益最大。
+
 ## 2. 重组优化
 
 ### 2.1 状态作用域最小化
 
+最常见的性能问题是"状态读取范围过大"：一个状态被高层函数读取，它一变整个子树都重组。解决办法是**把状态的读取下放到真正使用它的最小组件**——下面的例子中 `expanded` 只有 Icon 需要，就把它隔离到 `ExpandIcon` 里：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 状态作用域最小化对应 View 体系：把依赖状态变化的子控件拆成独立 View / 自定义 View，缩小刷新范围
-```
 
 @tab Kotlin
 
@@ -70,14 +69,11 @@ fun ExpandIcon(expanded: Boolean, onClick: () -> Unit) {
 
 ### 2.2 remember 缓存计算结果
 
+`remember(key) { 计算 }` 把昂贵的计算结果缓存起来，只有 key 变化时才重新计算。列表求和这类操作值得缓存：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：计算结果存入字段 / ViewModel 缓存，仅在输入变化时重算
-```
 
 @tab Kotlin
 
@@ -96,14 +92,11 @@ fun ExpenseList(expenses: List<Expense>) {
 
 ### 2.3 derivedStateOf：派生状态按需计算
 
+"是否滚过顶部"这类派生状态高频变化但结果只有两个取值，直接用原始状态会导致每次滚动都重组。`derivedStateOf` 只在结果变化时通知重组：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：滚动监听回调中判断 firstVisibleItemIndex，按需更新控件
-```
 
 @tab Kotlin
 
@@ -126,6 +119,8 @@ fun ShowHideButton(listState: LazyListState) {
 
 ### 3.1 什么是稳定性
 
+稳定性是编译器能否"证明参数没变"的前提——证明不了就每次重组：
+
 ```text
 稳定类型：重组时参数未变 → 跳过重组
 不稳定类型（var 属性、可变集合、无注解的 data class 含 var）：
@@ -139,6 +134,8 @@ fun ShowHideButton(listState: LazyListState) {
 ```
 
 ### 3.2 提升稳定性的实践
+
+把不稳定类型变稳定有四个常用手段：字段只读、集合不可变、注解标记、用 immutable 集合库：
 
 ::: code-tabs
 
@@ -224,14 +221,11 @@ kotlinOptions {
 
 ## 4. 列表性能：LazyColumn
 
+长列表必须用 `LazyColumn`——它只组合可见项（虚拟化）。两个关键点：**key** 提供稳定唯一标识让 Diff 精准，**item 保持小且独立**缩小重组范围：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：RecyclerView + ListAdapter（DiffUtil 计算 key 差异）
-```
 
 @tab Kotlin
 
@@ -260,7 +254,6 @@ fun UserRow(user: User) {
 **列表优化要点**：
 
 | 优化 | 说明 |
-| --- | --- |
 | `key` | 稳定标识（id），Diff 更精准 |
 | item 小而独立 | 减少重组范围 |
 | `contentType` | 不同类型 item 分开缓存 |
@@ -269,14 +262,11 @@ fun UserRow(user: User) {
 
 ## 5. 图形层优化（GraphicsLayer）
 
+动画/拖拽/缩放这类高频变化，千万别用布局属性（`offset` 等）——每次变化都触发重新布局。`graphicsLayer` 只改绘制层，走硬件合成，完全跳过 measure/layout：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 对应 View 体系：View.setTranslationX / setAlpha / setRotationZ（属性动画走硬件合成，跳过布局）
-```
 
 @tab Kotlin
 
@@ -314,6 +304,8 @@ graphicsLayer 优势：
 ```
 
 ## 7. 分析工具
+
+优化不能靠猜，要靠数据说话：
 
 | 工具 | 用途 |
 | --- | --- |

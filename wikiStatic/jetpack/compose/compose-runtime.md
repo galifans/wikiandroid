@@ -29,20 +29,17 @@ flowchart TD
 
 核心问题：**状态变化时，如何只更新受影响的最小范围？**
 
+回答这个问题需要理解 Compose 的分层职责：**编译器**把 @Composable 代码改造成可追踪的重组函数，**Runtime** 提供快照（状态追踪）、重组调度和 Slot Table（存储），**UI 层**负责最终绘制。下面逐层拆解：
+
 ## 2. 编译器插件做了什么
 
 ### 2.1 代码转换
 
-@Composable 函数会被编译器改造成**接受额外参数**的重组函数：
+编译器插件是 Compose 高效的第一功臣。开发者写的 @Composable 函数会被改造成**接受额外参数**（`$composer` 和 `$changed`）的重组函数——`$composer` 负责读写 Slot Table 记录调用，`$changed` 是参数变化位掩码：
 
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 为 Kotlin 编译器插件能力，Java 中无等价写法；
-// 以下为原理示意（Kotlin 源码在右侧）。
-```
 
 @tab Kotlin
 
@@ -74,6 +71,8 @@ fun Greeting(name: String, $composer: Composer<*>, $changed: Int) {
 
 ### 3.1 重组的触发
 
+状态一旦被修改，完整链路是：快照系统记录脏范围 → Recomposer 在主线程下一帧调度 → 重新执行受影响的 @Composable 函数 → 参数对比决定跳过与否 → 更新 Slot Table：
+
 ```mermaid
 sequenceDiagram
     participant S as Snapshot 系统
@@ -90,15 +89,11 @@ sequenceDiagram
 
 ### 3.2 重组是"智能跳过"的
 
+"最小范围更新"落到实处就是：哪个函数读取了变化的状态，就只重组哪个函数——下面代码里两个 Text 各自读取独立参数，互不牵连：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 为 Kotlin 声明式 UI，Java 中无等价写法；
-// 对比理解：View 体系 setText 只更新一个控件，
-// Compose 重组只重执行受状态影响的函数。
-```
 
 @tab Kotlin
 
@@ -137,6 +132,8 @@ fun Screen(count: Int, name: String) {
 
 ### 4.2 快照模型
 
+快照系统有三种角色，各自服务于不同的并发场景：
+
 ```mermaid
 flowchart TD
     A[GlobalSnapshot 全局快照] --> B[MutableSnapshot 可写快照]
@@ -158,11 +155,6 @@ flowchart TD
 
 @tab:active Java
 
-```java
-// Snapshot 为 Kotlin 协程/内建 API，Java 中无等价写法；
-// 概念理解：状态读写在快照内完成，apply 时合并。
-```
-
 @tab Kotlin
 
 ```kotlin
@@ -182,6 +174,8 @@ Snapshot.withMutableSnapshot {
 :::
 
 ### 4.4 状态对象的读取计数
+
+"最小范围更新"的底层来源是**读取计数**——Compose 记录每个状态被谁读取，写入时只通知这些读取方：
 
 ```mermaid
 flowchart LR
@@ -209,6 +203,8 @@ flowchart LR
 
 ### 5.2 对比：View 树 vs Slot Table
 
+Slot Table 与 View 树的核心差异在于"用什么存状态"：
+
 | 对比项 | View 树 | Slot Table |
 | --- | --- | --- |
 | 结构 | 树状对象 | **线性数组** + 组标记 |
@@ -221,11 +217,6 @@ flowchart LR
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 为 Kotlin 声明式 UI，Java 中无等价写法；
-// 理解重点：remember 与位置绑定，不是与数据绑定。
-```
 
 @tab Kotlin
 
@@ -251,7 +242,7 @@ fun Demo(show: Boolean) {
 
 ### 6.1 稳定类型
 
-编译器推断每个类型的**稳定性**，决定能否跳过重组：
+编译器会推断每个类型的**稳定性**：稳定类型（`@Stable`/`@Immutable` 或不可变数据）可以证明"参数没变"从而跳过重组；不稳定类型（可变字段、公开类）每次都可能变，无法跳过：
 
 | 类型 | 说明 | 例子 |
 | --- | --- | --- |
@@ -261,11 +252,6 @@ fun Demo(show: Boolean) {
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 为 Kotlin 编译器能力，Java 中无等价写法；
-// 注解作用在 Kotlin 类上。
-```
 
 @tab Kotlin
 
@@ -304,6 +290,8 @@ flowchart LR
 
 ### 7.1 remember 的本质
 
+`remember` 的本质是"**按位置缓存**"：首次执行时计算并写入 Slot Table，后续重组直接复用。它不感知状态变化，只按 key 失效：
+
 ```mermaid
 flowchart LR
     A[remember] --> B[Slot Table 中缓存]
@@ -317,14 +305,11 @@ flowchart LR
 
 ### 7.2 derivedStateOf 原理
 
+当 UI 只关心"状态的派生结果"（而非状态本身）时，`derivedStateOf` 帮你缓存结果：结果没变就不触发重组，适合大数据列表过滤这类场景：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// derivedStateOf 为 Kotlin API，Java 中无等价写法；
-// 语义：派生状态，只在依赖变化时重新计算。
-```
 
 @tab Kotlin
 
@@ -344,6 +329,8 @@ val isEmpty by remember {
 :::
 
 ### 7.3 使用建议
+
+不同状态场景选不同方案：
 
 | 场景 | 方案 |
 | --- | --- |

@@ -34,6 +34,8 @@ flowchart TD
     B --> E[AndroidViewModelFactory<br>默认工厂]
 ```
 
+三个类的职责分工：**ViewModelProvider** 是入口，负责"取或建"；**Factory** 负责"建"（默认是 AndroidViewModelFactory，支持 Application/SavedStateHandle 参数）；**ViewModelStore** 负责"存"——本质就是一个 `HashMap<String, ViewModel>`。下面的源码展示了 Store 的容器本质：
+
 ::: code-tabs
 
 @tab:active Java
@@ -116,6 +118,8 @@ fun <T : ViewModel> get(key: String, modelClass: Class<T>): T {
 
 ### 2.2 为什么旋转不销毁
 
+答案藏在 Activity 的 `NonConfigurationInstances` 机制里：配置变化时，系统在销毁旧 Activity 前调用 `onRetainNonConfigurationInstance`，允许把 ViewModelStore 等"非配置状态"交出来；新 Activity 创建后再通过 `getLastNonConfigurationInstance` 原样取回——ViewModel 就这样被"转交"而非"重建"：
+
 ::: code-tabs
 
 @tab:active Java
@@ -156,6 +160,8 @@ protected fun onCreate(savedInstanceState: Bundle?) {
 
 :::
 
+整个传递过程的时序如下——注意 ViewModelStore 只在"旧 Activity 与系统"之间转手，实例本身从未被销毁：
+
 ```mermaid
 sequenceDiagram
     participant A1 as Activity(旧)
@@ -169,6 +175,8 @@ sequenceDiagram
 > **关键**:ViewModelStore 不挂在 Activity 实例上,而是通过 `NonConfigurationInstances` 在重建时**原样传递**,所以 ViewModel 不销毁。**只有 `finish()`(用户主动关闭)才会真正 clear**。
 
 ## 三、onCleared 调用时机
+
+onCleared 的唯一触发入口是 `ViewModelStore.clear()`，而 clear 的调用条件藏在 ComponentActivity 的 onDestroy 里——**`!isChangingConfigurations()`**：配置变化销毁时这个标志为 true，跳过清理；用户 finish 时标志为 false，执行清理：
 
 ::: code-tabs
 
@@ -198,12 +206,16 @@ override fun onDestroy() {
 
 :::
 
+不同场景下是否触发 onCleared 可总结为下表：
+
 | 场景 | isChangingConfigurations | onCleared |
 |------|------------------------|-----------|
 | 旋转屏幕/切换深色模式 | true | ✗ 不调用 |
 | 用户按返回键 finish() | false | ✓ 调用 |
 | 任务被移除 | false | ✓ 调用 |
 | 进程被杀(无 onDestroy) | — | ✗ 不调用(进程直接没了) |
+
+onCleared 的典型用途是"清理 ViewModel 独占的资源"：
 
 ::: code-tabs
 
@@ -256,6 +268,8 @@ class TimerViewModel : ViewModel() {
 >  **坑**:onCleared 不保证在进程被杀时调用(进程死亡无回调),所以关键数据要持久化到 SavedStateHandle/Room/DataStore。
 
 ## 四、Factory 与默认工厂
+
+ViewModelProvider 需要两个东西：**ViewModelStore**（从 owner 获取）和 **Factory**（负责创建实例）。默认工厂（DefaultFactory/SavedStateViewModelFactory）能自动处理三种构造参数：`@Inject` 注解的依赖、`SavedStateHandle`、`Application`。当 ViewModel 需要自定义参数（如 userId）时，就必须自己实现 Factory：
 
 ::: code-tabs
 
@@ -352,6 +366,8 @@ viewModels { DetailViewModelFactory(userId, repo) }
 
 ## 五、viewModelScope 原理
 
+`viewModelScope` 本质是 ViewModel 的扩展属性：首次访问时创建 `CloseableCoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)`，并以 `JOB_KEY` 为 tag 存进 ViewModel 的 `mBagOfTags`。选择 `SupervisorJob` 是为了"一个子协程失败不影响兄弟协程"；选择 `Main.immediate` 是因为 UI 层默认要在主线程收集结果。源码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -384,6 +400,8 @@ public val ViewModel.viewModelScope: CoroutineScope
 
 :::
 
+销毁时的清理也很简单——`clear()` 时把 `JOB_KEY` 对应的 Closeable 关掉，整个 scope 的协程随之取消：
+
 ::: code-tabs
 
 @tab:active Java
@@ -413,6 +431,8 @@ fun clear() {
 > `viewModelScope` 使用 `SupervisorJob + Main.immediate`。ViewModel 清除时自动取消,无需手动管理协程生命周期。注意:网络请求放 viewModelScope 会在离开页面时自动取消(合理),但**轮询/下载**等需特殊处理。
 
 ## 六、SavedStateHandle 原理
+
+SavedStateHandle 的内部结构并不复杂：一个普通 Map（`mRegular`）存值，外加一个 `SavedStateProvider` 负责与系统状态保存机制对接。当 Activity 执行 `onSaveInstanceState` 时，系统会调用所有注册的 Provider 收集状态，SavedStateHandle 就把 Map 里的值写进 Bundle；进程死亡重建后，Bundle 恢复回来，`getLiveData`/`get` 自然读到旧值：
 
 ::: code-tabs
 
@@ -495,6 +515,8 @@ class MainViewModel(
 ```
 
 :::
+
+整个"写入 → 序列化 → 恢复"的时序如下：
 
 ```mermaid
 sequenceDiagram

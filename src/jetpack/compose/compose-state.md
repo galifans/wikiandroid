@@ -11,6 +11,8 @@ description: mutableStateOf/remember/rememberSaveable、状态提升、ViewModel
 
 ## 1. 状态的三要素
 
+Compose 的状态管理可以浓缩成三个概念：**状态**是随时间变化的数据，**事件**是改变状态的行为，**界面**是状态的函数。三者的关系是单向数据流——事件只改状态，UI 只随状态重组：
+
 ```text
 状态（State）：随时间变化的数据（count、加载状态、用户信息）
 事件（Event）：触发状态变化的行为（点击、网络回调）
@@ -24,14 +26,11 @@ description: mutableStateOf/remember/rememberSaveable、状态提升、ViewModel
 
 ### 2.1 mutableStateOf：可观察状态
 
+`mutableStateOf` 创建的是**可观察状态**：读取它的值会被 Compose 记录，写入新值会自动触发读取方的重组。这构成了 Compose 响应式的基石：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 可观察状态对应 View 体系：LiveData / MutableLiveData + Observer
-```
 
 @tab Kotlin
 
@@ -50,14 +49,11 @@ Button(onClick = { count++ }) { Text("+1") }
 
 ### 2.2 remember / rememberSaveable
 
+`remember` 解决"重组时状态丢失"：它把值缓存在组合树中，重组时复用；`rememberSaveable` 更进一步，通过 Bundle 在配置变化（旋转屏幕）时也能恢复。两者的选择标准很简单——**旋转后要不要保留**：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// remember 对应 View 体系：Activity/ViewModel 字段；rememberSaveable 对应 onSaveInstanceState / SavedStateHandle
-```
 
 @tab Kotlin
 
@@ -78,14 +74,11 @@ var user by rememberSaveable(stateSaver = UserSaver) {
 
 ### 2.3 derivedStateOf：派生状态
 
+当状态 A 是状态 B 的"推导结果"（如"列表是否滚过顶部"由 firstVisibleItemIndex 推导）时，直接用 B 会在 B 每次变化都触发重组，即使结果没变。`derivedStateOf` 只在**计算结果**变化时才触发重组，是高频变化场景的性能利器：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 派生状态对应 View 体系：滚动监听回调中按需更新 UI，或 MediatorLiveData 派生
-```
 
 @tab Kotlin
 
@@ -102,14 +95,11 @@ val isVisible by remember {
 
 ## 3. 状态提升（Hoisting）
 
+状态提升把"谁持有状态"和"谁展示状态"分开：父组件持有状态并传给子组件，子组件通过回调上报事件。这样做的好处是子组件可复用、可测试（给它什么值就显示什么）：
+
 ::: code-tabs
 
 @tab:active Java
-
-```java
-// Compose 仅支持 Kotlin DSL，无 Java 等价写法；
-// 状态提升对应 View 体系：自定义 View 用回调接口上抛事件，状态由父容器持有
-```
 
 @tab Kotlin
 
@@ -134,6 +124,8 @@ fun Screen() {
 **规则**：尽可能无状态；状态提升到最近的公共父级。
 
 ## 4. ViewModel 集成（官方推荐）
+
+跨配置变化（旋转屏幕）要保留的状态应该放 ViewModel：它在 Activity 重建后存活，状态不丢。UI 层只做两件事——**读状态、发事件**，业务逻辑全部下沉到 ViewModel：
 
 ::: code-tabs
 
@@ -193,6 +185,8 @@ fun CounterScreen(viewModel: CounterViewModel = viewModel()) {
 
 ## 5. 协程与 Flow 收集
 
+业务数据流（网络、数据库）通常以 Flow 形式存在于 ViewModel。UI 层用 `collectAsState` 把 Flow 转成 Compose 状态自动收集；一次性事件（如登录后跳转）则放进 `LaunchedEffect` 或 `rememberCoroutineScope` 触发的协程里：
+
 ::: code-tabs
 
 @tab:active Java
@@ -245,6 +239,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 :::
 
 ## 6. 状态容器模式（StateHolder）
+
+当一个界面的状态字段超过两三个，把它们打包成一个不可变 data class（如 `SearchUiState`）+ 一个持有它的 StateHolder 类，是官方推荐的模式。好处是状态变更走"整体替换"，可预测、可单元测试，UI 只需订阅整个状态对象：
 
 ::: code-tabs
 
@@ -315,6 +311,8 @@ fun rememberSearchStateHolder(): SearchStateHolder =
 :::
 
 ## 7. 状态管理决策树
+
+实际项目中"状态放哪"可以按下面的决策树快速判断：
 
 ```text
 需要跨配置变化保留？

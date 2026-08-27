@@ -11,6 +11,8 @@ title: ViewModel 与 LiveData
 
 **作用**：存储与 UI 相关的数据，在配置变更（旋转屏幕）后仍然存活，随 Activity/Fragment 真正销毁时清空。
 
+ViewModel 的使用分两步：定义时继承 `ViewModel` 并用 `LiveData`/`StateFlow` 暴露状态，使用时通过 `ViewModelProvider` 获取实例。注意 ViewModel 的获取方式与它"按作用域共享"的特性绑定——同一个 Activity 内的多个 Fragment 通过 `activityViewModels()` 可以共享同一份 ViewModel 实例：
+
 ::: code-tabs
 
 @tab:active Java
@@ -57,13 +59,11 @@ class MainActivity : ComponentActivity() {
 
 ### ViewModel 为什么能存活？
 
-- 通过 `ViewModelStore`（非配置实例）持有 ViewModel
-- 旋转屏幕时 `ViewModelStore` 被保留，新 Activity 复用同一 Store
+关键在于 **ViewModelStore** 这个"中转站"：Activity 的 `NonConfigurationInstance` 在配置变更时被系统保留，而 ViewModelStore 就存在其中。旋转屏幕时，系统销毁旧 Activity 但保留 ViewModelStore，新 Activity 创建后从同一个 Store 里取出 ViewModel 复用——因此数据不丢，且 `onCleared()` 不会被调用。只有 Activity **真正**销毁（如用户按返回键）时，Store 才随之清空并回调 `onCleared()`。
 
 ### viewModelScope
 
-- ViewModel 自带的协程作用域
-- ViewModel 销毁时自动取消协程，避免内存泄漏
+`viewModelScope` 是 ViewModel 自带的协程作用域，它绑定 `Dispatchers.Main.immediate` 并跟随 ViewModel 生命周期：ViewModel 销毁时自动 `cancel()` 所有未完成的协程，避免协程在界面销毁后继续执行造成的内存泄漏与无效更新。这也是"在 ViewModel 里做异步、把结果暴露为 StateFlow/LiveData"这条规范的原因。
 
 ## 二、LiveData
 
@@ -97,13 +97,9 @@ data.observe(this) { value ->
 
 :::
 
-| 特性 | 说明 |
-|------|------|
-| 生命周期感知 | `ON_START` 后活跃，活跃时才回调 |
-| 自动清理 | Observer 随 Lifecycle 销毁自动移除 |
-| 数据粘性 | 先 set 后 observe 也能收到（粘性事件） |
+LiveData 的三个核心特性决定了它的使用体验：**生命周期感知**——只有处于 `ON_START` 之后的活跃状态，Observer 才会收到回调，后台时不会触发不必要的 UI 更新；**自动清理**——Observer 与 LifecycleOwner 绑定，页面销毁时自动移除监听，无需手动解除；**数据粘性**——即使先 `setValue` 再 `observe`，新订阅者也能立刻收到当前值（粘性事件），这在"Fragment 重建后要立刻拿到最新状态"的场景非常有用，但也是事件型数据容易重复消费的根源。
 
-### LiveData vs StateFlow
+两者都是"可观察的数据持有者"，核心差异在生命周期感知的实现方式上——LiveData 内置感知，StateFlow 需要配合 `repeatOnLifecycle`：
 
 | 对比项 | LiveData | StateFlow |
 |--------|----------|-----------|

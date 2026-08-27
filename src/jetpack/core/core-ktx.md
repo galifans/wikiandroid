@@ -11,7 +11,7 @@ description: core-ktx 常用扩展、Context KTX、View KTX、协程 KTX、集�
 
 ## 1. 什么是 KTX
 
-KTX（Kotlin Extensions）是一系列 Kotlin 扩展函数，本质是**对现有 API 的封装**，不改变底层能力，只让调用更简洁：
+KTX（Kotlin Extensions）是一系列 Kotlin 扩展函数，本质是**对现有 API 的封装**，不改变底层能力，只让调用更简洁。它的定位可以用一句话概括——Kotlin 代码通过扩展函数调用原生 API，最终仍走框架能力，零运行时开销：
 
 ```mermaid
 flowchart LR
@@ -30,6 +30,8 @@ flowchart LR
 ## 2. Context KTX
 
 ### 2.1 常用扩展
+
+Context 相关的扩展让字符串转 Uri、读取系统属性等操作更顺手：
 
 ::: code-tabs
 
@@ -62,6 +64,8 @@ val versionName = context.packageManager
 
 ### 2.2 Bundle 构建
 
+`bundleOf` 用键值对一次构建 Bundle，相比 Java 的逐条 put 更简洁且类型安全：
+
 ::: code-tabs
 
 @tab:active Java
@@ -93,6 +97,8 @@ val name: String? = bundle.getString("name")
 ## 3. View KTX
 
 ### 3.1 常用扩展
+
+View KTX 把"布局完成、绘制前、可见性"等时机都封装成了回调，`doOnLayout` 里拿宽高、`isVisible` 一键控制显隐：
 
 ::: code-tabs
 
@@ -137,6 +143,8 @@ view.doOnDetach { }
 
 ### 3.2 手势处理
 
+点击、长按、触摸、双击都能用 lambda 直写，最后一种要借助 `GestureDetector`：
+
 ::: code-tabs
 
 @tab:active Java
@@ -180,6 +188,8 @@ view.setOnTouchListener { _, event -> detector.onTouchEvent(event) }
 ## 4. 协程与 Lifecycle KTX
 
 ### 4.1 viewModelScope / lifecycleScope
+
+协程最怕"任务没结束，载体先没了"。`viewModelScope` 随 ViewModel 销毁自动取消，`lifecycleScope` 随生命周期销毁取消——**scope 即生命周期**：
 
 ::: code-tabs
 
@@ -234,6 +244,8 @@ class MainActivity : AppCompatActivity() {
 
 ### 4.2 Flow 收集
 
+收集 Flow 也要考虑生命周期，几种方式按"要不要感知生命周期"区分：
+
 | 收集方式 | 生命周期行为 |
 | --- | --- |
 | `collect` | 一直收集，无生命周期感知 |
@@ -244,6 +256,8 @@ class MainActivity : AppCompatActivity() {
 ## 5. 集合与工具 KTX
 
 ### 5.1 常用集合扩展
+
+Kotlin 标准库的集合操作（map/filter/groupBy…）已经是日常标配，配合协程还能直接 `asFlow()` 流入数据管道：
 
 ::: code-tabs
 
@@ -279,6 +293,8 @@ list.asFlow()
 :::
 
 ### 5.2 系统服务获取
+
+`getSystemService(Class)` 传类名即可，返回值天然带类型，不用手动强转：
 
 ::: code-tabs
 

@@ -11,6 +11,8 @@ description: PagingSource、PagingData、RemoteMediator、LoadState 完整架构
 
 ## 1. Paging 3 架构总览
 
+Paging 3 把"分页加载"拆成一条清晰的数据流：数据源按需产出一页 → 包装成不可变数据流 → 适配器消费并展示，加载更多/刷新/重试全部由框架托管：
+
 ```text
 数据源（网络/数据库）
     │
@@ -30,6 +32,8 @@ UI（自动处理加载更多/刷新/错误重试）
 ## 2. 核心组件
 
 ### 2.1 PagingSource（数据源）
+
+`PagingSource` 是分页的"数据源头"，唯一核心方法是 `load()`：接收 `LoadParams`（页码、每页大小），返回 `LoadResult.Page`（数据 + 前/后页码）或 `LoadResult.Error`。`getRefreshKey` 决定数据失效后回到哪一页：
 
 ::: code-tabs
 
@@ -123,6 +127,8 @@ class UserPagingSource(
 
 ### 2.2 ViewModel 中组装 PagingData
 
+ViewModel 负责把 `Pager`（配置 + 数据源工厂）组装成 `PagingData` 数据流，并用 `cachedIn(viewModelScope)` 缓存——旋转屏幕重建 UI 时不会重新请求网络：
+
 ::: code-tabs
 
 @tab:active Java
@@ -169,6 +175,8 @@ class UserListViewModel(
 :::
 
 ### 2.3 UI 层展示
+
+UI 层把数据流收集后交给适配器 `submitData`，再通过 `loadStateFlow` 处理"首次加载 / 加载更多 / 出错重试"三种状态：
 
 ::: code-tabs
 
@@ -245,6 +253,8 @@ class UserListFragment : Fragment() {
 
 ### 2.4 Adapter
 
+Adapter 继承 `PagingDataAdapter`，只要提供 `DiffUtil` 回调，框架就能精准计算列表差异、只更新变化的 item：
+
 ::: code-tabs
 
 @tab:active Java
@@ -312,7 +322,7 @@ class UserAdapter :
 
 ## 3. RemoteMediator：网络 + 数据库缓存
 
-推荐架构：**数据库作为单一数据源**，网络结果先存库再刷新 UI。
+推荐架构：**数据库作为单一数据源**，网络结果先存库再刷新 UI。`RemoteMediator` 就是"同步网络与数据库"的桥：
 
 ::: code-tabs
 
@@ -418,7 +428,7 @@ val pagingDataFlow = Pager(
 
 :::
 
-**架构图**：
+**架构图**：Room 是唯一数据出口（`PagingSource` 从数据库读），`RemoteMediator` 只负责"网络 → 数据库"的写入方向：
 
 ```mermaid
 flowchart LR
@@ -430,6 +440,8 @@ flowchart LR
 ```
 
 ## 4. LoadState 详解
+
+UI 需要知道"当前在加载什么"：`refresh` 是整表刷新、`append` 是向后加载更多、`prepend` 是向前加载更早：
 
 | LoadState 类型 | 含义 |
 | --- | --- |

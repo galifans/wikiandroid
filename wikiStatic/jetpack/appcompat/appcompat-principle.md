@@ -13,7 +13,7 @@ description: AppCompatActivity 原理、AppCompatDelegate 委托机制、Theme.A
 
 ### 1.1 兼容的本质
 
-系统更新慢、碎片化严重，新 API 只在部分版本可用。AppCompat 的思路是：
+系统更新慢、碎片化严重，新 API 只在部分版本可用。AppCompat 的思路是：**用代理层做版本分流**——高版本走原生实现，低版本走兼容实现，对外接口一致：
 
 ```mermaid
 flowchart LR
@@ -40,6 +40,8 @@ flowchart LR
 ## 2. AppCompatActivity 原理
 
 ### 2.1 委托模式
+
+AppCompatActivity 的核心是**委托模式**：自己不做兼容工作，全权交给 `AppCompatDelegate`，而 delegate 按系统版本选择实现：
 
 ::: code-tabs
 
@@ -78,6 +80,8 @@ class MainActivity : AppCompatActivity() {
 
 ### 2.2 AppCompatDelegate 版本适配
 
+`create()` 工厂方法按 Build.VERSION 分支，不同版本用不同实现类：
+
 ```mermaid
 flowchart TD
     A[AppCompatDelegate.create] --> B{Build.VERSION}
@@ -94,6 +98,8 @@ flowchart TD
 不同实现类在**内部细节**上分版本处理，对外暴露相同能力（主题、夜间模式、Window 装饰）。
 
 ### 2.3 setContentView 做了什么
+
+`setContentView` 也经过 delegate——内部把普通控件替换成 AppCompat 版本、设置窗口装饰、应用主题：
 
 ::: code-tabs
 
@@ -127,7 +133,7 @@ delegate 内部：
 
 ### 3.1 AppCompatViewInflater
 
-布局中写 `<ImageView>` 会被自动替换为 `AppCompatImageView`：
+你写 `<ImageView>`，实际拿到的是 `AppCompatImageView`——布局填充器自动完成了替换：
 
 | 布局控件 | 实际替换为 | 增加的能力 |
 | --- | --- | --- |
@@ -139,6 +145,8 @@ delegate 内部：
 | RadioButton | AppCompatRadioButton | tint |
 
 ### 3.2 Tint 着色机制
+
+AppCompat 控件对图片着色（tint）的支持：
 
 ::: code-tabs
 
@@ -179,7 +187,7 @@ class AppCompatImageView : ImageView {
 
 ### 4.1 原理
 
-`AppCompatDelegate.setDefaultNightMode()` 让应用在 API 14+ 支持深色模式：
+`AppCompatDelegate.setDefaultNightMode()` 让应用在 API 14+ 支持深色模式——几个模式值的含义如下：
 
 ::: code-tabs
 
@@ -225,6 +233,8 @@ class SettingsActivity : AppCompatActivity() {
 
 ### 4.2 夜间模式实现方式
 
+设置模式后，系统通过 **uiMode 配置变化**触发 Activity 重建，重建时自动加载 `values-night` 资源：
+
 ```mermaid
 flowchart LR
     A[setDefaultNightMode] --> B[delegate 保存 mode]
@@ -262,7 +272,7 @@ delegate.applyDayNight()
 
 ## 5. Compat 工具类
 
-AppCompat 之外，androidx.core 提供大量 Compat 工具：
+AppCompat 之外，androidx.core 提供大量 Compat 工具类，让新 API 在旧版本安全调用：
 
 | 工具类 | 典型能力 |
 | --- | --- |
