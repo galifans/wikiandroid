@@ -21,6 +21,8 @@ flowchart LR
     A --> D[Broadcast 消息]
 ```
 
+验证线程真相的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -63,6 +65,8 @@ class DemoService : Service() {
 
 ### 1.2 常见误区
 
+常见误区的对照说明如下：
+
 | 误区 | 真相 |
 |------|------|
 | "Service 是后台，可以做耗时操作" | 错，Service 默认主线程，耗时操作一样 ANR |
@@ -74,6 +78,8 @@ class DemoService : Service() {
 ## 二、正确姿势：Service + 线程/协程
 
 ### 2.1 手动管理线程
+
+手动管理线程的示例代码如下：
 
 ::: code-tabs
 
@@ -150,6 +156,8 @@ class DownloadService : Service() {
 
 ### 2.2 startService vs bindService 的线程差异
 
+两种方式在线程上的差异说明如下：
+
 | 维度 | startService | bindService |
 |------|--------------|-------------|
 | 生命周期 | 独立运行，需 stopSelf/stopService | 跟随绑定者，全部解绑自动销毁 |
@@ -162,6 +170,8 @@ class DownloadService : Service() {
 ## 三、IntentService：曾经的官方答案
 
 ### 3.1 原理
+
+IntentService 的典型写法如下：
 
 ::: code-tabs
 
@@ -217,6 +227,8 @@ flowchart LR
 
 ### 3.2 为什么被废弃
 
+IntentService 被废弃的原因说明如下：
+
 | 问题 | 说明 |
 |------|------|
 | 串行执行 | 不支持并发，多任务排队 |
@@ -230,6 +242,8 @@ flowchart LR
 
 ### 4.1 什么时候该用 WorkManager
 
+WorkManager 的适用场景如下：
+
 | 场景 | 方案 |
 |------|------|
 | 即时后台任务（用户等待） | 协程 + 前台服务 |
@@ -239,6 +253,8 @@ flowchart LR
 
 ### 4.2 WorkManager 与 Service 对比
 
+WorkManager 与 Service 的对比说明如下：
+
 | 维度 | Service | WorkManager |
 |------|---------|-------------|
 | 保证级别 | 进程被杀即中断 | 可持久化，重启恢复 |
@@ -247,6 +263,8 @@ flowchart LR
 | 链式任务 | 无 | 支持 Work 链 |
 | 前台展示 | 需自己管理通知 | 自带 ForegroundInfo |
 | 适用 | 即时、交互式 | 后台可靠任务 |
+
+WorkManager 的典型使用代码如下：
 
 ::: code-tabs
 
@@ -313,6 +331,8 @@ WorkManager.getInstance(context).enqueue(request)
 - 豁免场景：用户交互、高优先级 FCM、前台 Activity 所在应用等
 
 ### 5.2 Service 内耗时任务的标准范式
+
+耗时任务执行方式的决策流程如下：
 
 ```mermaid
 flowchart TD

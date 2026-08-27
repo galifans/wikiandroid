@@ -23,6 +23,8 @@ description: AIDL 语法、in/out/inout 方向、oneway、Binder 工作原理、
 
 ### 2.1 数据类型支持
 
+各数据类型在 AIDL 中的支持情况如下：
+
 | 类型 | 说明 |
 | --- | --- |
 | 基本类型 | `int`、`long`、`boolean`、`float`、`double`、`char`、`byte` |
@@ -32,6 +34,8 @@ description: AIDL 语法、in/out/inout 方向、oneway、Binder 工作原理、
 | 其他 AIDL 接口 | 可传递 IBinder |
 
 ### 2.2 方向限定符
+
+各方向限定符的含义如下：
 
 | 限定符 | 含义 |
 | --- | --- |
@@ -50,6 +54,8 @@ description: AIDL 语法、in/out/inout 方向、oneway、Binder 工作原理、
 package com.example.ipc;
 parcelable Book;
 ```
+
+Book 类的 Parcelable 标准实现如下：
 
 ::: code-tabs
 
@@ -155,6 +161,8 @@ interface IOnBookArrivedListener {
 
 ### 3.3 服务端实现
 
+服务端的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -245,6 +253,8 @@ class BookManagerService : Service() {
 > 自动调用 `onCallbackDied` 清理，避免"内存泄漏 + 重复注册"两大经典问题。
 
 ### 3.4 客户端调用
+
+客户端的调用实现如下：
 
 ::: code-tabs
 
@@ -358,6 +368,8 @@ class MainActivity : AppCompatActivity() {
 </service>
 ```
 
+跨应用的客户端绑定实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -382,6 +394,8 @@ bindService(intent, connection, Context.BIND_AUTO_CREATE)
 :::
 
 ### 3.6 Kotlin 现代写法：@Parcelize 替代手写 Parcelable
+
+使用 @Parcelize 的现代写法如下：
 
 ::: code-tabs
 
@@ -537,6 +551,8 @@ interface IBookManager {
 - 普通调用是同步的，若服务端执行慢，客户端 Binder 线程会阻塞。
 
 ## 5. 常用替代方案对比
+
+各通信方案的对比说明如下：
 
 | 方案 | 特点 | 适用场景 |
 | --- | --- | --- |

@@ -21,6 +21,8 @@ description: SQLiteOpenHelper、SQL 语句与事务、WAL 模式、索引优化�
 | 事务 | 支持 ACID，默认 autocommit |
 | 线程安全 | 单连接串行执行，多连接需处理锁竞争 |
 
+SQLite 的整体调用链路如下：
+
 ```mermaid
 flowchart LR
     A[应用代码] --> B[SQLiteOpenHelper]
@@ -32,6 +34,8 @@ flowchart LR
 ## 二、SQLiteOpenHelper
 
 ### 2.1 基本使用
+
+SQLiteOpenHelper 的标准写法如下：
 
 ::: code-tabs
 
@@ -119,6 +123,8 @@ val db = helper.readableDatabase
 
 ### 2.2 生命周期钩子
 
+各生命周期回调的触发时机如下：
+
 | 回调 | 触发时机 | 典型操作 |
 |------|----------|----------|
 | `onCreate` | 数据库文件首次创建 | 建表、建索引、初始化数据 |
@@ -130,6 +136,8 @@ val db = helper.readableDatabase
 ## 三、CRUD 与查询
 
 ### 3.1 增删改查
+
+SQLite 增删改查的标准写法如下：
 
 ::: code-tabs
 
@@ -206,6 +214,8 @@ db.delete(TABLE_ARTICLE, "view_count < ?", arrayOf("5"))
 
 ### 3.2 参数化查询防注入
 
+参数化查询的正确写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -236,6 +246,8 @@ db.rawQuery("SELECT * FROM article WHERE title = ?", arrayOf(input))
 ### 4.1 为什么要用事务
 
 批量写入默认每条 SQL 一个事务（写盘一次），N 条数据 = N 次磁盘 IO。用事务包裹可合并为一次提交，**性能提升数量级**，且保证原子性（要么全成功要么全失败）。
+
+事务包裹的批量写入代码如下：
 
 ::: code-tabs
 
@@ -276,6 +288,8 @@ try {
 
 ### 4.2 事务特性
 
+各事务特性的说明如下：
+
 | 特性 | 说明 |
 |------|------|
 | 原子性 | 要么全部执行，要么全部回滚 |
@@ -290,12 +304,16 @@ try {
 
 ### 5.1 Journal 模式 vs WAL 模式
 
+两种日志模式的对比说明如下：
+
 | 对比项 | 默认（DELETE journal） | WAL |
 |--------|----------------------|-----|
 | 写原理 | 写前先写 journal 日志 | 写操作追加到 WAL 文件 |
 | 读写并发 | 读阻塞写、写阻塞读 | 读写可并行 |
 | 性能 | 写放大 | 写更快、读更快 |
 | 缺点 | 并发差 | WAL 文件增长需 checkpoint |
+
+开启 WAL 模式的实现代码如下：
 
 ::: code-tabs
 
@@ -325,6 +343,8 @@ override fun onConfigure(db: SQLiteDatabase) {
 :::
 
 ### 5.2 索引优化
+
+索引的建立方式如下：
 
 ::: code-tabs
 
@@ -366,6 +386,8 @@ sqlite3 wiki.db "EXPLAIN QUERY PLAN SELECT * FROM article WHERE category='storag
 
 ### 5.3 其他优化手段
 
+其他优化手段的说明如下：
+
 | 手段 | 说明 |
 |------|------|
 | `setForeignKeyConstraintsEnabled` | 开启外键级联 |
@@ -377,6 +399,8 @@ sqlite3 wiki.db "EXPLAIN QUERY PLAN SELECT * FROM article WHERE category='storag
 ## 六、数据库升级与迁移
 
 ### 6.1 增量迁移模式
+
+增量迁移的标准写法如下：
 
 ::: code-tabs
 
@@ -412,6 +436,8 @@ override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
 :::
 
 ### 6.2 破坏性变更：重建表
+
+重建表的迁移代码如下：
 
 ::: code-tabs
 

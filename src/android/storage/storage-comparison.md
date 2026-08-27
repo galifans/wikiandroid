@@ -11,6 +11,8 @@ description: SharedPreferences、DataStore、Room、文件、SQLite 五大存储
 
 ## 1. 五大存储方案总览
 
+五大存储方案的对比说明如下：
+
 | 方案 | 数据类型 | 跨进程 | 异步支持 | 类型安全 | 适用场景 |
 | --- | --- | --- | --- | --- | --- |
 | SharedPreferences | 键值对 |  不推荐 | ✗（apply 为异步写） | ✗ | 简单配置（已逐渐被替代） |
@@ -22,6 +24,8 @@ description: SharedPreferences、DataStore、Room、文件、SQLite 五大存储
 ## 2. SharedPreferences 的问题
 
 ### 2.1 历史问题
+
+SharedPreferences 的旧时代写法如下：
 
 ::: code-tabs
 
@@ -59,6 +63,8 @@ Android 官方已将其标记为 **legacy API**，推荐使用 DataStore 替代�
 ## 3. DataStore（推荐）
 
 ### 3.1 Preferences DataStore
+
+Preferences DataStore 的核心实现如下：
 
 ::: code-tabs
 
@@ -142,6 +148,8 @@ message UserPreferences {
 }
 ```
 
+Proto DataStore 的读写实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -177,6 +185,8 @@ suspend fun updateUser(block: (UserPreferences) -> UserPreferences) {
 - **跨进程**：DataStore 自身保证单进程单实例，多进程使用有额外配置。
 
 ## 4. Room（结构化数据首选）
+
+Room 的完整示例代码如下：
 
 ::: code-tabs
 
@@ -253,6 +263,8 @@ Room 优势：
 
 ## 5. 文件存储
 
+文件存储的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -283,6 +295,8 @@ val cacheFile = File(context.cacheDir, "temp.txt")
 
 :::
 
+各存储目录的用途与权限说明如下：
+
 | 目录 | 用途 | 权限 |
 | --- | --- | --- |
 | `filesDir` | 长期私有文件 | 无 |
@@ -296,6 +310,8 @@ val cacheFile = File(context.cacheDir, "temp.txt")
 
 ### 6.1 三个时代的文件访问
 
+三个时代文件访问策略的对比说明如下：
+
 | 版本 | 策略 | 说明 |
 |------|------|------|
 | ≤ Android 9 | 宽松 | 任意路径可读写（需权限） |
@@ -303,6 +319,8 @@ val cacheFile = File(context.cacheDir, "temp.txt")
 | Android 11+ (API 30) | 分区存储（强制） | 不再提供退出开关 |
 
 ### 6.2 分区存储下的正确姿势
+
+分区存储下的标准写法如下：
 
 ::: code-tabs
 

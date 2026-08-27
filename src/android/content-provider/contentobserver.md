@@ -12,6 +12,8 @@ description: 数据变化的观察者模式、registerContentObserver 用法、�
 
 **ContentObserver（内容观察者）** 用于监听 ContentProvider 数据的增删改变化。任何应用修改了某张数据表，其他应用通过注册的 Observer 都能收到通知，实现**跨进程的数据变更感知**。
 
+ContentObserver 的整体流程如下：
+
 ```mermaid
 flowchart LR
     A[应用 A<br>ContentResolver.insert/update/delete] -->|notifyChange| B[ContentProvider]
@@ -22,6 +24,8 @@ flowchart LR
 ## 二、核心用法
 
 ### 2.1 注册与注销
+
+注册与注销的标准写法如下：
 
 ::: code-tabs
 
@@ -171,6 +175,8 @@ class MyProvider : ContentProvider() {
 
 ## 三、跨进程分发原理
 
+跨进程分发的完整链路如下：
+
 ```mermaid
 sequenceDiagram
     participant P as Provider 应用
@@ -190,6 +196,8 @@ sequenceDiagram
 ## 四、经典应用场景
 
 ### 4.1 监听系统通讯录
+
+监听系统通讯录的示例代码如下：
 
 ::: code-tabs
 
@@ -213,6 +221,8 @@ contentResolver.registerContentObserver(uri, true, observer)
 
 ### 4.2 监听系统设置
 
+监听系统设置的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -235,6 +245,8 @@ contentResolver.registerContentObserver(uri, false, localeObserver)
 
 ### 4.3 监听媒体库（相册）
 
+监听媒体库的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -256,6 +268,8 @@ contentResolver.registerContentObserver(uri, true, mediaObserver)
 :::
 
 ### 4.4 监听自己 Provider 的表变化
+
+监听自己 Provider 表的示例代码如下：
 
 ::: code-tabs
 
@@ -280,6 +294,8 @@ contentResolver.registerContentObserver(uri, true, articleObserver)
 ## 五、与 Flow / LiveData 结合
 
 ### 5.1 封装为回调 Flow
+
+封装为回调 Flow 的示例代码如下：
 
 ::: code-tabs
 
@@ -327,6 +343,8 @@ fun Context.observeContentChanges(uri: Uri, notifyForDescendants: Boolean = true
 
 Room 内部就是通过 `InvalidationTracker` + ContentObserver 机制感知表变化的：Room 在 SQLite 表上注册观察者，数据变更后自动通知 Flow 重新查询。
 
+对应的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -354,6 +372,8 @@ interface ArticleDao {
 :::
 
 ## 六、注意事项与坑点
+
+各注意点的说明如下：
 
 | 注意点 | 说明 |
 |--------|------|

@@ -12,6 +12,8 @@ description: Style 与 Theme 的区别、styleable 自定义属性、主题继�
 
 ### 1.1 概念辨析
 
+Style 与 Theme 的概念对比如下：
+
 | 维度 | Style（样式） | Theme（主题） |
 |------|--------------|--------------|
 | 作用范围 | 单个 View | 整个 Activity/Application |
@@ -67,6 +69,8 @@ description: Style 与 Theme 的区别、styleable 自定义属性、主题继�
 <!-- 等价于 parent="BaseText"（仅同包/同资源时生效） -->
 ```
 
+两种继承方式的对比说明如下：
+
 | 继承方式 | 写法 | 特点 |
 |----------|------|------|
 | 显式 parent | `parent="BaseText"` | 明确、跨包可用 |
@@ -92,6 +96,8 @@ description: Style 与 Theme 的区别、styleable 自定义属性、主题继�
 
 ### 3.2 属性 format 类型
 
+各 format 类型的说明如下：
+
 | format | 说明 | 示例 |
 |--------|------|------|
 | `integer` | 整型 | `maxRating` |
@@ -105,6 +111,8 @@ description: Style 与 Theme 的区别、styleable 自定义属性、主题继�
 | `flag` | 位标志 | `scrollbars` |
 
 ### 3.3 在 View 中使用
+
+在自定义 View 中解析自定义属性的实现如下：
 
 ::: code-tabs
 
@@ -177,6 +185,8 @@ class RatingBar @JvmOverloads constructor(
 
 ### 4.1 主题优先级
 
+各来源属性的优先级关系如下：
+
 ```mermaid
 flowchart TD
     A[View 属性直接设置<br>android:textSize] -->|优先级最高| Z[最终值]
@@ -212,6 +222,8 @@ Theme.Material3.DayNight
 
 ### 5.1 主题属性驱动的换肤
 
+主题属性驱动换肤的写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -246,6 +258,8 @@ AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
 ### 5.2 动态换肤思路
 
+常见换肤方案的对比说明如下：
+
 | 方案 | 原理 | 优缺点 |
 |------|------|--------|
 | DayNight 资源 | values-night 限定符自动切换 | 官方推荐，需重启 Activity 生效 |
@@ -261,6 +275,8 @@ AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 ```
 
 ## 六、常见坑点
+
+主题与样式使用中的常见坑点如下：
 
 | 坑点 | 说明 |
 |------|------|

@@ -10,6 +10,8 @@ description: Activity 生命周期七回调详解、典型场景时序、配置�
 
 ## 一、生命周期全景图
 
+完整的生命周期状态流转如下：
+
 ```mermaid
 stateDiagram-v2
     [*] --> onCreate: 首次创建
@@ -34,6 +36,8 @@ stateDiagram-v2
 
 ## 二、七个核心回调逐一详解
 
+各核心回调的触发时机与典型操作如下：
+
 | 回调 | 触发时机 | 典型操作 | 注意事项 |
 |------|----------|----------|----------|
 | `onCreate` | 首次创建，**整个生命周期只调用一次** | `setContentView`、初始化 ViewModel、绑定点击事件、初始化数据 | 不要在这里做耗时操作；`savedInstanceState` 可能为 null（首次启动） |
@@ -45,6 +49,8 @@ stateDiagram-v2
 | `onDestroy` | Activity 销毁（用户返回或系统回收） | 释放全部资源、解绑 Service、注销动态 Receiver | 区分"正常销毁"（`isFinishing`）与"非正常销毁"（配置变更/内存回收） |
 
 ### 关键认知：onPause 与 onStop 的本质区别
+
+onPause 与 onStop 的切换时序如下：
 
 ```mermaid
 sequenceDiagram
@@ -60,6 +66,8 @@ sequenceDiagram
 - **`onPause` 必须轻量**：系统会等待 `onPause` 返回后才让新 Activity 绘制，耗时操作会拖慢页面切换。
 
 ## 三、典型场景回调顺序速查表
+
+各典型场景的回调顺序如下：
 
 | 场景 | 回调顺序 |
 |------|----------|
@@ -104,6 +112,8 @@ sequenceDiagram
 2. 按返回键退到桌面后进入最近任务列表
 3. 屏幕旋转等配置变更
 4. 内存不足杀进程前
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -279,6 +289,8 @@ class ProfileActivity : AppCompatActivity() {
 
 ## 五、进程被杀死后的恢复
 
+进程被杀死后的恢复流程如下：
+
 ```mermaid
 flowchart LR
     A[用户使用 App] --> B[按 Home / 切后台]
@@ -313,6 +325,8 @@ flowchart LR
 - **栈顶已是该实例** → 复用并回调 `onNewIntent`；
 - 不在栈顶 → 行为同 `standard`（创建新实例）。
 
+singleTop 复用实例的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -346,6 +360,8 @@ class NotificationDetailActivity : AppCompatActivity() {
 
 ### 6.3 singleTask（最重要）
 
+singleTask 的栈内处理流程如下：
+
 ```mermaid
 flowchart TD
     subgraph Task 栈
@@ -371,6 +387,8 @@ flowchart TD
 **典型场景**：来电界面、闹钟响铃（全局唯一、独立窗口，不被其他页面覆盖）。
 
 ### 6.5 启动模式对比表
+
+各启动模式的对比说明如下：
 
 | 模式 | 是否新实例 | 所在 Task | `onNewIntent` 触发条件 |
 |------|-----------|-----------|------------------------|
@@ -415,6 +433,8 @@ startActivity(intent)
 
 :::
 
+各 Flag 的作用与等价关系如下：
+
 | Flag | 作用 | 等价关系 |
 |------|------|----------|
 | `FLAG_ACTIVITY_NEW_TASK` | 在新 Task 中启动 | 类似 singleTask |
@@ -428,6 +448,8 @@ startActivity(intent)
 :::
 
 **经典组合：退出登录清空栈**
+
+退出登录清空任务栈的写法如下：
 
 ::: code-tabs
 
@@ -516,6 +538,8 @@ lifecycleScope.launch {
 ```
 
 :::
+
+各写法的行为说明如下：
 
 | 写法 | 行为 |
 |------|------|

@@ -10,6 +10,8 @@ description: AndroidManifest.xml 的完整配置体系——四大组件声明�
 
 ## 一、Manifest 的作用
 
+Manifest 的核心作用链路如下：
+
 ```mermaid
 flowchart LR
     M[AndroidManifest.xml] --> A[声明四大组件<br/>Activity/Service/Receiver/Provider]
@@ -18,6 +20,8 @@ flowchart LR
     M --> D[声明能力<br/>intent-filter: 能处理什么意图]
     M --> E[版本与包信息<br/>package/versionCode/versionName]
 ```
+
+Manifest 各项作用说明如下：
 
 | 作用 | 说明 |
 |------|------|
@@ -71,6 +75,8 @@ flowchart LR
 ```
 
 ## 三、application 标签常用属性
+
+application 标签常用属性说明如下：
 
 | 属性 | 作用 | 常见值 |
 |------|------|--------|
@@ -130,6 +136,8 @@ flowchart LR
     android:authorities="com.example.app.provider"
     android:exported="false" />
 ```
+
+四大组件声明的必配项与常见坑如下：
 
 | 组件 | 必配项 | 常见坑 |
 |------|--------|--------|
@@ -203,6 +211,8 @@ flowchart LR
 </application>
 ```
 
+三种进程写法的对比说明如下：
+
 | 写法 | 进程名 | 特点 |
 |------|--------|------|
 | 不写 | 包名 | 默认主进程 |
@@ -210,6 +220,8 @@ flowchart LR
 | `com.example.xxx` | 全限定名 | 全局进程，可被其他应用（同 UID）复用 |
 
 ## 八、常见错误与排查
+
+常见 Manifest 错误的排查对照如下：
 
 | 错误信息 | 原因 | 解决方案 |
 |----------|------|----------|

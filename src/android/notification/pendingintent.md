@@ -10,6 +10,8 @@ description: PendingIntent 的原理与使用——与 Intent 的本质区别、
 
 ## 一、PendingIntent 是什么
 
+PendingIntent 从创建到执行的完整链路如下：
+
 ```mermaid
 flowchart LR
     A[应用] -->|创建 PendingIntent<br/>getActivity/getService/getBroadcast| B[PendingIntent<br/>包装 Intent + 执行权限]
@@ -17,6 +19,8 @@ flowchart LR
     C -->|触发时机: 点击通知/闹钟/小部件| D[系统以你的身份执行]
     D --> E[启动 Activity / Service / 发广播]
 ```
+
+Intent 与 PendingIntent 的对比说明如下：
 
 | 对比 | Intent | PendingIntent |
 |------|--------|---------------|
@@ -31,6 +35,8 @@ PendingIntent = **Intent + 执行权限 + 触发时机**。系统在触发时"�
 :::
 
 ## 二、三种创建方式
+
+三种 PendingIntent 创建方式的标准写法如下：
 
 ::: code-tabs
 
@@ -90,6 +96,8 @@ val pendingBroadcast = PendingIntent.getBroadcast(
 
 :::
 
+各创建方法的触发结果与典型场景如下：
+
 | 方法 | 触发结果 | 典型场景 |
 |------|----------|----------|
 | `getActivity` | 启动 Activity | 点击通知跳转页面 |
@@ -107,6 +115,8 @@ PendingIntent 通过 `requestCode` + Intent 是否匹配来决定"复用还是�
 | `FLAG_NO_CREATE` | 不存在则返回 null（不创建） | 检查是否已存在 |
 | `FLAG_IMMUTABLE` | 创建后 Intent 不可修改（**安全默认**） | 通知/小部件（Android 12 起强制） |
 | `FLAG_MUTABLE` | 允许其他组件修改 Intent 内容 | 特定系统场景（如媒体会话） |
+
+通知内容更新场景的写法如下：
 
 ::: code-tabs
 
@@ -154,6 +164,8 @@ targetSdk 31+ 创建 PendingIntent **必须显式声明** `FLAG_IMMUTABLE` 或 `
 ## 四、典型使用场景
 
 ### 场景 1：通知点击跳转
+
+通知点击跳转的完整写法如下：
 
 ::: code-tabs
 
@@ -204,6 +216,8 @@ NotificationManagerCompat.from(this).notify(chatId, notification)
 
 ### 场景 2：通知操作按钮（播放/暂停）
 
+通知操作按钮的写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -240,6 +254,8 @@ NotificationCompat.Builder(this, "media")
 
 ### 场景 3：桌面小部件
 
+桌面小部件点击的写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -269,6 +285,8 @@ views.setOnClickPendingIntent(R.id.widget_root, pending)
 :::
 
 ### 场景 4：AlarmManager 闹钟
+
+AlarmManager 闹钟的写法如下：
 
 ::: code-tabs
 
@@ -302,13 +320,15 @@ alarmManager.setExactAndAllowWhileIdle(
 
 ## 五、安全最佳实践
 
+各类安全风险的防护措施如下：
+
 | 风险 | 说明 | 防护 |
 |------|------|------|
 | Intent 注入 | 恶意应用篡改 PendingIntent 内容 | `FLAG_IMMUTABLE` |
 | 伪造 PendingIntent | 恶意应用冒充你的通知 | PendingIntent 只交给可信系统 API |
 | 隐私泄露 | extras 携带敏感数据被读取 | 不把敏感数据放 PendingIntent 的 extras |
 | 滥用特权 | 利用"以应用身份执行"特性 | 接收方校验来源（`getCallingPackage` 等） |
-
+PendingIntent 的安全规范写法如下：
 ::: code-tabs
 
 @tab:active Java

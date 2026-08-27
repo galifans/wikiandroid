@@ -73,6 +73,8 @@ flowchart LR
 </application>
 ```
 
+Manifest 各属性的说明如下：
+
 | 属性 | 说明 |
 |------|------|
 | `android:name` | 固定为 `androidx.core.content.FileProvider`（框架实现） |
@@ -110,6 +112,8 @@ flowchart LR
 
 ### 2.3 标签与根目录对应表
 
+各标签对应的根目录如下：
+
 | 标签 | 根目录（context 相对） | 示例 |
 |------|------------------------|------|
 | `<root-path>` | 文件系统根 `/` | 整个设备（谨慎使用） |
@@ -124,6 +128,8 @@ flowchart LR
 ## 三、生成与使用 content URI
 
 ### 3.1 获取 URI
+
+获取 content URI 的示例代码如下：
 
 ::: code-tabs
 
@@ -155,6 +161,8 @@ val uri: Uri = FileProvider.getUriForFile(
 
 ### 3.2 授予临时权限
 
+授予临时权限的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -181,6 +189,8 @@ val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
 :::
 
 ### 3.3 分享场景
+
+分享场景的示例代码如下：
 
 ::: code-tabs
 
@@ -223,6 +233,8 @@ fun shareImage(context: Context, file: File) {
 
 ## 四、临时权限机制
 
+临时权限的授予与回收链路如下：
+
 ```mermaid
 sequenceDiagram
     participant A as 发送方 App
@@ -244,6 +256,8 @@ sequenceDiagram
 ## 五、常见问题与排查
 
 ### 5.1 常见异常
+
+常见异常的原因与解决方案如下：
 
 | 异常 | 原因 | 解决 |
 |------|------|------|

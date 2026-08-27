@@ -10,6 +10,8 @@ description: Android 权限体系全解析——沙箱模型、权限分级(norm
 
 ## 一、安全模型：沙箱 + 权限
 
+沙箱模型与权限授权的整体流程如下：
+
 ```mermaid
 flowchart LR
     A[应用安装] --> B[分配独立 UID<br/>进程级沙箱]
@@ -20,6 +22,8 @@ flowchart LR
     E -->|拒绝| G[SecurityException]
 ```
 
+安全模型的各机制说明如下：
+
 | 机制 | 说明 |
 |------|------|
 | UID 沙箱 | 每个应用独立 UID，进程/文件默认隔离 |
@@ -28,6 +32,8 @@ flowchart LR
 | 权限分级 | normal / dangerous / signature 三种保护级别 |
 
 ## 二、权限保护级别（protectionLevel）
+
+三种保护级别的对比说明如下：
 
 | 级别 | 授予方式 | 说明 | 示例 |
 |------|----------|------|------|
@@ -57,6 +63,8 @@ flowchart LR
 
 ### 申请流程
 
+运行时权限申请的状态流转如下：
+
 ```mermaid
 stateDiagram-v2
     [*] --> 检查: checkSelfPermission
@@ -75,6 +83,8 @@ stateDiagram-v2
 ```
 
 ### 标准申请代码
+
+运行时权限申请的完整示例代码如下：
 
 ::: code-tabs
 
@@ -143,11 +153,15 @@ class MainActivity : ComponentActivity() {
 
 ### 三种"拒绝"状态的区分
 
+三种拒绝状态的处理方式对比如下：
+
 | 状态 | `shouldShowRequestPermissionRationale` | 处理 |
 |------|----------------------------------------|------|
 | 首次拒绝 | `true` | 弹自定义解释弹窗，说明用途后重新申请 |
 | 拒绝并勾选"不再询问" | `false` | 只能跳系统设置页让用户手动开启 |
 | 永久拒绝（系统策略） | `false` | 同上，引导设置页 |
+
+跳转设置页的示例代码如下：
 
 ::: code-tabs
 
@@ -178,6 +192,8 @@ fun goToAppSettings() {
 
 ## 四、权限版本演进（面试高频）
 
+各版本权限变化的影响对比如下：
+
 | 版本 | 变化 | 影响 |
 |------|------|------|
 | Android 6.0 | 引入**运行时权限** | dangerous 权限需动态申请 |
@@ -193,6 +209,8 @@ fun goToAppSettings() {
 ```xml
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 ```
+
+动态申请通知权限的示例代码如下：
 
 ::: code-tabs
 
@@ -233,6 +251,8 @@ if (Build.VERSION.SDK_INT >= 33) {
      ├─ 校验保护级别与授予状态
      └─ 返回 GRANTED / DENIED
 ```
+
+各关键类的职责说明如下：
 
 | 关键类 | 职责 |
 |--------|------|

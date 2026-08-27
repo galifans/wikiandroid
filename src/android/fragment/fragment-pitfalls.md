@@ -13,6 +13,8 @@ description: Fragment 状态丢失、重叠问题、commit 时机、懒加载、
 
 ### 问题
 
+错误写法（在 onSaveInstanceState 之后提交事务）如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -80,6 +82,8 @@ Activity 被系统重建（旋转屏幕、内存回收）后，`onCreate` 中再
 
 ### 解决
 
+正确写法（先判断 savedInstanceState 再 add）如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -119,6 +123,8 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
 ### 问题
 
+错误写法（commit 之后再 setArguments）如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -144,6 +150,8 @@ fragment.arguments = bundle   // 无效！
 :::
 
 ### 解决
+
+正确写法（先 setArguments 再提交）如下：
 
 ::: code-tabs
 
@@ -179,6 +187,8 @@ supportFragmentManager.commit { add(R.id.container, fragment) }
 `FragmentPagerAdapter` 预加载导致**首次可见时机**判断错误。
 
 ### 现代解决（Fragment + ViewPager2）
+
+ViewPager2 场景下的懒加载写法如下：
 
 ::: code-tabs
 
@@ -241,6 +251,8 @@ class MyFragment : Fragment() {
 
 ### 解决
 
+安全访问的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -279,6 +291,8 @@ if (isAdded) { /* 安全使用 activity */ }
 ## 6. 坑点六：视图引用泄漏（view 与 fragment 生命周期不一致）
 
 ### 问题
+
+错误写法（View 持有异步回调引用）如下：
 
 ::: code-tabs
 
@@ -343,11 +357,15 @@ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
 ## 7. 坑点七：commit 与 commitAllowingStateLoss 的选择
 
+三种 commit 方式的对比说明如下：
+
 | API | 行为 | 使用场景 |
 | --- | --- | --- |
 | `commit()` | 状态丢失时抛异常 | 正常 UI 操作 |
 | `commitAllowingStateLoss()` | 状态丢失时静默丢弃 | 异步回调、非关键 UI 变更 |
 | `commitNow()` | 同步执行 | 需要立即生效（如 `addOnBackStackChangedListener` 中） |
+
+commit 方式的选择原则如下：
 
 ::: code-tabs
 
@@ -384,6 +402,8 @@ Fragment 内嵌套 Fragment，内层 `replace` 时未指定正确容器，或两
 Fragment 内部需要拦截返回键（如表单确认），但默认返回键直接退出 Activity。
 
 ### 解决（现代方案）
+
+返回键拦截的现代写法如下：
 
 ::: code-tabs
 
@@ -445,6 +465,8 @@ Fragment 的 `arguments` 可以恢复，但**成员变量不会自动保存**；
 
 ### 解决
 
+手动保存状态的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -498,6 +520,8 @@ class ProfileFragment : Fragment() {
 ViewPager2 默认预加载相邻页，页面不可见时 Fragment 仍处于 `STARTED` 甚至 `RESUMED` 状态——`onResume` 中启动的协程/轮询在离屏页上仍在运行，造成资源浪费甚至崩溃。
 
 ### 解决
+
+控制页面最大生命周期的示例代码如下：
 
 ::: code-tabs
 
@@ -554,6 +578,8 @@ viewLifecycleOwner.lifecycleScope.launch {
 
 ### 问题
 
+错误写法（在 onCreate 中访问 viewLifecycleOwner）如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -586,6 +612,8 @@ override fun onCreate(savedInstanceState: Bundle?) {
 `viewLifecycleOwner` 在 `onCreateView` 到 `onDestroyView` 之间才有效。在 `onCreate` 中访问可能取到**上一个 View 的 lifecycle**（Fragment 重建 View 时），导致协程没有及时取消。
 
 ### 解决
+
+正确写法（在 onViewCreated 之后访问 viewLifecycleOwner）如下：
 
 ::: code-tabs
 

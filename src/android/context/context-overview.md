@@ -15,6 +15,8 @@ Context（上下文）是**对应用环境的抽象**：它封装了资源访问
 
 ### 1.1 继承体系
 
+Context 的继承体系构成关系如下：
+
 ```mermaid
 flowchart TD
     C[Context 抽象类] --> CI[ContextImpl<br/>真正的实现]
@@ -32,6 +34,8 @@ flowchart TD
 - **ContextThemeWrapper**：在 ContextWrapper 基础上增加了主题能力，Activity 继承它。
 
 ### 1.2 ContextWrapper 代理机制（核心）
+
+ContextWrapper 的委托实现如下：
 
 ::: code-tabs
 
@@ -76,6 +80,8 @@ class ContextWrapper(private var mBase: Context) : Context() {
 
 :::
 
+attachBaseContext 注入 base 的实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -110,6 +116,8 @@ protected fun attachBaseContext(newBase: Context) {
 
 ## 二、Context 的几种类型对比（必考）
 
+各 Context 类型的对比说明如下：
+
 | 类型 | 实例 | 生命周期 | 使用场景 |
 | --- | --- | --- | --- |
 | Application | 应用级单例 | 进程存活期间 | 全局单例、长生命周期对象、工具类初始化 |
@@ -119,6 +127,8 @@ protected fun attachBaseContext(newBase: Context) {
 | Provider | 组件级 | Provider 存在期间 | Provider 内部操作 |
 
 ### 2.1 Application vs Activity Context
+
+Application Context 与 Activity Context 的对比说明如下：
 
 | 对比项 | Application Context | Activity Context |
 |--------|--------------------|------------------|
@@ -145,6 +155,8 @@ protected fun attachBaseContext(newBase: Context) {
 ## 四、使用注意事项与内存泄漏（核心考点）
 
 ### 4.1 内存泄漏案例
+
+典型的内存泄漏写法与正确写法如下：
 
 ::: code-tabs
 
@@ -179,6 +191,8 @@ object UserManager {
 :::
 
 **泄漏链条**：单例 → Activity Context → Activity 持有 Window/DecorView → 整个 Activity 无法 GC。**LeakCanary 检测到的泄漏绝大多数是这类。**
+
+静态引用与 Handler 内部类泄漏的示例代码如下：
 
 ::: code-tabs
 
@@ -217,6 +231,8 @@ companion object {
 
 ## 五、getSystemService 原理
 
+getSystemService 的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -252,6 +268,8 @@ fun getSystemService(ctx: ContextImpl, name: String): Any? {
 
 :::
 
+getSystemService 的调用时序如下：
+
 ```mermaid
 sequenceDiagram
     participant App as 业务代码
@@ -274,6 +292,8 @@ sequenceDiagram
 - `getSystemService` 是**纯内存查找**，不在主线程做 I/O，可放心主线程调用。
 
 ## 六、多进程与 Application 初始化
+
+多进程下的 Application 初始化代码如下：
 
 ::: code-tabs
 

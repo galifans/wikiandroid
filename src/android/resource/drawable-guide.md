@@ -12,6 +12,8 @@ description: Drawable 分类体系、Shape/Selector/LayerList/Vector 各类型�
 
 **Drawable（可绘制对象）** 是 Android 中"可以被绘制的东西"的抽象，不同于 Bitmap（像素图），Drawable 更关注**绘制指令**与**尺寸无关的适配**。
 
+Drawable 的分类体系如下：
+
 ```mermaid
 flowchart LR
     A[Drawable 抽象] --> B[BitmapDrawable<br>位图]
@@ -24,6 +26,8 @@ flowchart LR
 ```
 
 ### Drawable 与 Bitmap 的区别
+
+两者的核心区别如下：
 
 | 维度 | Drawable | Bitmap |
 |------|----------|--------|
@@ -55,6 +59,8 @@ flowchart LR
 ```
 
 ### 2.2 shape 类型
+
+shape 支持的几何类型如下：
 
 | 类型 | 值 | 说明 |
 |------|-----|------|
@@ -112,6 +118,8 @@ flowchart LR
 
 ### 3.2 常用状态位
 
+selector 中常用的状态位如下：
+
 | 状态 | 含义 |
 |------|------|
 | `state_pressed` | 按下 |
@@ -150,6 +158,8 @@ flowchart LR
 
 ### 4.2 常用组合 Drawable
 
+常用组合 Drawable 的作用如下：
+
 | 类型 | 作用 |
 |------|------|
 | layer-list | 多层叠加（阴影、水印、进度背景） |
@@ -182,6 +192,8 @@ flowchart LR
 
 ### 5.2 矢量图与位图对比
 
+两者的对比说明如下：
+
 | 维度 | VectorDrawable | Bitmap |
 |------|----------------|--------|
 | 文件大小 | 很小（KB 级） | 随分辨率增长 |
@@ -203,6 +215,8 @@ flowchart LR
 ```
 
 ## 六、自定义 Drawable
+
+一个自定义 Drawable 的完整实现如下：
 
 ::: code-tabs
 

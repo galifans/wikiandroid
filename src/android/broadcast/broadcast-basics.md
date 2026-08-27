@@ -39,6 +39,8 @@ AMS 匹配 Intent-Filter → 找到所有符合条件的 Receiver
 </receiver>
 ```
 
+静态注册接收器的对应实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -72,6 +74,8 @@ class BootReceiver : BroadcastReceiver() {
 - **Android 8.0+ 限制**：大多数隐式广播（非显式指定包名）无法静态注册接收。
 
 ### 2.2 动态注册（代码）
+
+动态注册的示例代码如下：
 
 ::: code-tabs
 
@@ -146,6 +150,8 @@ class MainActivity : AppCompatActivity() {
 
 ### 3.1 普通广播（无序广播）
 
+普通广播的发送代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -168,6 +174,8 @@ sendBroadcast(intent)
 - 接收方不能修改结果，也不能阻断传播。
 
 ### 3.2 有序广播
+
+有序广播的发送代码如下：
 
 ::: code-tabs
 
@@ -194,6 +202,8 @@ sendOrderedBroadcast(
 ```
 
 :::
+
+接收方修改结果与终止传播的示例代码如下：
 
 ::: code-tabs
 
@@ -235,6 +245,8 @@ override fun onReceive(context: Context, intent: Intent) {
 
 ### 3.3 粘性广播（已废弃）
 
+粘性广播的发送代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -256,6 +268,8 @@ sendStickyBroadcast(intent)
 - `ACTION_BATTERY_CHANGED` 等系统粘性广播仍在使用（可通过 `registerReceiver(null, filter)` 获取当前值）。
 
 ## 3.4 广播发送的安全实践
+
+广播发送的安全实践代码如下：
 
 ::: code-tabs
 
@@ -301,6 +315,8 @@ override fun onReceive(context: Context, intent: Intent) {
 
 ## 3.5 广播的底层分发流程（AMS 侧）
 
+广播在 AMS 侧的底层分发流程如下：
+
 ```mermaid
 sequenceDiagram
     participant App as 发送方
@@ -326,6 +342,8 @@ sequenceDiagram
 
 ## 4. Android 版本限制汇总
 
+各 Android 版本的广播限制汇总如下：
+
 | 版本 | 限制 |
 | --- | --- |
 | Android 8.0 (26) | 隐式广播静态注册受限（仅保留少量系统豁免广播） |
@@ -348,6 +366,8 @@ sequenceDiagram
 - **同进程事件总线**：改用 **LiveData / Flow（SharedFlow）** 或第三方事件总线（如 Kotlin 协程 Channel）。
 - **跨组件通信**：ViewModel 共享。
 - **保留场景**：`sendOrderedBroadcast` 与系统广播仍用 BroadcastReceiver。
+
+本地事件总线的推荐替代实现如下：
 
 ::: code-tabs
 
@@ -398,6 +418,8 @@ lifecycleScope.launch {
 
 ## 6. onReceive 的限制
 
+onReceive 的执行限制与处理建议如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -425,6 +447,8 @@ override fun onReceive(context: Context, intent: Intent) {
 
 **超时机制详解**：AMS 对每个广播设置超时（BroadcastQueue 中的 `BROADCAST_TIMEOUT`）：
 
+各场景的超时时间与后果如下：
+
 | 场景 | 超时时间 | 超时后果 |
 |------|----------|----------|
 | 前台广播（`setPackage`/高优先级） | ~10 秒 | 超时后 AMS 强制结束该 Receiver 进程（ANR 弹窗） |
@@ -433,6 +457,8 @@ override fun onReceive(context: Context, intent: Intent) {
 > 广播的超时是**从发送到 Receiver 处理完毕**的整体时限。静态注册的 Receiver 若进程未启动，系统会先启动进程再投递，这段时间也计入超时——所以静态注册的 `onReceive` 里**绝不能做耗时操作**。
 
 `goAsync()` 模式：
+
+goAsync 异步处理的示例代码如下：
 
 ::: code-tabs
 

@@ -28,6 +28,8 @@ description: 静态注册与动态注册的机制差异、Android 8.0+ 隐式广
 
 ### 动态注册（代码注册）
 
+动态注册的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -68,6 +70,8 @@ unregisterReceiver(receiver)
 
 ## 2. 核心差异对比表
 
+静态注册与动态注册的核心差异对比如下：
+
 | 维度 | 静态注册 | 动态注册 |
 | --- | --- | --- |
 | 注册时机 | 安装时（Manifest 解析） | 代码执行时 |
@@ -96,6 +100,8 @@ Android 8.0 起，除豁免列表外，所有【隐式广播】不能再通过�
 
 豁免广播（可静态注册）主要包括：
 
+主要豁免广播及其用途如下：
+
 | 广播 | 用途 |
 | --- | --- |
 | ACTION_BOOT_COMPLETED | 开机完成（延迟接收） |
@@ -107,6 +113,8 @@ Android 8.0 起，除豁免列表外，所有【隐式广播】不能再通过�
 | ACTION_BATTERY_LOW / OK 等部分电源类 | 低电量（有限制） |
 
 ### 3.3 判断是否隐式
+
+隐式与显式广播的示例代码如下：
 
 ::: code-tabs
 
@@ -144,6 +152,8 @@ sendBroadcast(explicit)
 ## 4. 高版本动态注册的导出标志
 
 Android 13（API 33）起：
+
+导出标志的注册写法如下：
 
 ::: code-tabs
 
@@ -184,6 +194,8 @@ registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
 
 ### 5.1 静态注册受限后的替代方案
 
+静态注册受限场景的替代方案如下：
+
 | 原静态注册场景 | 替代方案 |
 |----------------|----------|
 | 开机自启 | `BOOT_COMPLETED` 仍在豁免列表，但 Android 15 起需 `RECEIVER_BOOT_COMPLETED` 且应用至少被启动一次 |
@@ -207,6 +219,8 @@ onReceive 返回后 → 进程优先级回落（可能瞬间被杀）
 - 因此：静态注册的 `onReceive` 里必须快速完成任务或把工作**转交给 WorkManager/前台服务**，否则任务可能随进程死亡而中断。
 
 ### 5.1 一个实用模板：网络变化监听
+
+网络变化监听的推荐实现如下：
 
 ::: code-tabs
 

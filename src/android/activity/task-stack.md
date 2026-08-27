@@ -30,6 +30,8 @@ Task A（前景任务）                 Task B（后台任务）
 
 ### 1.1 Task 与进程、线程的关系（高频混淆点）
 
+三者的对比说明如下：
+
 | 概念 | 是什么 | 关系 |
 |------|--------|------|
 | 进程 | 资源分配单位（Linux 进程） | 一个 Task 的 Activity 可以**分布在多个进程**（通过 `android:process` 拆分） |
@@ -49,6 +51,8 @@ Task A（用户正在浏览的"主线"）              Task B（另一个业务�
 
 ### 1.2 Task 与 Recents（最近任务）的关系
 
+Task 与 Recents 的关系如下：
+
 ```mermaid
 flowchart LR
     A[Task A] --> R[Recents 列表<br/>每个 Task 一张快照]
@@ -62,6 +66,8 @@ flowchart LR
 - `excludeFromRecents="true"` 的 Activity 所在 Task 不会出现在 Recents。
 
 ## 2. Back Stack 的基本行为
+
+Back Stack 各操作的行为如下：
 
 | 操作 | 行为 |
 | --- | --- |
@@ -94,6 +100,8 @@ flowchart LR
 
 - 若**栈顶已是该 Activity 实例**，不创建新实例，而是回调 `onNewIntent()`。
 - 若不在栈顶，行为同 `standard`。
+
+对应的核心实现如下：
 
 ::: code-tabs
 
@@ -151,6 +159,8 @@ class SearchActivity : AppCompatActivity() {
 
 ### 3.5 启动模式对比表
 
+各启动模式的对比说明如下：
+
 | 模式 | 是否新实例 | 所在 Task | onNewIntent 触发条件 |
 | --- | --- | --- | --- |
 | standard | 总是 | 发起者 Task | 永不 |
@@ -186,6 +196,8 @@ startActivity(intent)
 ```
 
 :::
+
+各 Flag 的作用说明如下：
 
 | Flag | 作用 |
 | --- | --- |
@@ -281,11 +293,15 @@ val isTaskRoot = isTaskRoot
 
 ## 5.5 多窗口模式（分屏 / 画中画）对 Task 的影响
 
+各多窗口模式与 Task 的关系如下：
+
 | 模式 | 与 Task 的关系 |
 |------|----------------|
 | **分屏（Split Screen）** | 同一屏幕上两个 Task 同时处于"前台"，各自维护自己的栈；两个 Task 都可见、都持有一半屏幕 |
 | **画中画（PIP）** | Activity 以窗口形式悬浮，其所在 Task 进入特殊状态；PIP 窗口不占用新 Task |
 | **自由窗口（Freeform）** | 桌面式多窗口，每个窗口一个 Task（Android 7.0+ 大屏设备） |
+
+分屏模式下 Task 的构成关系如下：
 
 ```mermaid
 flowchart LR

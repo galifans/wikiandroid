@@ -18,6 +18,8 @@ description: 从 API 设计、异步模型、一致性、类型安全四个维�
 
 ### 2.1 SharedPreferences
 
+SharedPreferences 的读写方式如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -51,6 +53,8 @@ val nickname = sp.getString("nickname", "default")
 :::
 
 ### 2.2 Preferences DataStore
+
+Preferences DataStore 的读写方式如下：
 
 ::: code-tabs
 
@@ -106,6 +110,8 @@ private object Keys {
 
 ### 2.3 观察变化
 
+两种方案监听数据变化的写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -146,6 +152,8 @@ lifecycleScope.launch {
 
 ## 3. 六大维度对比表
 
+六大维度的对比说明如下：
+
 | 维度 | SharedPreferences | DataStore |
 | --- | --- | --- |
 | 数据模型 | 键值对（无类型） | 键值对 / Proto（类型安全） |
@@ -166,6 +174,8 @@ getSharedPreferences() 首次调用
   → 一次性加载所有键值对到内存（startLoadFromDisk 是异步的，
      但 getXxx() 会调用 awaitLoadedLocked 等待加载完成）
 ```
+
+SP 读取路径的源码关键逻辑如下：
 
 ::: code-tabs
 
@@ -196,6 +206,8 @@ fun getString(key: String, defValue: String): String {
 :::
 
 ### 4.2 写入路径
+
+SP 写入路径的源码关键逻辑如下：
 
 ::: code-tabs
 
@@ -234,6 +246,8 @@ DataStore 核心机制：
   - 异常处理：读失败抛 IOException（需自行处理/重试），写失败不破坏原数据
 ```
 
+DataStore 内部实现的核心逻辑如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -268,6 +282,8 @@ DataStore 核心机制：
 ### 6.3 迁移方案
 
 官方推荐：**一次性迁移**（首次启动把 SP 数据导入 DataStore，之后删除 SP 文件）。
+
+一次性迁移的实现代码如下：
 
 ::: code-tabs
 

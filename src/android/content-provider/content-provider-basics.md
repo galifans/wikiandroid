@@ -40,6 +40,8 @@ content://com.example.provider/user/10
 协议      authority（唯一标识）   path   id（可选）
 ```
 
+URI 各部分的说明如下：
+
 | 部分 | 示例 | 说明 |
 | --- | --- | --- |
 | scheme | `content://` | 固定前缀 |
@@ -48,6 +50,8 @@ content://com.example.provider/user/10
 | id | `/10` | 具体某条数据（可选） |
 
 ### 2.1 UriMatcher 匹配
+
+UriMatcher 的标准写法如下：
 
 ::: code-tabs
 
@@ -194,6 +198,8 @@ class UserProvider : ContentProvider() {
 
 ## 3. 客户端访问（ContentResolver）
 
+客户端访问的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -269,6 +275,8 @@ class MainActivity : AppCompatActivity() {
 
 ## 4. ContentObserver 数据观察
 
+ContentObserver 注册与回调的标准写法如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -321,6 +329,8 @@ override fun onDestroy() {
 
 ### 5.1 读取系统联系人
 
+读取系统联系人的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -352,6 +362,8 @@ val cursor = contentResolver.query(
 :::
 
 ### 5.2 读取相册图片
+
+读取相册图片的示例代码如下：
 
 ::: code-tabs
 
@@ -414,6 +426,8 @@ class InitProvider : ContentProvider() {
 
 ### 5.4 批量操作（ContentProviderOperation）
 
+批量操作的示例代码如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -460,6 +474,8 @@ contentResolver.applyBatch(AUTHORITY, operations)
 
 ## 5.5 Provider 启动时机与 Application 的关系（源码角度）
 
+Provider 启动与 Application 的时序关系如下：
+
 ```mermaid
 sequenceDiagram
     participant S as system_server
@@ -476,6 +492,8 @@ sequenceDiagram
 - 副作用：Provider 过多且 `onCreate` 重会**拖慢冷启动**（每个 Provider 实例化都要耗时）。这是 `androidx.startup`（App Startup）库优化的问题——它把所有初始化器合并到一个 Provider。
 
 ## 6. ContentProvider vs 其他方案
+
+ContentProvider 与其他方案的对比说明如下：
 
 | 方案 | 跨进程 | 类型安全 | 数据变化通知 | 适用场景 |
 | --- | --- | --- | --- | --- |

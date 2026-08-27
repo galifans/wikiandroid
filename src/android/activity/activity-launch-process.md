@@ -34,6 +34,8 @@ Activity 启动涉及 **App 进程** 与 **系统进程**（system_server）的�
 
 ### 2.1 startActivity → Instrumentation
 
+startActivity 到 Instrumentation 的转发链如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -127,6 +129,8 @@ fun execStartActivity(...): ActivityResult? {
 
 ### 3.1 startActivity 主链
 
+ATMS 侧主链路的实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -200,6 +204,8 @@ fun startActivityMayWait(...): Int {
 6. **调度 resume** → `mTaskSupervisor.resumeFocusedStackTopActivityLocked()`
 
 ### 3.2 进程启动（Zygote）
+
+进程启动的核心实现如下：
 
 ::: code-tabs
 
@@ -305,6 +311,8 @@ override fun handleLaunchActivity(r: ActivityClientRecord, pendingActions: Pendi
 
 ### 4.2 performLaunchActivity（核心方法）
 
+performLaunchActivity 的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -364,6 +372,8 @@ private fun performLaunchActivity(r: ActivityClientRecord, customIntent: Intent)
 
 ### 4.3 handleResumeActivity
 
+handleResumeActivity 的核心实现如下：
+
 ::: code-tabs
 
 @tab:active Java
@@ -408,6 +418,8 @@ fun handleResumeActivity(r: ActivityClientRecord, ...) {
 
 ## 5. 完整时序图
 
+完整的启动链路时序如下：
+
 ```mermaid
 sequenceDiagram
     participant App as App 进程(调用方)
@@ -442,6 +454,8 @@ sequenceDiagram
 | Application.onCreate | 业务初始化（SDK、数据库、上报） | **懒加载**：非必要初始化推迟到用时再执行（如启动器框架）；SDK 按需初始化 |
 | Activity.onCreate/onStart | 布局 inflate、数据加载 | 布局扁平化（ConstraintLayout）、`AsynchronousLayoutInflater`、ViewStub 懒加载、列表分页 |
 | 首帧渲染 | measure/layout/draw 全流程 | 减少过度绘制、避免主线程 IO、启动主题（SplashScreen）掩盖白屏 |
+
+启动优化示例代码如下：
 
 ::: code-tabs
 
@@ -537,6 +551,8 @@ A：① 进程创建（Zygote fork + Application init）；② `Application.onCr
 A：`startActivityForResult`（旧）有两大痛点：Activity 重建后回调丢失、无类型安全；
 **Activity Result API**（AndroidX）通过 `registerForActivityResult` 注册回调，结果由
 `ActivityResultRegistry` 管理，配置变更后自动恢复回调，且 `ActivityResultContract` 提供类型安全契约。
+
+对应的核心实现如下：
 
 ::: code-tabs
 
