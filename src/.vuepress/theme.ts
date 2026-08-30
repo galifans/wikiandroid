@@ -63,8 +63,7 @@ export default hopeTheme({
     git: {
       contributors: false,
     },
-    // 本地搜索（slimsearch）
-    slimsearch: true,
+    // 本地搜索已移除（2026-08-30：slimsearch 中文检索跳转不准，用户决定去掉搜索框）
     // 代码块复制按钮
     copyCode: true,
     // 图片预览

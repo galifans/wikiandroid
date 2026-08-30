@@ -68,7 +68,7 @@ index: false   # 仅模块索引页需要（如 roadmap/README.md）
   - `vuepress@2.0.0-rc.30`（`@latest` 会解析到 1.x，禁止）
   - `vuepress-theme-hope@2.0.0-rc.107`
   - `@vuepress/bundler-vite@2.0.0-rc.30`（必须显式指定，否则报 "No bundler"）
-  - `@vuepress/plugin-slimsearch@2.0.0-rc.130`（替代已废弃的 searchPro，不要换回）
+  - `@vuepress/plugin-slimsearch@2.0.0-rc.130`（替代已废弃的 searchPro，不要换回；2026-08-30 起**已禁用**——中文检索跳转不准，搜索框已移除，theme.ts plugins 中不再启用，依赖保留以备恢复）
   - `sass-embedded`（theme-hope 调色板依赖，不可移除）
 
 ## 9. 行为边界

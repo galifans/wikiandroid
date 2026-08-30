@@ -143,8 +143,9 @@ galifans_vibe_coding/
 | `src/.vuepress/public/` | 静态资源 | `logo.svg`（首页 hero）、`favicon.svg` 等 |
 | `package.json` | 依赖与脚本 | 一般不动，保持精确版本 |
 
-**主题插件（theme.ts → plugins）**：slimsearch（本地搜索）、copyCode（复制按钮）、
+**主题插件（theme.ts → plugins）**：copyCode（复制按钮）、
 photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版权水印，`global: false`）。
+> 2026-08-30：slimsearch（本地搜索）已禁用——中文检索跳转不准（搜索"注解框架"会跳到无关标题），用户决定去掉搜索框。依赖保留在 package.json，恢复时在 theme.ts plugins 重新启用即可。
 
 ---
 
