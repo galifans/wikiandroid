@@ -126,27 +126,6 @@ wikiStatic/
 │       ├── sp-vs-datastore.md
 │       ├── sqlite-guide.md
 │       └── storage-comparison.md
-├── books/
-│   ├── README.md
-│   ├── algorithm/
-│   │   ├── hello-algo.pdf
-│   │   └── programmer-math.pdf
-│   ├── android/
-│   │   └── README.md
-│   ├── architecture/
-│   │   └── README.md
-│   ├── database/
-│   │   └── programmer-sql-classic.pdf
-│   ├── java/
-│   │   ├── alibaba-java-dev-manual.pdf
-│   │   └── java-memory-model.pdf
-│   ├── language/
-│   │   └── README.md
-│   ├── network/
-│   │   ├── httpclient-intro.pdf
-│   │   └── multithreading-guide.pdf
-│   └── system/
-│       └── README.md
 ├── engineering/
 │   ├── README.md
 │   ├── cicd/
@@ -372,40 +351,97 @@ wikiStatic/
 │   ├── ams-wms/
 │   │   ├── README.md
 │   │   ├── ams-activity-launch.md
+│   │   ├── ams-process-priority.md
+│   │   ├── broadcast-mechanism.md
+│   │   ├── contentprovider-mechanism.md
 │   │   ├── pms-package-manager.md
 │   │   ├── wms-principle.md
 │   │   └── wms-touch-dispatch.md
 │   ├── apk/
 │   │   ├── README.md
+│   │   ├── aapt2-resource.md
 │   │   ├── apk-build-process.md
 │   │   ├── apk-install-process.md
 │   │   ├── apk-reinforcement.md
+│   │   ├── assetmanager.md
 │   │   ├── multi-channel.md
 │   │   └── signature-verify.md
 │   ├── art/
 │   │   ├── README.md
 │   │   ├── art-compilation.md
 │   │   ├── art-gc.md
+│   │   ├── art-memory-model.md
 │   │   ├── art-runtime.md
 │   │   ├── classloader.md
-│   │   └── dex-format.md
+│   │   ├── dex-format.md
+│   │   ├── hidden-api.md
+│   │   └── jni-art.md
+│   ├── audio/
+│   │   ├── README.md
+│   │   ├── audio-architecture.md
+│   │   ├── audio-focus.md
+│   │   └── audioflinger.md
 │   ├── binder/
 │   │   ├── README.md
 │   │   ├── aidl-deep.md
 │   │   ├── binder-driver.md
 │   │   ├── binder-mechanism.md
+│   │   ├── binder-threadpool.md
 │   │   ├── ipc-comparison.md
-│   │   └── parcelable.md
+│   │   ├── parcelable.md
+│   │   └── servicemanager-deep.md
 │   ├── boot/
 │   │   ├── README.md
 │   │   ├── app-launch.md
+│   │   ├── init-process.md
+│   │   ├── property-service.md
 │   │   ├── system-boot.md
+│   │   ├── systemserver-startup.md
 │   │   └── zygote-deep.md
-│   └── os/
+│   ├── connectivity/
+│   │   ├── README.md
+│   │   ├── bluetooth.md
+│   │   ├── connectivity-architecture.md
+│   │   └── wifi.md
+│   ├── graphics/
+│   │   ├── README.md
+│   │   ├── graphics-architecture.md
+│   │   ├── hardware-composer.md
+│   │   ├── surfaceflinger.md
+│   │   └── vsync-choreographer.md
+│   ├── hal/
+│   │   ├── README.md
+│   │   ├── hal-architecture.md
+│   │   ├── hidl.md
+│   │   └── vintf.md
+│   ├── input/
+│   │   ├── README.md
+│   │   ├── input-dispatcher.md
+│   │   ├── input-reader.md
+│   │   └── input-system.md
+│   ├── os/
+│   │   ├── README.md
+│   │   ├── cgroup-lmk.md
+│   │   ├── linux-memory.md
+│   │   ├── linux-scheduler.md
+│   │   ├── os-core.md
+│   │   ├── selinux.md
+│   │   └── thread-sync-ipc.md
+│   ├── power/
+│   │   ├── README.md
+│   │   ├── doze-battery.md
+│   │   ├── power-architecture.md
+│   │   └── wakelock.md
+│   ├── security/
+│   │   ├── README.md
+│   │   ├── keystore.md
+│   │   ├── security-architecture.md
+│   │   └── verified-boot.md
+│   └── storage/
 │       ├── README.md
-│       ├── linux-memory.md
-│       ├── os-core.md
-│       └── thread-sync-ipc.md
+│       ├── app-storage.md
+│       ├── partition-filesystem.md
+│       └── storage-architecture.md
 └── ui/
     ├── README.md
     ├── animation/

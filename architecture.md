@@ -58,7 +58,7 @@ galifans_vibe_coding/
     ├── jetpack/                 # Jetpack（lifecycle-viewmodel / room-datastore / paging-navigation / workmanager-hilt / compose）
     ├── network/                 # 网络与异步（http / handler / coroutine / thread）
     ├── advanced/                # 进阶实战（architecture / modular / plugin / performance / stability / multimedia / cross-platform）
-    ├── system/                  # 系统原理（binder / ams-wms / boot / apk / art / os）
+    ├── system/                  # 系统原理（binder / ams-wms / boot / apk / art / os / input / power / connectivity / storage / audio / graphics / security / hal）
     ├── engineering/             # 工程实践（gradle / git / cicd / testing）
     ├── interview/               # 面试指南（7 篇平铺文章）
     ├── projects/                # 实战项目
@@ -85,7 +85,7 @@ galifans_vibe_coding/
 | 6 | Jetpack | — | Jetpack Compose / Lifecycle/ViewModel / Room/DataStore / Paging/Navigation / WorkManager/Hilt | 下拉菜单 |
 | 7 | 网络与异步 | — | 网络与协议 / Handler 消息机制 / 协程 Flow/RxJava / 线程池与并发 / 计算机网络体系 / Socket 编程基础 / TCP 与 UDP 详解 | 下拉菜单 |
 | 8 | 进阶实战 | — | 架构设计 / 组件化与模块化 / 插件化与热修复 / 性能优化 / 稳定性保障 / 音视频开发 / 跨端方案 | 下拉菜单 |
-| 9 | 系统原理 | — | Binder 机制 / AMS/WMS / 系统与应用启动流程 / APK 打包与签名 / ART/DEX/类加载 / 操作系统 | 下拉菜单 |
+| 9 | 系统原理 | — | Binder 机制 / AMS/WMS / 系统与应用启动流程 / APK 打包与签名 / ART/DEX/类加载 / 操作系统 / 输入系统 / 电源与功耗 / 网络与连接 / 存储系统 / 音频系统 / 图形显示系统 / 安全体系 / HAL 硬件抽象层 | 下拉菜单 |
 | 10 | 工程实践 | — | Gradle 构建 / Git 与版本管理 / CI/CD / 测试体系 | 下拉菜单 |
 | 11 | 面试指南 | `/interview/` | — | 平铺 8 篇文章 |
 | 12 | 实战项目 | `/projects/` | — | 平铺文章 |
@@ -238,6 +238,14 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 | apk/ | apk-build-process.md、multi-channel.md、signature-verify.md、apk-install-process.md、apk-reinforcement.md、aapt2-resource.md、assetmanager.md |
 | art/ | art-runtime.md、art-compilation.md、art-gc.md、dex-format.md、classloader.md、art-memory-model.md、jni-art.md、hidden-api.md |
 | os/ | os-core.md、linux-memory.md、thread-sync-ipc.md、linux-scheduler.md、cgroup-lmk.md、selinux.md |
+| input/ | input-system.md、input-reader.md、input-dispatcher.md |
+| power/ | power-architecture.md、wakelock.md、doze-battery.md |
+| connectivity/ | connectivity-architecture.md、wifi.md、bluetooth.md |
+| storage/ | storage-architecture.md、partition-filesystem.md、app-storage.md |
+| audio/ | audio-architecture.md、audioflinger.md、audio-focus.md |
+| graphics/ | graphics-architecture.md、surfaceflinger.md、vsync-choreographer.md、hardware-composer.md |
+| security/ | security-architecture.md、keystore.md、verified-boot.md |
+| hal/ | hal-architecture.md、hidl.md、vintf.md |
 
 ### 工程实践 `/engineering/`
 | 子模块 | ✓ 已完成 |

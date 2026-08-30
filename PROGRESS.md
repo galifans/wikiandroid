@@ -15,11 +15,26 @@
 | 域名 | https://wikiandroid.com（备用：https://wikiandroid.pages.dev） |
 | 仓库 | https://github.com/galifans/wikiandroid（分支 main） |
 | 部署方式 | Cloudflare Pages：`git push main` 自动触发构建部署（约 2-4 分钟） |
-| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 351 页面） |
+| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 393 页面） |
 | 本地预览 | `npm run dev` → http://localhost:8080 |
-| 当前状态 | ✓ 内容建设完成（274 篇文章），持续维护中 |
+| 当前状态 | ✓ 内容建设完成（316 篇文章），持续维护中 |
 
 ## 2. 进展时间线
+
+### 2026-08-30（系统原理章节再扩充：41 → 67 篇文章，新增 8 个子模块 26 篇，覆盖真实 AOSP 架构）
+- ✓ 用户需求：按照安卓系统实际架构新增子模块与对应文章，文章越多越符合架构越好（确认子模块可以新增）
+- ✓ 新增 8 个子模块（共 14 个）：
+  - `input/`（输入系统）+3：`input-system.md`（输入系统整体架构：IMS/EventHub→InputReader→InputDispatcher→InputChannel→ViewRootImpl 链路、命中测试/焦点、输入 ANR 5 秒）、`input-reader.md`（InputReader 事件读取与加工：TouchInputMapper 触点聚合/坐标换算、KeyboardInputMapper 键位映射 .kl/.kcm、NotifyArgs）、`input-dispatcher.md`（InputDispatcher 分发策略：QUEUED→DELIVERED→FINISHED 状态机、输入 ANR 排查 dumpsys input）
+  - `power/`（电源与功耗）+3：`power-architecture.md`（电源管理架构：PMS、电源状态机 AWAKEN/DOZE/SLEEP、亮灭屏、WakeLock 类型表、DisplayPowerController、深度休眠）、`wakelock.md`（WakeLock 与唤醒机制：类型表、引用计数、泄露排查、内核 wakelock、WorkManager 替代）、`doze-battery.md`（Doze 模式与电池优化：状态机 ACTIVE/INACTIVE/IDLE_PENDING/IDLE/IDLE_MAINTENANCE、App Standby、白名单、FCM/WorkManager 适配）
+  - `connectivity/`（网络与连接）+3：`connectivity-architecture.md`（网络连接架构：ConnectivityService、NetworkAgent、网络评分/切换、captive portal、VPN、NetworkCallback）、`wifi.md`（WiFi 框架与连接流程：WifiService/WifiStateMachine、wpa_supplicant、WPA 四步握手、WifiNetworkSpecifier、定位权限）、`bluetooth.md`（蓝牙框架与协议栈：BluetoothService、GATT 模型、配对 vs 连接、Android 12 权限）
+  - `storage/`（存储系统）+3：`storage-architecture.md`（存储系统架构：vold、StorageManagerService、卷管理、FUSE 虚拟化、FBE/FDE 加密）、`partition-filesystem.md`（分区布局与文件系统：boot/system/vendor/data、动态分区 super、A/B 无缝更新、ext4/f2fs/erofs、dm-verity）、`app-storage.md`（应用存储与分区存储：Scoped Storage、MediaStore RELATIVE_PATH/IS_PENDING、SAF takePersistableUriPermission、Android 13 细分媒体权限）
+  - `audio/`（音频系统）+3：`audio-architecture.md`（音频系统架构：AudioTrack/AudioRecord、AudioFlinger、AudioPolicyService、Audio HAL、播放/录音链路）、`audioflinger.md`（AudioFlinger 混音与输出：ashmem 共享内存传输、PlaybackThread/DuplicatingThread/OffloadThread/RecordThread/MmapThread、Mixer、SRC、FastMixer/AAudio 低延迟）、`audio-focus.md`（音频焦点与策略：AudioFocusRequest、焦点类型 GAIN/TRANSIENT/MAY_DUCK/EXCLUSIVE、LOSS 响应、流类型、BECOMING_NOISY）
+  - `graphics/`（图形显示系统）+4：`graphics-architecture.md`（Android 图形架构：应用渲染→BufferQueue→SurfaceFlinger→HWC→屏幕、VSYNC 同步）、`surfaceflinger.md`（SurfaceFlinger 合成机制：Layer 类型、Transaction、Client/Device 合成、掉帧分析 gfxinfo/--latency）、`vsync-choreographer.md`（VSYNC 与 Choreographer：App/SF VSYNC 分发、三阶段回调 INPUT/ANIMATION/TRAVERSAL、16.6ms、双/三缓冲）、`hardware-composer.md`（HWC 硬件合成与显示：Composer HAL 演进、Overlay、合成决策、多屏）
+  - `security/`（安全体系）+3：`security-architecture.md`（Android 安全架构：沙箱/权限/签名/加密四层、SELinux 兜底）、`keystore.md`（Keystore 与密钥管理：硬件密钥 TEE/StrongBox、使用约束、Key Attestation）、`verified-boot.md`（Verified Boot 与启动安全：AVB、dm-verity、信任链、回滚保护）
+  - `hal/`（HAL 硬件抽象层）+3：`hal-architecture.md`（HAL 架构与 Treble：system/vendor 解耦、绑定式/直通式、HIDL/AIDL HAL）、`hidl.md`（HIDL 接口与实现：.hal 接口、HwBinder、服务注册/获取、版本管理）、`vintf.md`（VINTF 兼容性验证：manifest、compatibility matrix、启动校验、版本协商）
+- ✓ 每篇风格统一：面试高频指数、编号章节、```text 代码块/表格、Q1-Q5 面试题（纯文本 Q/A）、小结；全站无 emoji
+- ✓ 索引同步：`src/.vuepress/navbar.ts` 系统原理下拉 6 → 14 项、`src/system/README.md` 模块表 +8 行与全部文章导航 +8 小节、`architecture.md` 目录树/导航表/系统原理状态表 +8 行、根 `README.md` 系统原理模块表 +8 行
+- ✓ 校验：`npm run build` 构建通过（367 → 393 页面）；`npm run sync:static` 已同步 wikiStatic；提交推送完成
 
 ### 2026-08-30（系统原理章节扩充：25 → 41 篇文章，新增 16 篇 AOSP 深度文章）
 - ✓ 用户需求：系统原理章节需要大量的知识内容补充，参考 Android 官方架构自主总结生成文章

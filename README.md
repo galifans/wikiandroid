@@ -103,6 +103,14 @@
 | APK | 打包与签名 | [APK](wikiStatic/system/apk/README.md) |
 | ART / DEX | 运行时与类加载 | [ART / DEX](wikiStatic/system/art/README.md) |
 | 操作系统 | 操作系统与 IPC | [操作系统](wikiStatic/system/os/README.md) |
+| 输入系统 | 输入事件读取与分发 | [输入系统](wikiStatic/system/input/README.md) |
+| 电源与功耗 | 电源管理 / WakeLock / Doze | [电源与功耗](wikiStatic/system/power/README.md) |
+| 网络与连接 | WiFi / 蓝牙 / 网络框架 | [网络与连接](wikiStatic/system/connectivity/README.md) |
+| 存储系统 | vold / 分区 / 应用存储 | [存储系统](wikiStatic/system/storage/README.md) |
+| 音频系统 | AudioFlinger / 音频焦点 | [音频系统](wikiStatic/system/audio/README.md) |
+| 图形显示系统 | SurfaceFlinger / VSYNC / HWC | [图形显示系统](wikiStatic/system/graphics/README.md) |
+| 安全体系 | 沙箱 / 权限 / 加密 / 启动安全 | [安全体系](wikiStatic/system/security/README.md) |
+| HAL 硬件抽象层 | Treble / HIDL / VINTF | [HAL 硬件抽象层](wikiStatic/system/hal/README.md) |
 
 ### 工程实践
 

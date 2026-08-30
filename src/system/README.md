@@ -18,6 +18,14 @@ index: false
 | APK | 打包与签名 | [APK](/system/apk/) |
 | ART / DEX | 运行时与类加载 | [ART / DEX](/system/art/) |
 | 操作系统 | 操作系统与 IPC | [操作系统](/system/os/) |
+| 输入系统 | 输入事件读取与分发 | [输入系统](/system/input/) |
+| 电源与功耗 | 电源管理 / WakeLock / Doze | [电源与功耗](/system/power/) |
+| 网络与连接 | WiFi / 蓝牙 / 网络框架 | [网络与连接](/system/connectivity/) |
+| 存储系统 | vold / 分区 / 应用存储 | [存储系统](/system/storage/) |
+| 音频系统 | AudioFlinger / 音频焦点 | [音频系统](/system/audio/) |
+| 图形显示系统 | SurfaceFlinger / VSYNC / HWC | [图形显示系统](/system/graphics/) |
+| 安全体系 | 沙箱 / 权限 / 加密 / 启动安全 | [安全体系](/system/security/) |
+| HAL 硬件抽象层 | Treble / HIDL / VINTF | [HAL 硬件抽象层](/system/hal/) |
 
 ## 知识框架
 
@@ -85,3 +93,44 @@ Binder IPC（进程通信骨架）
 - [Linux 进程调度机制](/system/os/linux-scheduler.md)：CFS / nice / 优先级映射
 - [cgroup 与低内存回收](/system/os/cgroup-lmk.md)：cpuset / lmkd / 进程冻结
 - [SELinux 与 Android 安全](/system/os/selinux.md)：MAC / policy / avc denied
+
+### 输入系统
+- [输入系统整体架构](/system/input/input-system.md)：IMS / EventHub / InputDispatcher 链路
+- [InputReader 事件读取与加工](/system/input/input-reader.md)：触摸聚合 / 键位映射 / 设备配置
+- [InputDispatcher 分发策略](/system/input/input-dispatcher.md)：分发状态机 / 输入 ANR / 排查
+
+### 电源与功耗
+- [电源管理架构](/system/power/power-architecture.md)：PMS / 电源状态机 / 亮灭屏
+- [WakeLock 与唤醒机制](/system/power/wakelock.md)：类型 / 引用计数 / 泄露排查
+- [Doze 模式与电池优化](/system/power/doze-battery.md)：状态机 / App Standby / 白名单
+
+### 网络与连接
+- [网络连接架构](/system/connectivity/connectivity-architecture.md)：ConnectivityService / NetworkAgent / 评分切换
+- [WiFi 框架与连接流程](/system/connectivity/wifi.md)：WifiService / wpa_supplicant / 四步握手
+- [蓝牙框架与协议栈](/system/connectivity/bluetooth.md)：GATT / 配对 / 权限
+
+### 存储系统
+- [存储系统架构](/system/storage/storage-architecture.md)：vold / StorageManagerService / FUSE / FBE
+- [分区布局与文件系统](/system/storage/partition-filesystem.md)：动态分区 / A/B / ext4 / f2fs / dm-verity
+- [应用存储与分区存储](/system/storage/app-storage.md)：Scoped Storage / MediaStore / SAF
+
+### 音频系统
+- [音频系统架构](/system/audio/audio-architecture.md)：AudioTrack / AudioFlinger / AudioPolicy / HAL
+- [AudioFlinger 混音与输出](/system/audio/audioflinger.md)：共享内存 / 混音线程 / 低延迟
+- [音频焦点与策略](/system/audio/audio-focus.md)：焦点类型 / LOSS 响应 / 流类型
+
+### 图形显示系统
+- [Android 图形架构](/system/graphics/graphics-architecture.md)：渲染 → BufferQueue → 合成 → 显示
+- [SurfaceFlinger 合成机制](/system/graphics/surfaceflinger.md)：Layer / Transaction / 掉帧
+- [VSYNC 与 Choreographer](/system/graphics/vsync-choreographer.md)：帧调度 / 16.6ms / 掉帧检测
+- [HWC 硬件合成与显示](/system/graphics/hardware-composer.md)：Composer HAL / Overlay / 多屏
+
+### 安全体系
+- [Android 安全架构](/system/security/security-architecture.md)：沙箱 / 权限 / 签名 / 加密四层
+- [Keystore 与密钥管理](/system/security/keystore.md)：硬件密钥 / TEE / 密钥约束
+- [Verified Boot 与启动安全](/system/security/verified-boot.md)：AVB / dm-verity / 信任链
+
+### HAL 硬件抽象层
+- [HAL 架构与 Treble](/system/hal/hal-architecture.md)：HAL 演进 / 绑定式与直通式
+- [HIDL 接口与实现](/system/hal/hidl.md)：.hal 接口 / HwBinder / 服务注册
+- [VINTF 兼容性验证](/system/hal/vintf.md)：manifest / matrix / 启动校验
