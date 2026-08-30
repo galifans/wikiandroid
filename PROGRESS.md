@@ -21,6 +21,17 @@
 
 ## 2. 进展时间线
 
+### 2026-08-30（系统原理章节扩充：25 → 41 篇文章，新增 16 篇 AOSP 深度文章）
+- ✓ 用户需求：系统原理章节需要大量的知识内容补充，参考 Android 官方架构自主总结生成文章
+- ✓ Binder 机制 +2：`binder-threadpool.md`（Binder 线程池与并发模型：binder_thread/binder_proc、max_threads=16、oneway 异步事务、死锁预防）、`servicemanager-deep.md`（ServiceManager 深入解析：svclist 链表、handle 0、addService/getService 流程、服务死亡通知 binderDied）
+- ✓ AMS/WMS +3：`ams-process-priority.md`（进程优先级与回收：oom_adj 表 -1000~10、updateOomAdjLocked、lmkd、保活与重建）、`broadcast-mechanism.md`（广播机制底层原理：动态/静态注册、AMS 分发链路、有序/无序广播、8.0+ 隐式广播限制）、`contentprovider-mechanism.md`（ContentProvider 底层原理：启动顺序、ProviderMap、跨进程访问链路、CursorWindow 共享内存）
+- ✓ 启动流程 +3：`init-process.md`（init 进程与 init.rc：PID 1 职责、Actions/Services、属性服务、ueventd、僵尸回收）、`property-service.md`（属性系统：前缀规则、共享内存存储、setprop 权限校验、sys.boot_completed）、`systemserver-startup.md`（SystemServer 启动与服务注册：三阶段启动、核心服务表、Watchdog 60s 机制）
+- ✓ APK +2：`aapt2-resource.md`（AAPT2 资源编译与打包：compile/link、资源 ID 0xPPTTEEEE、resources.arsc 结构）、`assetmanager.md`（AssetManager 资源加载：资源包挂载、配置限定符匹配、资源引用链、换肤原理）
+- ✓ ART +3：`art-memory-model.md`（ART 内存模型与对象布局：堆分区、对象头、压缩引用、四种引用类型、GC Roots、TLAB）、`jni-art.md`（JNI 与 ART 交互：RegisterNatives、JNIEnv、引用管理、性能优化）、`hidden-api.md`（隐藏 API 限制：白/灰/黑名单、反射检测、豁免场景、veridex）
+- ✓ 操作系统 +3：`linux-scheduler.md`（Linux 进程调度：CFS/vruntime、nice 权重表、SCHED_FIFO/RR、Android 线程优先级映射、调度延迟排查）、`cgroup-lmk.md`（cgroup 与低内存回收：cpuset/memory 子系统、lmkd 与 PSI、进程冻结）、`selinux.md`（SELinux 与 Android 安全：MAC 模型、安全上下文、policy 规则、avc denied 排查、Binder 与 SELinux）
+- ✓ 索引同步：`src/system/README.md` 全部文章导航（6 个子模块全量更新）、`architecture.md` 系统原理状态表、根 `README.md` 文章计数
+- ✓ 校验：`npm run build` 构建通过并推送
+
 ### 2026-08-30（书籍统一迁移到顶层 books/，删除 wikiStatic/books 双通道）
 - ✓ 用户需求：书籍全部移动到根目录 `books/`，不再使用 `wikiStatic/books/`，README 结构统一处理
 - ✓ 迁移：`wikiStatic/books/` 下 7 本小书全部移入顶层 `books/` 对应分类（算法/Java/数据库/HTTP/多线程），删除整个 `wikiStatic/books/` 目录

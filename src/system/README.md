@@ -39,17 +39,25 @@ Binder IPC（进程通信骨架）
 - [AIDL 深入解析](/system/binder/aidl-deep.md)：Stub / Proxy / 双向通信
 - [Parcelable 序列化](/system/binder/parcelable.md)：与 Serializable 对比
 - [IPC 方式对比](/system/binder/ipc-comparison.md)：Binder / Socket / Messenger
+- [Binder 线程池与并发模型](/system/binder/binder-threadpool.md)：binder_thread / 线程池上限 / oneway
+- [ServiceManager 深入解析](/system/binder/servicemanager-deep.md)：svclist / 服务注册与查询
 
 ### AMS / WMS
 - [AMS 与 Activity 启动](/system/ams-wms/ams-activity-launch.md)：AMS 调度流程
 - [WMS 窗口管理](/system/ams-wms/wms-principle.md)：窗口层级 / 添加删除
 - [PMS 包管理机制](/system/ams-wms/pms-package-manager.md)：扫描解析 / 安装 / 权限
 - [WMS 触摸事件分发深入](/system/ams-wms/wms-touch-dispatch.md)：InputDispatcher / 命中测试
+- [Android 进程优先级与回收](/system/ams-wms/ams-process-priority.md)：oom_adj / LMK / 保活
+- [广播机制底层原理](/system/ams-wms/broadcast-mechanism.md)：AMS 分发 / 有序广播 / 8.0 限制
+- [ContentProvider 底层原理](/system/ams-wms/contentprovider-mechanism.md)：Provider 启动 / 跨进程访问
 
 ### 启动流程
 - [系统启动流程](/system/boot/system-boot.md)：Bootloader → init → Zygote
 - [应用启动流程](/system/boot/app-launch.md)：Launcher → AMS → ActivityThread
 - [Zygote 进程深入](/system/boot/zygote-deep.md)：预加载 / fork / Socket 孵化
+- [init 进程与 init.rc 深入](/system/boot/init-process.md)：init.rc / Service / 守护
+- [属性系统 Property Service](/system/boot/property-service.md)：共享内存 / getprop / setprop
+- [SystemServer 启动与系统服务注册](/system/boot/systemserver-startup.md)：服务启动 / Watchdog
 
 ### APK 打包与签名
 - [APK 打包流程与签名机制](/system/apk/apk-build-process.md)：AAPT / D8 / 签名 v1-v3
@@ -57,6 +65,8 @@ Binder IPC（进程通信骨架）
 - [多渠道打包](/system/apk/multi-channel.md)
 - [APK 安装流程与原理](/system/apk/apk-install-process.md)：PackageInstaller / dex2oat / 安装器
 - [APK 加固与安全防护](/system/apk/apk-reinforcement.md)：混淆 / 加壳 / 反调试
+- [AAPT2 资源编译与打包](/system/apk/aapt2-resource.md)：compile / link / resources.arsc
+- [AssetManager 资源加载机制](/system/apk/assetmanager.md)：资源查找 / 配置匹配 / 换肤
 
 ### ART / DEX / 类加载
 - [ART 运行时与 GC](/system/art/art-runtime.md)：AOT / JIT / 回收器
@@ -64,8 +74,14 @@ Binder IPC（进程通信骨架）
 - [ART 垃圾回收机制](/system/art/art-gc.md)
 - [类加载器与双亲委托](/system/art/classloader.md)：DexClassLoader / PathClassLoader
 - [DEX 文件格式](/system/art/dex-format.md)
+- [ART 内存模型与对象布局](/system/art/art-memory-model.md)：对象头 / 压缩引用 / GC Roots
+- [JNI 与 ART 交互机制](/system/art/jni-art.md)：JNIEnv / 引用管理 / 性能优化
+- [隐藏 API 限制机制](/system/art/hidden-api.md)：黑白灰名单 / 反射检测 / 兼容
 
 ### 操作系统
 - [操作系统核心概念](/system/os/os-core.md)：进程 / 线程 / 内存
 - [Linux 内存管理深入](/system/os/linux-memory.md)：虚拟内存 / oom_adj / LMK
 - [线程同步与 IPC](/system/os/thread-sync-ipc.md)：锁 / 信号量 / Linux IPC
+- [Linux 进程调度机制](/system/os/linux-scheduler.md)：CFS / nice / 优先级映射
+- [cgroup 与低内存回收](/system/os/cgroup-lmk.md)：cpuset / lmkd / 进程冻结
+- [SELinux 与 Android 安全](/system/os/selinux.md)：MAC / policy / avc denied

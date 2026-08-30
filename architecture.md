@@ -232,12 +232,12 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 系统原理 `/system/`
 | 子模块 | ✓ 已完成 |
 | --- | --- |
-| binder/ | binder-mechanism.md、binder-driver.md、aidl-deep.md、ipc-comparison.md、parcelable.md |
-| ams-wms/ | ams-activity-launch.md、wms-principle.md、pms-package-manager.md、wms-touch-dispatch.md |
-| boot/ | system-boot.md、app-launch.md、zygote-deep.md |
-| apk/ | apk-build-process.md、multi-channel.md、signature-verify.md、apk-install-process.md、apk-reinforcement.md |
-| art/ | art-runtime.md、art-compilation.md、art-gc.md、dex-format.md、classloader.md |
-| os/ | os-core.md、linux-memory.md、thread-sync-ipc.md |
+| binder/ | binder-mechanism.md、binder-driver.md、aidl-deep.md、ipc-comparison.md、parcelable.md、binder-threadpool.md、servicemanager-deep.md |
+| ams-wms/ | ams-activity-launch.md、wms-principle.md、pms-package-manager.md、wms-touch-dispatch.md、ams-process-priority.md、broadcast-mechanism.md、contentprovider-mechanism.md |
+| boot/ | system-boot.md、app-launch.md、zygote-deep.md、init-process.md、property-service.md、systemserver-startup.md |
+| apk/ | apk-build-process.md、multi-channel.md、signature-verify.md、apk-install-process.md、apk-reinforcement.md、aapt2-resource.md、assetmanager.md |
+| art/ | art-runtime.md、art-compilation.md、art-gc.md、dex-format.md、classloader.md、art-memory-model.md、jni-art.md、hidden-api.md |
+| os/ | os-core.md、linux-memory.md、thread-sync-ipc.md、linux-scheduler.md、cgroup-lmk.md、selinux.md |
 
 ### 工程实践 `/engineering/`
 | 子模块 | ✓ 已完成 |
