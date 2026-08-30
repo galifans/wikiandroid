@@ -58,7 +58,7 @@ features:
     link: /projects/
   - title: 书籍资源
     icon: book
-    details: 精选 Android、Java、算法、网络、数据库等方向的 PDF 书籍，点击即可下载
+    details: 精选各方向 PDF 经典书籍：小体积书网站直链下载，经典大书 GitHub 直接下载
     link: /books/
   - title:  关于本站
     icon: info
@@ -69,7 +69,7 @@ features:
 ## 内容规模
 
 > **9 大知识模块 · 265+ 篇原创文章**，覆盖 Android 面试全考点（应用层 → 源码 → 性能 → 工程化）；
-> 另有 **7 本可下载 PDF 书籍**与 **6 篇大厂面经**。
+> 另有 **7 本网站直链 PDF 书籍**、**34 本经典书籍（GitHub 下载）**与 **6 篇大厂面经**。
 
 ## 精选文章
 

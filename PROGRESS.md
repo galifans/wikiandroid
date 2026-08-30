@@ -21,6 +21,14 @@
 
 ## 2. 进展时间线
 
+### 2026-08-30（书籍资源双通道体系：16 大方向 34 本经典书籍入库）
+- ✓ 用户需求：上传经典技术书籍（每分类几本经典即可），只需 GitHub 直接下载链接，暂不需要在线阅读
+- ✓ 架构决策：新增顶层 `books/` 经典书库（16 大方向 34 本 PDF，605.7MB，GitHub 直链下载，**不发布到网站**——规避 Cloudflare Pages 单文件 25MiB 限制）；`wikiStatic/books/` 保留 7 本小体积书（<25MiB）网站直链，形成「双通道」书籍体系
+- ✓ 新增 `books/README.md` 完整索引（16 分类表格 + 相对链接；半角括号文件名如 `Effective C++中文版(第三版).pdf` 用 %28/%29 编码）
+- ✓ 同步更新 5 处索引文档：根 `README.md`（新增「经典书籍库（GitHub 下载）」16 个子分类表）、`src/books/README.md`（新增 GitHub blob 绝对链接表 + 「超大体积书籍（源仓库下载）」8 本）、`architecture.md`（7.7 双通道管理规范）、`src/README.md`（主页书籍卡片文案）、`wikiStatic/books/README.md`（去 emoji + 新增指向经典书库小节）
+- ✓ 校验：`npm run build` 351 页面构建成功（62s）；全站禁 emoji
+- 选择标准：跳过 >60MB 超大文件（C++ Primer、Netty、RabbitMQ 实战指南等 11 本），改为 TIM168 源仓库链接
+
 ### 2026-08-27（Phase 3 全站内容增强完成：8 大板块全部补齐图表/代码块/表格前置讲解句）
 - ✓ 用户需求："其他板块也按照相同要求进行完善"——将 Phase 2 Jetpack 板块的 4 项优化推广到全站非 Jetpack 板块
 - ✓ 4 项优化全站落地：① 每个 mermaid/sequenceDiagram 图、每个 `::: code-tabs`、每个表格前补充中文讲解引导句（冒号结尾，如"整体流程如下：""核心实现如下：""对比说明如下："）；② 仅 Kotlin 代码块默认 Kotlin + Java 按钮灰化（Phase 2 已全站生效）；③ 简单表格转文字——实践中以"表格前引导句 + 保留表格"落实（大表格保留更易扫读）；④ mermaid 缩小 + 边框 CSS（Phase 2 已全站生效）
