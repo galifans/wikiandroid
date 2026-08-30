@@ -40,6 +40,7 @@ const modules = [
     "jetpack",
     "network",
     "advanced",
+    "opensource",
     "system",
     "engineering",
     "interview",

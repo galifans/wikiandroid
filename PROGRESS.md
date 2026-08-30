@@ -15,11 +15,28 @@
 | 域名 | https://wikiandroid.com（备用：https://wikiandroid.pages.dev） |
 | 仓库 | https://github.com/galifans/wikiandroid（分支 main） |
 | 部署方式 | Cloudflare Pages：`git push main` 自动触发构建部署（约 2-4 分钟） |
-| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 393 页面） |
+| 构建命令 | `npm run build` → 输出 `src/.vuepress/dist`（当前 410 页面） |
 | 本地预览 | `npm run dev` → http://localhost:8080 |
-| 当前状态 | ✓ 内容建设完成（316 篇文章），持续维护中 |
+| 当前状态 | ✓ 内容建设完成（324 篇文章），持续维护中 |
 
 ## 2. 进展时间线
+
+### 2026-08-30（新增开源组件板块：OkHttp / Retrofit / Glide / GreenDao / RxJava / LeakCanary / ButterKnife / Dagger2 / EventBus 共 9 篇文章）
+- ✓ 用户需求：安卓开源组件源码是重要学习资源，新增「开源组件」板块并补充 9 个经典开源库知识
+- ✓ 新增模块 `src/opensource/`（平铺，`index: false`）与模块 README（组件一览表 + 阅读建议 + 关联板块）
+- ✓ 9 篇文章（面试高频指数：OkHttp/Retrofit/Glide 极高、RxJava/LeakCanary/EventBus 高、GreenDao/ButterKnife/Dagger2 中）：
+  - `okhttp.md`（OkHttp 底层网络框架）：组件定位/基础使用/请求执行流程/拦截器责任链/连接池与缓存/源码解析指引/Q1-Q5/小结
+  - `retrofit.md`（Retrofit 网络封装框架）：动态代理 + 注解系统、CallAdapter 与 Converter、九种设计模式一览表、源码解析指引
+  - `glide.md`（Glide 图片加载框架）：加载流程/三级缓存/生命周期绑定/图片加载优化/源码解析指引
+  - `greendao.md`（GreenDao 数据库框架）：代码生成原理、注解体系表、数据库升级
+  - `rxjava.md`（RxJava 响应式编程）：观察者模式与线程切换/背压/操作符体系/与协程对比
+  - `leakcanary.md`（LeakCanary 内存泄漏检测）：引用泄漏观察、三重确认、泄漏原因与修复表
+  - `butterknife.md`（ButterKnife 视图注入）：APT 注解处理、生成代码、零反射、与 ViewBinding 对比
+  - `dagger2.md`（Dagger2 依赖注入）：编译期生成 vs 反射、作用域表、@Module、与 Hilt 的关系
+  - `eventbus.md`（EventBus 事件总线）：扩展观察者模式、线程模型表、粘性事件、与广播对比
+- ✓ 每篇风格统一：面试高频指数、编号章节、code-tabs（Java 默认 + Kotlin）、mermaid 图、对比表、Q1-Q5（details 查看答案）、小结、进阶阅读交叉链接
+- ✓ 索引同步：`navbar.ts` 新增开源组件下拉（14 → 15 项）、`sidebar.ts` +`"/opensource/": "structure"`、`scripts/sync-wikistatic.mjs` 模块列表 +opensource、`architecture.md` 目录树/导航表/状态统计、首页 `src/README.md` features + 内容规模 9 → 10 大模块、根 `README.md` 模块表 +9 行
+- ✓ 校验：`node scripts/validate-tabs.cjs`（opensource 全部通过）、`node scripts/validate-mermaid.mjs` ALL OK（@ 转义 #64;）、`npm run build` 构建通过（393 → 410 页面）、`npm run sync:static` 已同步 wikiStatic 镜像与目录树
 
 ### 2026-08-30（系统原理章节再扩充：41 → 67 篇文章，新增 8 个子模块 26 篇，覆盖真实 AOSP 架构）
 - ✓ 用户需求：按照安卓系统实际架构新增子模块与对应文章，文章越多越符合架构越好（确认子模块可以新增）

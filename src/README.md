@@ -40,6 +40,10 @@ features:
     icon: rocket
     details: 架构设计、组件化、插件化、性能优化、稳定性保障与音视频开发
     link: /advanced/architecture/
+  - title: 开源组件
+    icon: package
+    details: OkHttp、Retrofit、Glide、GreenDao、RxJava、LeakCanary、ButterKnife、Dagger2、EventBus 九大经典开源库源码知识
+    link: /opensource/okhttp.html
   - title: 系统原理
     icon: gears
     details: Binder、AMS/WMS、系统启动流程、APK 打包签名、ART/DEX 类加载
@@ -68,7 +72,7 @@ features:
 
 ## 内容规模
 
-> **9 大知识模块 · 265+ 篇原创文章**，覆盖 Android 面试全考点（应用层 → 源码 → 性能 → 工程化）；
+> **10 大知识模块 · 320+ 篇原创文章**，覆盖 Android 面试全考点（应用层 → 源码 → 性能 → 工程化 → 开源组件）；
 > 另有 **39 本 PDF 技术书籍**（GitHub 下载）与 **6 篇大厂面经**。
 
 ## 精选文章
@@ -214,6 +218,17 @@ features:
 - [MediaCodec 硬编硬解与 FFmpeg](/advanced/multimedia/mediacodec-ffmpeg.md)
 - [Camera2 拍照流程与原理](/advanced/multimedia/camera-capture.md)
 - [跨端方案选型：Flutter / RN / Compose Multiplatform](/advanced/cross-platform/cross-platform-overview.md)
+
+### 开源组件
+- [OkHttp 底层网络框架：责任链 / Dispatcher / 连接池](/opensource/okhttp.md)
+- [Retrofit 网络封装框架：动态代理 / 九种设计模式](/opensource/retrofit.md)
+- [Glide 图片加载框架：三级缓存 / 生命周期绑定](/opensource/glide.md)
+- [GreenDao 数据库框架：代码生成 / ORM 映射](/opensource/greendao.md)
+- [RxJava 响应式编程：线程切换 / 背压 / 操作符](/opensource/rxjava.md)
+- [LeakCanary 内存泄漏检测：弱引用监控 / 引用链分析](/opensource/leakcanary.md)
+- [ButterKnife 视图注入：APT / 注解处理器](/opensource/butterknife.md)
+- [Dagger2 依赖注入：@Inject / @Module / 作用域](/opensource/dagger2.md)
+- [EventBus 事件总线：观察者模式 / 粘性事件](/opensource/eventbus.md)
 
 ### 系统原理
 - [Binder 跨进程通信机制详解](/system/binder/binder-mechanism.md)

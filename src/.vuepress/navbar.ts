@@ -85,6 +85,20 @@ export default navbar([
     ],
   },
   {
+    text: "开源组件",
+    children: [
+      { text: "OkHttp 底层网络框架", link: "/opensource/okhttp.html" },
+      { text: "Retrofit 网络封装框架", link: "/opensource/retrofit.html" },
+      { text: "Glide 图片加载框架", link: "/opensource/glide.html" },
+      { text: "GreenDao 数据库框架", link: "/opensource/greendao.html" },
+      { text: "RxJava 响应式编程", link: "/opensource/rxjava.html" },
+      { text: "LeakCanary 内存泄漏检测", link: "/opensource/leakcanary.html" },
+      { text: "ButterKnife 视图注入框架", link: "/opensource/butterknife.html" },
+      { text: "Dagger2 依赖注入框架", link: "/opensource/dagger2.html" },
+      { text: "EventBus 事件总线", link: "/opensource/eventbus.html" },
+    ],
+  },
+  {
     text: "系统原理",
     children: [
       { text: "Binder 机制", link: "/system/binder/" },

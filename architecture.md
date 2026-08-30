@@ -42,7 +42,7 @@ galifans_vibe_coding/
 │   └── sync-wikistatic.mjs     # wikiStatic 同步脚本（md 同步 + README 目录树自动刷新，跨平台 Node）
 ├── wikiStatic/                  # 静态资料库（GitHub 直接浏览/下载，内容与 src/ 同源，详见第 8 节）
 │   ├── README.md                # wikiStatic 总索引（含自动生成的目录树）
-│   └── <模块目录>/              # 各知识模块 md 镜像（roadmap / language / android / ui / jetpack / network / advanced / system / engineering / interview / projects / about）
+    └── <模块目录>/              # 各知识模块 md 镜像（roadmap / language / android / ui / jetpack / network / advanced / opensource / system / engineering / interview / projects / about）
 └── src/                         # 站点源码根（VuePress docsDir）
     ├── README.md                # 首页（hero + 12 张功能卡片 + 精选文章）
     ├── .vuepress/               # 站点配置目录
@@ -58,9 +58,10 @@ galifans_vibe_coding/
     ├── jetpack/                 # Jetpack（lifecycle-viewmodel / room-datastore / paging-navigation / workmanager-hilt / compose）
     ├── network/                 # 网络与异步（http / handler / coroutine / thread）
     ├── advanced/                # 进阶实战（architecture / modular / plugin / performance / stability / multimedia / cross-platform）
+    ├── opensource/              # 开源组件（okhttp / retrofit / glide / greendao / rxjava / leakcanary / butterknife / dagger2 / eventbus 共 9 个经典开源库）
     ├── system/                  # 系统原理（binder / ams-wms / boot / apk / art / os / input / power / connectivity / storage / audio / graphics / security / hal）
     ├── engineering/             # 工程实践（gradle / git / cicd / testing）
-    ├── interview/               # 面试指南（7 篇平铺文章）
+    ├── interview/               # 面试指南（8 篇平铺文章）
     ├── projects/                # 实战项目
     ├── books/                   # 书籍资源板块页（全部书籍按技术分类，GitHub 下载索引）
     └── about/                   # 关于本站（intro / contribution-guideline / faq）
@@ -85,12 +86,13 @@ galifans_vibe_coding/
 | 6 | Jetpack | — | Jetpack Compose / Lifecycle/ViewModel / Room/DataStore / Paging/Navigation / WorkManager/Hilt | 下拉菜单 |
 | 7 | 网络与异步 | — | 网络与协议 / Handler 消息机制 / 协程 Flow/RxJava / 线程池与并发 / 计算机网络体系 / Socket 编程基础 / TCP 与 UDP 详解 | 下拉菜单 |
 | 8 | 进阶实战 | — | 架构设计 / 组件化与模块化 / 插件化与热修复 / 性能优化 / 稳定性保障 / 音视频开发 / 跨端方案 | 下拉菜单 |
-| 9 | 系统原理 | — | Binder 机制 / AMS/WMS / 系统与应用启动流程 / APK 打包与签名 / ART/DEX/类加载 / 操作系统 / 输入系统 / 电源与功耗 / 网络与连接 / 存储系统 / 音频系统 / 图形显示系统 / 安全体系 / HAL 硬件抽象层 | 下拉菜单 |
-| 10 | 工程实践 | — | Gradle 构建 / Git 与版本管理 / CI/CD / 测试体系 | 下拉菜单 |
-| 11 | 面试指南 | `/interview/` | — | 平铺 8 篇文章 |
-| 12 | 实战项目 | `/projects/` | — | 平铺文章 |
-| 13 | 书籍资源 | `/books/` | — | 分类索引 + GitHub 下载（PDF 实体存仓库顶层 `books/`） |
-| 14 | GitHub | https://github.com/galifans/wikiandroid | — | 外链 |
+| 9 | 开源组件 | — | OkHttp 底层网络框架 / Retrofit 网络封装框架 / Glide 图片加载框架 / GreenDao 数据库框架 / RxJava 响应式编程 / LeakCanary 内存泄漏检测 / ButterKnife 视图注入框架 / Dagger2 依赖注入框架 / EventBus 事件总线 | 下拉菜单 |
+| 10 | 系统原理 | — | Binder 机制 / AMS/WMS / 系统与应用启动流程 / APK 打包与签名 / ART/DEX/类加载 / 操作系统 / 输入系统 / 电源与功耗 / 网络与连接 / 存储系统 / 音频系统 / 图形显示系统 / 安全体系 / HAL 硬件抽象层 | 下拉菜单 |
+| 11 | 工程实践 | — | Gradle 构建 / Git 与版本管理 / CI/CD / 测试体系 | 下拉菜单 |
+| 12 | 面试指南 | `/interview/` | — | 平铺 8 篇文章 |
+| 13 | 实战项目 | `/projects/` | — | 平铺文章 |
+| 14 | 书籍资源 | `/books/` | — | 分类索引 + GitHub 下载（PDF 实体存仓库顶层 `books/`） |
+| 15 | GitHub | https://github.com/galifans/wikiandroid | — | 外链 |
 
 > 注：`/about/` 不在导航栏中，通过首页「关于本站」功能卡片与链接访问。
 
@@ -229,6 +231,17 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 | multimedia/ | multimedia-basics.md、exoplayer-deep.md、mediacodec-ffmpeg.md、camera-capture.md |
 | cross-platform/ | cross-platform-overview.md |
 
+### 开源组件 `/opensource/`（平铺）
+- ✓ okhttp.md（OkHttp 底层网络框架：组件定位 / Dispatcher 调度 / 拦截器责任链 / 连接池与缓存）
+- ✓ retrofit.md（Retrofit 网络封装框架：动态代理 / 注解体系 / CallAdapter 与 Converter / 九种设计模式）
+- ✓ glide.md（Glide 图片加载框架：三级缓存 / 生命周期绑定 / 加载流程 / 图片优化）
+- ✓ greendao.md（GreenDao 数据库框架：代码生成 / ORM 映射 / 注解体系 / 数据库升级）
+- ✓ rxjava.md（RxJava 响应式编程：观察者模式 / 线程切换 / 背压 / 操作符体系）
+- ✓ leakcanary.md（LeakCanary 内存泄漏检测：弱引用监控 / GC 复查 / Heap Dump / 引用链分析）
+- ✓ butterknife.md（ButterKnife 视图注入：APT 注解处理 / 代码生成 / 与 ViewBinding 对比）
+- ✓ dagger2.md（Dagger2 依赖注入：@Inject / @Module / @Component / 作用域 / 编译期生成）
+- ✓ eventbus.md（EventBus 事件总线：扩展观察者模式 / 线程模型 / 粘性事件 / 与广播对比）
+
 ### 系统原理 `/system/`
 | 子模块 | ✓ 已完成 |
 | --- | --- |
@@ -271,7 +284,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 关于本站 `/about/`
 - ✓ intro.md　✓ contribution-guideline.md　✓ faq.md
 
-**现状统计**：✓ 全部文章已完成（265 篇文章 + 80 个模块 README，构建 336 页面），无「（待更新）」占位文章，构建无 broken-link warning。
+**现状统计**：✓ 全部文章已完成（324 篇文章 + 85 个模块 README，构建 410 页面），无「（待更新）」占位文章，构建无 broken-link warning。
 
 ---
 

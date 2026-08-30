@@ -9,6 +9,7 @@ export default sidebar({
   "/jetpack/": "structure",
   "/network/": "structure",
   "/advanced/": "structure",
+  "/opensource/": "structure",
   "/system/": "structure",
   "/engineering/": "structure",
   "/interview/": "structure",

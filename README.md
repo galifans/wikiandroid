@@ -93,6 +93,20 @@
 | 音视频 | 音视频开发入门 | [音视频](wikiStatic/advanced/multimedia/README.md) |
 | 跨端方案 | Flutter / RN / KMP 选型 | [跨端方案](wikiStatic/advanced/cross-platform/README.md) |
 
+### 开源组件
+
+| 组件 | 定位 | 入口 |
+| --- | --- | --- |
+| OkHttp | Android 最优秀的网络底层框架，没有之一 | [OkHttp 底层网络框架](wikiStatic/opensource/okhttp.md) |
+| Retrofit | 基于 OkHttp 的优雅封装，内含九种常用设计模式 | [Retrofit 网络封装框架](wikiStatic/opensource/retrofit.md) |
+| Glide | Android 使用最广泛的图片加载框架 | [Glide 图片加载框架](wikiStatic/opensource/glide.md) |
+| GreenDao | Android 中数据库操作综合效率最高的框架 | [GreenDao 数据库框架](wikiStatic/opensource/greendao.md) |
+| RxJava | 异步、简洁、优雅的响应式编程框架 | [RxJava 响应式编程](wikiStatic/opensource/rxjava.md) |
+| LeakCanary | 内存泄漏检测利器，自动分析引用链 | [LeakCanary 内存泄漏检测](wikiStatic/opensource/leakcanary.md) |
+| ButterKnife | APT + 注解攻破 findViewById()，Jake Wharton 大神之作 | [ButterKnife 视图注入框架](wikiStatic/opensource/butterknife.md) |
+| Dagger2 | 编译期依赖注入，自动管理类的实例、解耦 | [Dagger2 依赖注入框架](wikiStatic/opensource/dagger2.md) |
+| EventBus | 扩展观察者模式实现的组件间通信，广播的替代者 | [EventBus 事件总线](wikiStatic/opensource/eventbus.md) |
+
 ### 系统原理
 
 | 模块 | 说明 | 入口 |
@@ -276,6 +290,7 @@
 | 网络与协议 | [WebSocket 原理与实现](wikiStatic/network/http/websocket.md) · [OkHttp 源码解析](wikiStatic/network/http/okhttp-source.md) · [Retrofit 源码解析](wikiStatic/network/http/retrofit-source.md) |
 | 系统与性能 | [Zygote 进程深入](wikiStatic/system/boot/zygote-deep.md) · [ART 编译优化](wikiStatic/system/art/art-compilation.md) · [启动优化实践](wikiStatic/advanced/performance/startup-optimization.md) · [内存优化与泄漏排查](wikiStatic/advanced/performance/memory-optimization.md) |
 | 工程与进阶 | [Git 分支模型](wikiStatic/engineering/git/git-branch-model.md) · [跨端方案选型](wikiStatic/advanced/cross-platform/cross-platform-overview.md) · [Camera2 拍照流程](wikiStatic/advanced/multimedia/camera-capture.md) · [灰度发布](wikiStatic/engineering/cicd/gray-release.md) |
+| 开源组件 | [OkHttp 底层网络框架](wikiStatic/opensource/okhttp.md) · [Retrofit 网络封装框架](wikiStatic/opensource/retrofit.md) · [Glide 图片加载框架](wikiStatic/opensource/glide.md) · [Dagger2 依赖注入](wikiStatic/opensource/dagger2.md) · [EventBus 事件总线](wikiStatic/opensource/eventbus.md) |
 | 面试指南 | [行为面试题与回答套路](wikiStatic/interview/behavior-questions.md) · [面试准备计划](wikiStatic/interview/interview-plan.md) · [简历与项目经验建议](wikiStatic/interview/resume-guide.md) |
 
 ## 支持项目

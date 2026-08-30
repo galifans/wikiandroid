@@ -97,7 +97,7 @@ index: false   # 仅模块索引页需要（如 roadmap/README.md）
 ### 11.1 wikiStatic 是什么
 
 - `wikiStatic/` = WikiAndroid 的静态资料库：md 学习资料，供 GitHub 用户直接浏览 / 下载。
-  - 各知识模块目录（roadmap / language / android / ui / jetpack / network / advanced / system / engineering / interview / projects / about）：由 `scripts/sync-wikistatic.mjs` 从 `src/` 同步的 md 镜像
+  - 各知识模块目录（roadmap / language / android / ui / jetpack / network / advanced / opensource / system / engineering / interview / projects / about）：由 `scripts/sync-wikistatic.mjs` 从 `src/` 同步的 md 镜像
   - 书籍 PDF 不放在 `wikiStatic/`，统一存仓库顶层 `books/`（见 11.3）
 
 ### 11.2 内容变更流程（新增 / 修改文章、模块）
