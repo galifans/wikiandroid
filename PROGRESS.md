@@ -21,6 +21,14 @@
 
 ## 2. 进展时间线
 
+### 2026-08-30（书籍资源页面重构：统一按技术分类，移除来源标注）
+- ✓ 用户反馈：网站书籍页「经典书籍库（GitHub 下载）」章节割裂、AI 痕迹明显；「超大体积书籍（源仓库下载）」章节暴露资源来源
+- ✓ 重构三处面向用户索引（`src/books/README.md`、根 `README.md`、`wikiStatic/books/README.md`）：全部书籍统一按 17 个技术分类展示（算法/Android/C++/C语言/HTML/HTTP/Java/Javascript/Linux/Python/大数据/多线程/汇编语言/架构/人工智能&机器学习/数据库/消息队列&搜索引擎），删除「经典书籍库」「超大体积书籍」章节及 TIM168 来源引用
+- ✓ 原「网络与并发」分类并入 HTTP（HttpClient 入门）与多线程（多线程编程指南），重复书目只保留一处双链接（网站直链 + GitHub）
+- ✓ 删除 `wikiStatic/books/{android,architecture,language,system}` 空占位目录（仅含 TIM168 引用 README）
+- ✓ `books/README.md` 标题改为「书籍资源库」，移除来源说明；`src/README.md` 内容规模改为「41 本 PDF 技术书籍」
+- ✓ `agent.md` 书籍来源约定更新：用户可见页面不标注具体来源仓库
+
 ### 2026-08-30（书籍资源双通道体系：16 大方向 34 本经典书籍入库）
 - ✓ 用户需求：上传经典技术书籍（每分类几本经典即可），只需 GitHub 直接下载链接，暂不需要在线阅读
 - ✓ 架构决策：新增顶层 `books/` 经典书库（16 大方向 34 本 PDF，605.7MB，GitHub 直链下载，**不发布到网站**——规避 Cloudflare Pages 单文件 25MiB 限制）；`wikiStatic/books/` 保留 7 本小体积书（<25MiB）网站直链，形成「双通道」书籍体系

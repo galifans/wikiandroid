@@ -45,7 +45,7 @@ galifans_vibe_coding/
 │   ├── books/                   # 网站直链书籍（仅收录 <25MiB 小体积 PDF；来源 TIM168/technical_books）
 │   │   ├── README.md            # 书籍索引（算法 / Java / 网络 / 数据库 …）
 │   │   ├── algorithm/ java/ network/ database/              # 已收录 PDF
-│   │   └── android/ architecture/ language/ system/         # 目录已建，PDF 待补充
+│   │   └── algorithm/ database/ java/ network/             # 仅收录已入库的小体积 PDF
 │   └── <模块目录>/              # 各知识模块 md 镜像（roadmap / language / android / ui / jetpack / network / advanced / system / engineering / interview / projects / about）
 └── src/                         # 站点源码根（VuePress docsDir）
     ├── README.md                # 首页（hero + 12 张功能卡片 + 精选文章）

@@ -130,49 +130,25 @@
 
 ## 书籍资源
 
-> 精选各方向经典 PDF 书籍，双通道下载：
-> - **网站直链**（小体积书）：`wikiStatic/books/`，见下方分类表，点击即可下载（Cloudflare CDN）；
-> - **GitHub 下载**（经典书库）：仓库 `books/` 目录收录 16 大方向经典书籍，见[经典书籍库](books/README.md)，点击书名直接下载，无需在线阅读。
-> 来源：[TIM168/technical_books](https://github.com/TIM168/technical_books)，仅供学习交流。
+> 精选各技术方向的高质量 PDF 经典书籍，点击书名即可下载：
+> - 小体积书籍存放在 `wikiStatic/books/`，网站直链下载（Cloudflare CDN）；
+> - 经典大部头书籍存放在仓库顶层 `books/`，点击跳转 GitHub 下载。
+> 仅供学习交流使用，请尊重原作者版权。
 
 ### 算法
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| Hello 算法（Java 版） | 动画图解、一键运行的数据结构与算法入门书 | [hello-algo.pdf](wikiStatic/books/algorithm/hello-algo.pdf) |
-| 程序员的数学 | 从数学视角理解编程，程序员必读 | [programmer-math.pdf](wikiStatic/books/algorithm/programmer-math.pdf) |
+| Hello 算法（Java 版） | 动画图解、一键运行的数据结构与算法入门书 | [下载](wikiStatic/books/algorithm/hello-algo.pdf) |
+| 程序员的数学 | 从数学视角理解编程，程序员必读 | [下载](wikiStatic/books/algorithm/programmer-math.pdf) |
 
-### Java
-
-| 书籍 | 说明 | 下载 |
-| --- | --- | --- |
-| 深入理解 JAVA 内存模型 | JMM 原理详解，面试常考 | [java-memory-model.pdf](wikiStatic/books/java/java-memory-model.pdf) |
-| 阿里巴巴 Java 开发手册（终极版） | 阿里规范，编码约定与最佳实践 | [alibaba-java-dev-manual.pdf](wikiStatic/books/java/alibaba-java-dev-manual.pdf) |
-
-### 网络与并发
-
-| 书籍 | 说明 | 下载 |
-| --- | --- | --- |
-| 多线程编程指南 | 多线程基础与并发实践 | [multithreading-guide.pdf](wikiStatic/books/network/multithreading-guide.pdf) |
-| HttpClient 入门 | HTTP 客户端实战入门 | [httpclient-intro.pdf](wikiStatic/books/network/httpclient-intro.pdf) |
-
-### 数据库
-
-| 书籍 | 说明 | 下载 |
-| --- | --- | --- |
-| 程序员的 SQL 金典 | SQL 语法与优化经典 | [programmer-sql-classic.pdf](wikiStatic/books/database/programmer-sql-classic.pdf) |
-
-### 经典书籍库（GitHub 下载）
-
-> 仓库 `books/` 目录收录的经典大书，点击书名直接下载（GitHub），完整索引见 [books/README.md](books/README.md)。
-
-#### Android
+### Android
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
 | Android 应用开发入门教程（经典版） | Android 入门经典教程 | [下载](books/Android/Android应用开发入门教程-经典版.pdf) |
 
-#### C++
+### C++
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
@@ -180,7 +156,7 @@
 | STL 源码剖析 | 深入 STL 内部实现原理 | [下载](books/C%2B%2B/STL源码剖析.pdf) |
 | 深度探索 C++ 对象模型 | C++ 对象内存模型深入 | [下载](books/C%2B%2B/深度探索C%2B%2B对象模型.pdf) |
 
-#### C语言
+### C语言
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
@@ -188,27 +164,29 @@
 | C 和指针（第二版） | 指针与内存深入理解 | [下载](books/C语言/C和指针（第二版）.pdf) |
 | C 专家编程 | C 语言进阶经典 | [下载](books/C语言/C专家编程.pdf) |
 
-#### HTML
+### HTML
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
 | HTML 入门教材 | HTML 入门基础 | [下载](books/HTML/HTML入门教材.pdf) |
 | HTML 语言从零到精通 | HTML 从入门到精通 | [下载](books/HTML/HTML语言从零到精通.pdf) |
 
-#### HTTP
+### HTTP
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| HttpClient 入门 | HTTP 客户端实战入门 | [下载](books/HTTP/HttpClient入门.pdf) |
+| HttpClient 入门 | HTTP 客户端实战入门 | [网站下载](wikiStatic/books/network/httpclient-intro.pdf) · [GitHub](books/HTTP/HttpClient入门.pdf) |
 
-#### Java
+### Java
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
+| 深入理解 JAVA 内存模型 | JMM 原理详解，面试常考 | [下载](wikiStatic/books/java/java-memory-model.pdf) |
+| 阿里巴巴 Java 开发手册（终极版） | 阿里规范，编码约定与最佳实践 | [下载](wikiStatic/books/java/alibaba-java-dev-manual.pdf) |
 | Maven 实战 | 构建工具实战经典 | [下载](books/Java/Maven实战.pdf) |
 | 深入理解 Java 7 | JVM 与 Java 语言深入 | [下载](books/Java/深入理解Java7.pdf) |
 
-#### Javascript
+### Javascript
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
@@ -216,20 +194,20 @@
 | JavaScript DOM 编程艺术 | DOM 编程入门经典 | [下载](books/Javascript/JavaScript_DOM编程艺术.pdf) |
 | 深入浅出 Node.js | Node.js 入门经典 | [下载](books/Javascript/深入浅出Node.js.pdf) |
 
-#### Linux
+### Linux
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
 | LINUX 内核设计与实现 | 内核原理经典 | [下载](books/Linux/LINUX内核设计与实现.pdf) |
 | linux 内核深入剖析（基于 0.11） | 内核源码逐行剖析 | [下载](books/Linux/linux内核深入剖析基于0.11.pdf) |
 
-#### Python
+### Python
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
 | Python 3.6 中文文档 | Python 官方文档中文版 | [下载](books/Python/Python3.6%20中文文档.pdf) |
 
-#### 大数据
+### 大数据
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
@@ -238,19 +216,19 @@
 | Spark 技术内幕 | Spark 内核架构深入解析 | [下载](books/大数据/Spark技术内幕%20%20深入解析Spark内核架构设计与实现原理.pdf) |
 | Kafka 权威指南（中文版） | 消息中间件权威指南 | [下载](books/大数据/kafka权威指南中文版.pdf) |
 
-#### 多线程
+### 多线程
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| 多线程编程指南 | 多线程基础与并发实践 | [下载](books/多线程/多线程编程指南.pdf) |
+| 多线程编程指南 | 多线程基础与并发实践 | [网站下载](wikiStatic/books/network/multithreading-guide.pdf) · [GitHub](books/多线程/多线程编程指南.pdf) |
 
-#### 汇编语言
+### 汇编语言
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
 | 汇编语言（王爽） | 汇编语言入门经典 | [下载](books/汇编语言/汇编语言王爽着.pdf) |
 
-#### 架构
+### 架构
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
@@ -258,21 +236,22 @@
 | 淘宝技术这十年 | 互联网架构演进纪实 | [下载](books/架构/淘宝技术这十年.pdf) |
 | 支付宝架构与技术 | 支付系统架构实战 | [下载](books/架构/支付宝架构与技术.pdf) |
 
-#### 人工智能&机器学习
+### 人工智能&机器学习
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
 | 机器学习（周志华） | 机器学习「西瓜书」经典 | [下载](books/人工智能%26机器学习/机器学习_周志华.pdf) |
 | 深度学习 | 深度学习「花书」经典 | [下载](books/人工智能%26机器学习/深度学习.pdf) |
 
-#### 数据库
+### 数据库
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
+| 程序员的 SQL 金典 | SQL 语法与优化经典 | [下载](wikiStatic/books/database/programmer-sql-classic.pdf) |
 | SQL 完全手册 | SQL 语法与优化大全 | [下载](books/数据库/SQL完全手册.pdf) |
 | MySQL 高效编程 | MySQL 实战编程经典 | [下载](books/数据库/《MySQL高效编程》.pdf) |
 
-#### 消息队列&搜索引擎
+### 消息队列&搜索引擎
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |

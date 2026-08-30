@@ -116,8 +116,8 @@ index: false   # 仅模块索引页需要（如 roadmap/README.md）
   1. PDF 放入 `wikiStatic/books/<分类>/`
   2. 更新三处索引：`wikiStatic/books/README.md`、`src/books/README.md`（网站板块页）、根 `README.md` 书籍表格
   3. 保持「文件名 / 大小 / 来源说明」与 `wikiStatic/books/` 实际文件一一对应
-- 书籍来源默认 [TIM168/technical_books](https://github.com/TIM168/technical_books)，仅供学习交流，须标注来源并尊重版权。
-- 网速 / 体积受限时：先建好分类目录与索引（标注「待补充」），PDF 后续再下载提交。
+- 书籍来源为公开开源资源；用户可见页面（网站、README）不标注具体来源仓库，仅保留通用版权声明。
+- 网速 / 体积受限时：不收录该书籍（不建占位目录、不写「待补充」），后续获得书籍后再补入对应分类。
 
 ### 11.4 根 README.md 维护（GitHub 首页）
 
