@@ -2,6 +2,7 @@
 icon: magnet
 title: ButterKnife 视图注入框架
 description: ButterKnife APT 注解处理、代码生成、findViewById 原理与 ButterKnife/ViewBinding 对比全解
+order: 7
 ---
 
 # ButterKnife 视图注入框架

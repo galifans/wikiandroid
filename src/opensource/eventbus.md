@@ -2,6 +2,7 @@
 icon: paper-plane
 title: EventBus 事件总线
 description: EventBus 观察者模式、事件订阅注册、线程模型、粘性事件与广播对比全解
+order: 9
 ---
 
 # EventBus 事件总线

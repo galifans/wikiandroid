@@ -2,6 +2,7 @@
 icon: flow
 title: RxJava 响应式编程
 description: RxJava 观察者模式、线程切换、背压、操作符体系与协程对比全解
+order: 5
 ---
 
 # RxJava 响应式编程

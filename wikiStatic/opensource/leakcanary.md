@@ -2,6 +2,7 @@
 icon: flask
 title: LeakCanary 内存泄漏检测
 description: LeakCanary 检测原理、引用泄漏观察、Dump Heap 与引用链分析全解
+order: 6
 ---
 
 # LeakCanary 内存泄漏检测

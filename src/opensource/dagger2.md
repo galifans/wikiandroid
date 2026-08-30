@@ -2,6 +2,7 @@
 icon: knife
 title: Dagger2 依赖注入框架
 description: Dagger2 依赖注入思想、编译期代码生成、@Component/@Module/@Inject 原理与作用域全解
+order: 8
 ---
 
 # Dagger2 依赖注入框架

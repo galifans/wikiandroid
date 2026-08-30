@@ -2,6 +2,7 @@
 icon: magic
 title: Retrofit 网络封装框架
 description: Retrofit 动态代理、注解解析、CallAdapter 与九种设计模式的灵活运用全解
+order: 2
 ---
 
 # Retrofit 网络封装框架
