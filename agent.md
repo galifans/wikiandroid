@@ -96,9 +96,9 @@ index: false   # 仅模块索引页需要（如 roadmap/README.md）
 
 ### 11.1 wikiStatic 是什么
 
-- `wikiStatic/` = WikiAndroid 的静态资料库：md 学习资料 + 书籍 PDF，供 GitHub 用户直接浏览 / 下载。
-  - `wikiStatic/books/`：书籍 PDF（点击直接下载），索引见 `wikiStatic/books/README.md`
+- `wikiStatic/` = WikiAndroid 的静态资料库：md 学习资料，供 GitHub 用户直接浏览 / 下载。
   - 各知识模块目录（roadmap / language / android / ui / jetpack / network / advanced / system / engineering / interview / projects / about）：由 `scripts/sync-wikistatic.mjs` 从 `src/` 同步的 md 镜像
+  - 书籍 PDF 不放在 `wikiStatic/`，统一存仓库顶层 `books/`（见 11.3）
 
 ### 11.2 内容变更流程（新增 / 修改文章、模块）
 
@@ -110,12 +110,13 @@ index: false   # 仅模块索引页需要（如 roadmap/README.md）
 3. **禁止手工编辑**目录树标记区间，一律由脚本刷新。
 4. 结构级变更（新增 / 删除模块）还需同步 `src/.vuepress/navbar.ts`、`sidebar.ts`、`architecture.md`、首页 features。
 
-### 11.3 书籍资源管理（wikiStatic/books/）
+### 11.3 书籍资源管理（统一存顶层 books/）
 
+- 所有 PDF 统一存仓库顶层 `books/<分类>/`（GitHub 直接下载），不发布到网站（Cloudflare Pages 单文件上限 25 MiB）。
 - 新增书籍流程：
-  1. PDF 放入 `wikiStatic/books/<分类>/`
-  2. 更新三处索引：`wikiStatic/books/README.md`、`src/books/README.md`（网站板块页）、根 `README.md` 书籍表格
-  3. 保持「文件名 / 大小 / 来源说明」与 `wikiStatic/books/` 实际文件一一对应
+  1. PDF 放入 `books/<分类>/`
+  2. 更新三处索引：`books/README.md`、`src/books/README.md`（网站板块页）、根 `README.md` 书籍表格
+  3. 保持「文件名 / 大小 / 说明」与 `books/` 实际文件一一对应
 - 书籍来源为公开开源资源；用户可见页面（网站、README）不标注具体来源仓库，仅保留通用版权声明。
 - 网速 / 体积受限时：不收录该书籍（不建占位目录、不写「待补充」），后续获得书籍后再补入对应分类。
 

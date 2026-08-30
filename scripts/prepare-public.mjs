@@ -2,31 +2,28 @@
 // scripts/prepare-public.mjs
 // WikiAndroid prebuild script (npm run prebuild / auto before build)
 //
-// Responsibilities:
-//   Copy wikiStatic/books/ (PDF single source of truth) into
-//   src/.vuepress/public/books/ so VuePress build publishes them at
-//   https://wikiandroid.com/books/*.pdf (direct download, Cloudflare CDN).
-//
-// Notes:
-//   - Cross-platform (Node.js): works on local Windows AND Cloudflare Pages
-//     Linux build environment (DO NOT use PowerShell here - CI has no `powershell`).
-//   - PDF files are ONLY stored in wikiStatic/books/ (repo);
-//     src/.vuepress/public/books/ is a build-time copy and is gitignored.
-//   - Cloudflare Pages single-file limit: 25 MiB. Keep books under that.
+// Historical note: used to copy wikiStatic/books/ into
+// src/.vuepress/public/books/ for direct site downloads.
+// Since all books now live in the top-level books/ (GitHub only),
+// this script only performs a safety check and exits.
 // =============================================================
 
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const booksSrc = path.join(root, "wikiStatic", "books");
-const booksDst = path.join(root, "src", ".vuepress", "public", "books");
 
 if (!existsSync(booksSrc)) {
-    console.warn(`[prepare-public] wikiStatic/books not found, skip: ${booksSrc}`);
+    console.warn(`[prepare-public] wikiStatic/books not found (books moved to top-level books/), skip: ${booksSrc}`);
     process.exit(0);
 }
+
+// Legacy copy logic kept for safety (e.g. if wikiStatic/books is re-created someday)
+import { cpSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+
+const booksDst = path.join(root, "src", ".vuepress", "public", "books");
 
 // 1. Clean old copy so removed books never linger in dist
 if (existsSync(booksDst)) {

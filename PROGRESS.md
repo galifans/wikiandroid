@@ -21,6 +21,14 @@
 
 ## 2. 进展时间线
 
+### 2026-08-30（书籍统一迁移到顶层 books/，删除 wikiStatic/books 双通道）
+- ✓ 用户需求：书籍全部移动到根目录 `books/`，不再使用 `wikiStatic/books/`，README 结构统一处理
+- ✓ 迁移：`wikiStatic/books/` 下 7 本小书全部移入顶层 `books/` 对应分类（算法/Java/数据库/HTTP/多线程），删除整个 `wikiStatic/books/` 目录
+- ✓ 去重：httpclient-intro.pdf（= HttpClient入门.pdf）、multithreading-guide.pdf（= 多线程编程指南.pdf）为同一本书重复拷贝，删除英文名版本；books/ 现共 **39 本 / 17 个分类**（新增「算法」分类）
+- ✓ 三处索引统一：`books/README.md`、`src/books/README.md`（网站页全部改 GitHub blob 链接）、根 `README.md` 全部按技术分类 + GitHub 相对链接，移除所有「网站直链 / Cloudflare CDN」表述
+- ✓ 内部文档同步：`architecture.md`（目录树 / 导航表 / 7.7 单通道规范 / 构建说明）、`agent.md`（11.3）、`src/README.md`（卡片文案 + 39 本）、`prepare-public.mjs`（历史性脚本安全跳过）、`sync-wikistatic.mjs` 注释
+- ✓ 校验：`npm run build` 构建通过；`wikiStatic/books/` 已从仓库与 git 中彻底移除
+
 ### 2026-08-30（书籍资源页面重构：统一按技术分类，移除来源标注）
 - ✓ 用户反馈：网站书籍页「经典书籍库（GitHub 下载）」章节割裂、AI 痕迹明显；「超大体积书籍（源仓库下载）」章节暴露资源来源
 - ✓ 重构三处面向用户索引（`src/books/README.md`、根 `README.md`、`wikiStatic/books/README.md`）：全部书籍统一按 17 个技术分类展示（算法/Android/C++/C语言/HTML/HTTP/Java/Javascript/Linux/Python/大数据/多线程/汇编语言/架构/人工智能&机器学习/数据库/消息队列&搜索引擎），删除「经典书籍库」「超大体积书籍」章节及 TIM168 来源引用

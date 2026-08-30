@@ -34,18 +34,14 @@ galifans_vibe_coding/
 ├── README.md                    # GitHub 首页（与 wikiandroid.com 同源：内容板块 + 书籍索引 + wikiStatic 目录树）
 ├── package.json                 # 依赖与脚本（dev / build / clean / sync:static）
 ├── .gitignore                   # 忽略 node_modules / .cache / .temp / dist
-├── books/                       # 经典书籍库（16 大方向精选 PDF，GitHub 直接下载，不发布到网站）
-│   └── README.md                # 经典书籍索引（Android / C++ / Java / 大数据 …）
+├── books/                       # 书籍资源库（17 大方向 39 本精选 PDF，GitHub 直接下载）
+│   └── README.md                # 书籍索引（算法 / Android / C++ / Java / 大数据 …）
 ├── scripts/
 │   ├── gen-icons.ps1            # 图标生成脚本（favicon.svg 同款设计 → PNG）
-│   ├── prepare-public.mjs      # 构建前复制 wikiStatic/books/ → src/.vuepress/public/books/（网站直链下载）
+│   ├── prepare-public.mjs      # 预构建脚本（wikiStatic/books 已移除，目录不存在时安全跳过）
 │   └── sync-wikistatic.mjs     # wikiStatic 同步脚本（md 同步 + README 目录树自动刷新，跨平台 Node）
 ├── wikiStatic/                  # 静态资料库（GitHub 直接浏览/下载，内容与 src/ 同源，详见第 8 节）
 │   ├── README.md                # wikiStatic 总索引（含自动生成的目录树）
-│   ├── books/                   # 网站直链书籍（仅收录 <25MiB 小体积 PDF；来源 TIM168/technical_books）
-│   │   ├── README.md            # 书籍索引（算法 / Java / 网络 / 数据库 …）
-│   │   ├── algorithm/ java/ network/ database/              # 已收录 PDF
-│   │   └── algorithm/ database/ java/ network/             # 仅收录已入库的小体积 PDF
 │   └── <模块目录>/              # 各知识模块 md 镜像（roadmap / language / android / ui / jetpack / network / advanced / system / engineering / interview / projects / about）
 └── src/                         # 站点源码根（VuePress docsDir）
     ├── README.md                # 首页（hero + 12 张功能卡片 + 精选文章）
@@ -66,7 +62,7 @@ galifans_vibe_coding/
     ├── engineering/             # 工程实践（gradle / git / cicd / testing）
     ├── interview/               # 面试指南（7 篇平铺文章）
     ├── projects/                # 实战项目
-    ├── books/                   # 书籍资源板块页（小书网站直链 wikiStatic/books/ + 经典大书 GitHub books/）
+    ├── books/                   # 书籍资源板块页（全部书籍按技术分类，GitHub 下载索引）
     └── about/                   # 关于本站（intro / contribution-guideline / faq）
 ```
 
@@ -93,7 +89,7 @@ galifans_vibe_coding/
 | 10 | 工程实践 | — | Gradle 构建 / Git 与版本管理 / CI/CD / 测试体系 | 下拉菜单 |
 | 11 | 面试指南 | `/interview/` | — | 平铺 8 篇文章 |
 | 12 | 实战项目 | `/projects/` | — | 平铺文章 |
-| 13 | 书籍资源 | `/books/` | — | 分类索引 + 直链下载（PDF 实体存 `wikiStatic/books/`） |
+| 13 | 书籍资源 | `/books/` | — | 分类索引 + GitHub 下载（PDF 实体存仓库顶层 `books/`） |
 | 14 | GitHub | https://github.com/galifans/wikiandroid | — | 外链 |
 
 > 注：`/about/` 不在导航栏中，通过首页「关于本站」功能卡片与链接访问。
@@ -262,7 +258,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 - ✓ open-source-analysis.md（开源项目源码解析）
 
 ### 书籍资源 `/books/`
-- ✓ src/books/README.md（网站板块页：小体积书分类索引 + 直链下载（`wikiStatic/books/`）+ 经典大书 GitHub 下载（仓库顶层 `books/`））
+- ✓ src/books/README.md（网站板块页：全部书籍按技术分类，GitHub 下载索引（仓库顶层 `books/`））
 
 ### 关于本站 `/about/`
 - ✓ intro.md　✓ contribution-guideline.md　✓ faq.md
@@ -325,20 +321,17 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 ### 7.6 更新「待更新」文章为正式文章
 - 创建文章文件，更新模块 README 移除「（待更新）」标记，即可消除对应 broken-link warning。
 
-### 7.7 书籍资源管理（双通道：网站直链小书 + GitHub 经典大书）
-- **小书（<25 MiB）**：实体存 `wikiStatic/books/<分类>/`（真相源），构建时 `prebuild`（`scripts/prepare-public.mjs`）自动复制到 `src/.vuepress/public/books/` → 发布为 `https://wikiandroid.com/books/*.pdf`（Cloudflare CDN 直链）；
-- **经典大书**：实体存仓库顶层 `books/<分类>/`（GitHub 直接下载，不发布到网站——Cloudflare Pages 单文件上限 25 MiB，大书无法网站直链）；
-- **Cloudflare Pages 单文件上限 25 MiB**：`wikiStatic/books/` 只收录 <25 MiB 的 PDF；大书一律进顶层 `books/`，仅提供 GitHub 下载链接；
-- 三处索引同步维护：`books/README.md`（经典书库索引）、`src/books/README.md`（网站板块页）、根 `README.md`（书籍表）；
-- 新增小书：PDF 放入 `wikiStatic/books/<分类>/` → 更新三处索引 → `npm run build` 验证 → 提交推送；
-- 新增经典大书：PDF 放入 `books/<分类>/` → 更新 `books/README.md` + `src/books/README.md` + 根 `README.md` → 提交推送（无需 build，GitHub 渲染即时生效）。
+### 7.7 书籍资源管理（全部书籍统一存顶层 books/，GitHub 下载）
+- **唯一真相源**：所有 PDF 实体存仓库顶层 `books/<分类>/`，点击书名跳转 GitHub 直接下载（不发布到网站——Cloudflare Pages 单文件上限 25 MiB）；
+- **索引同步维护**：`books/README.md`（完整索引）、`src/books/README.md`（网站板块页）、根 `README.md`（书籍表）；
+- 新增书籍：PDF 放入 `books/<分类>/` → 更新三处索引 → `npm run build` 验证 → 提交推送；
 
 ---
 
 ## 8. 构建与发布流程
 
 ```bash
-npm run build        # 1. 本地构建验证（prebuild 自动复制 wikiStatic/books/ → public/books/，输出 src/.vuepress/dist）
+npm run build        # 1. 本地构建验证（输出 src/.vuepress/dist）
 npm run dev          # 2.（可选）本地预览 http://localhost:8080
 git add -A
 git commit -m "feat(scope): 描述"
@@ -346,7 +339,7 @@ git push origin main # 3. 推送 main → Cloudflare Pages 自动构建部署
 # 4. 验证 https://wikiandroid.com（带查询参数硬刷新避免缓存）
 ```
 
-构建输出 97 个文章页面 + 各模块 README 页 + `books/` PDF 直链；`dist/` 与 `src/.vuepress/public/books/`（构建副本）已被 `.gitignore` 忽略，不入库。
+构建输出 97 个文章页面 + 各模块 README 页；`dist/` 已被 `.gitignore` 忽略，不入库。书籍全部存顶层 `books/`（GitHub 下载，不参与构建）。
 
 ---
 

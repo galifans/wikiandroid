@@ -1,22 +1,20 @@
 ---
 icon: book
 title: 书籍资源
-description: 精选 Android、Java、算法、网络、数据库等方向的高质量 PDF 经典书籍，点击书名直接下载（Cloudflare CDN / GitHub）
+description: 精选各技术方向的高质量 PDF 经典书籍，点击书名跳转 GitHub 直接下载
 ---
 
 # 书籍资源
 
-> 精选各技术方向的高质量 PDF 经典书籍，点击书名即可下载：
-> - **网站直链**：小体积书籍，Cloudflare CDN 加速，下载速度快；
-> - **GitHub 下载**：经典大部头书籍，点击跳转 GitHub 直接下载。
+> 精选各技术方向的高质量 PDF 经典书籍，全部收录在仓库 `books/` 目录，点击书名跳转 GitHub 直接下载。
 > 仅供学习交流使用，请尊重原作者版权。
 
 ## 算法
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| Hello 算法（Java 版） | 动画图解、一键运行的数据结构与算法入门书（15.5MB） | [网站下载](/books/algorithm/hello-algo.pdf) · [GitHub 备用](https://github.com/galifans/wikiandroid/raw/main/wikiStatic/books/algorithm/hello-algo.pdf) |
-| 程序员的数学 | 从数学视角理解编程，程序员必读（11.8MB） | [网站下载](/books/algorithm/programmer-math.pdf) · [GitHub 备用](https://github.com/galifans/wikiandroid/raw/main/wikiStatic/books/algorithm/programmer-math.pdf) |
+| Hello 算法（Java 版） | 动画图解、一键运行的数据结构与算法入门书（15.5MB） | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/%E7%AE%97%E6%B3%95/hello-algo.pdf) |
+| 程序员的数学 | 从数学视角理解编程，程序员必读（11.8MB） | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/%E7%AE%97%E6%B3%95/programmer-math.pdf) |
 
 ## Android
 
@@ -51,14 +49,14 @@ description: 精选 Android、Java、算法、网络、数据库等方向的高�
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| HttpClient 入门 | HTTP 客户端实战入门（0.1MB） | [网站下载](/books/network/httpclient-intro.pdf) · [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/HTTP/HttpClient%E5%85%A5%E9%97%A8.pdf) |
+| HttpClient 入门 | HTTP 客户端实战入门（0.1MB） | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/HTTP/HttpClient%E5%85%A5%E9%97%A8.pdf) |
 
 ## Java
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| 深入理解 JAVA 内存模型 | JMM 原理详解，面试常考（1.3MB） | [网站下载](/books/java/java-memory-model.pdf) · [GitHub 备用](https://github.com/galifans/wikiandroid/raw/main/wikiStatic/books/java/java-memory-model.pdf) |
-| 阿里巴巴 Java 开发手册（终极版） | 阿里规范，编码约定与最佳实践（1MB） | [网站下载](/books/java/alibaba-java-dev-manual.pdf) · [GitHub 备用](https://github.com/galifans/wikiandroid/raw/main/wikiStatic/books/java/alibaba-java-dev-manual.pdf) |
+| 深入理解 JAVA 内存模型 | JMM 原理详解，面试常考（1.3MB） | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/Java/java-memory-model.pdf) |
+| 阿里巴巴 Java 开发手册（终极版） | 阿里规范，编码约定与最佳实践（1MB） | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/Java/alibaba-java-dev-manual.pdf) |
 | Maven 实战 | 构建工具实战经典 | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/Java/Maven%E5%AE%9E%E6%88%98.pdf) |
 | 深入理解 Java 7 | JVM 与 Java 语言深入 | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/Java/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java7.pdf) |
 
@@ -96,7 +94,7 @@ description: 精选 Android、Java、算法、网络、数据库等方向的高�
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| 多线程编程指南 | 多线程基础与并发实践（1.8MB） | [网站下载](/books/network/multithreading-guide.pdf) · [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/%E5%A4%9A%E7%BA%BF%E7%A8%8B/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E6%8C%87%E5%8D%97.pdf) |
+| 多线程编程指南 | 多线程基础与并发实践（1.8MB） | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/%E5%A4%9A%E7%BA%BF%E7%A8%8B/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B%E6%8C%87%E5%8D%97.pdf) |
 
 ## 汇编语言
 
@@ -123,7 +121,7 @@ description: 精选 Android、Java、算法、网络、数据库等方向的高�
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| 程序员的 SQL 金典 | SQL 语法与优化经典（1.7MB） | [网站下载](/books/database/programmer-sql-classic.pdf) · [GitHub 备用](https://github.com/galifans/wikiandroid/raw/main/wikiStatic/books/database/programmer-sql-classic.pdf) |
+| 程序员的 SQL 金典 | SQL 语法与优化经典（1.7MB） | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/%E6%95%B0%E6%8D%AE%E5%BA%93/programmer-sql-classic.pdf) |
 | SQL 完全手册 | SQL 语法与优化大全 | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/%E6%95%B0%E6%8D%AE%E5%BA%93/SQL%E5%AE%8C%E5%85%A8%E6%89%8B%E5%86%8C.pdf) |
 | MySQL 高效编程 | MySQL 实战编程经典 | [GitHub 下载](https://github.com/galifans/wikiandroid/blob/main/books/%E6%95%B0%E6%8D%AE%E5%BA%93/%E3%80%8AMySQL%E9%AB%98%E6%95%88%E7%BC%96%E7%A8%8B%E3%80%8B.pdf) |
 

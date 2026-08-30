@@ -3,6 +3,13 @@
 > 精选各技术方向的经典 PDF 书籍，存放在本仓库 `books/` 目录，点击书名即可直接下载。
 > 仅供学习交流使用，请尊重原作者版权。
 
+## 算法
+
+| 书籍 | 说明 | 下载 |
+| --- | --- | --- |
+| Hello 算法（Java 版） | 动画图解、一键运行的数据结构与算法入门书 | [下载](算法/hello-algo.pdf) |
+| 程序员的数学 | 从数学视角理解编程，程序员必读 | [下载](算法/programmer-math.pdf) |
+
 ## Android
 
 | 书籍 | 说明 | 下载 |
@@ -42,6 +49,8 @@
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
+| 深入理解 JAVA 内存模型 | JMM 原理详解，面试常考 | [下载](Java/java-memory-model.pdf) |
+| 阿里巴巴 Java 开发手册（终极版） | 阿里规范，编码约定与最佳实践 | [下载](Java/alibaba-java-dev-manual.pdf) |
 | Maven 实战 | 构建工具实战经典 | [下载](Java/Maven实战.pdf) |
 | 深入理解 Java 7 | JVM 与 Java 语言深入 | [下载](Java/深入理解Java7.pdf) |
 
@@ -106,6 +115,7 @@
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
+| 程序员的 SQL 金典 | SQL 语法与优化经典 | [下载](数据库/programmer-sql-classic.pdf) |
 | SQL 完全手册 | SQL 语法与优化大全 | [下载](数据库/SQL完全手册.pdf) |
 | MySQL 高效编程 | MySQL 实战编程经典 | [下载](数据库/《MySQL高效编程》.pdf) |
 

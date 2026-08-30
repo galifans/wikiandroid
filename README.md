@@ -9,7 +9,7 @@
 | 方式 | 说明 |
 | --- | --- |
 | **GitHub 直接阅读**（推荐） | 本文档即完整知识库：下方按 板块直接呈现核心内容，点击文章标题即可在 GitHub 内阅读全文 |
-| **下载资料** | 直接下载 `wikiStatic/` 中的 md 学习资料，或 `wikiStatic/books/` 中的书籍 PDF |
+| **下载资料** | 直接下载 `wikiStatic/` 中的 md 学习资料，或 `books/` 中的书籍 PDF |
 | **在线学习（可选）** | 需要全文搜索、侧边栏导航、明暗主题时，访问 [wikiandroid.com](https://wikiandroid.com)（与本文档同源） |
 
 ---
@@ -130,17 +130,15 @@
 
 ## 书籍资源
 
-> 精选各技术方向的高质量 PDF 经典书籍，点击书名即可下载：
-> - 小体积书籍存放在 `wikiStatic/books/`，网站直链下载（Cloudflare CDN）；
-> - 经典大部头书籍存放在仓库顶层 `books/`，点击跳转 GitHub 下载。
+> 精选各技术方向的高质量 PDF 经典书籍，全部收录在仓库顶层 `books/` 目录，点击书名即可直接下载（GitHub）。完整索引见 [books/README.md](books/README.md)。
 > 仅供学习交流使用，请尊重原作者版权。
 
 ### 算法
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| Hello 算法（Java 版） | 动画图解、一键运行的数据结构与算法入门书 | [下载](wikiStatic/books/algorithm/hello-algo.pdf) |
-| 程序员的数学 | 从数学视角理解编程，程序员必读 | [下载](wikiStatic/books/algorithm/programmer-math.pdf) |
+| Hello 算法（Java 版） | 动画图解、一键运行的数据结构与算法入门书 | [下载](books/算法/hello-algo.pdf) |
+| 程序员的数学 | 从数学视角理解编程，程序员必读 | [下载](books/算法/programmer-math.pdf) |
 
 ### Android
 
@@ -175,14 +173,14 @@
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| HttpClient 入门 | HTTP 客户端实战入门 | [网站下载](wikiStatic/books/network/httpclient-intro.pdf) · [GitHub](books/HTTP/HttpClient入门.pdf) |
+| HttpClient 入门 | HTTP 客户端实战入门 | [下载](books/HTTP/HttpClient入门.pdf) |
 
 ### Java
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| 深入理解 JAVA 内存模型 | JMM 原理详解，面试常考 | [下载](wikiStatic/books/java/java-memory-model.pdf) |
-| 阿里巴巴 Java 开发手册（终极版） | 阿里规范，编码约定与最佳实践 | [下载](wikiStatic/books/java/alibaba-java-dev-manual.pdf) |
+| 深入理解 JAVA 内存模型 | JMM 原理详解，面试常考 | [下载](books/Java/java-memory-model.pdf) |
+| 阿里巴巴 Java 开发手册（终极版） | 阿里规范，编码约定与最佳实践 | [下载](books/Java/alibaba-java-dev-manual.pdf) |
 | Maven 实战 | 构建工具实战经典 | [下载](books/Java/Maven实战.pdf) |
 | 深入理解 Java 7 | JVM 与 Java 语言深入 | [下载](books/Java/深入理解Java7.pdf) |
 
@@ -220,7 +218,7 @@
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| 多线程编程指南 | 多线程基础与并发实践 | [网站下载](wikiStatic/books/network/multithreading-guide.pdf) · [GitHub](books/多线程/多线程编程指南.pdf) |
+| 多线程编程指南 | 多线程基础与并发实践 | [下载](books/多线程/多线程编程指南.pdf) |
 
 ### 汇编语言
 
@@ -247,7 +245,7 @@
 
 | 书籍 | 说明 | 下载 |
 | --- | --- | --- |
-| 程序员的 SQL 金典 | SQL 语法与优化经典 | [下载](wikiStatic/books/database/programmer-sql-classic.pdf) |
+| 程序员的 SQL 金典 | SQL 语法与优化经典 | [下载](books/数据库/programmer-sql-classic.pdf) |
 | SQL 完全手册 | SQL 语法与优化大全 | [下载](books/数据库/SQL完全手册.pdf) |
 | MySQL 高效编程 | MySQL 实战编程经典 | [下载](books/数据库/《MySQL高效编程》.pdf) |
 

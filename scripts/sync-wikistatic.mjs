@@ -7,7 +7,7 @@
 //
 // Responsibilities:
 //   1. Copy *.md from src/ content modules into wikiStatic/ (skip .vuepress, src/README.md, src/books/)
-//   2. Remove orphan *.md files in wikiStatic/ module dirs (never touch wikiStatic/books/)
+//   2. Remove orphan *.md files in wikiStatic/ module dirs (books live in top-level books/, not here)
 //   3. Auto-refresh the directory tree between the WIKISTATIC_TREE markers
 //      in wikiStatic/README.md (the root README.md no longer shows the tree)
 //
