@@ -195,7 +195,8 @@
     color: var(--vp-c-accent);
   }
 
-  // 禁用按钮（仅 Kotlin 代码块的 Java tab）：灰化 + 不可点击 + 悬停无反馈
+  // 禁用按钮（Kotlin-only 代码块的 Java tab / Java-only 题解的 Kotlin tab）：
+  // 灰化 + 不可点击 + 悬停无反馈
   .vp-code-tab-nav.disabled {
     color: var(--vp-c-text-mute, #9a9a9a);
     cursor: not-allowed;

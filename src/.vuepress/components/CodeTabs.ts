@@ -1,9 +1,10 @@
 // 自定义 CodeTabs 组件：覆盖 @vuepress/plugin-markdown-tab 的 CodeTabs。
 // 能力扩展：
-// 1) 识别"空内容"tab（如仅 Kotlin 代码块中被清空的 Java tab）→ 标记为 disabled：
+// 1) 识别"空内容"tab（如仅 Kotlin 代码块中被清空的 Java tab、
+//    或仅 Java 题解块中留空的 Kotlin tab）→ 标记为 disabled：
 //    按钮灰化、不可点击、键盘导航跳过、默认不激活；
 // 2) 默认激活第一个非 disabled tab（原组件默认激活 props.active，
-//    对"仅 Kotlin"块（Java 为空）会自动落到 Kotlin）；
+//    Kotlin-only 块自动落到 Kotlin，Java-only 题解块保持 Java）；
 // 其余行为（tabId 记忆、键盘左右切换、aria）与原组件一致。
 import { useStorage } from "@vueuse/core";
 import { defineComponent, h, onMounted, ref, shallowRef, useId, watch } from "vue";
@@ -128,7 +129,11 @@ export default defineComponent({
                     "aria-selected": isActive,
                     "aria-disabled": disabled[idx] ? `` : undefined,
                     disabled: disabled[idx] ? `` : undefined,
-                    title: disabled[idx] ? `此代码块仅支持 Kotlin 写法` : undefined,
+                    title: disabled[idx]
+                      ? (data[idx].id.toLowerCase() === `java`
+                          ? `此代码块仅支持 Kotlin 写法`
+                          : `此代码块仅提供 Java 版本`)
+                      : undefined,
                     onClick: () => {
                       if (disabled[idx]) return;
                       activeIndex.value = idx;
