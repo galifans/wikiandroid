@@ -21,6 +21,21 @@
 
 ## 2. 进展时间线
 
+### 2026-09-11（LeetCode Hot 100 题解页优化：100 题补全题目描述与示例 + 题目标题外链图标）
+- ✓ 用户需求：`src/language/algorithm/leetcode-top100.md` 页面需要优化——① 每题提供原始问题描述；② 题目标题后补充可跳转的力扣题目链接图标，鼠标悬停提示「前往leetcode」
+- ✓ 内容补全（100/100）：每个 `####` 题目下由「思路 + 代码」扩为「**题目描述** → `text 示例 → **思路** → 代码」四段式
+  - 题目描述为便于中文阅读的改写（非逐字复制官方文案，版权安全），示例输入输出取自题目公开用例
+  - 完整约束与官方用例统一引导至力扣页面（阅读约定中说明）
+  - 代码块（`::: code-tabs`）与原有思路讲解**保持不变**，仅在题首新增两段
+- ✓ 外链图标：题目标题末尾注入 `<a class="leetcode-link no-external-link-icon" ... data-tooltip="前往leetcode"></a>`
+  - 图标用 `src/.vuepress/styles/index.scss` 的 CSS 蒙版 `--leetcode-link-icon`（内联 SVG data URI）绘制，颜色跟随 `currentColor`，深浅色模式自动适配；悬停/键盘聚焦在图标上方淡入「前往leetcode」气泡
+  - 100 条外链全部使用 leetcode.cn 官方题号 slug（two-sum / group-anagrams / trapping-rain-water …），`target="_blank"` + `rel="noopener noreferrer"`
+- ✓ 关键取舍：图标锚点**内容必须留空**——markdown-it 会把 `<a>` 与 `</a>` 之间的文字计为 text token，被 markdown-it-anchor 计入标题 slug，标题锚点会变成 `#两数之和-leetcode-1-·-简单-前往-leetcode`，破坏既有深链；故文案改放 `data-tooltip` / `aria-label` 属性，图标纯由 CSS 绘制
+- ✓ 关键取舍：锚点必须带 `no-external-link-icon` 类——页面容器 `.theme-container.external-link-icon` 会让主题给内容区所有 `target="_blank"` 链接追加 `::after` 外链小图标，该规则优先级高于本项目样式，会覆盖 `content: attr(data-tooltip)` 并多画一个 11px 图标；主题为此提供 `:not(.no-external-link-icon)` 退出类
+- ✓ §3 阅读约定与章节引导句同步更新（图标用途、描述为改写+示例来源、代码仅 Java 说明）
+- ✓ 校验：`npm run build` 构建通过（410 页面）；渲染产物核对 100 个 `<h4>`、100 个外链锚点、标题 id 与改造前完全一致（无 `-前往-leetcode` 后缀）、无重复外链图标；浏览器实测浅/深色模式下图标与「前往leetcode」气泡正常
+- ✓ `npm run sync:static` 已同步 `wikiStatic/language/algorithm/leetcode-top100.md`
+
 ### 2026-08-30（新增开源组件板块：OkHttp / Retrofit / Glide / GreenDao / RxJava / LeakCanary / ButterKnife / Dagger2 / EventBus 共 9 篇文章）
 - ✓ 用户需求：安卓开源组件源码是重要学习资源，新增「开源组件」板块并补充 9 个经典开源库知识
 - ✓ 新增模块 `src/opensource/`（平铺，`index: false`）与模块 README（组件一览表 + 阅读建议 + 关联板块）
@@ -380,6 +395,11 @@
 - 正文：面试高频指数 、emoji 章节标题、Kotlin 代码示例、对比表格、高频面试题 Q&A（Q1-Q5）、小结
 - 内容为**原创中文教育文章**（参考 GitHub 高星仓库知识结构，非翻译，版权安全）
 
+### 重点长文记录
+| 文章 | 规模 | 结构特点 |
+| --- | --- | --- |
+| `src/language/algorithm/leetcode-top100.md` | 4600+ 行 / 100 道题 | 刷题策略 → 模板速查 → 14 个考点分类（哈希/双指针/滑动窗口/栈/链表/二叉树/图论/回溯/贪心/矩阵/普通数组/二分/动规/技巧），每题「题目描述 + 示例输入输出 + 思路 + code-tabs（Java）」四段式，题目标题末尾带力扣外链图标（见 §5 踩坑记录） |
+
 ## 4. 关键提交记录
 
 | Commit | 说明 |
@@ -397,6 +417,9 @@
 ## 5. 踩坑与经验记录（供后续参考）
 
 - **markdown 中 `<xxx>` 放在代码块外会被当作 HTML 标签** → VuePress build 报 "Element is missing end tag"。修复：正文里的占位符用反引号包成行内代码（如 `` `git branch <name>` ``）。XML 代码块内不受影响。
+- **标题里塞内联 HTML 会污染标题 id（slug）**：markdown-it 只把 `<a>`、`</a>` 标签本身当作 html_inline，标签之间的文字仍是 `text` token，会被 markdown-it-anchor 计入 slug。例如 `#### 两数之和（LeetCode 1 · 简单） <a class="x" ...>前往 LeetCode</a>` 渲染出的 id 变成 `两数之和-leetcode-1-·-简单-前往-leetcode`（首尾空白 slugify 时会 trim，中间不会）。**结论：标题内的 HTML 锚点内容一律留空**，可见文案放 `data-tooltip`/`aria-label` 属性，图形用 CSS 伪元素蒙版绘制（参考 `leetcode-top100.md` 的 `.leetcode-link`）。
+- **标题里 `<a class="header-anchor">` 内嵌套 `<a>`**：VuePress 会把整段标题包进 `<a class="header-anchor">`，标题内的外链锚点会嵌在其中，浏览器解析时会提前闭合外层锚点。当前 `.leetcode-link` 为空内容 + `position: absolute` 的伪元素图标，未出现实际可点区域异常；若后续要放可见文字，需重新评估（更稳妥是移到标题下方单独成段）。
+- **主题会自动给外链加图标，会盖掉自定义 `::after`**：`vuepress-theme-hope` 在内容区容器上加 `.external-link-icon`，对 `[vp-content] a[href*="://"]`、`a[target="_blank"]` 统一追加 `::after` 图标（`.external-link-icon [vp-content] a[target="_blank"]:not(.no-external-link-icon)::after`），其优先级高于项目自定义样式，会把自定义 `content: attr(data-tooltip)` 覆盖成 `""`。**修复：给自定义外链锚点加 `no-external-link-icon` 类退出**（该类是主题提供的正式退出机制）。排查手段：在浏览器里遍历 CSSOM 找出所有匹配该元素的 `::after` 规则并比对 `content` 声明。
 - **Cloudflare Pages 构建环境是 Linux**：任何构建钩子（prebuild）都不能调用 `powershell`/`pwsh`，必须用跨平台 Node 脚本（`node scripts/xxx.mjs`）。本地能跑的 PowerShell 脚本不代表 CI 能跑。
 - **PowerShell 5.1 偶发 PATH 丢失**：跑 npm 前先执行
   `$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")`

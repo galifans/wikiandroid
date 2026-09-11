@@ -25,6 +25,13 @@
     "Microsoft YaHei", "Source Han Sans SC", ui-sans-serif, system-ui,
     sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
     "Noto Color Emoji";
+
+  // 外链图标（open_in_new 样式的外链箭头），以 mask 方式绘制，
+  // 颜色随 currentColor 变化，深浅色模式自动适配。
+  // 源 SVG：<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  //   <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7z
+  //            M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+  --leetcode-link-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M19%2019H5V5h7V3H5c-1.11%200-2%20.9-2%202v14c0%201.1.89%202%202%202h14c1.1%200%202-.9%202-2v-7h-2v7zM14%203v2h3.59l-9.83%209.83%201.41%201.41L19%206.41V10h2V3h-7z'/%3E%3C/svg%3E");
 }
 
 // 正文排版：改善"拥挤"观感
@@ -237,5 +244,104 @@
     display: block;
     max-width: 100%;
     height: auto; // 覆盖 svg 固定 width/height 属性，等比缩放
+  }
+}
+
+// ============ LeetCode 题解外链图标（leetcode-top100.md 专用）============
+// 用法（写在题目标题末尾）：
+//   <a class="leetcode-link no-external-link-icon" href="https://leetcode.cn/problems/xxx/"
+//      target="_blank" rel="noopener noreferrer"
+//      aria-label="前往 LeetCode 对应题目" data-tooltip="前往leetcode"></a>
+//
+// 两个必须遵守的写法约束（改题目标题时勿破坏，否则会静默出错）：
+// 1) 锚点内必须留空：markdown-it 会把 <a> 与 </a> 之间的文字当作 text token，
+//    进而被 markdown-it-anchor 计入标题 slug，标题锚点会变成
+//    「#两数之和-leetcode-1-·-简单-前往-leetcode」，破坏既有深链。图标因此由
+//    CSS 蒙版绘制，文案放进 data-tooltip / aria-label 属性。
+// 2) 必须带 no-external-link-icon 类：页面容器 .theme-container.external-link-icon 会让
+//    主题给内容区所有 target="_blank" 链接追加 ::after 外链小图标，该规则优先级更高，
+//    会覆盖下面的 content: attr(data-tooltip) 并多画一个 11px 图标。主题为此提供了
+//    :not(.no-external-link-icon) 退出类。
+//
+// 表现：
+// 1) 站点内渲染为圆形图标按钮（图标用 --leetcode-link-icon 蒙版绘制，
+//    颜色跟随 currentColor，深浅色模式自动适配）；
+// 2) 悬停或键盘聚焦时，在图标正上方淡入「前往leetcode」气泡提示；
+// 3) wikiStatic / GitHub 上没有本样式，锚点为空不会残留额外字符。
+
+.vp-page .leetcode-link {
+  position: relative;
+  display: inline-block;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-left: 0.45rem;
+  vertical-align: -0.22rem;
+  border-radius: 50%;
+  background-color: var(--vp-c-accent-soft);
+  color: var(--vp-c-accent);
+  font-size: 0; // 隐藏标记内文案（图标由 ::before 绘制）
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--vp-t-color, 0.3s ease),
+    color var(--vp-t-color, 0.3s ease),
+    transform var(--vp-t-transform, 0.3s ease);
+
+  // 外链图标：蒙版着色，随 currentColor 变化
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: currentcolor;
+    -webkit-mask-image: var(--leetcode-link-icon);
+    -webkit-mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: 64%;
+    mask-image: var(--leetcode-link-icon);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: 64%;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--vp-c-accent);
+    color: var(--vp-c-accent-text);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  // 悬停提示气泡
+  &::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 0.55rem);
+    left: 50%;
+    z-index: 10;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 6px;
+    background-color: var(--vp-c-bg-elv);
+    box-shadow: 0 2px 8px var(--vp-c-shadow);
+    color: var(--vp-c-text);
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.3;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(4px);
+    transition:
+      opacity var(--vp-t-color, 0.3s ease),
+      transform var(--vp-t-transform, 0.3s ease),
+      visibility var(--vp-t-color, 0.3s ease);
+    pointer-events: none; // 气泡不拦截鼠标，避免闪烁
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
   }
 }
