@@ -1,12 +1,24 @@
 import { defineClientConfig } from "vuepress/client";
 import type { Router } from "vue-router";
 import CodeTabs from "./components/CodeTabs.ts";
+import { setupPageview } from "./utils/pageview.ts";
+
+// 访问量统计服务地址（Cloudflare Worker，部署方式见 workers/pv-counter/README.md）。
+// 更换为 *.workers.dev 地址时，记得同步 Worker 的 ALLOWED_ORIGINS 白名单。
+const PAGEVIEW_ENDPOINT = "https://pv.wikiandroid.com";
 
 export default defineClientConfig({
   enhance({ app, router }) {
     // 覆盖 @vuepress/plugin-markdown-tab 注册的 CodeTabs 组件：
     // 支持"仅 Kotlin"代码块（Java tab 内容为空）→ Java 按钮灰化禁用、默认激活 Kotlin
     app.component("CodeTabs", CodeTabs);
+
+    // 访问量统计：生产环境上报当前路径，并把「全站总浏览量 / 本页浏览量」
+    // 写入页脚占位元素（#wiki-site-pv / #wiki-page-pv，见 theme.ts 的 footer）。
+    // 仅生产构建启用，避免本地 dev 污染线上计数。
+    if (import.meta.env.PROD) {
+      setupPageview(router, { endpoint: PAGEVIEW_ENDPOINT });
+    }
 
     // 禁用浏览器原生滚动恢复，统一由 scrollBehavior 处理（savedPosition 分支负责恢复）
     if (typeof history !== "undefined") history.scrollRestoration = "manual";

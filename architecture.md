@@ -40,6 +40,12 @@ galifans_vibe_coding/
 │   ├── gen-icons.ps1            # 图标生成脚本（favicon.svg 同款设计 → PNG）
 │   ├── prepare-public.mjs      # 预构建脚本（wikiStatic/books 已移除，目录不存在时安全跳过）
 │   └── sync-wikistatic.mjs     # wikiStatic 同步脚本（md 同步 + README 目录树自动刷新，跨平台 Node）
+├── workers/
+│   └── pv-counter/              # 访问量统计服务（Cloudflare Worker + D1，见第 5.1 节）
+│       ├── src/index.js         # Worker 入口：POST /hit、GET /stats、GET /total
+│       ├── schema.sql           # D1 建表语句（pageviews）
+│       ├── wrangler.toml        # 部署配置（D1 绑定 / 自定义域名）
+│       └── README.md            # 部署步骤与接口说明
 ├── wikiStatic/                  # 静态资料库（GitHub 直接浏览/下载，内容与 src/ 同源，详见第 8 节）
 │   ├── README.md                # wikiStatic 总索引（含自动生成的目录树）
     └── <模块目录>/              # 各知识模块 md 镜像（roadmap / language / android / ui / jetpack / network / advanced / opensource / system / engineering / interview / projects / about）
@@ -140,12 +146,36 @@ galifans_vibe_coding/
 | `src/.vuepress/theme.ts` | 主题配置 | `author.name`（决定版权行）、`footer`、`repo`、`plugins` |
 | `src/.vuepress/navbar.ts` | 顶部导航 | 增删导航项 / 调整文案与顺序 |
 | `src/.vuepress/sidebar.ts` | 侧边栏 | 新增顶层模块时添加一行 `"structure"` |
+| `src/.vuepress/client.ts` | 客户端增强 | CodeTabs 注册 / scrollBehavior / 访问量上报（`PAGEVIEW_ENDPOINT`） |
+| `src/.vuepress/utils/pageview.ts` | 访问量前端上报 | 上报逻辑与页脚数值回填（选择器见第 5.1 节） |
 | `src/.vuepress/public/` | 静态资源 | `logo.svg`（首页 hero）、`favicon.svg` 等 |
+| `workers/pv-counter/` | 访问量统计服务 | Cloudflare Worker + D1（部署见其 README，详见第 5.1 节） |
 | `package.json` | 依赖与脚本 | 一般不动，保持精确版本 |
 
 **主题插件（theme.ts → plugins）**：copyCode（复制按钮）、
 photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版权水印，`global: false`）。
 > 2026-08-30：slimsearch（本地搜索）已禁用——中文检索跳转不准（搜索"注解框架"会跳到无关标题），用户决定去掉搜索框。依赖保留在 package.json，恢复时在 theme.ts plugins 重新启用即可。
+
+### 5.1 访问量统计（页脚总浏览量 + 本页浏览量）
+
+> 需求：页脚显示**网站总计浏览量**，并展示**当前子页面**的访问量。
+> 方案：Cloudflare Worker + D1 自建（数据自有、免费、隐私友好），非第三方统计。
+
+| 层 | 位置 | 说明 |
+| --- | --- | --- |
+| 存储 | D1 表 `pageviews(path TEXT PK, count, updated_at)` | 全站总量 = `SUM(count)`，无需单独计数器 |
+| 服务 | `workers/pv-counter/src/index.js` | `POST /hit`（+1 并返回）、`GET /stats?path=`、`GET /total` |
+| 前端 | `src/.vuepress/utils/pageview.ts` | `router.afterEach` 上报；同会话同路径只计一次（sessionStorage） |
+| 展示 | `theme.ts` 的 `footer` | 占位元素 `#wiki-site-pv` / `#wiki-page-pv`，默认 `–` |
+| 样式 | `index.scss` 的 `.vp-footer .site-stat*` | 数值品牌绿 + `tabular-nums` 等宽 |
+
+**关键机制 / 注意事项**：
+- 页脚由 theme-hope 用 `innerHTML` 渲染（`.vp-footer`），**每次路由变化会被重建**——`pageview.ts` 用 `MutationObserver` 监听后把缓存值回填，不能依赖一次性写入。
+- 仅**生产构建**启用（`import.meta.env.PROD`），本地 `npm run dev` 不上报，避免污染线上计数。
+- 接口地址在 `client.ts` 的 `PAGEVIEW_ENDPOINT` 常量（当前 `https://pv.wikiandroid.com`）；换成 `*.workers.dev` 时须同步 Worker 的 `ALLOWED_ORIGINS` 白名单。
+- `workers/` 目录**不参与网站构建**（VuePress 只构建 `src`），Pages 部署与它无关，需单独 `wrangler deploy`。
+- 未部署 Worker / 接口不可达时前端静默失败，页脚保留 `–`，不影响站点可用性。
+- 统计服务首次部署步骤（create D1 → execute schema → fill database_id → deploy）见 `workers/pv-counter/README.md`。
 
 ---
 
@@ -319,7 +349,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 
 ### 7.5 修改品牌 / 版权 / 页脚
 - 版权行：`theme.ts` 的 `author.name`（theme-hope 据此自动生成 `Copyright  <year> <name>`）；`copyright.author` 同步改。
-- 页脚：`theme.ts` 的 `footer`（当前为 `GitHub | MIT License`）。
+- 页脚：`theme.ts` 的 `footer`（含「总浏览量 / 本页浏览量」统计占位 + `GitHub | MIT License`；统计实现见第 5.1 节）。
 - 站点标题：`config.ts` 的 `title`。
 - 图标：替换 `public/logo.svg` / `public/favicon.svg`（用 `scripts/gen-icons.ps1` 重新生成 PNG）。
 

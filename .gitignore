@@ -3,5 +3,7 @@ src/.vuepress/.cache/
 src/.vuepress/.temp/
 src/.vuepress/dist/
 src/.vuepress/public/books/
+# Cloudflare Workers 本地状态（wrangler 生成）
+.wrangler/
 .DS_Store
 *.log

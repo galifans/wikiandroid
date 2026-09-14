@@ -345,3 +345,30 @@
     transform: translateX(-50%) translateY(0);
   }
 }
+
+// ============ 页脚访问量统计（总浏览量 / 本页浏览量）============
+// 数值由 src/.vuepress/utils/pageview.ts 从 Cloudflare Worker 拉取后写入
+// #wiki-site-pv / #wiki-page-pv（见 workers/pv-counter）；拉取前显示占位符 “–”。
+// 结构写在 theme.ts 的 footer 字符串中，这里只负责排版与配色。
+.vp-footer {
+  .site-stat {
+    white-space: nowrap; // 标签与数值不拆行
+  }
+
+  .site-stat-label {
+    color: var(--vp-c-text-mute);
+  }
+
+  .site-stat-value {
+    margin-inline-start: 4px;
+    color: var(--vp-c-accent); // 品牌绿高亮数值
+    font-weight: 600;
+    font-variant-numeric: tabular-nums; // 数字等宽：数值变化时不抖动
+  }
+
+  // 分隔竖线（与 GitHub | MIT License 的原有风格一致）
+  .site-stat-sep {
+    margin: 0 0.5em;
+    opacity: 0.55;
+  }
+}
