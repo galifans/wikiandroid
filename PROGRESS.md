@@ -35,7 +35,8 @@
 - ✓ 页脚 `theme.ts` footer：`总访问量 – | GitHub | MIT License`（占位元素 `#wiki-site-pv`）；`index.scss` 新增 `.vp-footer .site-stat*`（数值品牌绿 `--vp-c-accent` + `font-variant-numeric: tabular-nums` 防抖动、分隔线半透明）
 - ✓ 关键取舍：theme-hope 用 `innerHTML` 渲染 `.vp-footer`，**每次路由变化都会被重建**——不能一次性写入数值，必须用 `MutationObserver` 监听回填（与主题内置 `setupRunningTimeFooter` 同一思路）
 - ✓ 校验：`npm run build` 构建通过（410 页面）；产物核对——所有 html 均含 `#wiki-site-pv` 占位节点、`dist/_routes.json` 存在且只 include `/pv/*`；无 lint/类型错误
-- ☐ 待用户执行（三个控制台步骤，均无需 wrangler）：① 创建 D1 库 `wikiandroid-pv` 并执行建表 SQL；② Pages 项目 Settings → Bindings 添加 D1 绑定，**变量名必须是 `DB`**；③ 重新部署一次使绑定生效。详见 architecture.md 第 5.1 节
+- ✓ 线上部署完成 → **2026-09-14 已启用并验证通过**：D1 库 `wikiandroid-pv` 已创建建表、Pages Production 环境已绑定变量名 `DB`，线上实测 `GET /pv/total` → `{"total":0}` 200、`POST /pv/hit` → `{"total":1}` 200
+- ⚠️ 排查踩坑：**部署未完成时探测会打到上一次部署**。Pages 从 clone 到 deploy 约 1.5～2 分钟，期间线上仍是旧版本，此时看到 `500 D1 binding \`DB\` is missing` 属正常中间态（旧部署没有绑定）。判断"是否上线"应看构建日志的 `Success: Your site was deployed!`，或比对页面是否含最新改动，而不是凭一次请求就下结论
 
 ### 2026-09-11（LeetCode Hot 100 题解页优化：100 题补全题目描述与示例 + 题目标题外链图标）
 - ✓ 用户需求：`src/language/algorithm/leetcode-top100.md` 页面需要优化——① 每题提供原始问题描述；② 题目标题后补充可跳转的力扣题目链接图标，鼠标悬停提示「前往leetcode」
@@ -448,6 +449,7 @@
 - **Cloudflare 静态站做计数优先 D1 而非 KV**：KV 的 `get` + `put` 非原子，高并发下会丢计数；D1（SQLite）用 `INSERT ... ON CONFLICT DO UPDATE count = count + 1` 天然原子，且 `SUM(count)` 即可得全站总量，无需额外维护总数。
 - **Cloudflare Pages 一旦有 `functions/` 目录，默认接管全部请求**：静态站原本请求不限量免费，加了 Functions 后所有请求都会调用 Function 并计入每日 10 万次免费额度。必须用 `_routes.json`（`include`/`exclude`，`exclude` 优先）把 Functions 限定到确实需要的路由；且该文件必须放在**构建产物目录**，放在仓库根目录无效。
 - **`functions/` 目录必须在仓库根目录**（官方文档明确：不能放在 `dist` 之类的静态根下），否则 Pages 不识别。
+- **Pages 构建期间线上仍是旧版本，别急着用一次请求下结论**：从 clone 到 `Success: Your site was deployed!` 约 1.5～2 分钟，这期间探测会打到**上一次部署**。典型误判：刚给 Pages 加了 D1 绑定并 Retry，立刻请求接口得到 `500 D1 binding \`DB\` is missing`，以为绑定没生效——其实只是新部署还没上线。**判断是否已上线应看构建日志最后一行，或比对页面是否含最新改动**（本项目页脚含 `wiki-site-pv` 即代表是新版），再复测接口。
 
 ## 6. 未来计划（候选，待用户确认）
 

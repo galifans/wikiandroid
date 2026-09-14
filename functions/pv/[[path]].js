@@ -92,14 +92,7 @@ export const onRequest = async ({ request, env, params }) => {
   if (request.method === "OPTIONS") return new Response(null, { status: 204 });
 
   // 未绑定 D1 时明确报错，便于部署后快速发现配置问题
-  // TODO(临时诊断，定位后删除)：把运行时可见的绑定名一并返回，用于排查
-  // Pages Settings → Bindings 是否真正挂到了当前部署上。
-  if (!env.DB) {
-    return json(
-      { error: "D1 binding `DB` is missing", bindings: Object.keys(env) },
-      500
-    );
-  }
+  if (!env.DB) return json({ error: "D1 binding `DB` is missing" }, 500);
 
   try {
     if (action === "hit" && request.method === "POST") {

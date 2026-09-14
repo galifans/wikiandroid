@@ -181,7 +181,8 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 - 接口基础路径在 `client.ts` 的 `PAGEVIEW_ENDPOINT` 常量（当前 `/pv`，同源相对路径）。
 - 未绑定 D1 或接口不可达时前端静默失败，页脚保留 `–`，不影响站点可用性（`env.DB` 缺失时接口返回 500 + 明确错误信息，便于排查）。
 
-**首次启用步骤**（只需一次，全部在 Cloudflare 控制台网页完成，**不用装 wrangler**）：
+**首次启用步骤**（只需一次，全部在 Cloudflare 控制台网页完成，**不用装 wrangler**）
+> ✅ 2026-09-14 已完成并通过线上验证，以下步骤留档备查（如更换账号/重建项目时照做）：
 
 1. **建库**：Storage & Databases → D1 → Create database，名称 `wikiandroid-pv`。
 2. **建表**：进入该库的 Console，粘贴执行：
@@ -198,14 +199,21 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
    变量名必须填 **`DB`**（与 `functions/pv/[[path]].js` 里的 `env.DB` 一致），再选择刚建的库。
 4. **重新部署**：绑定的变更需一次新部署才生效（Deployments → Retry deployment，或再 push 一次）。
 
+> ⚠️ 构建需要 1.5～2 分钟，**期间线上仍是旧部署**。此时探测接口会得到
+> `500 D1 binding \`DB\` is missing`（旧部署没有绑定），属正常中间态。
+> 判断新部署是否上线看构建日志末行 `Success: Your site was deployed!`，
+> 或比对页面是否含最新改动（页脚含 `wiki-site-pv` 即新版），然后再复测。
+
 **验证**（部署完成后）：
 
 ```powershell
 Invoke-RestMethod "https://wikiandroid.com/pv/total"
+# → {"total":0}   （200）
 Invoke-RestMethod -Method Post -Uri "https://wikiandroid.com/pv/hit" `
   -ContentType "application/json" -Body '{"path":"/test/"}'
-# 期望分别返回 {"total":N} 与 {"page":1,"total":N}；测试完清掉测试数据：
-# DELETE FROM pageviews WHERE path='/test/'
+# → {"total":1}   （200，hit 只返回全站总量）
+# 测试完清掉测试数据：DELETE FROM pageviews WHERE path='/test/'；
+# 想完全归零：DELETE FROM pageviews;
 ```
 
 ---
