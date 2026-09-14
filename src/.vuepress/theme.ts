@@ -30,14 +30,11 @@ export default hopeTheme({
   // 侧边栏（按目录结构自动生成）
   sidebar,
 
-  // 页脚：全站总浏览量 + 本页浏览量（数值由 client.ts 的 setupPageview 注入）
-  // 占位符 "–" 在接口返回后被替换；未配置 / 未部署统计服务时保持占位符。
+  // 页脚：全站总访问量（数值由 client.ts 的 setupPageview 注入）
+  // 占位符 "–" 在接口返回后被替换；接口不可用时保持占位符。
   footer:
-    '<span class="site-stat"><span class="site-stat-label">总浏览量</span>' +
+    '<span class="site-stat"><span class="site-stat-label">总访问量</span>' +
     '<span class="site-stat-value" id="wiki-site-pv">–</span></span>' +
-    '<span class="site-stat-sep">|</span>' +
-    '<span class="site-stat"><span class="site-stat-label">本页浏览</span>' +
-    '<span class="site-stat-value" id="wiki-page-pv">–</span></span>' +
     '<span class="site-stat-sep">|</span>' +
     '<a href="https://github.com/galifans/wikiandroid" target="_blank">GitHub</a>' +
     '<span class="site-stat-sep">|</span>' +

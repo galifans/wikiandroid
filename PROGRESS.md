@@ -21,19 +21,21 @@
 
 ## 2. 进展时间线
 
-### 2026-09-14（新增页脚访问量统计：全站总计浏览量 + 每个子页面浏览量）
-- ✓ 用户需求：wikiandroid.com 页脚需要展示**网站总计浏览量**，并给**各个子页面**增加访问量统计；确认方案为「Cloudflare Worker + D1 自建」、展示位置统一在**页脚**
-- ✓ 方案选型：对比三种——A. Cloudflare Worker + D1（数据自有/免费/隐私友好，能同时满足总量+单页）；B. 不蒜子 busuanzi（零后端但第三方不稳定）；C. theme-hope 内置 `pageInfo: ["PageView"]`（依赖 Waline/Artalk 评论服务，且无全站总量）。**选 A**
-- ✓ 服务端 `workers/pv-counter/`（独立目录，不参与网站构建）：
-  - `src/index.js`：`POST /hit`（自增并返回 `{page,total}`）、`GET /stats?path=`（只读）、`GET /total`；CORS 按来源白名单（wikiandroid.com / www / pages.dev / localhost）
+### 2026-09-14（新增页脚全站总访问量统计）
+- ✓ 用户需求演变：最初要求「页脚展示网站总计浏览量 + 各个子页面访问量」，实现后用户决定**只保留全站总访问量**，不在每个页面展示单页数字
+- ✓ 方案选型：对比三种——A. Cloudflare 自建 + D1（数据自有/免费/隐私友好）；B. 不蒜子 busuanzi（零后端但第三方不稳定）；C. theme-hope 内置 `pageInfo: ["PageView"]`（依赖 Waline/Artalk 评论服务，且无全站总量）。**选 A**
+- ✓ 落地形态选型：先实现为**独立 Worker**（需 `wrangler login` + `wrangler deploy`），后改为 **Cloudflare Pages Functions**（`functions/` 目录随 Pages 构建自动发布）——免装 wrangler、免单独部署、免 CORS 白名单，`git push` 即生效；仓库已删除 `workers/` 目录
+- ✓ 服务端 `functions/pv/[[path]].js`（仓库根目录，随站点自动部署）：`POST /pv/hit`（按路径 +1，返回 `{total}`）、`GET /pv/total`（只读）；同源故无需 CORS
   - D1 表 `pageviews(path TEXT PRIMARY KEY, count, updated_at)`；自增用 `INSERT ... ON CONFLICT(path) DO UPDATE SET count = count + 1`（原子，避开 KV 读-改-写并发丢数）；全站总量 = `SUM(count)`，无需单独计数器
-  - `wrangler.toml` / `schema.sql` / `README.md`（create D1 → execute schema → 填 database_id → deploy → 绑定 pv.wikiandroid.com 自定义域名）
-- ✓ 前端 `src/.vuepress/utils/pageview.ts`：`router.afterEach` 上报当前 path；同会话同路径只计一次（sessionStorage）；rAF 节流 + MutationObserver 回填；网络异常静默失败
-- ✓ 接入 `src/.vuepress/client.ts`：新增 `PAGEVIEW_ENDPOINT = "https://pv.wikiandroid.com"`，`import.meta.env.PROD` 守卫（dev 不上报不污染线上数据）
-- ✓ 页脚 `theme.ts` footer：`总浏览量 – | 本页浏览 – | GitHub | MIT License`（占位元素 `#wiki-site-pv` / `#wiki-page-pv`）；`index.scss` 新增 `.vp-footer .site-stat*`（数值品牌绿 `--vp-c-accent` + `font-variant-numeric: tabular-nums` 防抖动、分隔线半透明）
-- ✓ 关键字取舍：theme-hope 用 `innerHTML` 渲染 `.vp-footer`，**每次路由变化都会被重建**——不能一次性写入数值，必须用 `MutationObserver` 监听回填（与主题内置 `setupRunningTimeFooter` 同一思路）
-- ✓ 校验：`npm run build` 构建通过（410 页面）；产物核对——所有 html 均含 `#wiki-site-pv` 占位节点、`assets/app-*.js` 含 `pv.wikiandroid.com` 上报代码；4 个改动文件无 lint/类型错误
-- ☐ 待用户执行：按 `workers/pv-counter/README.md` 部署 Worker + D1，并绑定 `pv.wikiandroid.com`（未部署时前端静默失败，页脚保留 `–`，不影响站点）
+  - **仍按页面路径分条记录**（便于日后查看单页数据），只不展示单页数字；恢复单页展示只需加回 `/pv/stats` 与前端回填逻辑
+  - 未绑定 D1 时返回 500 + `D1 binding \`DB\` is missing`，便于部署后快速定位配置问题
+- ✓ **关键坑：Functions 默认会接管所有请求**——Pages 项目一旦有 `functions/` 目录，全站静态请求都会进 Functions 并消耗每日 10 万次免费额度。必须用 `_routes.json` 限定：本项目 `src/.vuepress/public/_routes.json` → `include: ["/pv/*"]`（VuePress 会自动拷到 dist 根，而 `_routes.json` 必须位于**构建产物目录**）
+- ✓ 前端 `src/.vuepress/utils/pageview.ts`：`router.afterEach` 上报当前 path；同会话同路径只计一次（sessionStorage，避免刷新刷量）；rAF 节流 + MutationObserver 回填；网络异常静默失败
+- ✓ 接入 `src/.vuepress/client.ts`：`PAGEVIEW_ENDPOINT = "/pv"`（同源相对路径），`import.meta.env.PROD` 守卫（dev 不上报不污染线上数据）
+- ✓ 页脚 `theme.ts` footer：`总访问量 – | GitHub | MIT License`（占位元素 `#wiki-site-pv`）；`index.scss` 新增 `.vp-footer .site-stat*`（数值品牌绿 `--vp-c-accent` + `font-variant-numeric: tabular-nums` 防抖动、分隔线半透明）
+- ✓ 关键取舍：theme-hope 用 `innerHTML` 渲染 `.vp-footer`，**每次路由变化都会被重建**——不能一次性写入数值，必须用 `MutationObserver` 监听回填（与主题内置 `setupRunningTimeFooter` 同一思路）
+- ✓ 校验：`npm run build` 构建通过（410 页面）；产物核对——所有 html 均含 `#wiki-site-pv` 占位节点、`dist/_routes.json` 存在且只 include `/pv/*`；无 lint/类型错误
+- ☐ 待用户执行（三个控制台步骤，均无需 wrangler）：① 创建 D1 库 `wikiandroid-pv` 并执行建表 SQL；② Pages 项目 Settings → Bindings 添加 D1 绑定，**变量名必须是 `DB`**；③ 重新部署一次使绑定生效。详见 architecture.md 第 5.1 节
 
 ### 2026-09-11（LeetCode Hot 100 题解页优化：100 题补全题目描述与示例 + 题目标题外链图标）
 - ✓ 用户需求：`src/language/algorithm/leetcode-top100.md` 页面需要优化——① 每题提供原始问题描述；② 题目标题后补充可跳转的力扣题目链接图标，鼠标悬停提示「前往leetcode」
@@ -444,7 +446,8 @@
 - **theme-hope 页脚是 `innerHTML` 渲染、随路由重建**：`.vp-footer` 内容每次路由变化都会被重新赋值，任何在页脚注入的动态内容（访问量、运行时间等）都不能只写一次，要用 `MutationObserver` 或随 `routePath` watch 回填；主题自带的 `setupRunningTimeFooter` 是同一模式。
 - **主题内置 `pageInfo: ["PageView"]` 不是开箱可用**：它依赖 `@vuepress/plugin-comment` 的 Waline / Artalk 提供 pageview（`@vuepress/plugin-comment/pageview` 的 `isSupported`），未配置评论服务时该选项静默无效。
 - **Cloudflare 静态站做计数优先 D1 而非 KV**：KV 的 `get` + `put` 非原子，高并发下会丢计数；D1（SQLite）用 `INSERT ... ON CONFLICT DO UPDATE count = count + 1` 天然原子，且 `SUM(count)` 即可得全站总量，无需额外维护总数。
-- **`workers/` 目录不影响 Pages 构建**：VuePress 只构建 `src`，Worker 需单独 `wrangler deploy`；但须注意 CORS——Worker 与站点不同源，来源白名单要包含所有实际访问域名（含 `*.pages.dev` 预览域）。
+- **Cloudflare Pages 一旦有 `functions/` 目录，默认接管全部请求**：静态站原本请求不限量免费，加了 Functions 后所有请求都会调用 Function 并计入每日 10 万次免费额度。必须用 `_routes.json`（`include`/`exclude`，`exclude` 优先）把 Functions 限定到确实需要的路由；且该文件必须放在**构建产物目录**，放在仓库根目录无效。
+- **`functions/` 目录必须在仓库根目录**（官方文档明确：不能放在 `dist` 之类的静态根下），否则 Pages 不识别。
 
 ## 6. 未来计划（候选，待用户确认）
 

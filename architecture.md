@@ -40,12 +40,9 @@ galifans_vibe_coding/
 │   ├── gen-icons.ps1            # 图标生成脚本（favicon.svg 同款设计 → PNG）
 │   ├── prepare-public.mjs      # 预构建脚本（wikiStatic/books 已移除，目录不存在时安全跳过）
 │   └── sync-wikistatic.mjs     # wikiStatic 同步脚本（md 同步 + README 目录树自动刷新，跨平台 Node）
-├── workers/
-│   └── pv-counter/              # 访问量统计服务（Cloudflare Worker + D1，见第 5.1 节）
-│       ├── src/index.js         # Worker 入口：POST /hit、GET /stats、GET /total
-│       ├── schema.sql           # D1 建表语句（pageviews）
-│       ├── wrangler.toml        # 部署配置（D1 绑定 / 自定义域名）
-│       └── README.md            # 部署步骤与接口说明
+├── functions/                   # Cloudflare Pages Functions（随 Pages 构建自动部署，见第 5.1 节）
+│   └── pv/
+│       └── [[path]].js          # 访问量接口：POST /pv/hit、GET /pv/total
 ├── wikiStatic/                  # 静态资料库（GitHub 直接浏览/下载，内容与 src/ 同源，详见第 8 节）
 │   ├── README.md                # wikiStatic 总索引（含自动生成的目录树）
     └── <模块目录>/              # 各知识模块 md 镜像（roadmap / language / android / ui / jetpack / network / advanced / opensource / system / engineering / interview / projects / about）
@@ -57,6 +54,7 @@ galifans_vibe_coding/
     │   ├── navbar.ts            # 顶部导航栏（唯一手工维护的导航源）
     │   ├── sidebar.ts           # 侧边栏（全部模块用 "structure" 自动生成）
     │   └── public/              # 静态资源（logo.svg / favicon.svg / 图标 PNG）
+    │       └── _routes.json     # 限定 Functions 只处理 /pv/*，其余保持静态请求免费
     ├── roadmap/                 # 学习路线
     ├── language/                # 语言基础（kotlin / java / algorithm）
     ├── android/                 # Android 核心（四大组件 + Fragment + Intent + 应用启动 + 资源/权限/通知 + 存储）
@@ -148,34 +146,67 @@ galifans_vibe_coding/
 | `src/.vuepress/sidebar.ts` | 侧边栏 | 新增顶层模块时添加一行 `"structure"` |
 | `src/.vuepress/client.ts` | 客户端增强 | CodeTabs 注册 / scrollBehavior / 访问量上报（`PAGEVIEW_ENDPOINT`） |
 | `src/.vuepress/utils/pageview.ts` | 访问量前端上报 | 上报逻辑与页脚数值回填（选择器见第 5.1 节） |
-| `src/.vuepress/public/` | 静态资源 | `logo.svg`（首页 hero）、`favicon.svg` 等 |
-| `workers/pv-counter/` | 访问量统计服务 | Cloudflare Worker + D1（部署见其 README，详见第 5.1 节） |
+| `src/.vuepress/public/` | 静态资源 | `logo.svg`（首页 hero）、`favicon.svg`、`_routes.json`（Functions 路由限定） |
+| `functions/pv/` | 访问量统计服务 | Cloudflare Pages Functions + D1（**随 Pages 构建自动部署**，详见第 5.1 节） |
 | `package.json` | 依赖与脚本 | 一般不动，保持精确版本 |
 
 **主题插件（theme.ts → plugins）**：copyCode（复制按钮）、
 photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版权水印，`global: false`）。
 > 2026-08-30：slimsearch（本地搜索）已禁用——中文检索跳转不准（搜索"注解框架"会跳到无关标题），用户决定去掉搜索框。依赖保留在 package.json，恢复时在 theme.ts plugins 重新启用即可。
 
-### 5.1 访问量统计（页脚总浏览量 + 本页浏览量）
+### 5.1 访问量统计（页脚全站总访问量）
 
-> 需求：页脚显示**网站总计浏览量**，并展示**当前子页面**的访问量。
-> 方案：Cloudflare Worker + D1 自建（数据自有、免费、隐私友好），非第三方统计。
+> 需求：页脚显示**全站总访问量**（早期方案含「本页浏览量」，2026-09-14 用户决定只保留总量）。
+> 方案：Cloudflare Pages Functions + D1 自建（数据自有、免费、隐私友好），非第三方统计。
+> 与站点**同源部署**，因此 `git push` 即自动生效——无需 wrangler、无需单独部署、无需 CORS 配置。
 
 | 层 | 位置 | 说明 |
 | --- | --- | --- |
 | 存储 | D1 表 `pageviews(path TEXT PK, count, updated_at)` | 全站总量 = `SUM(count)`，无需单独计数器 |
-| 服务 | `workers/pv-counter/src/index.js` | `POST /hit`（+1 并返回）、`GET /stats?path=`、`GET /total` |
+| 服务 | `functions/pv/[[path]].js` | `POST /pv/hit`（按路径 +1，返回 `{total}`）、`GET /pv/total`（只读） |
+| 路由 | `src/.vuepress/public/_routes.json` | `include: ["/pv/*"]` → 只有 `/pv/*` 走 Functions |
 | 前端 | `src/.vuepress/utils/pageview.ts` | `router.afterEach` 上报；同会话同路径只计一次（sessionStorage） |
-| 展示 | `theme.ts` 的 `footer` | 占位元素 `#wiki-site-pv` / `#wiki-page-pv`，默认 `–` |
+| 展示 | `theme.ts` 的 `footer` | 占位元素 `#wiki-site-pv`，默认 `–` |
 | 样式 | `index.scss` 的 `.vp-footer .site-stat*` | 数值品牌绿 + `tabular-nums` 等宽 |
+
+> 注：服务端仍**按页面路径分条记录**（便于日后查看单页数据），但页脚只展示全站总量。
+> 如需恢复单页展示，在 `pageview.ts` 加回 pageSelector 回填逻辑、并恢复 `/pv/stats?path=` 接口即可。
 
 **关键机制 / 注意事项**：
 - 页脚由 theme-hope 用 `innerHTML` 渲染（`.vp-footer`），**每次路由变化会被重建**——`pageview.ts` 用 `MutationObserver` 监听后把缓存值回填，不能依赖一次性写入。
+- `_routes.json` **必须位于构建产物目录**（`src/.vuepress/dist`）；本项目放在 `src/.vuepress/public/_routes.json` 由 VuePress 自动拷到 dist 根。
+  > 若省略该文件，Cloudflare 会让**所有**请求都进 Functions——410 页站点的静态请求将不再免费（并消耗每天 10 万次的 Functions 免费额度）。
+- `functions/` 必须位于**仓库根目录**（不能放在 `dist` 等静态根下），否则不会被识别。
 - 仅**生产构建**启用（`import.meta.env.PROD`），本地 `npm run dev` 不上报，避免污染线上计数。
-- 接口地址在 `client.ts` 的 `PAGEVIEW_ENDPOINT` 常量（当前 `https://pv.wikiandroid.com`）；换成 `*.workers.dev` 时须同步 Worker 的 `ALLOWED_ORIGINS` 白名单。
-- `workers/` 目录**不参与网站构建**（VuePress 只构建 `src`），Pages 部署与它无关，需单独 `wrangler deploy`。
-- 未部署 Worker / 接口不可达时前端静默失败，页脚保留 `–`，不影响站点可用性。
-- 统计服务首次部署步骤（create D1 → execute schema → fill database_id → deploy）见 `workers/pv-counter/README.md`。
+- 接口基础路径在 `client.ts` 的 `PAGEVIEW_ENDPOINT` 常量（当前 `/pv`，同源相对路径）。
+- 未绑定 D1 或接口不可达时前端静默失败，页脚保留 `–`，不影响站点可用性（`env.DB` 缺失时接口返回 500 + 明确错误信息，便于排查）。
+
+**首次启用步骤**（只需一次，全部在 Cloudflare 控制台网页完成，**不用装 wrangler**）：
+
+1. **建库**：Storage & Databases → D1 → Create database，名称 `wikiandroid-pv`。
+2. **建表**：进入该库的 Console，粘贴执行：
+
+   ```sql
+   CREATE TABLE IF NOT EXISTS pageviews (
+       path       TEXT    PRIMARY KEY,
+       count      INTEGER NOT NULL DEFAULT 0,
+       updated_at INTEGER NOT NULL DEFAULT 0
+   );
+   ```
+
+3. **绑定**：Workers & Pages → Pages 项目 → Settings → Bindings → Add → D1 database，
+   变量名必须填 **`DB`**（与 `functions/pv/[[path]].js` 里的 `env.DB` 一致），再选择刚建的库。
+4. **重新部署**：绑定的变更需一次新部署才生效（Deployments → Retry deployment，或再 push 一次）。
+
+**验证**（部署完成后）：
+
+```powershell
+Invoke-RestMethod "https://wikiandroid.com/pv/total"
+Invoke-RestMethod -Method Post -Uri "https://wikiandroid.com/pv/hit" `
+  -ContentType "application/json" -Body '{"path":"/test/"}'
+# 期望分别返回 {"total":N} 与 {"page":1,"total":N}；测试完清掉测试数据：
+# DELETE FROM pageviews WHERE path='/test/'
+```
 
 ---
 
@@ -349,7 +380,7 @@ photoSwipe（图片预览）、readingTime（阅读时间）、copyright（版�
 
 ### 7.5 修改品牌 / 版权 / 页脚
 - 版权行：`theme.ts` 的 `author.name`（theme-hope 据此自动生成 `Copyright  <year> <name>`）；`copyright.author` 同步改。
-- 页脚：`theme.ts` 的 `footer`（含「总浏览量 / 本页浏览量」统计占位 + `GitHub | MIT License`；统计实现见第 5.1 节）。
+- 页脚：`theme.ts` 的 `footer`（含「总访问量」统计占位 + `GitHub | MIT License`；统计实现见第 5.1 节）。
 - 站点标题：`config.ts` 的 `title`。
 - 图标：替换 `public/logo.svg` / `public/favicon.svg`（用 `scripts/gen-icons.ps1` 重新生成 PNG）。
 
